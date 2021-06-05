@@ -6,3 +6,5 @@ parameters:
     inferPrivatePropertyTypeFromConstructor: true
     ignoreErrors:
         - '#Unreachable statement - code above always terminates\.#'
+        - '#Result of && is always false\.#'
+        - '#Strict comparison using === between null and array will always evaluate to false\.#'

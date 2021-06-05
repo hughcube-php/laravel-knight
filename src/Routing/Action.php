@@ -87,7 +87,7 @@ abstract class Action
                 $data = $validator->valid();
             }
 
-            $this->parameterBag = new ParameterBag((is_array($data) ? $data : []));
+            $this->parameterBag = new ParameterBag($data);
         }
     }
 
