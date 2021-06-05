@@ -25,7 +25,7 @@ abstract class Action
     /**
      * @var ParameterBag
      */
-    private $parameter;
+    private $parameterBag;
 
     /**
      * @var array
@@ -37,7 +37,7 @@ abstract class Action
      *
      * @return mixed
      */
-    abstract public function action(ParameterBag $parameter);
+    abstract protected function action();
 
     /**
      * Get HTTP Request.
@@ -62,14 +62,24 @@ abstract class Action
      *
      * @return ParameterBag
      */
-    protected function getParameter()
+    protected function parameter($key = null)
     {
-        if (!$this->parameter instanceof ParameterBag) {
-            $results = $this->getValidationFactory()->validate($this->getRequest()->all(), $this->rules());
-            $this->parameter = new ParameterBag($results);
+        if (null === $key) {
+            return $this->parameterBag;
         }
+        return $this->parameterBag->get($key);
+    }
 
-        return $this->parameter;
+    /**
+     * load parameters.
+     */
+    protected function loadParameters()
+    {
+        if (!$this->parameterBag instanceof ParameterBag) {
+            $this->parameterBag = new ParameterBag(
+                app(Factory::class)->validate($this->getRequest()->all(), $this->rules())
+            );
+        }
     }
 
     /**
@@ -89,9 +99,9 @@ abstract class Action
      *     return Model::findById($this->getParameter()->get('id'));
      * });
      *
-     * @param mixed    $name
+     * @param mixed $name
      * @param callable $callable
-     * @param bool     $reset
+     * @param bool $reset
      *
      * @return mixed
      */
@@ -106,20 +116,12 @@ abstract class Action
     }
 
     /**
-     * Get a validation factory instance.
-     *
-     * @return \Illuminate\Validation\Factory
-     */
-    protected function getValidationFactory()
-    {
-        return app(Factory::class);
-    }
-
-    /**
      * @return mixed
      */
     public function __invoke()
     {
-        return $this->action($this->getParameter());
+        $this->loadParameters();
+
+        return $this->action();
     }
 }

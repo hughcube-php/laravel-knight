@@ -14,8 +14,6 @@ use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 class TestCase extends OrchestraTestCase
 {
-    protected $requestClearKey = null;
-
     /**
      * @param \Illuminate\Foundation\Application $app
      *
@@ -26,13 +24,6 @@ class TestCase extends OrchestraTestCase
         return [
             DatabaseServiceProvider::class,
         ];
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->requestClearKey = md5(random_bytes(100));
     }
 
     /**
@@ -91,27 +82,5 @@ class TestCase extends OrchestraTestCase
                 ],
             ],
         ]);
-    }
-
-    /**
-     * @throws \Exception
-     *
-     * @return Request
-     */
-    protected function createRequest()
-    {
-        return Request::create(
-            '/test',
-            'POST',
-            [],
-            [],
-            [],
-            ['CONTENT_TYPE' => 'application/json'],
-            json_encode([
-                md5(random_bytes(100)) => 1,
-                md5(random_bytes(100)) => 2,
-                $this->requestClearKey => time(),
-            ])
-        );
     }
 }

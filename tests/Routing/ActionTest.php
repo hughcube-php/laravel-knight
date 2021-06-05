@@ -11,40 +11,39 @@ namespace HughCube\Laravel\Knight\Tests\Routing;
 use Closure;
 use HughCube\Laravel\Knight\Http\ParameterBag;
 use HughCube\Laravel\Knight\Routing\Action;
+use HughCube\Laravel\Knight\Tests\Routing\Action as TestAction;
 use HughCube\Laravel\Knight\Tests\TestCase;
-use Illuminate\Http\Request;
+use Illuminate\Http\Request as IlluminateRequest;
 
 class ActionTest extends TestCase
 {
-    /**
-     * Define web routes setup.
-     *
-     * @param \Illuminate\Routing\Router $router
-     *
-     * @return void
-     */
     protected function defineWebRoutes($router)
     {
-        $action = $this
-            ->getMockBuilder(Action::class)
-            ->onlyMethods(['action'])
-            ->getMockForAbstractClass();
+        $router->POST('/test', TestAction::class);
+    }
 
-        $action->expects($this->any())->method('action')->willReturn('test');
+    public function testWebRoute()
+    {
+        $uuid = md5(random_bytes(100));
+        $response = $this->json('POST', '/test', [
+            "uuid" => $uuid,
+            "test" => md5(random_bytes(100))
+        ]);
 
-        $router->POST('/test', get_class($action));
+        $this->assertSame($response->getStatusCode(), 200);
+        $this->assertSame($response->content(), "{\"uuid\":\"$uuid\"}");
     }
 
     public function testGetRequest()
     {
-        $action = $this->getMockForAbstractClass(Action::class);
+        $action = $this->mock(Action::class);
 
         $getRequest = Closure::bind(function () {
             /** @var Action $this */
             return $this->getRequest();
         }, $action, Action::class);
 
-        $this->assertInstanceOf(Request::class, $getRequest());
+        $this->assertInstanceOf(IlluminateRequest::class, $getRequest());
     }
 
     /**
@@ -54,61 +53,73 @@ class ActionTest extends TestCase
      */
     public function testGetParameter()
     {
-        $action = $this
-            ->getMockBuilder(Action::class)
-            ->onlyMethods(['getRequest', 'rules'])
-            ->getMockForAbstractClass();
+        $action = $this->mock(TestAction::class);
 
-        $key = $this->requestClearKey;
+        $uuid = md5(random_bytes(100));
+        $data = ["uuid" => $uuid, "uuid2" => md5(random_bytes(100))];
 
-        $action->expects($this->any())->method('getRequest')->willReturn($this->createRequest());
-        $action->expects($this->any())->method('rules')->willReturn([$key => ['integer']]);
-
-        $getParameter = Closure::bind(function () {
+        $getParameter = Closure::bind(function ($key = null) {
             /** @var Action $this */
-            return $this->getParameter();
+            $this->loadParameters();
+            return $this->parameter($key);
         }, $action, Action::class);
 
-        $getRequest = Closure::bind(function () {
-            /** @var Action $this */
-            return $this->getRequest();
+
+        $setRequest = Closure::bind(function ($request) {
+            $this->request = $request;
         }, $action, Action::class);
+        $setRequest($request = IlluminateRequest::create(
+            '/test',
+            'GET',
+            [],
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode($data)
+        ));
 
         $this->assertInstanceOf(ParameterBag::class, $getParameter());
-        $this->assertTrue($getParameter()->has($key));
-        $this->assertSame($getParameter()->get($key), $getRequest()->json($key));
+        $this->assertTrue($getParameter()->has('uuid'));
+        $this->assertFalse($getParameter()->has('uuid2'));
+        $this->assertSame($getParameter()->get('uuid'), $request->json('uuid'));
         $this->assertSame(1, count($getParameter()->all()));
     }
 
     public function testInvoke()
     {
-        $action = $this
-            ->getMockBuilder(Action::class)
-            ->onlyMethods(['action', 'getRequest', 'rules'])
-            ->getMockForAbstractClass();
+        /** @var TestAction $action */
+        $action = new TestAction();
 
-        $getParameter = Closure::bind(function () {
+        $uuid = md5(random_bytes(100));
+        $data = ["uuid" => $uuid, "uuid2" => md5(random_bytes(100))];
+
+        $callAction = Closure::bind(function () {
             /** @var Action $this */
-            return $this->getParameter();
+            return $this->action();
         }, $action, Action::class);
 
-        $key = $this->requestClearKey;
-        $action->expects($this->any())->method('getRequest')->willReturnCallback(function () {
-            return $this->createRequest();
-        });
-        $action->expects($this->any())->method('rules')->willReturnCallback(function () use ($key) {
-            return [$key => ['integer']];
-        });
-        $action->expects($this->any())->method('action')->willReturnCallback(function () use ($getParameter) {
-            return $getParameter();
-        });
 
-        $this->assertSame($getParameter(), $action());
+        $setRequest = Closure::bind(function ($request) {
+            $this->request = $request;
+        }, $action, Action::class);
+        $setRequest($request = IlluminateRequest::create(
+            '/test',
+            'GET',
+            [],
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode($data)
+        ));
+
+        $this->assertSame($action(), $callAction());
+        $this->assertSame($action()['uuid'], $uuid);
     }
 
     public function testGetOrSetAttribute()
     {
-        $action = $this->getMockBuilder(Action::class)->getMockForAbstractClass();
+        /** @var TestAction $action */
+        $action = new TestAction();
 
         $getOrSetAttribute = Closure::bind(function ($name, $callable, $reset = false) {
             /** @var Action $this */
@@ -142,11 +153,5 @@ class ActionTest extends TestCase
         $this->assertSame(false, $getOrSetAttribute($name, function () {
             return false;
         }, true));
-    }
-
-    public function testWebRoute()
-    {
-        $response = $this->json('POST', '/test', []);
-        $response->assertOk();
     }
 }
