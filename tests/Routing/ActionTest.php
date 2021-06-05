@@ -22,6 +22,9 @@ class ActionTest extends TestCase
         $router->POST('/test', TestAction::class);
     }
 
+    /**
+     * @requires PHP >= 7.2
+     */
     public function testWebRoute()
     {
         $uuid = md5(random_bytes(100));
