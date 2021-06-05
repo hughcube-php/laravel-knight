@@ -11,10 +11,10 @@ namespace HughCube\Laravel\Knight\Routing;
 use HughCube\Laravel\Knight\Http\LaravelRequest;
 use HughCube\Laravel\Knight\Http\LumenRequest;
 use HughCube\Laravel\Knight\Http\ParameterBag;
+use Illuminate\Contracts\Foundation\Application  as LaravelApplication;
 use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Http\Request;
 use Laravel\Lumen\Application as LumenApplication;
-use Illuminate\Contracts\Foundation\Application  as LaravelApplication;
 
 abstract class Action
 {
@@ -57,6 +57,7 @@ abstract class Action
         if ($app instanceof LumenApplication) {
             return $this->request = $app->make(Request::class);
         }
+
         return $this->request = $app->make('request');
     }
 
@@ -70,6 +71,7 @@ abstract class Action
         if (null === $key) {
             return $this->parameterBag;
         }
+
         return $this->parameterBag->get($key);
     }
 
@@ -112,9 +114,9 @@ abstract class Action
      *     return Model::findById($this->getParameter()->get('id'));
      * });
      *
-     * @param mixed $name
+     * @param mixed    $name
      * @param callable $callable
-     * @param bool $reset
+     * @param bool     $reset
      *
      * @return mixed
      */
