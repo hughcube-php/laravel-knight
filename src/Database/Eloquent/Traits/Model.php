@@ -10,8 +10,7 @@ use Illuminate\Support\Collection;
 use Psr\SimpleCache\CacheInterface;
 
 /**
- * Trait QueryCache
- * @package HughCube\Laravel\Knight\Database\Eloquent
+ * Trait QueryCache.
  */
 trait Model
 {
@@ -27,6 +26,7 @@ trait Model
 
     /**
      * @param mixed $date
+     *
      * @return Carbon|null
      */
     public function toCarbon($date = null)
@@ -36,6 +36,7 @@ trait Model
 
     /**
      * @param mixed $date
+     *
      * @return Carbon|null
      */
     public function getCreatedAtAttribute($date)
@@ -45,6 +46,7 @@ trait Model
 
     /**
      * @param mixed $date
+     *
      * @return Carbon|null
      */
     public function getUpdatedAtAttribute($date)
@@ -54,6 +56,7 @@ trait Model
 
     /**
      * @param mixed $date
+     *
      * @return Carbon|null
      */
     public function getDeleteAtAttribute($date)
@@ -67,11 +70,12 @@ trait Model
     public function isDeleted()
     {
         $deletedAt = $this->getAttribute($this->getDeletedAtColumn());
+
         return null === $deletedAt || (is_numeric($deletedAt) && 0 == $deletedAt);
     }
 
     /**
-     * 判断数据是否正常
+     * 判断数据是否正常.
      *
      * @return bool
      */
@@ -91,9 +95,10 @@ trait Model
     }
 
     /**
-     * 跳过缓存执行
+     * 跳过缓存执行.
      *
      * @param \Closure $callback 执行的回调
+     *
      * @return mixed
      */
     public static function noCache(Closure $callback)
@@ -111,7 +116,7 @@ trait Model
     }
 
     /**
-     * 获取缓存
+     * 获取缓存.
      *
      * @return CacheInterface|null;
      */
@@ -121,7 +126,7 @@ trait Model
     }
 
     /**
-     * 标识对象是否是通过缓存查找出来的
+     * 标识对象是否是通过缓存查找出来的.
      *
      * @return bool
      */
@@ -131,9 +136,10 @@ trait Model
     }
 
     /**
-     * 缓存的时间, 默认5-7天
+     * 缓存的时间, 默认5-7天.
      *
      * @param int|null $duration
+     *
      * @return int|null
      */
     public function getCacheDuration($duration = null)
@@ -142,7 +148,7 @@ trait Model
     }
 
     /**
-     * 缓存版本控制
+     * 缓存版本控制.
      *
      * @return string
      */
@@ -162,9 +168,8 @@ trait Model
     }
 
     /**
-     *
-     *
      * @param array $columns
+     *
      * @return string
      */
     protected function buildColumnsCacheKey(array $columns)
@@ -172,24 +177,26 @@ trait Model
         $cacheKey = [];
         foreach ($columns as $name => $value) {
             $name = is_numeric($name) ? $this->getKey() : $name;
-            $cacheKey[((string)$name)] = ((string)$value);
+            $cacheKey[((string) $name)] = ((string) $value);
         }
 
         ksort($cacheKey);
         $cacheKey = json_encode($cacheKey);
 
-        return 'model:' . md5(sprintf('%s:%s:%s', static::class, $cacheKey, $this->getCacheVersion()));
+        return 'model:'.md5(sprintf('%s:%s:%s', static::class, $cacheKey, $this->getCacheVersion()));
     }
 
     protected function buildPrimaryKeyCacheKey()
     {
         $keyName = $this->getKeyName();
+
         return $this->buildColumnsCacheKey([$keyName => $this->{$keyName}]);
     }
 
     /**
      * @param string $cacheKey
-     * @param mixed $default
+     * @param mixed  $default
+     *
      * @return mixed|null
      */
     public function cacheGet($cacheKey, $default = null)
@@ -199,6 +206,7 @@ trait Model
 
         if ($cache instanceof CacheInterface) {
             $value = $cache->get($cacheKey, $this->getCachePlaceholder());
+
             return $this->isCachePlaceholder($value) ? $default : $value;
         }
 
@@ -207,6 +215,7 @@ trait Model
 
     /**
      * @param array $cacheKeys
+     *
      * @return array|iterable
      */
     public function cacheGetMultiple(array $cacheKeys)
@@ -233,9 +242,10 @@ trait Model
     }
 
     /**
-     * @param string $cacheKey
-     * @param mixed $value
-     * @param null|integer|Carbon $duration
+     * @param string          $cacheKey
+     * @param mixed           $value
+     * @param null|int|Carbon $duration
+     *
      * @return bool
      */
     public function cacheSet($cacheKey, $value, $duration = null)
@@ -251,10 +261,11 @@ trait Model
     }
 
     /**
-     * 批量缓存数据
+     * 批量缓存数据.
      *
-     * @param array $items
-     * @param integer|null $duration
+     * @param array    $items
+     * @param int|null $duration
+     *
      * @return bool
      */
     final public function cacheSetMultiple(array $items, $duration = null)
@@ -274,9 +285,10 @@ trait Model
     }
 
     /**
-     * 批量删除缓存
+     * 批量删除缓存.
      *
      * @param array $cacheKeys
+     *
      * @return bool
      */
     public function cacheDeleteMultiple(array $cacheKeys)
@@ -296,11 +308,12 @@ trait Model
     }
 
     /**
-     * 从缓存里面获取数据, 如果不存在把 $callable 的返回值缓存起来
+     * 从缓存里面获取数据, 如果不存在把 $callable 的返回值缓存起来.
      *
-     * @param string $cacheKey
+     * @param string   $cacheKey
      * @param callable $callable
-     * @param integer|null $duration
+     * @param int|null $duration
+     *
      * @return mixed
      */
     public function cacheGetOrSet($cacheKey, $callable, $duration = null)
@@ -318,7 +331,7 @@ trait Model
     }
 
     /**
-     * 重置当前数据的缓存
+     * 重置当前数据的缓存.
      *
      * @return bool
      */
@@ -328,7 +341,7 @@ trait Model
     }
 
     /**
-     * 删除当前对象对应的 cache
+     * 删除当前对象对应的 cache.
      *
      * @return bool
      */
@@ -340,6 +353,7 @@ trait Model
     protected function populateCacheRow()
     {
         $this->isFromCache = true;
+
         return $this;
     }
 
@@ -347,6 +361,7 @@ trait Model
      * Find rows by pk.
      *
      * @param array|Collection $ids
+     *
      * @return \Illuminate\Database\Eloquent\Collection|static[]
      */
     public static function findByIds($ids)
@@ -369,26 +384,30 @@ trait Model
                 $collection->put($id, $row);
             }
         }
+
         return $collection;
     }
 
     /**
      * Find row by pk.
      *
-     * @param integer $id
+     * @param int $id
+     *
      * @return static
      */
     public static function findById($id)
     {
         $collection = static::findByIds([$id]);
+
         return $collection->get($id);
     }
 
     /**
-     * 根据唯一建查找对象列表
+     * 根据唯一建查找对象列表.
      *
-     * @param array[] $ids 必需是keyValue的格式, [['id' => 1], ['id' => 1]]
-     * @param integer|null $duration 缓存的有效期, 单位秒
+     * @param array[]  $ids      必需是keyValue的格式, [['id' => 1], ['id' => 1]]
+     * @param int|null $duration 缓存的有效期, 单位秒
+     *
      * @return Collection
      */
     protected function findAllByUniqueColumn(array $ids, $duration = null)
@@ -419,7 +438,7 @@ trait Model
         $fromDbRows = $this->newQuery()
             ->where(function (Builder $query) use ($condition) {
                 foreach ($condition as $column => $values) {
-                    $query->whereIn($column, array_values(array_unique((array)$values)));
+                    $query->whereIn($column, array_values(array_unique((array) $values)));
                 }
             })
             ->limit(count($missIndexes))
@@ -434,6 +453,7 @@ trait Model
         foreach ($fromDbRows as $fromDbRow) {
             $rows->add($fromDbRow);
         }
+
         return $rows->values();
     }
 
@@ -456,6 +476,7 @@ trait Model
     /**
      * @param Collection $cacheKeys
      * @param Collection $rows
+     *
      * @return Collection
      */
     protected function addRowsByCacheKeys(Collection $cacheKeys, Collection $rows)
