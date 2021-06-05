@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\Schema;
 
 class ModelTest extends TestCase
 {
-    protected function setUp(): void
+    protected function getEnvironmentSetUp($app)
     {
-        parent::setUp();
+        parent::getEnvironmentSetUp($app);
 
         Schema::create('users', function (Blueprint $table) {
             $table->bigIncrements('id')->unsigned()->comment('id');
@@ -48,7 +48,7 @@ class ModelTest extends TestCase
             $user = User::findById($i);
             $this->assertTrue($user->isFromCache());
 
-            $cacheIds->add($i);
+            $cacheIds->push($i);
         }
 
         for ($i = 1; $i <= 1000; $i++) {
@@ -58,18 +58,12 @@ class ModelTest extends TestCase
             $users = User::findByIds(range($startId, $endId));
             foreach ($users as $user) {
                 $this->assertSame($user->isFromCache(), (false !== $cacheIds->search($user->id)));
-                $cacheIds->add($user->id);
+                $cacheIds->push($user->id);
             }
         }
 
         $userIds = Collection::make(range(1, 100))->shuffle();
         $users = User::findByIds($userIds->toArray());
         $this->assertSame($users->keys()->toArray(), $userIds->toArray());
-    }
-
-    protected function tearDown(): void
-    {
-        Schema::dropIfExists('users');
-        parent::tearDown();
     }
 }

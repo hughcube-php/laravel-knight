@@ -9,9 +9,8 @@
         }
     ],
     "require": {
-        "php": ">=7.1|8.*",
+        "php": "7.*|8.*",
         "ext-json": "*",
-        "illuminate/support": ">=5.0",
         "hughcube/laravel-validation": "^1.0",
         "jenssegers/agent": "^2.6",
         "hughcube/static-instance": "^1.0",

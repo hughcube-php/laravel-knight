@@ -76,9 +76,18 @@ abstract class Action
     protected function loadParameters()
     {
         if (!$this->parameterBag instanceof ParameterBag) {
-            $this->parameterBag = new ParameterBag(
-                app(Factory::class)->validate($this->getRequest()->all(), $this->rules())
-            );
+            /** @var \Illuminate\Validation\Factory $factory */
+            $factory = app(Factory::class);
+            $validator = $factory->make($this->getRequest()->all(), $this->rules());
+
+            $data = $validator->validate();
+
+            /** Compatible with php7.0 */
+            if (null === $data && method_exists($validator, 'valid')) {
+                $data = $validator->valid();
+            }
+
+            $this->parameterBag = new ParameterBag((is_array($data) ? $data : []));
         }
     }
 

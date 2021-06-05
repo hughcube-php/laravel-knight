@@ -39,7 +39,8 @@ class ActionTest extends TestCase
 
     public function testGetRequest()
     {
-        $action = $this->mock(Action::class);
+        /** @var TestAction $action */
+        $action = new TestAction();
 
         $getRequest = Closure::bind(function () {
             /** @var Action $this */
@@ -56,7 +57,8 @@ class ActionTest extends TestCase
      */
     public function testGetParameter()
     {
-        $action = $this->mock(TestAction::class);
+        /** @var TestAction $action */
+        $action = new TestAction();
 
         $uuid = md5(random_bytes(100));
         $data = ["uuid" => $uuid, "uuid2" => md5(random_bytes(100))];
@@ -83,9 +85,12 @@ class ActionTest extends TestCase
 
         $this->assertInstanceOf(ParameterBag::class, $getParameter());
         $this->assertTrue($getParameter()->has('uuid'));
-        $this->assertFalse($getParameter()->has('uuid2'));
         $this->assertSame($getParameter()->get('uuid'), $request->json('uuid'));
-        $this->assertSame(1, count($getParameter()->all()));
+
+        if(version_compare(PHP_VERSION, '7.1', '>=')){
+            $this->assertFalse($getParameter()->has('uuid2'));
+            $this->assertSame(1, count($getParameter()->all()));
+        }
     }
 
     public function testInvoke()

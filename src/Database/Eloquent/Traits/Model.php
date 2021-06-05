@@ -451,7 +451,7 @@ trait Model
 
         /** 合并db的查询结果 */
         foreach ($fromDbRows as $fromDbRow) {
-            $rows->add($fromDbRow);
+            $rows->push($fromDbRow);
         }
 
         return $rows->values();
@@ -487,9 +487,9 @@ trait Model
 
         foreach ($cacheKeys as $cacheKeyIndex => $cacheKey) {
             if (isset($fromCacheRows[$cacheKey])) {
-                $rows->add($fromCacheRows[$cacheKey]->populateCacheRow());
+                $rows->push($fromCacheRows[$cacheKey]->populateCacheRow());
             } elseif (!isset($fromCacheRows[$cacheKey]) || !$this->isCachePlaceholder($fromCacheRows[$cacheKey])) {
-                $missIndexes->add($cacheKeyIndex);
+                $missIndexes->push($cacheKeyIndex);
             }
         }
 
