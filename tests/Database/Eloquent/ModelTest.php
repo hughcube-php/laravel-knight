@@ -20,7 +20,7 @@ class ModelTest extends TestCase
         parent::setUp();
 
         Schema::create('users', function (Blueprint $table) {
-            $table->id()->unsigned()->comment('id');
+            $table->bigIncrements('id')->unsigned()->comment('id');
             $table->string('nickname')->nullable();
             $table->timestamps();
             $table->softDeletes();
