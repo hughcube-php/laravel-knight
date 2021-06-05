@@ -6,13 +6,16 @@
  * Time: 11:36 下午.
  */
 
-namespace HughCube\Laravel\Package\Tests;
+namespace HughCube\Laravel\Knight\Tests;
 
-use HughCube\Laravel\Package\ServiceProvider as PackageServiceProvider;
+use Illuminate\Database\DatabaseServiceProvider;
+use Illuminate\Http\Request;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 class TestCase extends OrchestraTestCase
 {
+    protected $requestClearKey = null;
+
     /**
      * @param \Illuminate\Foundation\Application $app
      *
@@ -21,8 +24,15 @@ class TestCase extends OrchestraTestCase
     protected function getPackageProviders($app)
     {
         return [
-            PackageServiceProvider::class,
+            DatabaseServiceProvider::class
         ];
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->requestClearKey = md5(random_bytes(100));
     }
 
     /**
@@ -30,11 +40,9 @@ class TestCase extends OrchestraTestCase
      */
     protected function getEnvironmentSetUp($app)
     {
-        $this->setupCache($app);
+        $app['config']->set('app.key', 'ZsZewWyUJ5FsKp9lMwv4tYbNlegQilM7');
 
-        /** @var \Illuminate\Config\Repository $appConfig */
-        $appConfig = $app['config'];
-        $appConfig->set('captchaCode', (require dirname(__DIR__) . '/config/config.php'));
+        $this->setupEloquent($app);
     }
 
     /**
@@ -46,13 +54,63 @@ class TestCase extends OrchestraTestCase
         $appConfig = $app['config'];
 
         $appConfig->set('cache', [
-            'default' => 'default',
+            'default' => 'file',
             'stores' => [
-                'default' => [
+                'array' => [
+                    'driver' => 'array',
+                    'serialize' => true,
+                ],
+                'file' => [
                     'driver' => 'file',
-                    'path' => sprintf('/tmp/test/%s', md5(serialize([__METHOD__]))),
+                    'path' => '/tmp/test/',
+                ],
+            ]
+        ]);
+    }
+
+    /**
+     * @param \Illuminate\Foundation\Application $app
+     */
+    protected function setupEloquent($app)
+    {
+        /** @var \Illuminate\Config\Repository $appConfig */
+        $appConfig = $app['config'];
+
+        $file = sprintf('/tmp/%s-%s-database.sqlite', date('Y-m-d'), md5(random_bytes(100)));
+        touch($file);
+
+        $appConfig->set('database', [
+            'default' => 'sqlite',
+            'connections' => [
+                'sqlite' => [
+                    'driver' => 'sqlite',
+                    'url' => '',
+                    'database' => $file,
+                    'prefix' => '',
+                    'foreign_key_constraints' => true,
                 ],
             ],
         ]);
+    }
+
+    /**
+     * @return Request
+     * @throws \Exception
+     */
+    protected function createRequest()
+    {
+        return Request::create(
+            '/test',
+            'POST',
+            [],
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode([
+                md5(random_bytes(100)) => 1,
+                md5(random_bytes(100)) => 2,
+                $this->requestClearKey => time()
+            ])
+        );
     }
 }

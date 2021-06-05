@@ -1,6 +1,6 @@
 <?php
 $header = <<<EOF
-This file is part of the hughcube/laravel-captcha-code.
+This file is part of the hughcube/laravel-knight
 
 (c) hugh.li <hugh.li@foxmail.com>
 
