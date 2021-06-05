@@ -13,7 +13,7 @@ class Action extends \HughCube\Laravel\Knight\Routing\Action
     protected function rules()
     {
         return [
-            'uuid' => ['string']
+            'uuid' => ['string'],
         ];
     }
 

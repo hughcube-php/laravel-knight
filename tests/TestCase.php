@@ -9,7 +9,6 @@
 namespace HughCube\Laravel\Knight\Tests;
 
 use Illuminate\Database\DatabaseServiceProvider;
-use Illuminate\Http\Request;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 class TestCase extends OrchestraTestCase

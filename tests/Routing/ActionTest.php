@@ -29,8 +29,8 @@ class ActionTest extends TestCase
     {
         $uuid = md5(random_bytes(100));
         $response = $this->json('POST', '/test', [
-            "uuid" => $uuid,
-            "test" => md5(random_bytes(100))
+            'uuid' => $uuid,
+            'test' => md5(random_bytes(100)),
         ]);
 
         $this->assertSame($response->getStatusCode(), 200);
@@ -61,14 +61,14 @@ class ActionTest extends TestCase
         $action = new TestAction();
 
         $uuid = md5(random_bytes(100));
-        $data = ["uuid" => $uuid, "uuid2" => md5(random_bytes(100))];
+        $data = ['uuid' => $uuid, 'uuid2' => md5(random_bytes(100))];
 
         $getParameter = Closure::bind(function ($key = null) {
             /** @var Action $this */
             $this->loadParameters();
+
             return $this->parameter($key);
         }, $action, Action::class);
-
 
         $setRequest = Closure::bind(function ($request) {
             $this->request = $request;
@@ -87,7 +87,7 @@ class ActionTest extends TestCase
         $this->assertTrue($getParameter()->has('uuid'));
         $this->assertSame($getParameter()->get('uuid'), $request->json('uuid'));
 
-        if(version_compare(PHP_VERSION, '7.1', '>=')){
+        if (version_compare(PHP_VERSION, '7.1', '>=')) {
             $this->assertFalse($getParameter()->has('uuid2'));
             $this->assertSame(1, count($getParameter()->all()));
         }
@@ -99,13 +99,12 @@ class ActionTest extends TestCase
         $action = new TestAction();
 
         $uuid = md5(random_bytes(100));
-        $data = ["uuid" => $uuid, "uuid2" => md5(random_bytes(100))];
+        $data = ['uuid' => $uuid, 'uuid2' => md5(random_bytes(100))];
 
         $callAction = Closure::bind(function () {
             /** @var Action $this */
             return $this->action();
         }, $action, Action::class);
-
 
         $setRequest = Closure::bind(function ($request) {
             $this->request = $request;
