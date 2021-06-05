@@ -28,7 +28,7 @@ class Environment extends Command
     public function handle()
     {
         $this->line(
-            '<info>Current application environment:</info> <comment>' . $this->laravel->environment() . '</comment>'
+            '<info>Current application environment:</info> <comment>'.$this->laravel->environment().'</comment>'
         );
     }
 }

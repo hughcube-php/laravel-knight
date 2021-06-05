@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/3/13
- * Time: 11:46 下午
+ * Time: 11:46 下午.
  */
 
 namespace HughCube\Laravel\Knight\Routing;
@@ -33,7 +33,7 @@ abstract class Action
     private $attributes = [];
 
     /**
-     * action
+     * action.
      *
      * @return mixed
      */
@@ -89,9 +89,9 @@ abstract class Action
      *     return Model::findById($this->getParameter()->get('id'));
      * });
      *
-     * @param mixed $name
+     * @param mixed    $name
      * @param callable $callable
-     * @param boolean $reset
+     * @param bool     $reset
      *
      * @return mixed
      */
@@ -101,6 +101,7 @@ abstract class Action
         if (!array_key_exists($key, $this->attributes) || $reset) {
             $this->attributes[$key] = $callable();
         }
+
         return $this->attributes[$key];
     }
 

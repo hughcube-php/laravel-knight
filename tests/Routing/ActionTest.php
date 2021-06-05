@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/6/4
- * Time: 7:36 下午
+ * Time: 7:36 下午.
  */
 
 namespace HughCube\Laravel\Knight\Tests\Routing;
@@ -13,7 +13,6 @@ use HughCube\Laravel\Knight\Http\ParameterBag;
 use HughCube\Laravel\Knight\Routing\Action;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Http\Request;
-use ReflectionClass;
 
 class ActionTest extends TestCase
 {
@@ -31,9 +30,9 @@ class ActionTest extends TestCase
             ->onlyMethods(['action'])
             ->getMockForAbstractClass();
 
-        $action->expects($this->any())->method('action')->willReturn("test");
+        $action->expects($this->any())->method('action')->willReturn('test');
 
-        $router->POST("/test", get_class($action));
+        $router->POST('/test', get_class($action));
     }
 
     public function testGetRequest()
@@ -49,8 +48,8 @@ class ActionTest extends TestCase
     }
 
     /**
-     *
      * @covers \HughCube\Laravel\Knight\Routing\Action::rules
+     *
      * @throws \Exception
      */
     public function testGetParameter()
@@ -116,7 +115,6 @@ class ActionTest extends TestCase
             return $this->getOrSetAttribute($name, $callable, $reset);
         }, $action, Action::class);
 
-
         $name = md5(serialize([random_bytes(100), random_int(0, 999999999999)]));
         $value = $getOrSetAttribute($name, function () {
             return random_int(0, 999999999999);
@@ -148,7 +146,7 @@ class ActionTest extends TestCase
 
     public function testWebRoute()
     {
-        $response = $this->json('POST', "/test", []);
+        $response = $this->json('POST', '/test', []);
         $response->assertOk();
     }
 }

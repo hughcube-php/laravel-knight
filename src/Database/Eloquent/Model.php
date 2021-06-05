@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/6/4
- * Time: 12:00 下午
+ * Time: 12:00 下午.
  */
 
 namespace HughCube\Laravel\Knight\Database\Eloquent;
@@ -11,8 +11,7 @@ namespace HughCube\Laravel\Knight\Database\Eloquent;
 use HughCube\Laravel\Knight\Database\Eloquent\Traits\Model as ModelTrait;
 
 /**
- * Class Model
- * @package HughCube\Laravel\Knight\Database\Eloquent
+ * Class Model.
  */
 class Model extends \Illuminate\Database\Eloquent\Model
 {
