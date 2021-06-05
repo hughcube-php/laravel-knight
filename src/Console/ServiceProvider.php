@@ -8,11 +8,7 @@ use HughCube\Laravel\Knight\Console\Commands\RepeatTest;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 
 /**
- * Class CommandServiceProvider
- * @package HughCube\Laravel\Knight\Console
- *
- * 在 /artisan 加上
- * $app->register(HughCube\Laravel\Knight\Console\CommandServiceProvider::class);
+ * Class CommandServiceProvider.
  */
 class ServiceProvider extends IlluminateServiceProvider
 {
@@ -38,7 +34,7 @@ class ServiceProvider extends IlluminateServiceProvider
     }
 
     /**
-     * 注册 $command
+     * 注册 $command.
      *
      * @param $commandClass
      */
@@ -47,7 +43,7 @@ class ServiceProvider extends IlluminateServiceProvider
         $this->commands([
             Environment::class,
             PhpIniFile::class,
-            RepeatTest::class
+            RepeatTest::class,
         ]);
     }
 }

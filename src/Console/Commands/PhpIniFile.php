@@ -31,8 +31,8 @@ class PhpIniFile extends Command
         $version = PHP_VERSION;
         $versionId = PHP_VERSION_ID;
         $this->line(
-            "<info>PHP version:</info>" . "<comment>{$version}</comment>"
-            . "<info>, versionID:</info>" . "<comment>{$versionId}</comment>"
+            '<info>PHP version:</info>'."<comment>{$version}</comment>"
+            .'<info>, versionID:</info>'."<comment>{$versionId}</comment>"
         );
 
         $phpBinaryPath = (new PhpExecutableFinder())->find();
@@ -44,7 +44,7 @@ class PhpIniFile extends Command
         $scanFiles = explode(',', $scanFiles);
         $scanFiles = array_map('trim', $scanFiles);
         $files = array_merge($files, $scanFiles);
-        $this->line("<info>PHP ini files: </info>");
+        $this->line('<info>PHP ini files: </info>');
         foreach ($files as $file) {
             $this->line("    <comment>$file</comment>");
         }

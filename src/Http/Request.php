@@ -12,7 +12,7 @@ trait Request
     protected $userAgentDetect;
 
     /**
-     * 获取agent检测
+     * 获取agent检测.
      *
      * @return Agent
      */
@@ -21,11 +21,12 @@ trait Request
         if (!$this->userAgentDetect instanceof Agent) {
             $this->userAgentDetect = new Agent($this->headers->all(), $this->userAgent());
         }
+
         return $this->userAgentDetect;
     }
 
     /**
-     * 判断是否在微信客户端内
+     * 判断是否在微信客户端内.
      *
      * @return bool
      */
@@ -35,7 +36,7 @@ trait Request
     }
 
     /**
-     * 判断是否在微信小程序客户端内
+     * 判断是否在微信小程序客户端内.
      *
      * @return bool
      */

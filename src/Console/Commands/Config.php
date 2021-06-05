@@ -30,7 +30,7 @@ class Config extends Command
      */
     public function handle()
     {
-        $key = $this->argument("key");
+        $key = $this->argument('key');
 
         VarDumper::dump(config((empty($key) ? null : $key)));
     }

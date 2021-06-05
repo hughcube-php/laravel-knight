@@ -33,13 +33,13 @@ class RepeatTest extends Command
     {
         $instance = $this->makeInstance();
 
-        if (method_exists($instance, "init")) {
+        if (method_exists($instance, 'init')) {
             $instance->init();
         }
 
         $number = $this->argument('number');
 
-        $this->line('<info>当前时间:</info><comment>' . Carbon::now()->format('Y-m-d H:i:s u') . '</comment>');
+        $this->line('<info>当前时间:</info><comment>'.Carbon::now()->format('Y-m-d H:i:s u').'</comment>');
         $this->line("<info>重复次数:</info><comment>{$number}</comment><info>次</info>");
 
         $startPeakMemory = memory_get_peak_usage();
@@ -76,8 +76,9 @@ class RepeatTest extends Command
     }
 
     /**
-     * @return object
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     *
+     * @return object
      */
     protected function makeInstance()
     {
@@ -95,10 +96,11 @@ class RepeatTest extends Command
     }
 
     /**
-     * 内存单位换算为M
+     * 内存单位换算为M.
      *
-     * @param integer $memory
-     * @return integer
+     * @param int $memory
+     *
+     * @return int
      */
     protected function formatMemory($memory)
     {

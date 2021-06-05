@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/6/5
- * Time: 2:49 下午
+ * Time: 2:49 下午.
  */
 
 namespace HughCube\Laravel\Knight\Tests\Database\Eloquent;
@@ -20,7 +20,7 @@ class ModelTest extends TestCase
         parent::setUp();
 
         Schema::create('users', function (Blueprint $table) {
-            $table->id()->unsigned()->comment("id");
+            $table->id()->unsigned()->comment('id');
             $table->string('nickname')->nullable();
             $table->timestamps();
             $table->softDeletes();
@@ -51,13 +51,12 @@ class ModelTest extends TestCase
             $cacheIds->add($i);
         }
 
-
         for ($i = 1; $i <= 1000; $i++) {
             $startId = random_int(0, 990);
             $endId = $startId + 10;
 
             $users = User::findByIds(range($startId, $endId));
-            foreach ($users as $user){
+            foreach ($users as $user) {
                 $this->assertSame($user->isFromCache(), (false !== $cacheIds->search($user->id)));
                 $cacheIds->add($user->id);
             }

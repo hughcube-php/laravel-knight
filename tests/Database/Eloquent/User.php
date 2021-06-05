@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/6/5
- * Time: 2:50 下午
+ * Time: 2:50 下午.
  */
 
 namespace HughCube\Laravel\Knight\Tests\Database\Eloquent;
@@ -23,7 +23,7 @@ class User extends Model
         'nickname',
         'created_at',
         'updated_at',
-        'deleted_at'
+        'deleted_at',
     ];
 
     protected $hidden = [];
@@ -31,7 +31,7 @@ class User extends Model
     protected $casts = [
         'created_at' => 'timestamp',
         'updated_at' => 'timestamp',
-        'deleted_at' => 'timestamp'
+        'deleted_at' => 'timestamp',
     ];
 
     /**
@@ -42,11 +42,11 @@ class User extends Model
     protected $dates = [
         'created_at',
         'updated_at',
-        'deleted_at'
+        'deleted_at',
     ];
 
     /**
-     * 获取缓存
+     * 获取缓存.
      *
      * @return CacheInterface;
      */
