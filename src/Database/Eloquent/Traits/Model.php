@@ -17,12 +17,12 @@ trait Model
     /**
      * @var bool 是否来自缓存
      */
-    private $isFromCache = false;
+    protected $isFromCache = false;
 
     /**
      * @var bool 是否跳过缓存
      */
-    private static $skipCache = false;
+    protected static $skipCache = false;
 
     /**
      * @param mixed $date
@@ -177,13 +177,13 @@ trait Model
         $cacheKey = [];
         foreach ($columns as $name => $value) {
             $name = is_numeric($name) ? $this->getKey() : $name;
-            $cacheKey[((string) $name)] = ((string) $value);
+            $cacheKey[((string)$name)] = ((string)$value);
         }
 
         ksort($cacheKey);
         $cacheKey = json_encode($cacheKey);
 
-        return 'model:'.md5(sprintf('%s:%s:%s', static::class, $cacheKey, $this->getCacheVersion()));
+        return 'model:' . md5(sprintf('%s:%s:%s', static::class, $cacheKey, $this->getCacheVersion()));
     }
 
     protected function buildPrimaryKeyCacheKey()
@@ -195,7 +195,7 @@ trait Model
 
     /**
      * @param string $cacheKey
-     * @param mixed  $default
+     * @param mixed $default
      *
      * @return mixed|null
      */
@@ -242,8 +242,8 @@ trait Model
     }
 
     /**
-     * @param string          $cacheKey
-     * @param mixed           $value
+     * @param string $cacheKey
+     * @param mixed $value
      * @param null|int|Carbon $duration
      *
      * @return bool
@@ -263,7 +263,7 @@ trait Model
     /**
      * 批量缓存数据.
      *
-     * @param array    $items
+     * @param array $items
      * @param int|null $duration
      *
      * @return bool
@@ -310,7 +310,7 @@ trait Model
     /**
      * 从缓存里面获取数据, 如果不存在把 $callable 的返回值缓存起来.
      *
-     * @param string   $cacheKey
+     * @param string $cacheKey
      * @param callable $callable
      * @param int|null $duration
      *
@@ -405,7 +405,7 @@ trait Model
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param array[]  $ids      必需是keyValue的格式, [['id' => 1], ['id' => 1]]
+     * @param array[] $ids 必需是keyValue的格式, [['id' => 1], ['id' => 1]]
      * @param int|null $duration 缓存的有效期, 单位秒
      *
      * @return Collection
@@ -438,7 +438,7 @@ trait Model
         $fromDbRows = $this->newQuery()
             ->where(function (Builder $query) use ($condition) {
                 foreach ($condition as $column => $values) {
-                    $query->whereIn($column, array_values(array_unique((array) $values)));
+                    $query->whereIn($column, array_values(array_unique((array)$values)));
                 }
             })
             ->limit(count($missIndexes))
