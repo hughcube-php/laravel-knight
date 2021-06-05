@@ -14,6 +14,7 @@ use HughCube\Laravel\Knight\Http\ParameterBag;
 use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Http\Request;
 use Laravel\Lumen\Application as LumenApplication;
+use Illuminate\Contracts\Foundation\Application  as LaravelApplication;
 
 abstract class Action
 {
@@ -50,11 +51,13 @@ abstract class Action
             return $this->request;
         }
 
-        if (app() instanceof LumenApplication) {
-            return $this->request = app()->make(Request::class);
-        }
+        /** @var LumenApplication|LaravelApplication $app */
+        $app = app();
 
-        return $this->request = app()->make('request');
+        if ($app instanceof LumenApplication) {
+            return $this->request = $app->make(Request::class);
+        }
+        return $this->request = $app->make('request');
     }
 
     /**
@@ -80,6 +83,7 @@ abstract class Action
             $factory = app(Factory::class);
             $validator = $factory->make($this->getRequest()->all(), $this->rules());
 
+            /** @var array|null $data */
             $data = $validator->validate();
 
             /** Compatible with php7.0 */
