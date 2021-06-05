@@ -31,7 +31,8 @@ class PhpIniFile extends Command
         $version = PHP_VERSION;
         $versionId = PHP_VERSION_ID;
         $this->line(
-            "<info>PHP version:</info><comment>{$version}</comment><info>, versionID:</info><comment>{$versionId}</comment>"
+            "<info>PHP version:</info>" . "<comment>{$version}</comment>"
+            . "<info>, versionID:</info>" . "<comment>{$versionId}</comment>"
         );
 
         $phpBinaryPath = (new PhpExecutableFinder())->find();

@@ -8,8 +8,6 @@
 
 namespace HughCube\Laravel\Knight\Http;
 
-
 class ParameterBag extends \Symfony\Component\HttpFoundation\ParameterBag
 {
-
 }
