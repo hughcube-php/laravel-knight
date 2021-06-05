@@ -33,11 +33,6 @@ class ServiceProvider extends IlluminateServiceProvider
         $this->registerCommand();
     }
 
-    /**
-     * 注册 $command.
-     *
-     * @param $commandClass
-     */
     protected function registerCommand()
     {
         $this->commands([

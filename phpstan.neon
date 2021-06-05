@@ -5,3 +5,4 @@ parameters:
         - src
     inferPrivatePropertyTypeFromConstructor: true
     ignoreErrors:
+        - '#Unreachable statement - code above always terminates\.#'

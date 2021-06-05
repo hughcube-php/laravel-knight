@@ -108,7 +108,7 @@ abstract class Action
     /**
      * Get a validation factory instance.
      *
-     * @return \Illuminate\Contracts\Validation\Factory
+     * @return \Illuminate\Validation\Factory
      */
     protected function getValidationFactory()
     {

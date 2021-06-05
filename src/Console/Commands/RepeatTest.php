@@ -37,6 +37,7 @@ class RepeatTest extends Command
             $instance->init();
         }
 
+        /** @var integer $number */
         $number = $this->argument('number');
 
         $this->line('<info>当前时间:</info><comment>'.Carbon::now()->format('Y-m-d H:i:s u').'</comment>');
@@ -100,7 +101,7 @@ class RepeatTest extends Command
      *
      * @param int $memory
      *
-     * @return int
+     * @return float
      */
     protected function formatMemory($memory)
     {
