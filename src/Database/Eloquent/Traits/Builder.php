@@ -193,7 +193,14 @@ trait Builder
         /** db 查询没有命中缓存的数据 */
         /** [['pk1' => 1, 'pk2' => 1], ['pk1' => 1, 'pk2' => 1]] => ['pk1' => [1, 1], 'pk2' => [1, 1]] */
         $condition = Collection::make(array_merge_recursive(...$ids->only($missIndexes->toArray())));
-        $fromDbRows = $this->where($condition->toArray())->limit(count($missIndexes))->get()
+        $fromDbRows = $this
+            ->where(function (self $query) use ($condition) {
+                foreach ($condition as $name => $values) {
+                    $query->where($name, array_values(array_unique((array)$values)));
+                }
+            })
+            ->limit(count($missIndexes))
+            ->get()
             ->keyBy(function (IlluminateModel $model) use ($condition) {
                 return $this->makeColumnsCacheKey(Arr::only($model->getAttributes(), $condition->keys()->toArray()));
             });
