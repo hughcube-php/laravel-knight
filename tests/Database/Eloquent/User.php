@@ -14,6 +14,8 @@ use Psr\SimpleCache\CacheInterface;
 
 class User extends Model
 {
+    const CACHE = 'array';
+
     protected $table = 'users';
 
     protected $primaryKey = 'id';

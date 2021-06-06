@@ -41,13 +41,13 @@ class ModelTest extends TestCase
 
         $cacheIds = Collection::make();
 
+        /** @var User $user */
         for ($i = 1; $i <= 100; $i++) {
-            $user = User::findById($i);
+            $user = User::findByPk($i);
             $this->assertFalse($user->isFromCache());
 
-            $user = User::findById($i);
+            $user = User::findByPk($i);
             $this->assertTrue($user->isFromCache());
-
             $cacheIds->push($i);
         }
 
@@ -55,7 +55,8 @@ class ModelTest extends TestCase
             $startId = random_int(0, 990);
             $endId = $startId + 10;
 
-            $users = User::findByIds(range($startId, $endId));
+            $users = User::findByPks(range($startId, $endId));
+            $this->assertInstanceOf(Collection::class, $users);
             foreach ($users as $user) {
                 $this->assertSame($user->isFromCache(), (false !== $cacheIds->search($user->id)));
                 $cacheIds->push($user->id);
@@ -63,7 +64,13 @@ class ModelTest extends TestCase
         }
 
         $userIds = Collection::make(range(1, 100))->shuffle();
-        $users = User::findByIds($userIds->toArray());
+        $users = User::findByPks($userIds->toArray());
+        $this->assertInstanceOf(Collection::class, $users);
         $this->assertSame($users->keys()->toArray(), $userIds->toArray());
+
+        $users = User::noCacheQuery()->findByPks(range($startId, $endId));
+        foreach ($users as $user) {
+            $this->assertFalse($user->isFromCache());
+        }
     }
 }
