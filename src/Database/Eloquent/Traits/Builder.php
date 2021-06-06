@@ -136,8 +136,7 @@ trait Builder
             return [$this->getModel()->getKeyName() => $value];
         });
 
-        $rows = $this->findAllByUniqueColumn($collection->toArray())
-            ->keyBy($this->getModel()->getKeyName());
+        $rows = $this->findAllByUniqueColumn($collection->toArray())->keyBy($this->getModel()->getKeyName());
 
         $collection = $this->getModel()->newCollection([]);
         foreach ($pks as $pk) {
@@ -196,7 +195,7 @@ trait Builder
             ->where(function (self $query) use ($condition) {
                 foreach ($condition as $name => $values) {
                     if (is_array($values)) {
-                        $query->where($name, array_values(array_unique($values)));
+                        $query->whereIn($name, array_values(array_unique($values)));
                     } elseif (null === $values) {
                         $query->whereNull($name);
                     } else {
@@ -224,7 +223,9 @@ trait Builder
         }
 
         /** 合并db的查询结果 */
-        $rows->push(...$fromDbRows->values()->all());
+        foreach ($fromDbRows as $fromDbRow) {
+            $rows->push($fromDbRow);
+        }
 
         return $rows->values();
     }

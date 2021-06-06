@@ -52,10 +52,12 @@ class ModelTest extends TestCase
         }
 
         for ($i = 1; $i <= 1000; $i++) {
-            $startId = random_int(0, 990);
+            $startId = random_int(1, 900);
             $endId = $startId + 10;
 
-            $users = User::findByIds(range($startId, $endId));
+            $ids = range($startId, $endId);
+            $users = User::findByIds($ids);
+            $this->assertSame(count($ids), $users->count());
             $this->assertInstanceOf(Collection::class, $users);
             foreach ($users as $user) {
                 $this->assertSame($user->isFromCache(), (false !== $cacheIds->search($user->id)));
@@ -68,9 +70,28 @@ class ModelTest extends TestCase
         $this->assertInstanceOf(Collection::class, $users);
         $this->assertSame($users->keys()->toArray(), $userIds->toArray());
 
-        $users = User::noCacheQuery()->findByPks(range($startId, $endId));
+        $users = User::noCacheQuery()->findByPks(range(1, 100));
         foreach ($users as $user) {
             $this->assertFalse($user->isFromCache());
+        }
+
+        $manyColumnItems = [];
+        $users = User::noCacheQuery()->findByPks(range(1, 100));
+        foreach ($users as $user) {
+            $where = ['id' => $user->id, 'nickname' => $user->nickname];
+            $user = User::query()->findAllByUniqueColumn([$where])->first();
+            $this->assertFalse($user->isFromCache());
+
+            $user = User::query()->findAllByUniqueColumn([$where])->first();
+            $this->assertTrue($user->isFromCache());
+
+            $manyColumnItems[] = $where;
+        }
+
+        $users = User::query()->findAllByUniqueColumn($manyColumnItems);
+        $this->assertSame(count($manyColumnItems), $users->count());
+        foreach ($users as $user) {
+            $this->assertTrue($user->isFromCache());
         }
     }
 }
