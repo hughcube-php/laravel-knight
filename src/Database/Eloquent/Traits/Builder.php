@@ -195,7 +195,13 @@ trait Builder
         $fromDbRows = $this
             ->where(function (self $query) use ($condition) {
                 foreach ($condition as $name => $values) {
-                    $query->where($name, array_values(array_unique((array)$values)));
+                    if (is_array($values)) {
+                        $query->where($name, array_values(array_unique($values)));
+                    } elseif (null === $values) {
+                        $query->whereNull($name);
+                    } else {
+                        $query->where($name, $values);
+                    }
                 }
             })
             ->limit(count($missIndexes))
