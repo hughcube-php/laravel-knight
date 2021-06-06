@@ -8,7 +8,6 @@
 
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
-
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use Illuminate\Cache\NullStore;
 use Illuminate\Cache\Repository;
