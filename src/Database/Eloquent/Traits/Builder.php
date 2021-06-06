@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/6/6
- * Time: 10:12 下午
+ * Time: 10:12 下午.
  */
 
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
@@ -18,7 +18,8 @@ use Illuminate\Support\Facades\Cache;
 use Psr\SimpleCache\CacheInterface;
 
 /**
- * Trait Builder
+ * Trait Builder.
+ *
  * @method Model getModel()
  */
 trait Builder
@@ -55,6 +56,7 @@ trait Builder
 
         $cache = $this->getModel()->getCache();
         $cache = is_string($cache) ? Cache::store($cache) : $cache;
+
         return $cache instanceof CacheInterface ? $cache : $this->getNullCache();
     }
 
@@ -66,6 +68,7 @@ trait Builder
         if (!self::$nullCache instanceof CacheInterface) {
             self::$nullCache = new Repository(new NullStore());
         }
+
         return self::$nullCache;
     }
 
@@ -79,6 +82,7 @@ trait Builder
 
     /**
      * @param mixed $value
+     *
      * @return bool
      */
     protected function isCachePlaceholder($value)
@@ -88,6 +92,7 @@ trait Builder
 
     /**
      * @param array $columns
+     *
      * @return string
      */
     protected function makeColumnsCacheKey(array $columns)
@@ -102,6 +107,7 @@ trait Builder
         $cacheKey = json_encode($cacheKey);
 
         $string = sprintf('%s:%s:%s', get_class($this->getModel()), $cacheKey, $this->getModel()->getCacheVersion());
+
         return sprintf('model:%s-%s', md5($string), crc32($string));
     }
 
@@ -111,12 +117,13 @@ trait Builder
     protected function makePkCacheKey()
     {
         return $this->makeColumnsCacheKey([
-            $this->getModel()->getKeyName() => $this->getModel()->getKey()
+            $this->getModel()->getKeyName() => $this->getModel()->getKey(),
         ]);
     }
 
     /**
-     * @param integer $pk
+     * @param int $pk
+     *
      * @return Model
      */
     public function findByPk($pk)
@@ -127,7 +134,8 @@ trait Builder
     }
 
     /**
-     * @param integer[] $pks
+     * @param int[] $pks
+     *
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function findByPks($pks)
@@ -145,6 +153,7 @@ trait Builder
                 $collection->put($pk, $row);
             }
         }
+
         return $collection;
     }
 
