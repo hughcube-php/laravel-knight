@@ -107,10 +107,7 @@ trait Model
 
     /**
      * 跳过缓存执行.
-     *
-     * @param \Closure $callback 执行的回调
-     *
-     * @return mixed
+     * @return Builder
      */
     public static function noCacheQuery()
     {
@@ -120,7 +117,7 @@ trait Model
     /**
      * 获取缓存.
      *
-     * @return CacheInterface;
+     * @return CacheInterface|string|null
      */
     public function getCache()
     {
@@ -173,7 +170,10 @@ trait Model
      */
     public static function findById($id)
     {
-        return static::query()->findByPk($id);
+        /** @var static $row */
+        $row = static::query()->findByPk($id);
+
+        return $row;
     }
 
     /**

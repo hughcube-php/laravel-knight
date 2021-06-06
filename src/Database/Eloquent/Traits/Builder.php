@@ -129,7 +129,7 @@ trait Builder
 
     /**
      * @param integer[] $pks
-     * @return \Illuminate\Database\Eloquent\Collection|Model[]
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function findByPks($pks)
     {
@@ -155,7 +155,7 @@ trait Builder
      *
      * @param array[] $ids 必需是keyValue的格式, [['id' => 1], ['id' => 1]]
      *
-     * @return Collection
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function findAllByUniqueColumn(array $ids)
     {
