@@ -20,7 +20,7 @@ trait Model
     protected $cacheVersion;
 
     /**
-     * @var boolean
+     * @var bool
      */
     protected $isFromCache = false;
 
@@ -98,6 +98,7 @@ trait Model
      * Create a new Eloquent query builder for the model.
      *
      * @param \Illuminate\Database\Query\Builder $query
+     *
      * @return Builder
      */
     public function newEloquentBuilder($query)
@@ -107,6 +108,7 @@ trait Model
 
     /**
      * 跳过缓存执行.
+     *
      * @return Builder
      */
     public static function noCacheQuery()
@@ -124,6 +126,7 @@ trait Model
         if (!defined('static::CACHE')) {
             return null;
         }
+
         return Cache::store(constant('static::DELETED_AT'));
     }
 
@@ -141,6 +144,7 @@ trait Model
     public function setIsFromCache($is = true)
     {
         $this->isFromCache = $is;
+
         return $this;
     }
 
@@ -165,7 +169,8 @@ trait Model
     }
 
     /**
-     * @param integer $id
+     * @param int $id
+     *
      * @return static
      */
     public static function findById($id)
@@ -177,7 +182,8 @@ trait Model
     }
 
     /**
-     * @param integer[] $ids
+     * @param int[] $ids
+     *
      * @return static[]|\Illuminate\Database\Eloquent\Collection
      */
     public static function findByIds($ids)
