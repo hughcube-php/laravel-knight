@@ -171,7 +171,7 @@ trait Model
      * @param integer $id
      * @return static
      */
-    public static function findByPk($id)
+    public static function findById($id)
     {
         return static::query()->findByPk($id);
     }
@@ -180,7 +180,7 @@ trait Model
      * @param integer[] $ids
      * @return static[]|\Illuminate\Database\Eloquent\Collection
      */
-    public static function findByPks($ids)
+    public static function findByIds($ids)
     {
         return static::query()->findByPks($ids);
     }
