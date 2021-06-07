@@ -8,11 +8,8 @@
 
 namespace HughCube\Laravel\Knight\Database\Eloquent;
 
-use Illuminate\Support\Collection;
-
 /**
- * Class Builder
- * @package HughCube\Laravel\Knight\Database\Eloquent
+ * Class Builder.
  */
 class Builder extends \Illuminate\Database\Eloquent\Builder
 {

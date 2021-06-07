@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/6/7
- * Time: 1:57 下午
+ * Time: 1:57 下午.
  */
 
 namespace HughCube\Laravel\Knight\Support;
@@ -34,8 +34,10 @@ trait Validation
 
     /**
      * @param array $request
-     * @return array|null
+     *
      * @throws \Illuminate\Validation\ValidationException
+     *
+     * @return array|null
      */
     protected function validate(array $request)
     {

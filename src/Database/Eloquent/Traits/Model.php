@@ -197,7 +197,7 @@ trait Model
     public function onChangeRefreshCacheKeys()
     {
         return [
-            [$this->getKeyName() => $this->getKey()]
+            [$this->getKeyName() => $this->getKey()],
         ];
     }
 }

@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/6/7
- * Time: 2:12 下午
+ * Time: 2:12 下午.
  */
 
 namespace HughCube\Laravel\Knight\Tests\Queue;
@@ -24,7 +24,6 @@ class JobTest extends TestCase
             /** @var Job $this */
             return app()->make(ConsoleOutput::class);
         }, $job, Job::class);
-
 
         $uuid = md5(random_bytes(100));
         $getOutput()->writeln("<info>$uuid</info>");
