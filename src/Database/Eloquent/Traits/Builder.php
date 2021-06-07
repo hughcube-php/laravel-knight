@@ -21,7 +21,7 @@ use Psr\SimpleCache\CacheInterface;
 /**
  * Trait Builder.
  *
- * @method Model getModel()
+ * @method Model                           getModel()
  * @method \Illuminate\Database\Connection getConnection()
  */
 trait Builder
@@ -136,7 +136,8 @@ trait Builder
     }
 
     /**
-     * @param integer[] $pks
+     * @param int[] $pks
+     *
      * @return EloquentCollection
      */
     public function findByPks($pks)
@@ -288,6 +289,7 @@ trait Builder
         $cacheKeys = Collection::make($this->getModel()->onChangeRefreshCacheKeys())->mapWithKeys(function ($id, $key) {
             return [$key => $this->makeColumnsCacheKey($id)];
         });
+
         return $this->getModel()->getCache()->deleteMultiple($cacheKeys->values()->toArray());
     }
 }
