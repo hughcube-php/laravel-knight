@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/6/7
- * Time: 11:27 上午
+ * Time: 11:27 上午.
  */
 
 namespace HughCube\Laravel\Knight\Queue;
@@ -22,7 +22,12 @@ use Symfony\Component\Console\Output\StreamOutput;
 
 class Job implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, GetOrSet, Validation;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    use GetOrSet;
+    use Validation;
 
     /**
      * @var OutputInterface
@@ -46,7 +51,8 @@ class Job implements ShouldQueue
 
     /**
      * @param string $key
-     * @param null $default
+     * @param null   $default
+     *
      * @return mixed
      */
     protected function getValue($key, $default = null)
@@ -56,7 +62,8 @@ class Job implements ShouldQueue
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param mixed  $value
+     *
      * @return static
      */
     protected function setValue($key, $value)
@@ -102,13 +109,13 @@ class Job implements ShouldQueue
      */
     protected function writeLog($message, $type = 'info')
     {
-        $styled = $type ? "<{$type}>[%s][%s] %s</{$type}> %s: %s" : "[%s][%s] %s %s: %s";
+        $styled = $type ? "<{$type}>[%s][%s] %s</{$type}> %s: %s" : '[%s][%s] %s %s: %s';
 
         $this->getOutput()->writeln(sprintf(
             $styled,
             Carbon::now()->format('Y-m-d H:i:s'),
             $this->job->getJobId(),
-            str_pad("Processing:", 11),
+            str_pad('Processing:', 11),
             $this->job->resolveName(),
             $message
         ));
@@ -122,6 +129,7 @@ class Job implements ShouldQueue
         if (!self::$output instanceof OutputInterface) {
             self::$output = new StreamOutput(fopen('php://stdout', 'w'));
         }
+
         return self::$output;
     }
 }

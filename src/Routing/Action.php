@@ -19,7 +19,8 @@ use Laravel\Lumen\Application as LumenApplication;
 
 abstract class Action
 {
-    use GetOrSet, Validation;
+    use GetOrSet;
+    use Validation;
 
     /**
      * @var LaravelRequest|LumenRequest
