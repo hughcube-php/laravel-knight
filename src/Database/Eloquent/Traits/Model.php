@@ -184,4 +184,14 @@ trait Model
     {
         return static::query()->findByPks($ids);
     }
+
+    /**
+     * @return array[]
+     */
+    public function onChangeRefreshCacheKeys()
+    {
+        return [
+            [$this->getKeyName() => $this->getKey()]
+        ];
+    }
 }

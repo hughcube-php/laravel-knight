@@ -79,16 +79,16 @@ class ModelTest extends TestCase
         $users = User::noCacheQuery()->findByPks(range(1, 100));
         foreach ($users as $user) {
             $where = ['id' => $user->id, 'nickname' => $user->nickname];
-            $user = User::query()->findAllByUniqueColumn([$where])->first();
+            $user = User::query()->findUniqueRows([$where])->first();
             $this->assertFalse($user->isFromCache());
 
-            $user = User::query()->findAllByUniqueColumn([$where])->first();
+            $user = User::query()->findUniqueRows([$where])->first();
             $this->assertTrue($user->isFromCache());
 
             $manyColumnItems[] = $where;
         }
 
-        $users = User::query()->findAllByUniqueColumn($manyColumnItems);
+        $users = User::query()->findUniqueRows($manyColumnItems);
         $this->assertSame(count($manyColumnItems), $users->count());
         foreach ($users as $user) {
             $this->assertTrue($user->isFromCache());

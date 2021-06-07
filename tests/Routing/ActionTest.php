@@ -130,7 +130,7 @@ class ActionTest extends TestCase
 
         $getOrSetAttribute = Closure::bind(function ($name, $callable, $reset = false) {
             /** @var Action $this */
-            return $this->getOrSetAttribute($name, $callable, $reset);
+            return $this->getOrSet($name, $callable, $reset);
         }, $action, Action::class);
 
         $name = md5(serialize([random_bytes(100), random_int(0, 999999999999)]));

@@ -11,6 +11,7 @@ namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use Illuminate\Cache\NullStore;
 use Illuminate\Cache\Repository;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -20,6 +21,7 @@ use Psr\SimpleCache\CacheInterface;
 /**
  * Trait Builder
  * @method Model getModel()
+ * @method \Illuminate\Database\Connection getConnection()
  */
 trait Builder
 {
@@ -128,7 +130,7 @@ trait Builder
 
     /**
      * @param integer[] $pks
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return EloquentCollection
      */
     public function findByPks($pks)
     {
@@ -136,7 +138,7 @@ trait Builder
             return [$this->getModel()->getKeyName() => $value];
         });
 
-        $rows = $this->findAllByUniqueColumn($collection->toArray())->keyBy($this->getModel()->getKeyName());
+        $rows = $this->findUniqueRows($collection->toArray())->keyBy($this->getModel()->getKeyName());
 
         $collection = $this->getModel()->newCollection([]);
         foreach ($pks as $pk) {
@@ -151,13 +153,13 @@ trait Builder
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param array[] $ids 必需是keyValue的格式, [['id' => 1], ['id' => 1]]
+     * @param array[] $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return EloquentCollection
      */
-    public function findAllByUniqueColumn(array $ids)
+    public function findUniqueRows(array $ids)
     {
-        /** @var \Illuminate\Database\Eloquent\Collection $rows */
+        /** @var EloquentCollection $rows */
         $rows = $this->getModel()->newCollection([]);
 
         if (empty($ids)) {
@@ -190,6 +192,7 @@ trait Builder
 
         /** db 查询没有命中缓存的数据 */
         /** [['pk1' => 1, 'pk2' => 1], ['pk1' => 1, 'pk2' => 1]] => ['pk1' => [1, 1], 'pk2' => [1, 1]] */
+        /** [['pk1' => 1, 'pk2' => 1]] => ['pk1' => 1, 'pk2' => 1] */
         $condition = Collection::make(array_merge_recursive(...$ids->only($missIndexes->toArray())));
         $fromDbRows = $this
             ->where(function (self $query) use ($condition) {

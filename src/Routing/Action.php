@@ -11,13 +11,16 @@ namespace HughCube\Laravel\Knight\Routing;
 use HughCube\Laravel\Knight\Http\LaravelRequest;
 use HughCube\Laravel\Knight\Http\LumenRequest;
 use HughCube\Laravel\Knight\Http\ParameterBag;
-use Illuminate\Contracts\Foundation\Application  as LaravelApplication;
-use Illuminate\Contracts\Validation\Factory;
+use HughCube\Laravel\Knight\Support\GetOrSet;
+use HughCube\Laravel\Knight\Support\Validation;
+use Illuminate\Contracts\Foundation\Application as LaravelApplication;
 use Illuminate\Http\Request;
 use Laravel\Lumen\Application as LumenApplication;
 
 abstract class Action
 {
+    use GetOrSet, Validation;
+
     /**
      * @var LaravelRequest|LumenRequest
      */
@@ -27,11 +30,6 @@ abstract class Action
      * @var ParameterBag
      */
     private $parameterBag;
-
-    /**
-     * @var array
-     */
-    private $attributes = [];
 
     /**
      * action.
@@ -81,53 +79,8 @@ abstract class Action
     protected function loadParameters()
     {
         if (!$this->parameterBag instanceof ParameterBag) {
-            /** @var \Illuminate\Validation\Factory $factory */
-            $factory = app(Factory::class);
-            $validator = $factory->make($this->getRequest()->all(), $this->rules());
-
-            /** @var array|null $data */
-            $data = $validator->validate();
-
-            /** Compatible with php7.0 */
-            if (null === $data && method_exists($validator, 'valid')) {
-                $data = $validator->valid();
-            }
-
-            $this->parameterBag = new ParameterBag($data);
+            $this->parameterBag = new ParameterBag($this->validate($this->getRequest()->all()));
         }
-    }
-
-    /**
-     * Request rules.
-     *
-     * @return array
-     */
-    protected function rules()
-    {
-        return [];
-    }
-
-    /**
-     * The user builds virtual properties.
-     *
-     * return $this->getOrSetAttribute(__METHOD__, function (){
-     *     return Model::findById($this->getParameter()->get('id'));
-     * });
-     *
-     * @param mixed    $name
-     * @param callable $callable
-     * @param bool     $reset
-     *
-     * @return mixed
-     */
-    protected function getOrSetAttribute($name, $callable, $reset = false)
-    {
-        $key = md5(serialize($name));
-        if (!array_key_exists($key, $this->attributes) || $reset) {
-            $this->attributes[$key] = $callable();
-        }
-
-        return $this->attributes[$key];
     }
 
     /**
