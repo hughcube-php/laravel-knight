@@ -11,6 +11,7 @@ namespace HughCube\Laravel\Knight\Tests\Queue;
 use Closure;
 use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\Tests\TestCase;
+use Symfony\Component\Console\Output\ConsoleOutput;
 
 class JobTest extends TestCase
 {
@@ -21,7 +22,7 @@ class JobTest extends TestCase
 
         $getOutput = Closure::bind(function () {
             /** @var Job $this */
-            return $this->getOutput();
+            return app()->make(ConsoleOutput::class);
         }, $job, Job::class);
 
 

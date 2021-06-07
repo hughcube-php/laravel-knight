@@ -17,8 +17,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
+use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Output\StreamOutput;
 
 class Job implements ShouldQueue
 {
@@ -104,7 +104,7 @@ class Job implements ShouldQueue
     {
         $styled = $type ? "<{$type}>[%s][%s] %s</{$type}> %s: %s" : "[%s][%s] %s %s: %s";
 
-        $this->getOutput()->writeln(sprintf(
+        app()->make(ConsoleOutput::class)->writeln(sprintf(
             $styled,
             Carbon::now()->format('Y-m-d H:i:s'),
             $this->job->getJobId(),
@@ -112,16 +112,5 @@ class Job implements ShouldQueue
             $this->job->resolveName(),
             $message
         ));
-    }
-
-    /**
-     * @return OutputInterface|StreamOutput
-     */
-    protected function getOutput()
-    {
-        if (!self::$output instanceof OutputInterface) {
-            self::$output = new StreamOutput(fopen('php://stdout', 'w'));
-        }
-        return self::$output;
     }
 }
