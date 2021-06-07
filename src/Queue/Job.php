@@ -79,7 +79,7 @@ class Job implements ShouldQueue
     /**
      * Write a string as error output.
      *
-     * @param $string
+     * @param string $string
      */
     protected function error($string)
     {
@@ -89,7 +89,7 @@ class Job implements ShouldQueue
     /**
      * Write a string as warning output.
      *
-     * @param $string
+     * @param string $string
      */
     protected function warn($string)
     {
@@ -125,4 +125,3 @@ class Job implements ShouldQueue
         return self::$output;
     }
 }
-

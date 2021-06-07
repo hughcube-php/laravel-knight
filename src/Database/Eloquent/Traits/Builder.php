@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/6/6
- * Time: 10:12 下午
+ * Time: 10:12 下午.
  */
 
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
@@ -19,7 +19,8 @@ use Illuminate\Support\Facades\Cache;
 use Psr\SimpleCache\CacheInterface;
 
 /**
- * Trait Builder
+ * Trait Builder.
+ *
  * @method Model getModel()
  * @method \Illuminate\Database\Connection getConnection()
  */
@@ -57,6 +58,7 @@ trait Builder
 
         $cache = $this->getModel()->getCache();
         $cache = is_string($cache) ? Cache::store($cache) : $cache;
+
         return $cache instanceof CacheInterface ? $cache : $this->getNullCache();
     }
 
@@ -68,6 +70,7 @@ trait Builder
         if (!self::$nullCache instanceof CacheInterface) {
             self::$nullCache = new Repository(new NullStore());
         }
+
         return self::$nullCache;
     }
 
@@ -81,6 +84,7 @@ trait Builder
 
     /**
      * @param mixed $value
+     *
      * @return bool
      */
     protected function isCachePlaceholder($value)
@@ -90,6 +94,7 @@ trait Builder
 
     /**
      * @param array $columns
+     *
      * @return string
      */
     protected function makeColumnsCacheKey(array $columns)
@@ -104,6 +109,7 @@ trait Builder
         $cacheKey = json_encode($cacheKey);
 
         $string = sprintf('%s:%s:%s', get_class($this->getModel()), $cacheKey, $this->getModel()->getCacheVersion());
+
         return sprintf('model:%s-%s', md5($string), crc32($string));
     }
 
@@ -113,12 +119,13 @@ trait Builder
     protected function makePkCacheKey()
     {
         return $this->makeColumnsCacheKey([
-            $this->getModel()->getKeyName() => $this->getModel()->getKey()
+            $this->getModel()->getKeyName() => $this->getModel()->getKey(),
         ]);
     }
 
     /**
-     * @param integer $pk
+     * @param int $pk
+     *
      * @return Model
      */
     public function findByPk($pk)
@@ -147,6 +154,7 @@ trait Builder
                 $collection->put($pk, $row);
             }
         }
+
         return $collection;
     }
 
@@ -231,5 +239,55 @@ trait Builder
         }
 
         return $rows->values();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function delete()
+    {
+        $number = parent::delete();
+        if (false !== $number && $this->getModel()->exists) {
+            $this->refreshRowCache();
+        }
+
+        return $number;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function update(array $values)
+    {
+        $number = parent::update($values);
+        if (false !== $number && $this->getModel()->exists) {
+            $this->refreshRowCache();
+        }
+
+        return $number;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function insert(array $values)
+    {
+        $number = parent::insert($values);
+        if (false !== $number && $this->getModel()->exists) {
+            $this->refreshRowCache();
+        }
+
+        return $number;
+    }
+
+    /**
+     * @return bool
+     */
+    public function refreshRowCache()
+    {
+        $cacheKeys = Collection::make($this->getModel()->onChangeRefreshCacheKeys())->mapWithKeys(function ($id, $key) {
+            return [$key => $this->makeColumnsCacheKey($id)];
+        });
+        return $this->getModel()->getCache()->deleteMultiple($cacheKeys->values()->toArray());
     }
 }
