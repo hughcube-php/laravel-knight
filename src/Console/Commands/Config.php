@@ -3,6 +3,7 @@
 namespace HughCube\Laravel\Knight\Console\Commands;
 
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\VarDumper\VarDumper;
 
 class Config extends Command
@@ -12,8 +13,7 @@ class Config extends Command
      *
      * @var string
      */
-    protected $signature = 'knight:config
-                    {key="" : Application config key}';
+    protected $signature = 'knight:config';
 
     /**
      * The console command description.
@@ -21,6 +21,13 @@ class Config extends Command
      * @var string
      */
     protected $description = 'Display the Application config';
+
+    public function configure()
+    {
+        parent::configure();
+
+        $this->addArgument('key', null, 'config key, Default output all', "");
+    }
 
     /**
      * Execute the console command.
