@@ -11,7 +11,7 @@ class Environment extends Command
      *
      * @var string
      */
-    protected $name = 'knight:env';
+    protected $signature = 'knight:env';
 
     /**
      * The console command description.

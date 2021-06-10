@@ -12,9 +12,8 @@ class Config extends Command
      *
      * @var string
      */
-    protected $name = 'knight:config
-                        {key="": Application config name }
-    ';
+    protected $signature = 'knight:config
+                    {key="" : Application config key}';
 
     /**
      * The console command description.

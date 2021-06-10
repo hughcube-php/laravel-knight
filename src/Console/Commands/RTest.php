@@ -6,16 +6,16 @@ use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Exception\RuntimeException;
 
-class RepeatTest extends Command
+class RTest extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'knight:repeat-test
+    protected $signature = 'knight:rtest
                             {number=1 : Number of repetitions, one by default }
-                            {--class= : The name of the class that needs to be executed}';
+                            {--class=\Tests\RTest : The name of the class that needs to be executed}';
 
     /**
      * The console command description.
@@ -33,10 +33,6 @@ class RepeatTest extends Command
     {
         $instance = $this->makeInstance();
 
-        if (method_exists($instance, 'init')) {
-            $instance->init();
-        }
-
         /** @var int $number */
         $number = $this->argument('number');
 
@@ -49,9 +45,7 @@ class RepeatTest extends Command
         $startDateTime = Carbon::now();
 
         for ($i = 1; $i <= $number; $i++) {
-            //work start******************************************************
             $instance->run($i);
-            //work end********************************************************
         }
 
         $endDateTime = Carbon::now();

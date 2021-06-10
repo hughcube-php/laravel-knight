@@ -4,7 +4,7 @@ namespace HughCube\Laravel\Knight\Console;
 
 use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
-use HughCube\Laravel\Knight\Console\Commands\RepeatTest;
+use HughCube\Laravel\Knight\Console\Commands\RTest;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 
 /**
@@ -38,7 +38,7 @@ class ServiceProvider extends IlluminateServiceProvider
         $this->commands([
             Environment::class,
             PhpIniFile::class,
-            RepeatTest::class,
+            RTest::class,
         ]);
     }
 }

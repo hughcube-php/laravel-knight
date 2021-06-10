@@ -45,7 +45,7 @@ class ActionTest extends TestCase
         $getRequest = Closure::bind(function () {
             /** @var Action $this */
             return $this->getRequest();
-        }, $action, Action::class);
+        }, $action, TestAction::class);
 
         $this->assertInstanceOf(IlluminateRequest::class, $getRequest());
     }
@@ -68,11 +68,11 @@ class ActionTest extends TestCase
             $this->loadParameters();
 
             return $this->parameter($key);
-        }, $action, Action::class);
+        }, $action, TestAction::class);
 
         $setRequest = Closure::bind(function ($request) {
             $this->request = $request;
-        }, $action, Action::class);
+        }, $action, TestAction::class);
         $setRequest($request = IlluminateRequest::create(
             '/test',
             'GET',
@@ -104,11 +104,11 @@ class ActionTest extends TestCase
         $callAction = Closure::bind(function () {
             /** @var Action $this */
             return $this->action();
-        }, $action, Action::class);
+        }, $action, TestAction::class);
 
         $setRequest = Closure::bind(function ($request) {
             $this->request = $request;
-        }, $action, Action::class);
+        }, $action, TestAction::class);
         $setRequest($request = IlluminateRequest::create(
             '/test',
             'GET',
@@ -131,7 +131,7 @@ class ActionTest extends TestCase
         $getOrSetAttribute = Closure::bind(function ($name, $callable, $reset = false) {
             /** @var Action $this */
             return $this->getOrSet($name, $callable, $reset);
-        }, $action, Action::class);
+        }, $action, TestAction::class);
 
         $name = md5(serialize([random_bytes(100), random_int(0, 999999999999)]));
         $value = $getOrSetAttribute($name, function () {

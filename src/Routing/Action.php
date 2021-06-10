@@ -17,7 +17,7 @@ use Illuminate\Contracts\Foundation\Application as LaravelApplication;
 use Illuminate\Http\Request;
 use Laravel\Lumen\Application as LumenApplication;
 
-abstract class Action
+trait Action
 {
     use GetOrSet;
     use Validation;

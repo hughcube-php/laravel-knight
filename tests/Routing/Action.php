@@ -8,8 +8,10 @@
 
 namespace HughCube\Laravel\Knight\Tests\Routing;
 
-class Action extends \HughCube\Laravel\Knight\Routing\Action
+class Action
 {
+    use \HughCube\Laravel\Knight\Routing\Action;
+
     protected function rules()
     {
         return [
