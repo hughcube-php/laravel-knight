@@ -13,7 +13,7 @@ trait GetOrSet
     /**
      * @var array
      */
-    private $classSelfHughCubeKnightCacheStorage = [];
+    private $hughCubeKnightClassSelfCacheStorage = [];
 
     /**
      * The user builds virtual properties.
@@ -22,19 +22,19 @@ trait GetOrSet
      *     return Model::findById($this->getParameter()->get('id'));
      * });
      *
-     * @param mixed    $name
+     * @param mixed $name
      * @param callable $callable
-     * @param bool     $reset
+     * @param bool $reset
      *
      * @return mixed
      */
     protected function getOrSet($name, $callable, $reset = false)
     {
         $key = md5(serialize($name));
-        if (!array_key_exists($key, $this->classSelfHughCubeKnightCacheStorage) || $reset) {
-            $this->classSelfHughCubeKnightCacheStorage[$key] = $callable();
+        if (!array_key_exists($key, $this->hughCubeKnightClassSelfCacheStorage) || $reset) {
+            $this->hughCubeKnightClassSelfCacheStorage[$key] = $callable();
         }
 
-        return $this->classSelfHughCubeKnightCacheStorage[$key];
+        return $this->hughCubeKnightClassSelfCacheStorage[$key];
     }
 }
