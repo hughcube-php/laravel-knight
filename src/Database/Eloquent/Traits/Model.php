@@ -104,7 +104,6 @@ trait Model
      * @param  \Illuminate\Database\Query\Builder  $query
      * @return Builder
      */
-    #[Pure]
     public function newEloquentBuilder($query): Builder
     {
         return new Builder($query);

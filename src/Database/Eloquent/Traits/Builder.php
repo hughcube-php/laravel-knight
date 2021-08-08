@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -59,7 +58,6 @@ trait Builder
         }
 
         $cache = $this->getModel()->getCache();
-        $cache = is_string($cache) ? Cache::store($cache) : $cache;
 
         return $cache instanceof CacheInterface ? $cache : $this->getNullCache();
     }
@@ -126,14 +124,12 @@ trait Builder
 
     /**
      * @param  mixed  $pk
-     *
-     * @return Model
+     * @return mixed
      * @throws InvalidArgumentException
      */
     public function findByPk($pk)
     {
         $collection = $this->findByPks([$pk]);
-
         return $collection->get($pk);
     }
 
@@ -168,7 +164,6 @@ trait Builder
      *
      * @return EloquentCollection
      * @throws InvalidArgumentException
-     * @throws \Exception
      */
     public function findUniqueRows(array $ids): EloquentCollection
     {
@@ -206,18 +201,19 @@ trait Builder
         /** [['pk1' => 1, 'pk2' => 1]] => ['pk1' => 1, 'pk2' => 1] */
         $condition = Collection::make(array_merge_recursive(...$ids->only($missIndexes->toArray())));
         $fromDbRows = $this
-            ->where(function ($query) use ($condition) {
-                /** @var static $query */
-                foreach ($condition as $name => $values) {
-                    if (is_array($values)) {
-                        $query->whereIn($name, array_values(array_unique($values)));
-                    } elseif (null === $values) {
-                        $query->whereNull($name);
-                    } else {
-                        $query->where($name, $values);
+            ->where(
+                function (self $query) use ($condition) {
+                    foreach ($condition as $name => $values) {
+                        if (is_array($values)) {
+                            $query->whereIn($name, array_values(array_unique($values)));
+                        } elseif (null === $values) {
+                            $query->whereNull($name);
+                        } else {
+                            $query->where($name, $values);
+                        }
                     }
                 }
-            })
+            )
             ->limit(count($missIndexes))
             ->get()
             ->keyBy(function (IlluminateModel $model) use ($condition) {
