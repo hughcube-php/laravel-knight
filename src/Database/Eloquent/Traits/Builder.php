@@ -11,18 +11,20 @@ namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use Illuminate\Cache\NullStore;
 use Illuminate\Cache\Repository;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Trait Builder.
  *
- * @method Model                           getModel()
- * @method \Illuminate\Database\Connection getConnection()
+ * @method Model getModel()
+ * @method Connection getConnection()
  */
 trait Builder
 {
@@ -46,7 +48,7 @@ trait Builder
     /**
      * @return CacheInterface
      */
-    protected function getCache()
+    public function getCache(): CacheInterface
     {
         if (!$this->enableCache) {
             return $this->getNullCache();
@@ -65,39 +67,38 @@ trait Builder
     /**
      * @return CacheInterface
      */
-    protected function getNullCache()
+    protected function getNullCache(): CacheInterface
     {
         if (!self::$nullCache instanceof CacheInterface) {
             self::$nullCache = new Repository(new NullStore());
         }
-
         return self::$nullCache;
     }
 
     /**
      * @return string
      */
-    protected function getCachePlaceholder()
+    protected function getCachePlaceholder(): string
     {
-        return 'Ah2XeR6g@@NULL@@iehee2Oe';
+        return '@@fad7563e68d@@';
     }
 
     /**
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return bool
      */
-    protected function isCachePlaceholder($value)
+    protected function isCachePlaceholder($value): bool
     {
         return $value === $this->getCachePlaceholder();
     }
 
     /**
-     * @param array $columns
+     * @param  array  $columns
      *
      * @return string
      */
-    protected function makeColumnsCacheKey(array $columns)
+    protected function makeColumnsCacheKey(array $columns): string
     {
         $cacheKey = [];
         foreach ($columns as $name => $value) {
@@ -116,7 +117,7 @@ trait Builder
     /**
      * @return string
      */
-    protected function makePkCacheKey()
+    protected function makePkCacheKey(): string
     {
         return $this->makeColumnsCacheKey([
             $this->getModel()->getKeyName() => $this->getModel()->getKey(),
@@ -124,9 +125,10 @@ trait Builder
     }
 
     /**
-     * @param int $pk
+     * @param  mixed  $pk
      *
      * @return Model
+     * @throws InvalidArgumentException
      */
     public function findByPk($pk)
     {
@@ -136,11 +138,12 @@ trait Builder
     }
 
     /**
-     * @param int[] $pks
+     * @param  array|Collection  $pks
      *
      * @return EloquentCollection
+     * @throws InvalidArgumentException
      */
-    public function findByPks($pks)
+    public function findByPks($pks): EloquentCollection
     {
         $collection = Collection::make($pks)->map(function ($value) {
             return [$this->getModel()->getKeyName() => $value];
@@ -155,20 +158,20 @@ trait Builder
                 $collection->put($pk, $row);
             }
         }
-
         return $collection;
     }
 
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param array[] $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
+     * @param  array[]  $ids  必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
      * @return EloquentCollection
+     * @throws InvalidArgumentException
+     * @throws \Exception
      */
-    public function findUniqueRows(array $ids)
+    public function findUniqueRows(array $ids): EloquentCollection
     {
-        /** @var EloquentCollection $rows */
         $rows = $this->getModel()->newCollection([]);
 
         if (empty($ids)) {
@@ -178,7 +181,6 @@ trait Builder
         /** @var Collection $ids */
         $ids = Collection::make($ids)->values();
 
-        /** @var Collection $cacheKeys */
         $cacheKeys = $ids->mapWithKeys(function ($id, $key) {
             return [$key => $this->makeColumnsCacheKey($id)];
         });
@@ -204,7 +206,8 @@ trait Builder
         /** [['pk1' => 1, 'pk2' => 1]] => ['pk1' => 1, 'pk2' => 1] */
         $condition = Collection::make(array_merge_recursive(...$ids->only($missIndexes->toArray())));
         $fromDbRows = $this
-            ->where(function (self $query) use ($condition) {
+            ->where(function ($query) use ($condition) {
+                /** @var static $query */
                 foreach ($condition as $name => $values) {
                     if (is_array($values)) {
                         $query->whereIn($name, array_values(array_unique($values)));
@@ -224,7 +227,7 @@ trait Builder
         /** 把db的查询结果缓存起来 */
         $cacheItems = [];
         foreach ($cacheKeys->only($missIndexes->toArray()) as $cacheKey) {
-            if ($fromDbRows->get($cacheKey)) {
+            if ($fromDbRows->has($cacheKey)) {
                 $cacheItems[$cacheKey] = $fromDbRows->get($cacheKey);
             } else {
                 $cacheItems[$cacheKey] = $this->getCachePlaceholder();
@@ -244,6 +247,7 @@ trait Builder
 
     /**
      * @inheritdoc
+     * @throws InvalidArgumentException
      */
     public function delete()
     {
@@ -257,11 +261,12 @@ trait Builder
 
     /**
      * @inheritdoc
+     * @throws InvalidArgumentException
      */
-    public function update(array $values)
+    public function update(array $values): int
     {
         $number = parent::update($values);
-        if (false !== $number && $this->getModel()->exists) {
+        if (false < $number && $this->getModel()->exists) {
             $this->refreshRowCache();
         }
 
@@ -270,6 +275,7 @@ trait Builder
 
     /**
      * @inheritdoc
+     * @throws InvalidArgumentException
      */
     public function insert(array $values)
     {
@@ -283,13 +289,15 @@ trait Builder
 
     /**
      * @return bool
+     * @throws InvalidArgumentException
      */
-    public function refreshRowCache()
+    public function refreshRowCache(): bool
     {
-        $cacheKeys = Collection::make($this->getModel()->onChangeRefreshCacheKeys())->mapWithKeys(function ($id, $key) {
-            return [$key => $this->makeColumnsCacheKey($id)];
-        });
+        $cacheKeys = Collection::make($this->getModel()->onChangeRefreshCacheKeys())
+            ->mapWithKeys(function ($id, $key) {
+                return [$key => $this->makeColumnsCacheKey($id)];
+            });
 
-        return $this->getModel()->getCache()->deleteMultiple($cacheKeys->values()->toArray());
+        return $this->getCache()->deleteMultiple($cacheKeys->values()->toArray());
     }
 }

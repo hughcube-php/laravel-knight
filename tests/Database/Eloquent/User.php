@@ -52,7 +52,7 @@ class User extends Model
      *
      * @return CacheInterface;
      */
-    public function getCache()
+    public function getCache(): CacheInterface
     {
         return Cache::store('array');
     }

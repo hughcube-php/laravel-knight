@@ -22,19 +22,16 @@ trait GetOrSet
      *     return Model::findById($this->getParameter()->get('id'));
      * });
      *
-     * @param mixed $name
-     * @param callable $callable
-     * @param bool $reset
-     *
+     * @param  mixed  $name
+     * @param  callable  $callable
      * @return mixed
      */
-    protected function getOrSet($name, $callable, $reset = false)
+    protected function getOrSet($name, callable $callable)
     {
         $key = md5(serialize($name));
-        if (!array_key_exists($key, $this->hughCubeKnightClassSelfCacheStorage) || $reset) {
+        if (!array_key_exists($key, $this->hughCubeKnightClassSelfCacheStorage)) {
             $this->hughCubeKnightClassSelfCacheStorage[$key] = $callable();
         }
-
         return $this->hughCubeKnightClassSelfCacheStorage[$key];
     }
 }

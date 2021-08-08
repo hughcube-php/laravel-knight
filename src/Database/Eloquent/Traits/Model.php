@@ -3,9 +3,13 @@
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
 use Carbon\Carbon;
+use Exception;
 use HughCube\Laravel\Knight\Database\Eloquent\Builder;
+use Illuminate\Contracts\Cache\Repository;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
-use Psr\SimpleCache\CacheInterface;
+use JetBrains\PhpStorm\Pure;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Trait QueryCache.
@@ -25,41 +29,41 @@ trait Model
     protected $isFromCache = false;
 
     /**
-     * @param mixed $date
+     * @param  mixed|null  $date
      *
      * @return Carbon|null
      */
-    public function toCarbon($date = null)
+    public function toCarbon(mixed $date = null)
     {
         return empty($date) ? null : Carbon::parse($date);
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return Carbon|null
      */
-    public function getCreatedAtAttribute($date)
+    public function getCreatedAtAttribute(mixed $date)
     {
         return $this->toCarbon($date);
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return Carbon|null
      */
-    public function getUpdatedAtAttribute($date)
+    public function getUpdatedAtAttribute(mixed $date)
     {
         return $this->toCarbon($date);
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return Carbon|null
      */
-    public function getDeleteAtAttribute($date)
+    public function getDeleteAtAttribute(mixed $date)
     {
         return $this->toCarbon($date);
     }
@@ -67,7 +71,7 @@ trait Model
     /**
      * @return bool
      */
-    public function isDeleted()
+    public function isDeleted(): bool
     {
         $deletedAt = $this->getAttribute($this->getDeletedAtColumn());
 
@@ -79,7 +83,7 @@ trait Model
      *
      * @return bool
      */
-    public function isNormal()
+    public function isNormal(): bool
     {
         return false == $this->isDeleted();
     }
@@ -89,7 +93,7 @@ trait Model
      *
      * @return string
      */
-    public function getDeletedAtColumn()
+    public function getDeletedAtColumn(): string
     {
         return defined('static::DELETED_AT') ? constant('static::DELETED_AT') : 'deleted_at';
     }
@@ -97,11 +101,11 @@ trait Model
     /**
      * Create a new Eloquent query builder for the model.
      *
-     * @param \Illuminate\Database\Query\Builder $query
-     *
+     * @param  \Illuminate\Database\Query\Builder  $query
      * @return Builder
      */
-    public function newEloquentBuilder($query)
+    #[Pure]
+    public function newEloquentBuilder($query): Builder
     {
         return new Builder($query);
     }
@@ -111,7 +115,7 @@ trait Model
      *
      * @return Builder
      */
-    public static function noCacheQuery()
+    public static function noCacheQuery(): Builder
     {
         return static::query()->noCache();
     }
@@ -119,7 +123,7 @@ trait Model
     /**
      * 获取缓存.
      *
-     * @return CacheInterface|string|null
+     * @return Repository|null
      */
     public function getCache()
     {
@@ -127,13 +131,13 @@ trait Model
             return null;
         }
 
-        return Cache::store(constant('static::DELETED_AT'));
+        return Cache::store(constant('static::CACHE'));
     }
 
     /**
      * @return bool
      */
-    public function isFromCache()
+    public function isFromCache(): bool
     {
         return $this->isFromCache;
     }
@@ -144,20 +148,19 @@ trait Model
     public function setIsFromCache($is = true)
     {
         $this->isFromCache = $is;
-
         return $this;
     }
 
     /**
      * 缓存的时间, 默认5-7天.
      *
-     * @param int|null $duration
-     *
-     * @return int|null
+     * @param  int|null  $duration
+     * @return int
+     * @throws Exception
      */
-    public function getCacheTtl($duration = null)
+    public function getCacheTtl(int $duration = null): int
     {
-        return null === $duration ? random_int((5 * 24 * 3600), (7 * 24 * 3600)) : null;
+        return null === $duration ? random_int((5 * 24 * 3600), (7 * 24 * 3600)) : $duration;
     }
 
     /**
@@ -169,24 +172,22 @@ trait Model
     }
 
     /**
-     * @param int $id
-     *
+     * @param  mixed  $id
      * @return static
+     * @throws InvalidArgumentException
      */
     public static function findById($id)
     {
-        /** @var static $row */
-        $row = static::query()->findByPk($id);
-
-        return $row;
+        return static::query()->findByPk($id);
     }
 
     /**
-     * @param int[] $ids
+     * @param  array|Collection  $ids
      *
-     * @return static[]|\Illuminate\Database\Eloquent\Collection
+     * @return Collection
+     * @throws InvalidArgumentException
      */
-    public static function findByIds($ids)
+    public static function findByIds($ids): Collection
     {
         return static::query()->findByPks($ids);
     }
@@ -194,7 +195,7 @@ trait Model
     /**
      * @return array[]
      */
-    public function onChangeRefreshCacheKeys()
+    public function onChangeRefreshCacheKeys(): array
     {
         return [
             [$this->getKeyName() => $this->getKey()],

@@ -9,13 +9,14 @@
 namespace HughCube\Laravel\Knight\Routing;
 
 use HughCube\Laravel\Knight\Http\LaravelRequest;
-use HughCube\Laravel\Knight\Http\LumenRequest;
-use HughCube\Laravel\Knight\Http\ParameterBag;
 use HughCube\Laravel\Knight\Support\GetOrSet;
 use HughCube\Laravel\Knight\Support\Validation;
-use Illuminate\Contracts\Foundation\Application as LaravelApplication;
+use Illuminate\Container\Container as IlluminateContainer;
+use Illuminate\Contracts\Container\Container as ContainerContract;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Application as LumenApplication;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 trait Action
 {
@@ -23,74 +24,90 @@ trait Action
     use Validation;
 
     /**
-     * @var LaravelRequest|LumenRequest
+     * @var ParameterBag|null
      */
-    private $request;
+    protected $parameterBag = null;
 
     /**
-     * @var ParameterBag
+     * @var Request|null
      */
-    private $parameterBag;
+    protected $request = null;
 
     /**
      * action.
      *
      * @return mixed
      */
-    abstract protected function action();
+    abstract public function action();
+
+    /**
+     * @return ContainerContract
+     */
+    protected function getContainer(): ContainerContract
+    {
+        return IlluminateContainer::getInstance();
+    }
 
     /**
      * Get HTTP Request.
      *
-     * @return LaravelRequest|LumenRequest
+     * @return Request|LumenApplication|LaravelRequest
      */
-    protected function getRequest()
+    protected function getRequest(): Request
     {
         if ($this->request instanceof Request) {
             return $this->request;
         }
 
-        /** @var LumenApplication|LaravelApplication $app */
-        $app = app();
-
-        if ($app instanceof LumenApplication) {
-            return $this->request = $app->make(Request::class);
+        if ($this->getContainer() instanceof LumenApplication) {
+            return $this->request = $this->getContainer()->make(Request::class);
         }
 
-        return $this->request = $app->make('request');
-    }
-
-    /**
-     * Get request validated results.
-     *
-     * @return ParameterBag
-     */
-    protected function parameter($key = null)
-    {
-        if (null === $key) {
-            return $this->parameterBag;
-        }
-
-        return $this->parameterBag->get($key);
+        return $this->request = $this->getContainer()->make('request');
     }
 
     /**
      * load parameters.
+     * @throws ValidationException
      */
     protected function loadParameters()
     {
-        if (!$this->parameterBag instanceof ParameterBag) {
-            $this->parameterBag = new ParameterBag($this->validate($this->getRequest()->all()));
+        if ($this->parameterBag instanceof ParameterBag) {
+            return;
         }
+
+        $validData = $this->validate($this->getRequest()->all());
+        $this->parameterBag = new ParameterBag($validData);
+    }
+
+    /**
+     * @return ParameterBag
+     * @throws
+     */
+    protected function getParameter(): ParameterBag
+    {
+        $this->loadParameters();
+
+        return $this->parameterBag;
     }
 
     /**
      * @return mixed
+     * @throws ValidationException
      */
-    public function __invoke()
+    public function invoke()
     {
         $this->loadParameters();
 
         return $this->action();
+    }
+
+    /**
+     * @return mixed
+     * @throws ValidationException
+     */
+    public function __invoke()
+    {
+        return $this->invoke();
     }
 }

@@ -8,12 +8,12 @@
 
 namespace HughCube\Laravel\Knight\Database\Eloquent;
 
-use HughCube\Laravel\Knight\Database\Eloquent\Traits\Model as ModelTrait;
+use HughCube\Laravel\Knight\Database\Eloquent\Traits\Model as KnightModel;
 
 /**
  * Class Model.
  */
 class Model extends \Illuminate\Database\Eloquent\Model
 {
-    use ModelTrait;
+    use KnightModel;
 }

@@ -8,19 +8,25 @@
 
 namespace HughCube\Laravel\Knight\Tests\Routing;
 
+use JetBrains\PhpStorm\ArrayShape;
+
 class Action
 {
     use \HughCube\Laravel\Knight\Routing\Action;
 
-    protected function rules()
+    /**
+     * @return array
+     */
+    public function action()
     {
-        return [
-            'uuid' => ['string'],
-        ];
+        return $this->getParameter()->all();
     }
 
-    protected function action()
+    #[ArrayShape(["uuid" => "string"])]
+    public function rules(): array
     {
-        return $this->parameter()->all();
+        return [
+            "uuid" => "string"
+        ];
     }
 }

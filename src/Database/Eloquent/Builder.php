@@ -8,10 +8,12 @@
 
 namespace HughCube\Laravel\Knight\Database\Eloquent;
 
+use HughCube\Laravel\Knight\Database\Eloquent\Traits\Builder as KnightBuilder;
+
 /**
  * Class Builder.
  */
 class Builder extends \Illuminate\Database\Eloquent\Builder
 {
-    use \HughCube\Laravel\Knight\Database\Eloquent\Traits\Builder;
+    use KnightBuilder;
 }

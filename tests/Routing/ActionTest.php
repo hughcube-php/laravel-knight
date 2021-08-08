@@ -8,22 +8,23 @@
 
 namespace HughCube\Laravel\Knight\Tests\Routing;
 
-use Closure;
-use HughCube\Laravel\Knight\Http\ParameterBag;
-use HughCube\Laravel\Knight\Routing\Action;
-use HughCube\Laravel\Knight\Tests\Routing\Action as TestAction;
+use Dotenv\Exception\ValidationException;
+use Exception;
 use HughCube\Laravel\Knight\Tests\TestCase;
-use Illuminate\Http\Request as IlluminateRequest;
+use Illuminate\Http\Request;
+use ReflectionException;
+use Symfony\Component\HttpFoundation\ParameterBag;
 
 class ActionTest extends TestCase
 {
     protected function defineWebRoutes($router)
     {
-        $router->POST('/test', TestAction::class);
+        $router->POST('/test', Action::class);
     }
 
     /**
      * @requires PHP >= 7.2
+     * @throws Exception
      */
     public function testWebRoute()
     {
@@ -37,43 +38,30 @@ class ActionTest extends TestCase
         $this->assertSame($response->content(), "{\"uuid\":\"$uuid\"}");
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function testGetRequest()
     {
-        /** @var TestAction $action */
-        $action = new TestAction();
+        $action = new Action();
 
-        $getRequest = Closure::bind(function () {
-            /** @var Action $this */
-            return $this->getRequest();
-        }, $action, TestAction::class);
-
-        $this->assertInstanceOf(IlluminateRequest::class, $getRequest());
+        $this->assertInstanceOf(Request::class, $this->callMethod($action, 'getRequest'));
     }
 
     /**
      * @covers \HughCube\Laravel\Knight\Routing\Action::rules
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function testGetParameter()
     {
-        /** @var TestAction $action */
-        $action = new TestAction();
+        $action = new Action();
 
         $uuid = md5(random_bytes(100));
         $data = ['uuid' => $uuid, 'uuid2' => md5(random_bytes(100))];
 
-        $getParameter = Closure::bind(function ($key = null) {
-            /** @var Action $this */
-            $this->loadParameters();
 
-            return $this->parameter($key);
-        }, $action, TestAction::class);
-
-        $setRequest = Closure::bind(function ($request) {
-            $this->request = $request;
-        }, $action, TestAction::class);
-        $setRequest($request = IlluminateRequest::create(
+        $request = Request::create(
             '/test',
             'GET',
             [],
@@ -81,35 +69,33 @@ class ActionTest extends TestCase
             [],
             ['CONTENT_TYPE' => 'application/json'],
             json_encode($data)
-        ));
+        );
+        $this->setProperty($action, 'request', $request);
 
-        $this->assertInstanceOf(ParameterBag::class, $getParameter());
-        $this->assertTrue($getParameter()->has('uuid'));
-        $this->assertSame($getParameter()->get('uuid'), $request->json('uuid'));
+        $parameter = $this->callMethod($action, 'getParameter');
+        $this->assertInstanceOf(ParameterBag::class, $parameter);
+
+        $this->assertTrue($parameter->has('uuid'));
+        $this->assertSame($parameter->get('uuid'), $request->json('uuid'));
 
         if (version_compare(PHP_VERSION, '7.1', '>=')) {
-            $this->assertFalse($getParameter()->has('uuid2'));
-            $this->assertSame(1, count($getParameter()->all()));
+            $this->assertFalse($parameter->has('uuid2'));
+            $this->assertSame(1, $parameter->count());
         }
     }
 
+    /**
+     * @throws ValidationException
+     * @throws Exception
+     */
     public function testInvoke()
     {
-        /** @var TestAction $action */
-        $action = new TestAction();
+        $action = new Action();
 
         $uuid = md5(random_bytes(100));
         $data = ['uuid' => $uuid, 'uuid2' => md5(random_bytes(100))];
 
-        $callAction = Closure::bind(function () {
-            /** @var Action $this */
-            return $this->action();
-        }, $action, TestAction::class);
-
-        $setRequest = Closure::bind(function ($request) {
-            $this->request = $request;
-        }, $action, TestAction::class);
-        $setRequest($request = IlluminateRequest::create(
+        $request = Request::create(
             '/test',
             'GET',
             [],
@@ -117,48 +103,51 @@ class ActionTest extends TestCase
             [],
             ['CONTENT_TYPE' => 'application/json'],
             json_encode($data)
-        ));
+        );
+        $this->setProperty($action, 'request', $request);
 
-        $this->assertSame($action(), $callAction());
+        $this->assertSame($action(), $action->action());
         $this->assertSame($action()['uuid'], $uuid);
     }
 
+    /**
+     * @throws Exception
+     */
     public function testGetOrSetAttribute()
     {
-        /** @var TestAction $action */
-        $action = new TestAction();
-
-        $getOrSetAttribute = Closure::bind(function ($name, $callable, $reset = false) {
-            /** @var Action $this */
-            return $this->getOrSet($name, $callable, $reset);
-        }, $action, TestAction::class);
+        $action = new Action();
 
         $name = md5(serialize([random_bytes(100), random_int(0, 999999999999)]));
-        $value = $getOrSetAttribute($name, function () {
-            return random_int(0, 999999999999);
-        });
-        $this->assertSame($value, $getOrSetAttribute($name, function () {
-            return random_int(0, 999999999999);
-        }));
-        $this->assertSame($value, $getOrSetAttribute($name, function () {
-            return random_int(0, 999999999999);
-        }));
-        $this->assertNotSame($value, $getOrSetAttribute($name, function () {
-            return random_int(0, 999999999999);
-        }, true));
+        $value = $this->callMethod($action, 'getOrSet', [
+            $name,
+            function () {
+                return random_int(0, 999999999999);
+            }
+        ]);
 
+        $this->assertSame($value, $this->callMethod($action, 'getOrSet', [
+            $name,
+            function () {
+                return random_int(0, 999999999999);
+            }
+        ]));
+
+        $count = 0;
         $name = md5(serialize([random_bytes(100), random_int(0, 999999999999)]));
-        $this->assertSame(null, $getOrSetAttribute($name, function () {
-            return null;
-        }));
-        $this->assertSame(null, $getOrSetAttribute($name, function () {
-            return random_int(0, 999999999999);
-        }));
-        $this->assertSame(null, $getOrSetAttribute($name, function () {
-            return false;
-        }));
-        $this->assertSame(false, $getOrSetAttribute($name, function () {
-            return false;
-        }, true));
+        $this->assertSame(null, $this->callMethod($action, 'getOrSet', [
+            $name,
+            function () use (&$count) {
+                $count++;
+                return null;
+            }
+        ]));
+        $this->assertSame(null, $this->callMethod($action, 'getOrSet', [
+            $name,
+            function () use (&$count) {
+                $count++;
+                return null;
+            }
+        ]));
+        $this->assertSame(1, $count);
     }
 }

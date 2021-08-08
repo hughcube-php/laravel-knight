@@ -4,6 +4,7 @@ namespace HughCube\Laravel\Knight\Console\Commands;
 
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Symfony\Component\Console\Exception\RuntimeException;
 
 class RTest extends Command
@@ -27,7 +28,8 @@ class RTest extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return void
+     * @throws BindingResolutionException
      */
     public function handle()
     {
@@ -71,9 +73,9 @@ class RTest extends Command
     }
 
     /**
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
-     *
      * @return object
+     * @throws BindingResolutionException
+     *
      */
     protected function makeInstance()
     {
@@ -93,11 +95,11 @@ class RTest extends Command
     /**
      * 内存单位换算为M.
      *
-     * @param int $memory
+     * @param  int  $memory
      *
      * @return float
      */
-    protected function formatMemory($memory)
+    protected function formatMemory(int $memory): float
     {
         return round($memory / 1024 / 1024, 2);
     }

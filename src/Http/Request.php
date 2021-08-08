@@ -16,7 +16,7 @@ trait Request
      *
      * @return Agent
      */
-    public function getUserAgentDetect()
+    public function getUserAgentDetect(): Agent
     {
         if (!$this->userAgentDetect instanceof Agent) {
             $this->userAgentDetect = new Agent($this->headers->all(), $this->userAgent());
@@ -30,7 +30,7 @@ trait Request
      *
      * @return bool
      */
-    public function isWeChat()
+    public function isWeChat(): bool
     {
         return false !== strpos($this->userAgent(), 'MicroMessenger');
     }
@@ -40,7 +40,7 @@ trait Request
      *
      * @return bool
      */
-    public function isWeChatMiniProgram()
+    public function isWeChatMiniProgram(): bool
     {
         return $this->isWeChat() && false !== strpos($this->userAgent(), 'miniProgram');
     }

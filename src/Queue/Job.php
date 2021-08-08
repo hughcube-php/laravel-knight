@@ -17,32 +17,23 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
-use Symfony\Component\Console\Output\ConsoleOutput;
-use Symfony\Component\Console\Output\OutputInterface;
+use Illuminate\Validation\ValidationException;
 
 class Job implements ShouldQueue
 {
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-    use GetOrSet;
-    use Validation;
-
-    /**
-     * @var OutputInterface
-     */
-    private static $output;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use GetOrSet, Validation;
 
     /**
      * @var array
      */
-    protected $data;
+    private $data;
 
     /**
      * Create a new job instance.
      *
      * @return void
+     * @throws ValidationException
      */
     public function __construct(array $data)
     {
@@ -50,23 +41,23 @@ class Job implements ShouldQueue
     }
 
     /**
-     * @param string $key
-     * @param null   $default
+     * @param  string  $key
+     * @param  null  $default
      *
      * @return mixed
      */
-    protected function getValue($key, $default = null)
+    protected function getValue(string $key, $default = null)
     {
         return Arr::get($this->data, $key, $default);
     }
 
     /**
-     * @param string $key
-     * @param mixed  $value
+     * @param  string  $key
+     * @param  mixed  $value
      *
      * @return static
      */
-    protected function setValue($key, $value)
+    protected function setValue(string $key, $value): Job
     {
         Arr::set($this->data, $key, $value);
 
@@ -74,50 +65,17 @@ class Job implements ShouldQueue
     }
 
     /**
-     * Write a string as information output.
-     *
-     * @param string $string
+     * @param  string  $message
      */
-    protected function info($string)
+    protected function echo(string $message)
     {
-        $this->writeLog($string, 'info');
-    }
-
-    /**
-     * Write a string as error output.
-     *
-     * @param string $string
-     */
-    protected function error($string)
-    {
-        $this->writeLog($string, 'error');
-    }
-
-    /**
-     * Write a string as warning output.
-     *
-     * @param string $string
-     */
-    protected function warn($string)
-    {
-        $this->writeLog($string, 'warning');
-    }
-
-    /**
-     * @param string $message
-     * @param string $type
-     */
-    protected function writeLog($message, $type = 'info')
-    {
-        $styled = $type ? "<{$type}>[%s][%s] %s</{$type}> %s: %s" : '[%s][%s] %s %s: %s';
-
-        app()->make(ConsoleOutput::class)->writeln(sprintf(
-            $styled,
-            Carbon::now()->format('Y-m-d H:i:s'),
+        echo sprintf(
+            '[%s][%s] %s %s: %s',
+            Carbon::now()->format('Y-m-d H:i:s.u'),
             $this->job->getJobId(),
             str_pad('Processing:', 11),
             $this->job->resolveName(),
             $message
-        ));
+        );
     }
 }

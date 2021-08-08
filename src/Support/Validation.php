@@ -9,39 +9,33 @@
 namespace HughCube\Laravel\Knight\Support;
 
 use Illuminate\Contracts\Validation\Factory;
+use Illuminate\Validation\ValidationException;
 
 trait Validation
 {
-    /**
-     * Get a validation factory instance.
-     *
-     * @return \Illuminate\Contracts\Validation\Factory
-     */
-    protected function getValidationFactory()
-    {
-        return app(Factory::class);
-    }
-
     /**
      * Request rules.
      *
      * @return array
      */
-    protected function rules()
+    protected function rules(): array
     {
         return [];
     }
 
     /**
-     * @param array $request
+     * @param  array  $request
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @return array
+     * @throws ValidationException
      *
-     * @return array|null
      */
-    protected function validate(array $request)
+    protected function validate(array $request): array
     {
-        $validator = $this->getValidationFactory()->make($request, $this->rules());
+        /** @var Factory $factory */
+        $factory = app(Factory::class);
+
+        $validator = $factory->make($request, $this->rules());
 
         /** @var array|null $data */
         $data = $validator->validate();
@@ -51,6 +45,6 @@ trait Validation
             $data = $validator->valid();
         }
 
-        return $data;
+        return empty($data) ? [] : $data;
     }
 }

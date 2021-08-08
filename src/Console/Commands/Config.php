@@ -3,7 +3,6 @@
 namespace HughCube\Laravel\Knight\Console\Commands;
 
 use Illuminate\Console\Command;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\VarDumper\VarDumper;
 
 class Config extends Command
