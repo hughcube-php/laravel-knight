@@ -125,7 +125,7 @@ trait Builder
     /**
      * @param  mixed  $pk
      * @return mixed
-     * @throws InvalidArgumentException
+     * @throws
      */
     public function findByPk($pk)
     {
@@ -137,7 +137,7 @@ trait Builder
      * @param  array|Collection  $pks
      *
      * @return EloquentCollection
-     * @throws InvalidArgumentException
+     * @throws
      */
     public function findByPks($pks): EloquentCollection
     {
@@ -155,6 +155,15 @@ trait Builder
             }
         }
         return $collection;
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function findUniqueRow($id)
+    {
+        $rows = $this->findUniqueRows([$id]);
+        return $rows->isEmpty() ? null : $rows->first();
     }
 
     /**
