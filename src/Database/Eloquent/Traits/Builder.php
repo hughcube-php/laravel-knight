@@ -108,7 +108,6 @@ trait Builder
         $cacheKey = json_encode($cacheKey);
 
         $string = sprintf('%s:%s:%s', get_class($this->getModel()), $cacheKey, $this->getModel()->getCacheVersion());
-
         return sprintf('model:%s-%s', md5($string), crc32($string));
     }
 
@@ -256,12 +255,12 @@ trait Builder
      */
     public function delete()
     {
-        $number = parent::delete();
-        if (false !== $number && $this->getModel()->exists) {
+        $results = parent::delete();
+        if (false !== $results) {
             $this->refreshRowCache();
         }
 
-        return $number;
+        return $results;
     }
 
     /**
@@ -270,12 +269,13 @@ trait Builder
      */
     public function update(array $values): int
     {
-        $number = parent::update($values);
-        if (false < $number && $this->getModel()->exists) {
+        /** @var int|bool $results */
+        $results = parent::update($values);
+        if (false !== $results && $this->getModel()->exists) {
             $this->refreshRowCache();
         }
 
-        return $number;
+        return $results;
     }
 
     /**
@@ -284,12 +284,43 @@ trait Builder
      */
     public function insert(array $values)
     {
-        $number = parent::insert($values);
-        if (false !== $number && $this->getModel()->exists) {
+        /** @var int|bool $results */
+        $results = parent::insert($values);
+        if (false !== $results && $this->getModel()->exists) {
             $this->refreshRowCache();
         }
 
-        return $number;
+        return $results;
+    }
+
+    /**
+     * @inheritdoc
+     * @throws InvalidArgumentException
+     */
+    public function insertOrIgnore(array $values)
+    {
+        /** @var int|bool $results */
+        $results = parent::insertOrIgnore($values);
+        if (false !== $results && $this->getModel()->exists) {
+            $this->refreshRowCache();
+        }
+
+        return $results;
+    }
+
+    /**
+     * @inheritdoc
+     * @throws InvalidArgumentException
+     */
+    public function insertGetId(array $values, $sequence = null)
+    {
+        /** @var int|bool $results */
+        $results = parent::insertGetId($values, $sequence);
+        if (false !== $results && $this->getModel()->exists) {
+            $this->refreshRowCache();
+        }
+
+        return $results;
     }
 
     /**
