@@ -78,6 +78,9 @@ class ActionTest extends TestCase
         $this->assertTrue($parameter->has('uuid'));
         $this->assertSame($parameter->get('uuid'), $request->json('uuid'));
 
+        $this->assertTrue($action->has('uuid'));
+        $this->assertSame($action->get('uuid'), $request->json('uuid'));
+
         if (version_compare(PHP_VERSION, '7.1', '>=')) {
             $this->assertFalse($parameter->has('uuid2'));
             $this->assertSame(1, $parameter->count());

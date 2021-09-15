@@ -8,16 +8,21 @@
 
 namespace HughCube\Laravel\Knight\Routing;
 
+use BadMethodCallException;
 use HughCube\Laravel\Knight\Http\LaravelRequest;
 use HughCube\Laravel\Knight\Support\GetOrSet;
 use HughCube\Laravel\Knight\Support\Validation;
 use Illuminate\Container\Container as IlluminateContainer;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\Container as ContainerContract;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Application as LumenApplication;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
+/**
+ * @mixin ParameterBag
+ */
 trait Action
 {
     use GetOrSet;
@@ -52,6 +57,7 @@ trait Action
      * Get HTTP Request.
      *
      * @return Request|LumenApplication|LaravelRequest
+     * @throws BindingResolutionException
      */
     protected function getRequest(): Request
     {
@@ -69,6 +75,7 @@ trait Action
     /**
      * load parameters.
      * @throws ValidationException
+     * @throws BindingResolutionException
      */
     protected function loadParameters()
     {
@@ -94,6 +101,7 @@ trait Action
     /**
      * @return mixed
      * @throws ValidationException
+     * @throws BindingResolutionException
      */
     public function invoke()
     {
@@ -105,9 +113,20 @@ trait Action
     /**
      * @return mixed
      * @throws ValidationException
+     * @throws BindingResolutionException
      */
     public function __invoke()
     {
         return $this->invoke();
+    }
+
+    public function __call($name, $arguments)
+    {
+        $parameter = $this->getParameter();
+        if (method_exists($parameter, $name)) {
+            return $parameter->{$name}(...$arguments);
+        }
+
+        throw new BadMethodCallException("No such method exists: {$name}");
     }
 }
