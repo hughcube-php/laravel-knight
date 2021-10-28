@@ -14,7 +14,6 @@ use HughCube\Laravel\Knight\Support\GetOrSet;
 use HughCube\Laravel\Knight\Support\Validation;
 use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Contracts\Container\Container as ContainerContract;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Application as LumenApplication;
@@ -46,9 +45,9 @@ trait Action
     abstract public function action();
 
     /**
-     * @return ContainerContract
+     * @return IlluminateContainer
      */
-    protected function getContainer(): ContainerContract
+    protected function getContainer(): IlluminateContainer
     {
         return IlluminateContainer::getInstance();
     }
