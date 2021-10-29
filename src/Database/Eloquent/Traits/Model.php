@@ -169,9 +169,9 @@ trait Model
 
     /**
      * @param  mixed  $id
-     * @return static
+     * @return static|null
      */
-    public static function findById(mixed $id): static
+    public static function findById(mixed $id): ?static
     {
         return static::query()->findByPk($id);
     }
