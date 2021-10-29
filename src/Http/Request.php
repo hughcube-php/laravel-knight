@@ -7,9 +7,9 @@ use Jenssegers\Agent\Agent;
 trait Request
 {
     /**
-     * @var Agent
+     * @var ?Agent
      */
-    protected $userAgentDetect;
+    protected ?Agent $userAgentDetect;
 
     /**
      * 获取agent检测.
@@ -32,7 +32,7 @@ trait Request
      */
     public function isWeChat(): bool
     {
-        return false !== strpos($this->userAgent(), 'MicroMessenger');
+        return str_contains($this->userAgent(), 'MicroMessenger');
     }
 
     /**
@@ -42,6 +42,6 @@ trait Request
      */
     public function isWeChatMiniProgram(): bool
     {
-        return $this->isWeChat() && false !== strpos($this->userAgent(), 'miniProgram');
+        return $this->isWeChat() && str_contains($this->userAgent(), 'miniProgram');
     }
 }

@@ -8,6 +8,7 @@
 
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
+use Exception;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use Illuminate\Cache\NullStore;
 use Illuminate\Cache\Repository;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use JetBrains\PhpStorm\Pure;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -27,17 +29,15 @@ use Psr\SimpleCache\InvalidArgumentException;
  */
 trait Builder
 {
-    private static $nullCache;
-
     /**
      * @var bool
      */
-    protected $enableCache = true;
+    protected bool $enableCache = true;
 
     /**
      * @return static
      */
-    public function noCache()
+    public function noCache(): static
     {
         $this->enableCache = false;
 
@@ -67,10 +67,12 @@ trait Builder
      */
     protected function getNullCache(): CacheInterface
     {
-        if (!self::$nullCache instanceof CacheInterface) {
-            self::$nullCache = new Repository(new NullStore());
+        static $nullCache = null;
+
+        if (!$nullCache instanceof CacheInterface) {
+            $nullCache = new Repository(new NullStore());
         }
-        return self::$nullCache;
+        return $nullCache;
     }
 
     /**
@@ -86,7 +88,8 @@ trait Builder
      *
      * @return bool
      */
-    protected function isCachePlaceholder($value): bool
+    #[Pure]
+    protected function isCachePlaceholder(mixed $value): bool
     {
         return $value === $this->getCachePlaceholder();
     }
@@ -126,19 +129,19 @@ trait Builder
      * @return mixed
      * @throws
      */
-    public function findByPk($pk)
+    public function findByPk(mixed $pk): mixed
     {
-        $collection = $this->findByPks([$pk]);
+        $collection = $this->findByPks((empty($pk) ? [] : [$pk]));
         return $collection->get($pk);
     }
 
     /**
-     * @param  array|Collection  $pks
+     * @param  array  $pks
      *
      * @return EloquentCollection
      * @throws
      */
-    public function findByPks($pks): EloquentCollection
+    public function findByPks(array $pks): EloquentCollection
     {
         $collection = Collection::make($pks)->map(function ($value) {
             return [$this->getModel()->getKeyName() => $value];
@@ -159,7 +162,7 @@ trait Builder
     /**
      * @throws InvalidArgumentException
      */
-    public function findUniqueRow($id)
+    public function findUniqueRow(mixed $id)
     {
         $rows = $this->findUniqueRows([$id]);
         return $rows->isEmpty() ? null : $rows->first();
@@ -172,6 +175,7 @@ trait Builder
      *
      * @return EloquentCollection
      * @throws InvalidArgumentException
+     * @throws Exception
      */
     public function findUniqueRows(array $ids): EloquentCollection
     {
@@ -192,9 +196,10 @@ trait Builder
         $missIndexes = Collection::make([]);
         $fromCacheRows = $this->getCache()->getMultiple($cacheKeys->toArray());
         foreach ($cacheKeys as $cacheKeyIndex => $cacheKey) {
-            if (isset($fromCacheRows[$cacheKey]) && $fromCacheRows[$cacheKey] instanceof Model) {
-                $rows->push($fromCacheRows[$cacheKey]->setIsFromCache());
-            } elseif (isset($fromCacheRows[$cacheKey]) && $fromCacheRows[$cacheKey] instanceof IlluminateModel) {
+            if (isset($fromCacheRows[$cacheKey]) && $fromCacheRows[$cacheKey] instanceof IlluminateModel) {
+                if (method_exists($fromCacheRows[$cacheKey], 'setIsFromCache')) {
+                    $fromCacheRows[$cacheKey]->setIsFromCache();
+                }
                 $rows->push($fromCacheRows[$cacheKey]);
             } elseif (!isset($fromCacheRows[$cacheKey]) || !$this->isCachePlaceholder($fromCacheRows[$cacheKey])) {
                 $missIndexes->push($cacheKeyIndex);
@@ -267,7 +272,7 @@ trait Builder
      * @inheritdoc
      * @throws InvalidArgumentException
      */
-    public function update(array $values): int
+    public function update(array $values)
     {
         /** @var int|bool $results */
         $results = parent::update($values);

@@ -92,13 +92,13 @@ class TestCase extends OrchestraTestCase
     }
 
     /**
-     * @param  string|object  $object
+     * @param  object  $object
      * @param  string  $method
      * @param  array  $args
      * @return mixed
      * @throws ReflectionException
      */
-    protected static function callMethod($object, string $method, array $args = [])
+    protected static function callMethod(object $object, string $method, array $args = []): mixed
     {
         $class = new ReflectionClass($object);
 
@@ -111,12 +111,12 @@ class TestCase extends OrchestraTestCase
 
 
     /**
-     * @param  string|object  $object
+     * @param  object  $object  $object
      * @param  string  $name
      * @return mixed
      * @throws ReflectionException
      */
-    protected static function getProperty($object, string $name)
+    protected static function getProperty(object $object, string $name): mixed
     {
         $class = new ReflectionClass($object);
 
@@ -127,12 +127,12 @@ class TestCase extends OrchestraTestCase
     }
 
     /**
-     * @param  string|object  $object
+     * @param  object  $object
      * @param  string  $name
-     * @param $value
+     * @param  mixed  $value
      * @throws ReflectionException
      */
-    protected static function setProperty($object, string $name, $value)
+    protected static function setProperty(object $object, string $name, mixed $value)
     {
         $class = new ReflectionClass($object);
 

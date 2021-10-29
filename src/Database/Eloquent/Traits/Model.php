@@ -5,35 +5,31 @@ namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 use Carbon\Carbon;
 use Exception;
 use HughCube\Laravel\Knight\Database\Eloquent\Builder;
-use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 use JetBrains\PhpStorm\Pure;
+use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Trait QueryCache.
  *
  * @method static Builder query()
+ * @method static Builder newQuery()
  */
 trait Model
 {
     /**
-     * @var string|null
-     */
-    protected $cacheVersion;
-
-    /**
      * @var bool
      */
-    protected $isFromCache = false;
+    protected bool $isFromCache = false;
 
     /**
      * @param  mixed|null  $date
      *
      * @return Carbon|null
      */
-    public function toCarbon(mixed $date = null)
+    public function toCarbon(mixed $date = null): ?Carbon
     {
         return empty($date) ? null : Carbon::parse($date);
     }
@@ -43,7 +39,7 @@ trait Model
      *
      * @return Carbon|null
      */
-    public function getCreatedAtAttribute(mixed $date)
+    public function getCreatedAtAttribute(mixed $date): ?Carbon
     {
         return $this->toCarbon($date);
     }
@@ -53,7 +49,7 @@ trait Model
      *
      * @return Carbon|null
      */
-    public function getUpdatedAtAttribute(mixed $date)
+    public function getUpdatedAtAttribute(mixed $date): ?Carbon
     {
         return $this->toCarbon($date);
     }
@@ -63,7 +59,7 @@ trait Model
      *
      * @return Carbon|null
      */
-    public function getDeleteAtAttribute(mixed $date)
+    public function getDeleteAtAttribute(mixed $date): ?Carbon
     {
         return $this->toCarbon($date);
     }
@@ -104,6 +100,7 @@ trait Model
      * @param  \Illuminate\Database\Query\Builder  $query
      * @return Builder
      */
+    #[Pure]
     public function newEloquentBuilder($query): Builder
     {
         return new Builder($query);
@@ -122,9 +119,9 @@ trait Model
     /**
      * 获取缓存.
      *
-     * @return Repository|null
+     * @return CacheInterface|null
      */
-    public function getCache()
+    public function getCache(): ?CacheInterface
     {
         if (!defined('static::CACHE')) {
             return null;
@@ -144,7 +141,7 @@ trait Model
     /**
      * @return $this
      */
-    public function setIsFromCache($is = true)
+    public function setIsFromCache($is = true): static
     {
         $this->isFromCache = $is;
         return $this;
@@ -165,28 +162,25 @@ trait Model
     /**
      * @return string|null
      */
-    public function getCacheVersion()
+    public function getCacheVersion(): ?string
     {
-        return $this->cacheVersion;
+        return '';
     }
 
     /**
      * @param  mixed  $id
      * @return static
-     * @throws InvalidArgumentException
      */
-    public static function findById($id)
+    public static function findById(mixed $id): static
     {
         return static::query()->findByPk($id);
     }
 
     /**
-     * @param  array|Collection  $ids
-     *
+     * @param  array  $ids
      * @return Collection
-     * @throws InvalidArgumentException
      */
-    public static function findByIds($ids): Collection
+    public static function findByIds(array $ids): Collection
     {
         return static::query()->findByPks($ids);
     }
@@ -199,5 +193,13 @@ trait Model
         return [
             [$this->getKeyName() => $this->getKey()],
         ];
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function refreshRowCache(): bool
+    {
+        return $this->newQuery()->refreshRowCache();
     }
 }

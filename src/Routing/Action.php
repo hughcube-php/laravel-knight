@@ -9,7 +9,6 @@
 namespace HughCube\Laravel\Knight\Routing;
 
 use BadMethodCallException;
-use HughCube\Laravel\Knight\Http\LaravelRequest;
 use HughCube\Laravel\Knight\Support\GetOrSet;
 use HughCube\Laravel\Knight\Support\Validation;
 use Illuminate\Container\Container as IlluminateContainer;
@@ -30,19 +29,19 @@ trait Action
     /**
      * @var ParameterBag|null
      */
-    protected $parameterBag = null;
+    protected ?ParameterBag $parameterBag = null;
 
     /**
      * @var Request|null
      */
-    protected $request = null;
+    protected ?Request $request = null;
 
     /**
      * action.
      *
      * @return mixed
      */
-    abstract public function action();
+    abstract public function action(): mixed;
 
     /**
      * @return IlluminateContainer
@@ -55,7 +54,7 @@ trait Action
     /**
      * Get HTTP Request.
      *
-     * @return Request|LumenApplication|LaravelRequest
+     * @return Request
      * @throws BindingResolutionException
      */
     protected function getRequest(): Request
@@ -102,7 +101,7 @@ trait Action
      * @throws ValidationException
      * @throws BindingResolutionException
      */
-    public function invoke()
+    public function invoke(): mixed
     {
         $this->loadParameters();
 
@@ -114,7 +113,7 @@ trait Action
      * @throws ValidationException
      * @throws BindingResolutionException
      */
-    public function __invoke()
+    public function __invoke(): mixed
     {
         return $this->invoke();
     }

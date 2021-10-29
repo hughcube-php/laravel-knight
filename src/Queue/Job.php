@@ -19,25 +19,49 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
-class Job implements ShouldQueue
+abstract class Job implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     use GetOrSet, Validation;
 
     /**
-     * @var array
+     * @var null|array
      */
-    private $data;
+    private null|array $data;
+
+    protected ?array $validData;
 
     /**
      * Create a new job instance.
      *
      * @return void
-     * @throws ValidationException
      */
-    public function __construct(array $data)
+    public function __construct(?array $data = null)
     {
-        $this->data = $this->validate($data);
+        $this->data = $data;
+    }
+
+    public function handle(): void
+    {
+        try {
+            $this->validData = $this->validate($this->data);
+        } catch (ValidationException $exception) {
+            $errors = json_encode($exception->errors(), JSON_UNESCAPED_UNICODE);
+            $this->info(sprintf('data validation error, errors: %s, data: %s', $errors, $this->getSerializeData()));
+            return;
+        }
+
+        $this->action();
+    }
+
+    abstract protected function action(): void;
+
+    /**
+     * @return string
+     */
+    protected function getSerializeData(): string
+    {
+        return base64_encode(serialize($this->data));
     }
 
     /**
@@ -46,9 +70,18 @@ class Job implements ShouldQueue
      *
      * @return mixed
      */
-    protected function getValue(string $key, $default = null)
+    protected function get(string $key, $default = null): mixed
     {
-        return Arr::get($this->data, $key, $default);
+        return Arr::get($this->validData, $key, $default);
+    }
+
+    /**
+     * @param  mixed  $key
+     * @return bool
+     */
+    protected function has(mixed $key): bool
+    {
+        return Arr::has($this->validData, $key);
     }
 
     /**
@@ -57,7 +90,7 @@ class Job implements ShouldQueue
      *
      * @return static
      */
-    protected function setValue(string $key, $value): Job
+    protected function set(string $key, mixed $value): static
     {
         Arr::set($this->data, $key, $value);
 
@@ -67,7 +100,7 @@ class Job implements ShouldQueue
     /**
      * @param  string  $message
      */
-    protected function echo(string $message)
+    protected function info(string $message)
     {
         echo sprintf(
             '[%s][%s] %s %s: %s',

@@ -9,7 +9,7 @@
         }
     ],
     "require": {
-        "php": "7.*|8.*",
+        "php": "8.*",
         "ext-json": "*",
         "hughcube/laravel-validation": "^1.0",
         "jenssegers/agent": "^2.6",

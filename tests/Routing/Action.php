@@ -15,9 +15,9 @@ class Action
     use \HughCube\Laravel\Knight\Routing\Action;
 
     /**
-     * @return array
+     * @return mixed
      */
-    public function action()
+    public function action(): mixed
     {
         return $this->getParameter()->all();
     }

@@ -9,16 +9,24 @@
 namespace HughCube\Laravel\Knight\Tests\Queue;
 
 use Closure;
+use Exception;
 use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 class JobTest extends TestCase
 {
+    /**
+     * @throws Exception
+     */
     public function testWriteLog()
     {
         /** @var Job $job */
-        $job = new Job([]);
+        $job = new class extends Job {
+            protected function action(): void
+            {
+            }
+        };
 
         $getOutput = Closure::bind(function () {
             /** @var Job $this */
