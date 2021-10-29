@@ -25,18 +25,21 @@ abstract class Job implements ShouldQueue
     use GetOrSet, Validation;
 
     /**
-     * @var null|array
+     * @var array
      */
-    private null|array $data;
+    protected array $data = [];
 
-    protected ?array $validData;
+    /**
+     * @var array
+     */
+    protected array $validData = [];
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(?array $data = null)
+    public function __construct(array $data = [])
     {
         $this->data = $data;
     }
@@ -44,7 +47,7 @@ abstract class Job implements ShouldQueue
     public function handle(): void
     {
         try {
-            $this->validData = $this->validate($this->data);
+            $this->validData = $this->validate($this->getData());
         } catch (ValidationException $exception) {
             $errors = json_encode($exception->errors(), JSON_UNESCAPED_UNICODE);
             $this->info(sprintf('data validation error, errors: %s, data: %s', $errors, $this->getSerializeData()));
@@ -57,11 +60,27 @@ abstract class Job implements ShouldQueue
     abstract protected function action(): void;
 
     /**
+     * @return array
+     */
+    protected function getData(): array
+    {
+        return $this->data;
+    }
+
+    /**
      * @return string
      */
     protected function getSerializeData(): string
     {
         return base64_encode(serialize($this->data));
+    }
+
+    /**
+     * @return array
+     */
+    protected function getValidData(): array
+    {
+        return $this->validData;
     }
 
     /**
@@ -92,7 +111,7 @@ abstract class Job implements ShouldQueue
      */
     protected function set(string $key, mixed $value): static
     {
-        Arr::set($this->data, $key, $value);
+        Arr::set($this->validData, $key, $value);
 
         return $this;
     }

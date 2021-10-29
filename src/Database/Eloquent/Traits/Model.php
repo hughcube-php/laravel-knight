@@ -22,7 +22,7 @@ trait Model
     /**
      * @var bool
      */
-    protected bool $isFromCache = false;
+    private bool $isFromCache = false;
 
     /**
      * @param  mixed|null  $date
