@@ -76,6 +76,15 @@ abstract class Job implements ShouldQueue
     }
 
     /**
+     * @param  int  $flags
+     * @return string
+     */
+    protected function getJsonData(int $flags = JSON_UNESCAPED_UNICODE): string
+    {
+        return json_encode($this->data, $flags);
+    }
+
+    /**
      * @return array
      */
     protected function getValidData(): array
