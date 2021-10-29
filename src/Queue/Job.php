@@ -93,6 +93,23 @@ abstract class Job implements ShouldQueue
     }
 
     /**
+     * @return string
+     */
+    protected function getSerializeValidData(): string
+    {
+        return base64_encode(serialize($this->validData));
+    }
+
+    /**
+     * @param  int  $flags
+     * @return string
+     */
+    protected function getJsonValidData(int $flags = JSON_UNESCAPED_UNICODE): string
+    {
+        return json_encode($this->validData, $flags);
+    }
+
+    /**
      * @param  string  $key
      * @param  null  $default
      *
