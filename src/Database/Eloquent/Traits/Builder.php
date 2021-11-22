@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use JetBrains\PhpStorm\Pure;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -76,11 +75,23 @@ trait Builder
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    protected function getCachePlaceholder(): string
+    protected function getCachePlaceholder(): ?string
     {
-        return '@@fad7563e68d@@';
+        if (method_exists($this->getModel(), 'getCachePlaceholder')) {
+            return $this->getModel()->getCachePlaceholder();
+        }
+
+        return null;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function hasCachePlaceholder(): bool
+    {
+        return null !== $this->getCachePlaceholder();
     }
 
     /**
@@ -88,10 +99,9 @@ trait Builder
      *
      * @return bool
      */
-    #[Pure]
     protected function isCachePlaceholder(mixed $value): bool
     {
-        return $value === $this->getCachePlaceholder();
+        return $value === $this->getCachePlaceholder() && $this->hasCachePlaceholder();
     }
 
     /**
@@ -112,16 +122,6 @@ trait Builder
 
         $string = sprintf('%s:%s:%s', get_class($this->getModel()), $cacheKey, $this->getModel()->getCacheVersion());
         return sprintf('model:%s-%s', md5($string), crc32($string));
-    }
-
-    /**
-     * @return string
-     */
-    protected function makePkCacheKey(): string
-    {
-        return $this->makeColumnsCacheKey([
-            $this->getModel()->getKeyName() => $this->getModel()->getKey(),
-        ]);
     }
 
     /**
@@ -238,7 +238,7 @@ trait Builder
         foreach ($cacheKeys->only($missIndexes->toArray()) as $cacheKey) {
             if ($fromDbRows->has($cacheKey)) {
                 $cacheItems[$cacheKey] = $fromDbRows->get($cacheKey);
-            } else {
+            } elseif ($this->hasCachePlaceholder()) {
                 $cacheItems[$cacheKey] = $this->getCachePlaceholder();
             }
         }

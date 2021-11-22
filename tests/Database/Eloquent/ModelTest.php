@@ -12,6 +12,7 @@ use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class ModelTest extends TestCase
 {
@@ -27,9 +28,14 @@ class ModelTest extends TestCase
         });
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function testQuery()
     {
         User::query()->truncate();
+
+        $this->assertNull(User::findById(1));
 
         $this->assertSame(0, User::query()->count());
         for ($i = 1; $i <= 1000; $i++) {
@@ -38,6 +44,11 @@ class ModelTest extends TestCase
             $user->save();
         }
         $this->assertSame(1000, User::query()->count());
+
+        $this->assertNull(User::findById(1));
+        /** @var User $user */
+        $user = User::query()->noCache()->findByPk(1);
+        $user->refreshRowCache();
 
         $cacheIds = Collection::make();
 

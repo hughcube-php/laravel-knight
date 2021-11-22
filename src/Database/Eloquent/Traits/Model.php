@@ -202,4 +202,12 @@ trait Model
     {
         return $this->newQuery()->refreshRowCache();
     }
+
+    /**
+     * @return string|null
+     */
+    public function getCachePlaceholder(): ?string
+    {
+        return '@@fad7563e68d@@';
+    }
 }
