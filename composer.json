@@ -14,14 +14,17 @@
         "hughcube/laravel-validation": "^1.0",
         "jenssegers/agent": "^2.6",
         "hughcube/static-instance": "^1.0",
-        "hughcube/enum": "^1.1"
+        "hughcube/enum": "^1.1",
+        "guzzlehttp/guzzle": "^7.4"
     },
     "require-dev": {
         "laravel/framework": "*",
         "laravel/lumen-framework": "*",
         "squizlabs/php_codesniffer": "*",
         "phpstan/phpstan": "*",
-        "orchestra/testbench": "*"
+        "orchestra/testbench": "*",
+        "swoole/ide-helper": "~4.7.1",
+        "laravel/octane": "^1.0"
     },
     "autoload": {
         "psr-4": {
