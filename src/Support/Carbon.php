@@ -38,4 +38,15 @@ class Carbon extends \Illuminate\Support\Carbon
 
         return $value;
     }
+
+    public static function isPastDate($date, string $format = 'Y-m-d H:i:s'): bool
+    {
+        $date = static::fromDate($date, $format);
+        return $date instanceof static && $date->isPast();
+    }
+
+    public static function isPastTimestamp($timestamp): bool
+    {
+        return !empty($timestamp) && $timestamp <= time();
+    }
 }
