@@ -54,7 +54,7 @@ class ScriptsAction
 
         $scripts = [];
         foreach (($status['scripts'] ?? []) as $script) {
-            $scripts[] = ltrim(Str::afterLast($script['full_path'], base_path()), '/');
+            $scripts[] = ltrim(Str::replaceFirst(base_path(), '', $script['full_path']), '/');
         }
         return $scripts;
     }
