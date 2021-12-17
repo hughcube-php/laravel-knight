@@ -8,26 +8,24 @@
 
 namespace HughCube\Laravel\Knight\Support;
 
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Support\Str;
 use Throwable;
 
 trait MultipleHandler
 {
-    protected function skipHandlerException(): bool
-    {
-        return false;
-    }
-
     protected function isStopHandlerResults($results): bool
     {
-        return false === $results;
+        return null !== $results;
     }
 
     /**
+     * @param  bool  $skipHandlerException
+     * @param  bool  $logSkipHandlerException
      * @return mixed
      * @throws Throwable
      */
-    protected function triggerHandlers(): mixed
+    protected function triggerHandlers(bool $skipHandlerException = false, bool $logSkipHandlerException = true): mixed
     {
         $results = null;
 
@@ -38,11 +36,12 @@ trait MultipleHandler
             } catch (Throwable $exception) {
             }
 
-            if ($exception instanceof Throwable && $this->skipHandlerException()) {
+            if ($exception instanceof Throwable && $skipHandlerException) {
+                $logSkipHandlerException and app(ExceptionHandler::class)->report($exception);
                 continue;
             }
 
-            if ($exception instanceof Throwable && !$this->skipHandlerException()) {
+            if ($exception instanceof Throwable && !$skipHandlerException) {
                 throw $exception;
             }
 
