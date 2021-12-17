@@ -12,7 +12,10 @@ use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Laravel\Octane\Contracts\DispatchesTasks;
+use Laravel\SerializableClosure\Exceptions\PhpVersionNotSupportedException;
+use Laravel\SerializableClosure\SerializableClosure;
 use Psr\SimpleCache\InvalidArgumentException;
+use Swoole\Http\Server;
 
 /**
  * @method static DispatchesTasks tasks()
@@ -39,23 +42,28 @@ class Octane extends \Laravel\Octane\Facades\Octane
     }
 
     /**
-     * @param  int  $count
-     * @return void
+     * @return int
      * @throws InvalidArgumentException
+     * @throws PhpVersionNotSupportedException
      */
-    public static function waitTasks(int $count = 10)
+    public static function waitSwooleTasks(): int
     {
+        $workerCount = 0;
+        if (class_exists(Server::class) && app()->bound(Server::class)) {
+            $workerCount = app(Server::class)->setting['task_worker_num'] ?? 0;
+        }
+
         /** 生成标识 */
         $spies = [];
-        for ($i = 1; $i <= $count; $i++) {
+        for ($i = 1; $i <= $workerCount; $i++) {
             $spies[] = sprintf('%s-%s', Str::random(32), $i);
         }
 
         /** 异步写入探针 */
-        foreach ($spies as $spy) {
-            static::task(function () use ($spy) {
-                static::cache()->set($spy, time(), 300);
-            });
+        foreach ($spies as $index => $spy) {
+            app(Server::class)->task(new SerializableClosure(function () use ($spy) {
+                Cache::store('octane')->put($spy, time(), 600);
+            }), $index);
         }
 
         /** 等待异步任务完成 */
@@ -69,5 +77,7 @@ class Octane extends \Laravel\Octane\Facades\Octane
             }
             usleep(200);
         }
+
+        return $workerCount;
     }
 }

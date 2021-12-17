@@ -13,9 +13,8 @@ use HughCube\Laravel\Knight\Routing\Action;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Laravel\SerializableClosure\Exceptions\PhpVersionNotSupportedException;
 use Psr\SimpleCache\InvalidArgumentException;
-use Swoole\Http\Server;
-use Throwable;
 
 class WaitTaskCompleteAction
 {
@@ -24,13 +23,13 @@ class WaitTaskCompleteAction
     /**
      * @return JsonResponse
      * @throws BindingResolutionException
+     * @throws InvalidArgumentException
+     * @throws PhpVersionNotSupportedException
      */
     public function action(): JsonResponse
     {
-        $workerCount = $this->getWorkerCount();
-
         $start = microtime(true);
-        Octane::waitTasks($workerCount * 3);
+        $workerCount = Octane::waitSwooleTasks();
         $end = microtime(true);
 
         $duration = $end - $start;
@@ -42,21 +41,5 @@ class WaitTaskCompleteAction
         return $this->asJson([
             'duration' => ($end - $start)
         ]);
-    }
-
-    /**
-     * @return int
-     */
-    protected function getWorkerCount(): int
-    {
-        if (!class_exists(Server::class)) {
-            return 0;
-        }
-
-        if (!app()->bound(Server::class)) {
-            return 0;
-        }
-
-        return app(Server::class)->setting['task_worker_num'] ?? 0;
     }
 }

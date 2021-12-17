@@ -38,7 +38,10 @@ class ScriptsAction
 
         $this->getCache()->set($this->getCacheKey(), $scripts, Carbon::now()->addYears());
 
-        return $this->asJson(['scripts' => $scripts]);
+        return $this->asJson([
+            'count' => count($scripts),
+            'scripts' => $scripts
+        ]);
     }
 
     protected function getScripts(): array|string
@@ -51,9 +54,8 @@ class ScriptsAction
 
         $scripts = [];
         foreach (($status['scripts'] ?? []) as $script) {
-            $scripts = ltrim(Str::beforeLast($script['full_path'], base_path()), '/');
+            $scripts[] = ltrim(Str::afterLast($script['full_path'], base_path()), '/');
         }
-
         return $scripts;
     }
 

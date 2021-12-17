@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\PhpProcess;
 use Symfony\Component\Process\Process;
+use Throwable;
 
 class CompileFilesCommand extends Command
 {
@@ -41,6 +42,7 @@ class CompileFilesCommand extends Command
 
     /**
      * @param  Schedule  $schedule
+     * @return void
      * @throws Exception
      */
     public function handle(Schedule $schedule)
@@ -159,25 +161,24 @@ class CompileFilesCommand extends Command
      */
     protected function getProdFiles(): array
     {
-        $url = $this->option('with_prod_files');
-        if (!Url::isUrlString($url)) {
+        if (empty($url = $this->option('with_prod_files'))) {
             return [];
         }
+
+        $url = Url::isUrlString($url) ? $url : route($url);
 
         try {
             $response = $this->getHttpClient()->post($url, [
                 RequestOptions::TIMEOUT => 10.0, RequestOptions::HTTP_ERRORS => false
             ]);
-
             $states = json_decode($response->getBody()->getContents(), true);
-            $scripts = $states['data']['scripts'] ?? [];
 
-            $files = [];
-            foreach ($scripts as $file) {
-                $files[] = app_path($file);
+            $scripts = [];
+            foreach (($states['data']['scripts'] ?? []) as $file) {
+                $scripts[] = base_path($file);
             }
-            return $files;
-        } catch (\Throwable $exception) {
+            return $scripts;
+        } catch (Throwable $exception) {
         }
 
         return [];

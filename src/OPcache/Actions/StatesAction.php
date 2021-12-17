@@ -42,7 +42,7 @@ class StatesAction
             return $this->asJson(opcache_get_status());
         }
 
-        return response(require dirname(__DIR__).'Views/opcache.php');
+        return response(require dirname(__DIR__).'/Views/opcache.php');
     }
 
     protected function isAsJson(): bool

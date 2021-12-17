@@ -1,6 +1,6 @@
 <?php
 // phpcs:ignoreFile
-defined('THOUSAND_SEPARATOR') or define('THOUSAND_SEPARATOR', true);
+defined('THOUSAND_SEPARATOR') or define('THOUSAND_SEPARATOR',true);
 
 if (!extension_loaded('Zend OPcache')) {
     echo '<div style="background-color: #F2DEDE; color: #B94A48; padding: 1em;">You do not have the Zend OPcache extension loaded, sample data is being shown instead.</div>';
@@ -47,9 +47,9 @@ class OpCacheDataModel
                     }
                     if ($k === 'current_wasted_percentage' || $k === 'opcache_hit_rate') {
                         $v = number_format(
-                            $v,
-                            2
-                        ) . '%';
+                                $v,
+                                2
+                            ) . '%';
                     }
                     if ($k === 'blacklist_miss_ratio') {
                         $v = number_format($v, 2) . '%';
@@ -110,9 +110,7 @@ class OpCacheDataModel
 
         $basename = '';
         while (true) {
-            if (count($this->_d3Scripts) !=1) {
-                break;
-            }
+            if (count($this->_d3Scripts) !=1) break;
             $basename .= DIRECTORY_SEPARATOR . key($this->_d3Scripts);
             $this->_d3Scripts = reset($this->_d3Scripts);
         }
@@ -271,13 +269,11 @@ class OpCacheDataModel
     // Borrowed from Laravel
     private function _arrayPset(&$array, $key, $value)
     {
-        if (is_null($key)) {
-            return $array = $value;
-        }
+        if (is_null($key)) return $array = $value;
         $keys = explode(DIRECTORY_SEPARATOR, ltrim($key, DIRECTORY_SEPARATOR));
         while (count($keys) > 1) {
             $key = array_shift($keys);
-            if (! isset($array[$key]) || ! is_array($array[$key])) {
+            if ( ! isset($array[$key]) || ! is_array($array[$key])) {
                 $array[$key] = array();
             }
             $array =& $array[$key];
@@ -285,6 +281,7 @@ class OpCacheDataModel
         $array[array_shift($keys)] = $value;
         return $array;
     }
+
 }
 
 $dataModel = new OpCacheDataModel();
