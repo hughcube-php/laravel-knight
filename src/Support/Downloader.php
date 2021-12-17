@@ -24,6 +24,22 @@ class Downloader implements StaticInstanceInterface
     use StaticInstanceTrait;
 
     /**
+     * @param  string  $url
+     * @return string
+     */
+    public static function path(string $url): string
+    {
+        $extension = File::extension($url);
+        return storage_path(sprintf(
+            "download/%s/%s/%s%s",
+            substr(md5($url), 0, 2),
+            substr(md5(microtime()), 0, 2),
+            md5($url),
+            ($extension ? ".{$extension}" : "")
+        ));
+    }
+
+    /**
      * @param  string  $method
      * @param  string  $url
      * @param  string  $file
