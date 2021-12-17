@@ -126,10 +126,10 @@ trait Builder
 
     /**
      * @param  mixed  $pk
-     * @return mixed
-     * @throws
+     * @return static|null
+     * @throws InvalidArgumentException
      */
-    public function findByPk(mixed $pk): mixed
+    public function findByPk(mixed $pk): static|null
     {
         $collection = $this->findByPks((empty($pk) ? [] : [$pk]));
         return $collection->get($pk);
@@ -137,9 +137,8 @@ trait Builder
 
     /**
      * @param  array  $pks
-     *
      * @return EloquentCollection
-     * @throws
+     * @throws InvalidArgumentException
      */
     public function findByPks(array $pks): EloquentCollection
     {

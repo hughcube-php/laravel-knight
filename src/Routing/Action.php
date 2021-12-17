@@ -13,9 +13,11 @@ use HughCube\Laravel\Knight\Support\GetOrSet;
 use HughCube\Laravel\Knight\Support\Validation;
 use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Application as LumenApplication;
+use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
@@ -42,6 +44,22 @@ trait Action
      * @return mixed
      */
     abstract public function action(): mixed;
+
+    /**
+     * @param  array  $data
+     * @param  int  $code
+     * @return JsonResponse
+     */
+    protected function asJson(array $data = [], int $code = 200): JsonResponse
+    {
+        return response()->json(
+            [
+                'code' => $code,
+                'message' => 'ok',
+                'data' => $data
+            ]
+        );
+    }
 
     /**
      * @return IlluminateContainer
@@ -87,7 +105,8 @@ trait Action
 
     /**
      * @return ParameterBag
-     * @throws
+     * @throws BindingResolutionException
+     * @throws ValidationException
      */
     protected function getParameter(): ParameterBag
     {
@@ -100,6 +119,7 @@ trait Action
      * @return mixed
      * @throws ValidationException
      * @throws BindingResolutionException
+     * @throws InvalidArgumentException
      */
     public function invoke(): mixed
     {
@@ -110,8 +130,9 @@ trait Action
 
     /**
      * @return mixed
-     * @throws ValidationException
      * @throws BindingResolutionException
+     * @throws InvalidArgumentException
+     * @throws ValidationException
      */
     public function __invoke(): mixed
     {

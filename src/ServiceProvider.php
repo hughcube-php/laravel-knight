@@ -13,6 +13,7 @@ use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
 use HughCube\Laravel\Knight\Console\Commands\RTest;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
+use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand as OPcacheCompileFilesCommand;
 
 class ServiceProvider extends IlluminateServiceProvider
 {
@@ -37,7 +38,8 @@ class ServiceProvider extends IlluminateServiceProvider
             Config::class,
             Environment::class,
             PhpIniFile::class,
-            RTest::class
+            RTest::class,
+            OPcacheCompileFilesCommand::class
         ]);
     }
 }

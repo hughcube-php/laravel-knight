@@ -39,9 +39,11 @@ class Octane extends \Laravel\Octane\Facades\Octane
     }
 
     /**
+     * @param  int  $count
+     * @return void
      * @throws InvalidArgumentException
      */
-    public static function waitTasks($count = 10)
+    public static function waitTasks(int $count = 10)
     {
         /** 生成标识 */
         $spies = [];

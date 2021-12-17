@@ -173,6 +173,7 @@ trait Model
      */
     public static function findById(mixed $id): ?static
     {
+        /** @phpstan-ignore-next-line */
         return static::query()->findByPk($id);
     }
 
