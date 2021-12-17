@@ -126,10 +126,10 @@ trait Builder
 
     /**
      * @param  mixed  $pk
-     * @return static|null
+     * @return mixed
      * @throws InvalidArgumentException
      */
-    public function findByPk(mixed $pk): static|null
+    public function findByPk(mixed $pk): mixed
     {
         $collection = $this->findByPks((empty($pk) ? [] : [$pk]));
         return $collection->get($pk);
