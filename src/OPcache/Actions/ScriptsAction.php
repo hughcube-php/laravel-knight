@@ -32,16 +32,31 @@ class ScriptsAction
     {
         $this->loadedOPcacheExtension();
 
-        $scripts = array_values(array_unique(array_filter(
-            array_merge($this->getScripts(), $this->getHistoryScripts())
-        )));
+        $scripts = array_merge(
+            ($historyScripts = $this->timeoutScriptsFilter($this->getHistoryScripts())),
+            ($currentScripts = $this->getScripts())
+        );
+        $scripts = $this->timeoutScriptsFilter($scripts);
 
         $this->getCache()->set($this->getCacheKey(), $scripts, Carbon::now()->addYears());
 
         return $this->asJson([
             'count' => count($scripts),
-            'scripts' => $scripts
+            'history_count' => count($historyScripts),
+            'current' => count($currentScripts),
+            'scripts' => array_keys($scripts),
         ]);
+    }
+
+    protected function timeoutScriptsFilter(array $scripts): array
+    {
+        foreach ($scripts as $file => $time) {
+            if ((30 * 24 * 3600) < (time() - $time)) {
+                unset($scripts[$file]);
+            }
+        }
+
+        return $scripts;
     }
 
     protected function getScripts(): array|string
@@ -54,8 +69,10 @@ class ScriptsAction
 
         $scripts = [];
         foreach (($status['scripts'] ?? []) as $script) {
-            $scripts[] = ltrim(Str::replaceFirst(base_path(), '', $script['full_path']), '/');
+            $file = ltrim(Str::replaceFirst(base_path(), '', $script['full_path']), '/');
+            $scripts[$file] = time();
         }
+
         return $scripts;
     }
 
@@ -66,20 +83,12 @@ class ScriptsAction
     protected function getHistoryScripts(): array
     {
         $histories = $this->getCache()->get($this->getCacheKey());
-        $scripts = is_array($histories) ? $histories : [];
-
-        foreach ($scripts as $index => $file) {
-            if (!is_file(base_path($file))) {
-                unset($scripts[$index]);
-            }
-        }
-
-        return array_values($scripts);
+        return is_array($histories) ? $histories : [];
     }
 
     protected function getCacheKey(): string
     {
-        $string = serialize([__METHOD__]);
+        $string = serialize(['v1.0.0', __METHOD__]);
         return strtr(sprintf('%s%s', md5($string), crc32($string)), 0, 30);
     }
 
