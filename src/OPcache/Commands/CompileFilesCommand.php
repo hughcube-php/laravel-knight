@@ -72,9 +72,9 @@ class CompileFilesCommand extends Command
 
         File::delete($file);
 
-        $this->info('');
+        $this->info(PHP_EOL.PHP_EOL.PHP_EOL);
         $this->info(sprintf('opcache compile file count: %s', count($scripts)));
-        $this->info('');
+        $this->info(PHP_EOL.PHP_EOL.PHP_EOL);
     }
 
     protected function compileProcessCode($file): string
