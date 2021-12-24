@@ -96,6 +96,6 @@ class HttpsGuard
 
     protected function isHostRequest(Request $request): bool
     {
-        return false !== filter_var($request->getHost(), FILTER_VALIDATE_IP);
+        return false === filter_var($request->getHost(), FILTER_VALIDATE_IP);
     }
 }
