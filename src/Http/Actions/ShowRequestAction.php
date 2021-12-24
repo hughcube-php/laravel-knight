@@ -26,6 +26,7 @@ class ShowRequestAction
     {
         return $this->asJson([
             'uri' => $this->getRequest()->getUri(),
+            'https' => $this->getRequest()->isSecure(),
             'method' => $this->getRequest()->getMethod(),
             'host' => $this->getRequest()->getHost(),
             'headers' => $this->getRequest()->headers->all(),
