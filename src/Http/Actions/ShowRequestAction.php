@@ -11,10 +11,9 @@ namespace HughCube\Laravel\Knight\Http\Actions;
 use Exception;
 use HughCube\Laravel\Knight\Routing\Action;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
-class LogRequestAction
+class ShowRequestAction
 {
     use Action;
 
@@ -25,13 +24,10 @@ class LogRequestAction
      */
     public function action(): string
     {
-        Log::info(sprintf(
-            'request: uri:%s, headers:%s, body:%s',
-            $this->getRequest()->getUri(),
-            json_encode($this->getRequest()->headers->all()),
-            serialize($this->getRequest()->getContent())
-        ));
-
-        return 'success';
+        return $this->asJson([
+            'uri' => $this->getRequest()->getUri(),
+            'headers' => $this->getRequest()->headers->all(),
+            'content' => serialize($this->getRequest()->getContent()),
+        ]);
     }
 }
