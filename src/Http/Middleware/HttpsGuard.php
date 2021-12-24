@@ -55,7 +55,7 @@ class HttpsGuard
 
     protected function isEnable(Request $request): bool
     {
-        return $this->isSecureApplicationUrl();
+        return $this->isSecureApplicationUrl() && $this->isHostRequest($request);
     }
 
     /**
@@ -92,5 +92,10 @@ class HttpsGuard
         }
 
         return 'https' === strtolower($scheme);
+    }
+
+    protected function isHostRequest(Request $request): bool
+    {
+        return false !== filter_var($request->getHost(), FILTER_VALIDATE_IP);
     }
 }
