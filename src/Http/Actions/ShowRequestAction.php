@@ -26,8 +26,12 @@ class ShowRequestAction
     {
         return $this->asJson([
             'uri' => $this->getRequest()->getUri(),
+            'method' => $this->getRequest()->getMethod(),
+            'host' => $this->getRequest()->getHost(),
             'headers' => $this->getRequest()->headers->all(),
+            'server' => $this->getRequest()->server->all(),
             'content' => serialize($this->getRequest()->getContent()),
+            '$_SERVER' => $_SERVER,
         ]);
     }
 }
