@@ -9,11 +9,18 @@
 namespace HughCube\Laravel\Knight\Http\Middleware;
 
 use Illuminate\Contracts\Foundation\Application;
-use Symfony\Component\HttpFoundation\Request;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class HttpsGuard
 {
+    /**
+     * The URIs that should be accessible while maintenance mode is enabled.
+     *
+     * @var array
+     */
+    protected array $except = [];
+
     /**
      * The application instance.
      *
@@ -39,16 +46,37 @@ class HttpsGuard
      */
     public function handle(Request $request, callable $next): Response
     {
-        if ($this->isEnable() && !$request->isSecure()) {
+        if ($this->isEnable($request) && !$this->isExcept($request) && !$request->isSecure()) {
             return redirect()->secure($request->getRequestUri());
         }
 
         return $next($request);
     }
 
-    protected function isEnable(): bool
+    protected function isEnable(Request $request): bool
     {
         return $this->isSecureApplicationUrl();
+    }
+
+    /**
+     * Determine if the request has a URI that should be accessible in maintenance mode.
+     *
+     * @param  Request  $request
+     * @return bool
+     */
+    protected function isExcept(Request $request): bool
+    {
+        foreach ($this->except as $except) {
+            if ($except !== '/') {
+                $except = trim($except, '/');
+            }
+
+            if ($request->fullUrlIs($except) || $request->is($except)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     protected function isSecureApplicationUrl(): bool
