@@ -22,7 +22,7 @@ class ShowRequestAction
      * @throws BindingResolutionException
      * @throws Exception
      */
-    public function action(): string
+    public function action(): Response
     {
         return $this->asJson([
             'uri' => $this->getRequest()->getUri(),
