@@ -14,7 +14,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
-class LogRequestAction
+class RequestLogAction
 {
     use Action;
 

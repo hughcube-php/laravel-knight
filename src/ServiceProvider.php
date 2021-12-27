@@ -12,9 +12,9 @@ use HughCube\Laravel\Knight\Console\Commands\Config;
 use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
 use HughCube\Laravel\Knight\Console\Commands\RTest;
-use HughCube\Laravel\Knight\Http\Actions\LogRequestAction as LogRequestAction;
 use HughCube\Laravel\Knight\Http\Actions\PingAction as PingAction;
-use HughCube\Laravel\Knight\Http\Actions\ShowRequestAction as ShowRequestAction;
+use HughCube\Laravel\Knight\Http\Actions\RequestLogAction as RequestLogAction;
+use HughCube\Laravel\Knight\Http\Actions\RequestShowAction as RequestShowAction;
 use HughCube\Laravel\Knight\OPcache\Actions\ScriptsAction as OPcacheScriptsAction;
 use HughCube\Laravel\Knight\OPcache\Actions\StatesAction as OPcacheStatesAction;
 use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand as OPcacheCompileFilesCommand;
@@ -68,8 +68,8 @@ class ServiceProvider extends IlluminateServiceProvider
     {
         $this->commands([OPcacheCompileFilesCommand::class]);
 
-        if (!$this->app->routesAreCached() && false !== config('knight.opcache.routes')) {
-            Route::group(['prefix' => config('knight.opcache.route_prefix', 'request')], function () {
+        if (!$this->app->routesAreCached() && !empty($prefix = config('knight.opcache.route_prefix'))) {
+            Route::group(['prefix' => $prefix], function () {
                 Route::any('/scripts', OPcacheScriptsAction::class)->name('knight_opcache_scripts');
                 Route::any('/states', OPcacheStatesAction::class)->name('knight_opcache_states');
             });
@@ -83,10 +83,10 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     protected function bootRequest()
     {
-        if (!$this->app->routesAreCached() && false !== config('knight.request.routes')) {
-            Route::group(['prefix' => config('knight.request.route_prefix', 'request')], function () {
-                Route::any('/log', LogRequestAction::class)->name('knight_request_log');
-                Route::any('/show', ShowRequestAction::class)->name('knight_request_show');
+        if (!$this->app->routesAreCached() && !empty($prefix = config('knight.request.route_prefix'))) {
+            Route::group(['prefix' => $prefix], function () {
+                Route::any('/log', RequestLogAction::class)->name('knight_request_log');
+                Route::any('/show', RequestShowAction::class)->name('knight_request_show');
             });
         }
     }

@@ -13,7 +13,7 @@ use HughCube\Laravel\Knight\Routing\Action;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Symfony\Component\HttpFoundation\Response;
 
-class ShowRequestAction
+class RequestShowAction
 {
     use Action;
 
@@ -30,9 +30,7 @@ class ShowRequestAction
             'method' => $this->getRequest()->getMethod(),
             'host' => $this->getRequest()->getHost(),
             'headers' => $this->getRequest()->headers->all(),
-            'server' => $this->getRequest()->server->all(),
             'content' => serialize($this->getRequest()->getContent()),
-            '$_SERVER' => $_SERVER,
         ]);
     }
 }
