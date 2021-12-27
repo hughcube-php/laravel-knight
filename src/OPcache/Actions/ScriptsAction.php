@@ -33,30 +33,23 @@ class ScriptsAction
         $this->loadedOPcacheExtension();
 
         $scripts = array_merge(
-            ($historyScripts = $this->timeoutScriptsFilter($this->getHistoryScripts())),
-            ($currentScripts = $this->getScripts())
+            $this->getHistoryScripts(),
+            $this->getScripts()
         );
-        $scripts = $this->timeoutScriptsFilter($scripts);
 
-        $this->getCache()->set($this->getCacheKey(), $scripts, Carbon::now()->addYears());
-
-        return $this->asJson([
-            'count' => count($scripts),
-            'history_count' => count($historyScripts),
-            'current' => count($currentScripts),
-            'scripts' => array_keys($scripts),
-        ]);
-    }
-
-    protected function timeoutScriptsFilter(array $scripts): array
-    {
+        /** Scripts that have not been used for 30 days are considered invalid */
         foreach ($scripts as $file => $time) {
             if ((30 * 24 * 3600) < (time() - $time)) {
                 unset($scripts[$file]);
             }
         }
 
-        return $scripts;
+        $this->getCache()->set($this->getCacheKey(), $scripts, Carbon::now()->addYears());
+
+        return $this->asJson([
+            'count' => count($scripts),
+            'scripts' => array_keys($scripts),
+        ]);
     }
 
     protected function getScripts(): array|string
@@ -88,8 +81,8 @@ class ScriptsAction
 
     protected function getCacheKey(): string
     {
-        $string = serialize(['v1.0.0', __METHOD__]);
-        return strtr(sprintf('%s%s', md5($string), crc32($string)), 0, 30);
+        $string = serialize(['v1.0.1', __METHOD__]);
+        return sprintf('%s%s', md5($string), crc32($string));
     }
 
     /**

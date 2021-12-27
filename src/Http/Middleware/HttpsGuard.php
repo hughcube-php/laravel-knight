@@ -10,6 +10,7 @@ namespace HughCube\Laravel\Knight\Http\Middleware;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class HttpsGuard
@@ -55,7 +56,9 @@ class HttpsGuard
 
     protected function isEnable(Request $request): bool
     {
-        return $this->isSecureApplicationUrl() && $this->isHostRequest($request);
+        return $this->isSecureApplicationUrl()
+            && $this->isHostRequest($request)
+            && !$this->isAliYunFcHandler($request);
     }
 
     /**
@@ -97,5 +100,26 @@ class HttpsGuard
     protected function isHostRequest(Request $request): bool
     {
         return false === filter_var($request->getHost(), FILTER_VALIDATE_IP);
+    }
+
+    protected function isAliYunFcHandler(Request $request): bool
+    {
+        if (!$this->isRunInAliYunFc($request)) {
+            return false;
+        }
+
+        $paths = ['/initialize', '/invoke', '/pre-freeze', '/pre-stop'];
+        return $request->fullUrlIs($paths) || $request->is($paths);
+    }
+
+    protected function isRunInAliYunFc(Request $request): bool
+    {
+        $fcHeaderCount = 0;
+        foreach ($request->headers->all() as $name => $values) {
+            if (Str::startsWith($name, 'x-fc-')) {
+                $fcHeaderCount++;
+            }
+        }
+        return $fcHeaderCount >= 5;
     }
 }

@@ -12,8 +12,16 @@ use HughCube\Laravel\Knight\Console\Commands\Config;
 use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
 use HughCube\Laravel\Knight\Console\Commands\RTest;
-use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
+use HughCube\Laravel\Knight\Http\Actions\LogRequestAction as LogRequestAction;
+use HughCube\Laravel\Knight\Http\Actions\PingAction as PingAction;
+use HughCube\Laravel\Knight\Http\Actions\ShowRequestAction as ShowRequestAction;
+use HughCube\Laravel\Knight\OPcache\Actions\ScriptsAction as OPcacheScriptsAction;
+use HughCube\Laravel\Knight\OPcache\Actions\StatesAction as OPcacheStatesAction;
 use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand as OPcacheCompileFilesCommand;
+use Illuminate\Foundation\Application as LaravelApplication;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
+use Laravel\Lumen\Application as LumenApplication;
 
 class ServiceProvider extends IlluminateServiceProvider
 {
@@ -22,6 +30,11 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     public function boot()
     {
+        $this->bootPublishes();
+        $this->bootCommands();
+        $this->bootOPcache();
+        $this->bootRequest();
+        $this->bootPing();
     }
 
     /**
@@ -29,17 +42,66 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     public function register()
     {
-        $this->registerCommand();
     }
 
-    protected function registerCommand()
+    protected function bootPublishes()
+    {
+        $source = realpath(dirname(__DIR__).'/config/knight.php');
+        if ($this->app instanceof LaravelApplication && $this->app->runningInConsole()) {
+            $this->publishes([$source => config_path("knight.php")]);
+        } elseif ($this->app instanceof LumenApplication) {
+            $this->app->configure('knight');
+        }
+    }
+
+    protected function bootCommands()
     {
         $this->commands([
             Config::class,
             Environment::class,
             PhpIniFile::class,
-            RTest::class,
-            OPcacheCompileFilesCommand::class
+            RTest::class
         ]);
+    }
+
+    protected function bootOPcache()
+    {
+        $this->commands([OPcacheCompileFilesCommand::class]);
+
+        if (!$this->app->routesAreCached() && false !== config('knight.opcache.routes')) {
+            Route::group(['prefix' => config('knight.opcache.route_prefix', 'request')], function () {
+                Route::any('/scripts', OPcacheScriptsAction::class)->name('knight_opcache_scripts');
+                Route::any('/states', OPcacheStatesAction::class)->name('knight_opcache_states');
+            });
+        }
+    }
+
+    /**
+     * Define the Sanctum routes.
+     *
+     * @return void
+     */
+    protected function bootRequest()
+    {
+        if (!$this->app->routesAreCached() && false !== config('knight.request.routes')) {
+            Route::group(['prefix' => config('knight.request.route_prefix', 'request')], function () {
+                Route::any('/log', LogRequestAction::class)->name('knight_request_log');
+                Route::any('/show', ShowRequestAction::class)->name('knight_request_show');
+            });
+        }
+    }
+
+    /**
+     * Define the Sanctum routes.
+     *
+     * @return void
+     */
+    protected function bootPing()
+    {
+        if (!$this->app->routesAreCached() && false !== config('knight.ping.routes')) {
+            Route::group(['prefix' => config('knight.ping.route_prefix')], function () {
+                Route::any('/ping', PingAction::class)->name('knight_ping');
+            });
+        }
     }
 }

@@ -31,7 +31,7 @@ class CompileFilesCommand extends Command
      * @inheritdoc
      */
     protected $signature = 'opcache:compile-files
-                            {--with_prod_files= : Whether to include cached files on line }
+                            {--with_prod_files=knight_opcache_scripts : Whether to include cached files on line }
                             {--with_app_files=0 : Whether to include app files }
                             {--with_composer_files=0 : Whether to include composer class files }';
 
@@ -181,6 +181,7 @@ class CompileFilesCommand extends Command
             }
             return $scripts;
         } catch (Throwable $exception) {
+            $this->warn($exception->getMessage());
         }
 
         return [];
