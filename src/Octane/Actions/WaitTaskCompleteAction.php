@@ -14,6 +14,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Laravel\SerializableClosure\Exceptions\PhpVersionNotSupportedException;
+use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
 class WaitTaskCompleteAction
@@ -32,14 +33,33 @@ class WaitTaskCompleteAction
         $workerCount = Octane::waitSwooleTasks();
         $end = microtime(true);
 
-        $duration = $end - $start;
+        $duration = round((($end - $start) * 1000), 2);
         $type = getenv('OCTANE_RUNTIME_TYPE') ?: 'unknown';
         $uri = $this->getRequest()->getRequestUri();
 
-        Log::debug(sprintf('type:%s, uri:%s, workerCount:%s, duration%ss', $type, $uri, $workerCount, $duration));
+        /** 记录log */
+        $message = sprintf('type:%s, uri:%s, workerCount:%s, duration%sms', $type, $uri, $workerCount, $duration);
+        $this->getLogChannel()->log($this->getLogLevel(), $message);
 
-        return $this->asJson([
-            'duration' => ($end - $start)
-        ]);
+        return $this->asJson(['duration' => $duration]);
+    }
+
+    /**
+     * @return LoggerInterface
+     * @throws BindingResolutionException
+     */
+    protected function getLogChannel(): LoggerInterface
+    {
+        $channel = $this->getContainerConfig()->get('knight.octane.wait_task_complete_log_channel');
+        return Log::channel($channel);
+    }
+
+    /**
+     * @return mixed
+     * @throws BindingResolutionException
+     */
+    protected function getLogLevel(): mixed
+    {
+        return $this->getContainerConfig()->get('knight.octane.wait_task_complete_log_level', 'debug');
     }
 }

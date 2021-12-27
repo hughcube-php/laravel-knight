@@ -108,7 +108,7 @@ class HttpsGuard
             return false;
         }
 
-        $paths = ['/initialize', '/invoke', '/pre-freeze', '/pre-stop'];
+        $paths = ['initialize', 'invoke', 'pre-freeze', 'pre-stop'];
         return $request->fullUrlIs($paths) || $request->is($paths);
     }
 

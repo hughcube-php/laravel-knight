@@ -11,6 +11,7 @@ namespace HughCube\Laravel\Knight\Routing;
 use BadMethodCallException;
 use HughCube\Laravel\Knight\Support\GetOrSet;
 use HughCube\Laravel\Knight\Support\Validation;
+use Illuminate\Config\Repository;
 use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\JsonResponse;
@@ -67,6 +68,15 @@ trait Action
     protected function getContainer(): IlluminateContainer
     {
         return IlluminateContainer::getInstance();
+    }
+
+    /**
+     * @return Repository
+     * @throws BindingResolutionException
+     */
+    protected function getContainerConfig(): Repository
+    {
+        return $this->getContainer()->make('config');
     }
 
     /**
