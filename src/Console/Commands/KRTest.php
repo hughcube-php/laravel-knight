@@ -7,16 +7,16 @@ use Illuminate\Console\Command;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Symfony\Component\Console\Exception\RuntimeException;
 
-class RTest extends Command
+class KRTest extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'knight:rtest
+    protected $signature = 'krtest
                             {number=1 : Number of repetitions, one by default }
-                            {--class=\Tests\RTest : The name of the class that needs to be executed}';
+                            {--class=\Tests\KRTest : The name of the class that needs to be executed}';
 
     /**
      * The console command description.

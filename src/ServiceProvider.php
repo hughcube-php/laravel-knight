@@ -11,7 +11,7 @@ namespace HughCube\Laravel\Knight;
 use HughCube\Laravel\Knight\Console\Commands\Config;
 use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
-use HughCube\Laravel\Knight\Console\Commands\RTest;
+use HughCube\Laravel\Knight\Console\Commands\KRTest;
 use HughCube\Laravel\Knight\Http\Actions\PingAction as PingAction;
 use HughCube\Laravel\Knight\Http\Actions\RequestLogAction as RequestLogAction;
 use HughCube\Laravel\Knight\Http\Actions\RequestShowAction as RequestShowAction;
@@ -60,7 +60,7 @@ class ServiceProvider extends IlluminateServiceProvider
             Config::class,
             Environment::class,
             PhpIniFile::class,
-            RTest::class
+            KRTest::class
         ]);
     }
 
