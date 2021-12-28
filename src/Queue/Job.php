@@ -10,6 +10,8 @@ namespace HughCube\Laravel\Knight\Queue;
 
 use HughCube\Laravel\Knight\Support\GetOrSet;
 use HughCube\Laravel\Knight\Support\Validation;
+use HughCube\StaticInstanceInterface;
+use HughCube\StaticInstanceTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -30,11 +32,12 @@ use Stringable;
  * @method static PendingDispatch|Fluent|static dispatchIf($boolean, ...$arguments)
  * @method static PendingDispatch|Fluent|static dispatchUnless($boolean, ...$arguments)
  */
-abstract class Job implements ShouldQueue
+abstract class Job implements ShouldQueue, StaticInstanceInterface
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     use GetOrSet, Validation;
     use LoggerTrait;
+    use StaticInstanceTrait;
 
     /**
      * @var array
