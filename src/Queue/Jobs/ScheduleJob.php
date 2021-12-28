@@ -57,13 +57,13 @@ class ScheduleJob extends Job
 
     /**
      * @param  string  $expression
-     * @param  callable  $callable
+     * @param  callable|Job  $job
      * @return void
      */
-    protected function pushJobIfDue(string $expression, callable $callable)
+    protected function pushJobIfDue(string $expression, callable|Job $job)
     {
         if ($this->isDue($expression)) {
-            $this->pushJob($callable());
+            $this->pushJob((is_callable($job) ? $job() : $job));
         }
     }
 }
