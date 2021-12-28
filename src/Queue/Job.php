@@ -13,16 +13,28 @@ use HughCube\Laravel\Knight\Support\Validation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Foundation\Bus\PendingDispatch;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Fluent;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use JetBrains\PhpStorm\Pure;
+use Psr\Log\LoggerTrait;
+use Stringable;
 
+/**
+ * @method static PendingDispatch|static dispatch(...$arguments)
+ * @method static PendingDispatch|Fluent|static dispatchIf($boolean, ...$arguments)
+ * @method static PendingDispatch|Fluent|static dispatchUnless($boolean, ...$arguments)
+ */
 abstract class Job implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     use GetOrSet, Validation;
+    use LoggerTrait;
 
     /**
      * @var array
@@ -33,6 +45,16 @@ abstract class Job implements ShouldQueue
      * @var array
      */
     protected array $validData = [];
+
+    /**
+     * @var array|string|null
+     */
+    protected null|string|array $logChannel = null;
+
+    /**
+     * @var string|int|null
+     */
+    protected null|string|int $pid = null;
 
     /**
      * Create a new job instance.
@@ -62,7 +84,7 @@ abstract class Job implements ShouldQueue
     /**
      * @return array
      */
-    protected function getData(): array
+    public function getData(): array
     {
         return $this->data;
     }
@@ -143,17 +165,53 @@ abstract class Job implements ShouldQueue
     }
 
     /**
-     * @param  string  $message
+     * @return string|int
      */
-    protected function info(string $message)
+    protected function getPid(): string|int
     {
-        echo sprintf(
-            '[%s][%s] %s %s: %s',
-            Carbon::now()->format('Y-m-d H:i:s.u'),
-            $this->job->getJobId(),
-            str_pad('Processing:', 11),
-            $this->job->resolveName(),
-            $message
-        );
+        if (null === $this->pid) {
+            $this->setPid(Str::random(5));
+        }
+
+        return $this->pid;
+    }
+
+    /**
+     * @param  string|int|null  $pid
+     * @return $this
+     */
+    public function setPid(null|string|int $pid): static
+    {
+        $this->pid = $pid;
+        return $this;
+    }
+
+    #[Pure]
+    protected function getName($job = null): string
+    {
+        return Str::afterLast(get_class(($job ?? $this)), '\\');
+    }
+
+    protected function getLogChannel(): array|string|null
+    {
+        return $this->logChannel;
+    }
+
+    public function setLogChannel(array|string|null $channel = null): static
+    {
+        $this->logChannel = $channel;
+        return $this;
+    }
+
+    /**
+     * @param $level
+     * @param  string|Stringable  $message
+     * @param  array  $context
+     * @return void
+     */
+    protected function log($level, string|Stringable $message, array $context = [])
+    {
+        $message = sprintf('[%s-%s] %s', $this->getName(), $this->getPid(), $message);
+        Log::channel($this->getLogChannel())->log($level, $message, $context);
     }
 }
