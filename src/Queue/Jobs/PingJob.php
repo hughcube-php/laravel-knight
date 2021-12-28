@@ -61,12 +61,8 @@ class PingJob extends Job
             return null;
         }
 
-        if ($response->hasHeader('request-id')) {
-            return $response->getHeaderLine('request-id');
-        }
-
         foreach ($response->getHeaders() as $name => $header) {
-            if (Str::endsWith($name, 'request-id')) {
+            if (Str::endsWith(strtolower($name), 'request-id')) {
                 return $response->getHeaderLine($name);
             }
         }
