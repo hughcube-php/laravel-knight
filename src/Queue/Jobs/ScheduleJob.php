@@ -54,4 +54,16 @@ class ScheduleJob extends Job
         $id = app(Dispatcher::class)->dispatch($job);
         $this->info(sprintf('job: %s, id:%s, delays:%sms', $this->getName($job), $id, $this->getDelays()));
     }
+
+    /**
+     * @param  string  $expression
+     * @param  callable  $callable
+     * @return void
+     */
+    protected function pushJobIfDue(string $expression, callable $callable)
+    {
+        if ($this->isDue($expression)) {
+            $this->pushJob($callable());
+        }
+    }
 }
