@@ -195,7 +195,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
         return Str::afterLast(get_class(($job ?? $this)), '\\');
     }
 
-    protected function getLogChannel(): array|string|null
+    public function getLogChannel(): array|string|null
     {
         return $this->logChannel;
     }
