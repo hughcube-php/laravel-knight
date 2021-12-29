@@ -22,7 +22,7 @@ class PingJob extends Job
     public function rules(): array
     {
         return [
-            'url' => ['required', 'nullable'],
+            'url' => ['string', 'nullable'],
             'method' => ['string', 'default:GET'],
             'timeout' => ['integer', 'default:2'],
         ];
@@ -33,7 +33,7 @@ class PingJob extends Job
      */
     protected function action(): void
     {
-        $url = $this->get('url');
+        $url = $this->getUrl();
         $method = strtoupper($this->get('method'));
         $timeout = $this->get('timeout');
 
