@@ -41,7 +41,12 @@ class AutoCleanFileJob extends Job
             File::delete($file);
         }
 
-        $this->info(sprintf('Delete %s files.', $count));
+        $this->info(sprintf(
+            'Delete %s %s files in the %s.',
+            $count,
+            implode(',', $this->getPatterns()),
+            implode(',', $this->getDirs())
+        ));
     }
 
     protected function getMaxDays(): int
