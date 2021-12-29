@@ -42,7 +42,7 @@ class WatchFilesJob extends \HughCube\Laravel\Knight\Queue\Job
     {
         $url = $this->getUrl();
         $response = $this->getHttpClient()->get($this->getUrl(), [
-            RequestOptions::TIMEOUT => $this->getUrl('timeout')
+            RequestOptions::TIMEOUT => floatval($this->get('timeout'))
         ]);
 
         $results = json_decode($response->getBody()->getContents(), true);
