@@ -6,6 +6,9 @@ use Exception;
 use GuzzleHttp\RequestOptions;
 use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\Support\HttpClient;
+use HughCube\PUrl\Url as PUrl;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use JetBrains\PhpStorm\ArrayShape;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -19,7 +22,7 @@ class PingJob extends Job
     public function rules(): array
     {
         return [
-            'url' => ['required', 'url'],
+            'url' => ['required', 'nullable'],
             'method' => ['string', 'default:GET'],
             'timeout' => ['integer', 'default:2'],
         ];
@@ -68,5 +71,19 @@ class PingJob extends Job
         }
 
         return null;
+    }
+
+    protected function getUrl()
+    {
+        $url = $this->get('url', 'knight_ping');
+        if (PUrl::isUrlString($url)) {
+            return $url;
+        }
+
+        if (Route::has($url)) {
+            return route($url);
+        }
+
+        return URL::to($url);
     }
 }
