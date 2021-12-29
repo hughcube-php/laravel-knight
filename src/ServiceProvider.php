@@ -22,6 +22,7 @@ use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use Laravel\Lumen\Application as LumenApplication;
+use HughCube\Laravel\Knight\Octane\Commands\PrepareCommand as OctanePrepareCommand;
 
 class ServiceProvider extends IlluminateServiceProvider
 {
@@ -60,7 +61,8 @@ class ServiceProvider extends IlluminateServiceProvider
             Config::class,
             Environment::class,
             PhpIniFile::class,
-            KRTest::class
+            KRTest::class,
+            OctanePrepareCommand::class,
         ]);
     }
 
