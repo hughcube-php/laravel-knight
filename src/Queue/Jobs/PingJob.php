@@ -25,6 +25,7 @@ class PingJob extends Job
             'url' => ['string', 'nullable'],
             'method' => ['string', 'default:GET'],
             'timeout' => ['integer', 'default:2'],
+            'allow_redirects' => ['integer', 'default:0'],
         ];
     }
 
@@ -44,7 +45,8 @@ class PingJob extends Job
         try {
             $response = $this->getHttpClient()->request($method, $url, [
                 RequestOptions::HTTP_ERRORS => false,
-                RequestOptions::TIMEOUT => $timeout
+                RequestOptions::TIMEOUT => $timeout,
+                RequestOptions::ALLOW_REDIRECTS => $this->getAllowRedirects(),
             ]);
         } catch (Throwable $exception) {
         }
@@ -73,11 +75,13 @@ class PingJob extends Job
         return null;
     }
 
-    protected function getUrl()
+    protected function getUrl(): string
     {
         $url = $this->get('url', 'knight_ping');
         if (PUrl::isUrlString($url)) {
-            return $url;
+            return PUrl::instance($url)
+                ->withScheme(PUrl::instance(config('app.url'))->getScheme())
+                ->toString();
         }
 
         if (Route::has($url)) {
@@ -85,5 +89,19 @@ class PingJob extends Job
         }
 
         return URL::to($url);
+    }
+
+    protected function getAllowRedirects(): bool|array
+    {
+        if (0 >= ($redirects = intval($this->get('allow_redirects', 0)))) {
+            return false;
+        }
+
+        return [
+            'max' => $redirects,
+            'strict' => true,
+            'referer' => true,
+            'protocols' => ['https', 'http']
+        ];
     }
 }
