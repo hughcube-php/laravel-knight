@@ -20,10 +20,30 @@ class PrepareServerVariables
      */
     public function handle(mixed $event): void
     {
-        /** 在事件触发器下面, 直接使用ip访问 */
-        if ($host = parse_url(config('app.url'), PHP_URL_HOST)) {
-            $event->request->server->set('HTTP_HOST', $host);
-            $event->request->headers->set('HOST', $host);
+        $this->prepareHost($event);
+    }
+
+    /**
+     * @param  RequestReceived  $event
+     * @return void
+     */
+    protected function prepareHost(mixed $event)
+    {
+        if (!$event instanceof RequestReceived) {
+            return;
         }
+
+        $host = $event->request->getHost();
+        if (false === filter_var($host, FILTER_VALIDATE_IP)) {
+            return;
+        }
+
+        $host = parse_url(config('app.url'), PHP_URL_HOST);
+        if (empty($host)) {
+            return;
+        }
+
+        $event->request->server->set('HTTP_HOST', $host);
+        $event->request->headers->set('HOST', $host);
     }
 }
