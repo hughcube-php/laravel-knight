@@ -8,6 +8,7 @@
 
 namespace HughCube\Laravel\Knight\Http\Middleware;
 
+use HughCube\PUrl\Url;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -48,7 +49,8 @@ class HttpsGuard
     public function handle(Request $request, callable $next): Response
     {
         if ($this->isEnable($request) && !$this->isExcept($request) && !$request->isSecure()) {
-            return redirect()->secure($request->getRequestUri());
+            $url = Url::instance($request->getUri())->withScheme('https');
+            return redirect()->to($url);
         }
 
         return $next($request);
