@@ -46,11 +46,11 @@ class HttpsGuard
      * @param  callable  $next
      * @return Response
      */
-    public function handle(Request $request, callable $next): Response
+    public function handle(Request $request, callable $next, $status = 301): Response
     {
         if ($this->isEnable($request) && !$this->isExcept($request) && !$request->isSecure()) {
             $url = Url::instance($request->getUri())->withScheme('https');
-            return redirect()->to($url, 301);
+            return redirect()->to($url, $status);
         }
 
         return $next($request);
