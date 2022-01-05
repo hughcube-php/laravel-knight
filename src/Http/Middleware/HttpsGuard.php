@@ -50,7 +50,7 @@ class HttpsGuard
     {
         if ($this->isEnable($request) && !$this->isExcept($request) && !$request->isSecure()) {
             $url = Url::instance($request->getUri())->withScheme('https');
-            return redirect()->to($url);
+            return redirect()->to($url, 301);
         }
 
         return $next($request);
