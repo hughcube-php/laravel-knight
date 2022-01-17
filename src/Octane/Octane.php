@@ -56,7 +56,8 @@ class Octane extends \Laravel\Octane\Facades\Octane
         /** 生成标识 */
         $spies = [];
         for ($i = 1; $i <= $workerCount; $i++) {
-            $spies[] = sprintf('%s-%s', Str::random(32), $i);
+            $random = serialize([microtime(), Str::random(32), $i]);
+            $spies[] = sprintf('%s-%s-%s', getmypid(), md5($random), crc32($random));
         }
 
         /** 异步写入探针 */
