@@ -78,17 +78,23 @@ class PingJob extends Job
     protected function getUrl(): string
     {
         $url = $this->get('url', 'knight_ping');
-        if (PUrl::isUrlString($url)) {
-            return PUrl::instance($url)
-                ->withScheme(PUrl::instance(config('app.url'))->getScheme())
-                ->toString();
+        if (is_string($url) && PUrl::isUrlString($url)) {
+            return $url;
         }
 
-        if (Route::has($url)) {
-            return route($url);
+        /** get app route */
+        $url = Route::has($url) ? route($url) : URL::to($url);
+
+        /** parse url */
+        $purl = PUrl::parse($url);
+
+        /** with app url scheme */
+        $appUrl = PUrl::parse(config('app.url'));
+        if ($appUrl instanceof PUrl && !empty($appUrl->getScheme()) && $purl instanceof PUrl) {
+            $purl = $purl->withScheme($appUrl->getScheme());
         }
 
-        return URL::to($url);
+        return $purl instanceof PUrl ? $purl->toString() : $url;
     }
 
     protected function getAllowRedirects(): bool|array
