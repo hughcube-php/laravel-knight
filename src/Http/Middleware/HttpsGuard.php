@@ -45,10 +45,10 @@ class HttpsGuard
      * @param  Request  $request
      * @param  callable  $next
      * @param  int  $status
-     * @param  null  $hsts
+     * @param  string|null  $hsts
      * @return Response
      */
-    public function handle(Request $request, callable $next, int $status = 301, $hsts = null): Response
+    public function handle(Request $request, callable $next, int $status = 301, ?string $hsts = null): Response
     {
         if ($this->isEnable($request) && !$this->isExcept($request) && !$request->isSecure()) {
             $url = Url::instance($request->getUri())->withScheme('https');
