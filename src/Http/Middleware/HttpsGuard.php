@@ -44,16 +44,28 @@ class HttpsGuard
     /**
      * @param  Request  $request
      * @param  callable  $next
+     * @param  int  $status
+     * @param  null  $hsts
      * @return Response
      */
-    public function handle(Request $request, callable $next, $status = 301): Response
+    public function handle(Request $request, callable $next, int $status = 301, $hsts = null): Response
     {
         if ($this->isEnable($request) && !$this->isExcept($request) && !$request->isSecure()) {
             $url = Url::instance($request->getUri())->withScheme('https');
             return redirect()->to($url, $status);
         }
 
-        return $next($request);
+        /** @var Response $response */
+        $response = $next($request);
+
+        /**
+         * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+         */
+        if (!empty($hsts)) {
+            $response->headers->set('Strict-Transport-Security', $hsts);
+        }
+
+        return $response;
     }
 
     protected function isEnable(Request $request): bool

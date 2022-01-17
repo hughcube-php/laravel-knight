@@ -77,7 +77,7 @@ class KRTest extends Command
      * @throws BindingResolutionException
      *
      */
-    protected function makeInstance()
+    protected function makeInstance(): object
     {
         $class = $this->option('class');
 
