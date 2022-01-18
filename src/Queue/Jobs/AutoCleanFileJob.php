@@ -17,9 +17,9 @@ class AutoCleanFileJob extends Job
     protected function rules(): array
     {
         return [
-            'dir' => ['required', 'string'],
-            'pattern' => ['string', 'default:*'],
-            'max_days' => ['integer', 'min:0', 'default:30'],
+            'dir' => ['required'],
+            'pattern' => ['nullable'],
+            'max_days' => ['integer', 'min:0'],
         ];
     }
 
@@ -51,7 +51,7 @@ class AutoCleanFileJob extends Job
 
     protected function getMaxDays(): int
     {
-        return intval($this->get('max_days', 30));
+        return intval(($this->get('max_days') ?: 30));
     }
 
     /**
@@ -59,7 +59,8 @@ class AutoCleanFileJob extends Job
      */
     protected function getDirs(): array
     {
-        return [$this->get('dir')];
+        $dir = $this->get('dir');
+        return is_array($dir) ? $dir : [$dir];
     }
 
     /**
@@ -67,6 +68,7 @@ class AutoCleanFileJob extends Job
      */
     protected function getPatterns(): array
     {
-        return [$this->get('pattern')];
+        $pattern = $this->get('pattern') ?: '*';
+        return is_array($pattern) ? $pattern : [$pattern];
     }
 }
