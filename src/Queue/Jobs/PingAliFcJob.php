@@ -15,7 +15,7 @@ class PingAliFcJob extends PingJob
     {
         return [
             'client' => ['nullable'],
-            'url' => ['string', 'nullable'],
+            'url' => ['string', 'nullable', 'default:alifc_ping'],
             'method' => ['string', 'default:GET'],
             'timeout' => ['integer', 'default:2'],
             'allow_redirects' => ['integer', 'default:0'],
