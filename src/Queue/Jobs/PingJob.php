@@ -3,6 +3,7 @@
 namespace HughCube\Laravel\Knight\Queue\Jobs;
 
 use Exception;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\Support\HttpClient;
@@ -43,7 +44,7 @@ class PingJob extends Job
 
         $start = microtime(true);
         try {
-            $response = $this->getHttpClient()->request($method, $url, [
+            $response = $this->request($method, $url, [
                 RequestOptions::HTTP_ERRORS => false,
                 RequestOptions::TIMEOUT => $timeout,
                 RequestOptions::ALLOW_REDIRECTS => $this->getAllowRedirects(),
@@ -58,6 +59,14 @@ class PingJob extends Job
         $exception = $exception instanceof Throwable ? sprintf('exception:%s', $exception->getMessage()) : null;
 
         $this->info(sprintf('%sms [%s] [%s] %s %s %s', $duration, $requestId, $statusCode, $method, $url, $exception));
+    }
+
+    /**
+     * @throws GuzzleException
+     */
+    protected function request(string $method, $uri = '', array $options = []): Response
+    {
+        return $this->getHttpClient()->request($method, $uri, $options);
     }
 
     protected function getRequestId($response): ?string

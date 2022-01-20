@@ -26,7 +26,8 @@
         "phpstan/phpstan": "*",
         "orchestra/testbench": "*",
         "swoole/ide-helper": "~4.7.1",
-        "laravel/octane": "^1.0"
+        "laravel/octane": "^1.0",
+        "hughcube/laravel-alifc": "*"
     },
     "autoload": {
         "psr-4": {
