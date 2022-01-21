@@ -61,7 +61,7 @@ class HttpsGuard
         /**
          * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
          */
-        if (!empty($hsts)) {
+        if (!empty($hsts) && $request->isSecure()) {
             $response->headers->set('Strict-Transport-Security', $hsts);
         }
 
