@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/12/17
- * Time: 14:56
+ * Time: 14:56.
  */
 
 namespace HughCube\Laravel\Knight\Octane;
@@ -33,7 +33,8 @@ class Octane extends \Laravel\Octane\Facades\Octane
     }
 
     /**
-     * @param  callable  $callable
+     * @param callable $callable
+     *
      * @return void
      */
     public static function task(callable $callable)
@@ -42,9 +43,10 @@ class Octane extends \Laravel\Octane\Facades\Octane
     }
 
     /**
-     * @return int
      * @throws InvalidArgumentException
      * @throws PhpVersionNotSupportedException
+     *
+     * @return int
      */
     public static function waitSwooleTasks(): int
     {

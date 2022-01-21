@@ -4,7 +4,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/2/22
- * Time: 11:18
+ * Time: 11:18.
  */
 
 namespace HughCube\Laravel\Knight\OPcache\Commands;
@@ -41,9 +41,11 @@ class CompileFilesCommand extends Command
     protected $description = 'opcache compile file';
 
     /**
-     * @param  Schedule  $schedule
-     * @return void
+     * @param Schedule $schedule
+     *
      * @throws Exception
+     *
+     * @return void
      */
     public function handle(Schedule $schedule)
     {
@@ -94,8 +96,9 @@ class CompileFilesCommand extends Command
     }
 
     /**
-     * @return array
      * @throws Exception
+     *
+     * @return array
      */
     protected function getFiles(): array
     {
@@ -144,7 +147,7 @@ class CompileFilesCommand extends Command
                 base_path('config/'),
                 base_path('public/'),
                 base_path('routes/'),
-                #base_path('vendor/'),
+                //base_path('vendor/'),
             ])
             ->name('*.php')
             ->ignoreUnreadableDirs()
@@ -171,7 +174,7 @@ class CompileFilesCommand extends Command
 
         try {
             $response = $this->getHttpClient()->post($url, [
-                RequestOptions::TIMEOUT => 10.0, RequestOptions::HTTP_ERRORS => false
+                RequestOptions::TIMEOUT => 10.0, RequestOptions::HTTP_ERRORS => false,
             ]);
             $states = json_decode($response->getBody()->getContents(), true);
 
@@ -179,6 +182,7 @@ class CompileFilesCommand extends Command
             foreach (($states['data']['scripts'] ?? []) as $file) {
                 $scripts[] = base_path($file);
             }
+
             return $scripts;
         } catch (Throwable $exception) {
             $this->warn($exception->getMessage());

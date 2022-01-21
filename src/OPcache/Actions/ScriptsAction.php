@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/4/15
- * Time: 8:42 下午
+ * Time: 8:42 下午.
  */
 
 namespace HughCube\Laravel\Knight\OPcache\Actions;
@@ -24,9 +24,10 @@ class ScriptsAction
     use LoadedOPcacheExtension;
 
     /**
-     * @return Response
      * @throws InvalidArgumentException
      * @throws Exception
+     *
+     * @return Response
      */
     public function action(): Response
     {
@@ -47,7 +48,7 @@ class ScriptsAction
         $this->getCache()->set($this->getCacheKey(), $scripts, Carbon::now()->addYears());
 
         return $this->asJson([
-            'count' => count($scripts),
+            'count'   => count($scripts),
             'scripts' => array_keys($scripts),
         ]);
     }
@@ -70,18 +71,21 @@ class ScriptsAction
     }
 
     /**
-     * @return array
      * @throws InvalidArgumentException
+     *
+     * @return array
      */
     protected function getHistoryScripts(): array
     {
         $histories = $this->getCache()->get($this->getCacheKey());
+
         return is_array($histories) ? $histories : [];
     }
 
     protected function getCacheKey(): string
     {
         $string = serialize(['v1.0.1', __METHOD__]);
+
         return sprintf('%s%s', md5($string), crc32($string));
     }
 

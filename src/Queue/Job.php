@@ -34,8 +34,12 @@ use Stringable;
  */
 abstract class Job implements ShouldQueue, StaticInstanceInterface
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    use GetOrSet, Validation;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+    use GetOrSet;
+    use Validation;
     use LoggerTrait;
     use StaticInstanceTrait;
 
@@ -76,6 +80,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
         } catch (ValidationException $exception) {
             $errors = json_encode($exception->errors(), JSON_UNESCAPED_UNICODE);
             $this->info(sprintf('data validation error, errors: %s, data: %s', $errors, $this->getSerializeData()));
+
             return;
         }
 
@@ -101,7 +106,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  int  $flags
+     * @param int $flags
+     *
      * @return string
      */
     protected function getJsonData(int $flags = JSON_UNESCAPED_UNICODE): string
@@ -126,7 +132,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  int  $flags
+     * @param int $flags
+     *
      * @return string
      */
     protected function getJsonValidData(int $flags = JSON_UNESCAPED_UNICODE): string
@@ -135,8 +142,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  string  $key
-     * @param  null  $default
+     * @param string $key
+     * @param null   $default
      *
      * @return mixed
      */
@@ -146,7 +153,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  mixed  $key
+     * @param mixed $key
+     *
      * @return bool
      */
     protected function has(mixed $key): bool
@@ -155,8 +163,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  string  $key
-     * @param  mixed  $value
+     * @param string $key
+     * @param mixed  $value
      *
      * @return static
      */
@@ -180,12 +188,14 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  string|int|null  $pid
+     * @param string|int|null $pid
+     *
      * @return $this
      */
     public function setPid(null|string|int $pid): static
     {
         $this->pid = $pid;
+
         return $this;
     }
 
@@ -203,13 +213,15 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     public function setLogChannel(array|string|null $channel = null): static
     {
         $this->logChannel = $channel;
+
         return $this;
     }
 
     /**
      * @param $level
-     * @param  string|Stringable  $message
-     * @param  array  $context
+     * @param string|Stringable $message
+     * @param array             $context
+     *
      * @return void
      */
     protected function log($level, string|Stringable $message, array $context = [])

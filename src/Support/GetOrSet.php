@@ -22,8 +22,9 @@ trait GetOrSet
      *     return Model::findById($this->getParameter()->get('id'));
      * });
      *
-     * @param  mixed  $name
-     * @param  callable  $callable
+     * @param mixed    $name
+     * @param callable $callable
+     *
      * @return mixed
      */
     protected function getOrSet(mixed $name, callable $callable): mixed
@@ -32,6 +33,7 @@ trait GetOrSet
         if (!array_key_exists($key, $this->hughCubeKnightClassSelfCacheStorage)) {
             $this->hughCubeKnightClassSelfCacheStorage[$key] = $callable();
         }
+
         return $this->hughCubeKnightClassSelfCacheStorage[$key];
     }
 }

@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/12/17
- * Time: 22:48
+ * Time: 22:48.
  */
 
 namespace HughCube\Laravel\Knight\OPcache;
@@ -19,6 +19,7 @@ trait LoadedOPcacheExtension
     {
         if (!extension_loaded('Zend OPcache')) {
             $message = 'You do not have the Zend OPcache extension loaded, sample data is being shown instead.';
+
             throw new Exception($message);
         }
     }

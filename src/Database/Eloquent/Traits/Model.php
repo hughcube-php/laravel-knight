@@ -25,7 +25,7 @@ trait Model
     private bool $isFromCache = false;
 
     /**
-     * @param  mixed|null  $date
+     * @param mixed|null $date
      *
      * @return Carbon|null
      */
@@ -35,7 +35,7 @@ trait Model
     }
 
     /**
-     * @param  mixed  $date
+     * @param mixed $date
      *
      * @return Carbon|null
      */
@@ -45,7 +45,7 @@ trait Model
     }
 
     /**
-     * @param  mixed  $date
+     * @param mixed $date
      *
      * @return Carbon|null
      */
@@ -55,7 +55,7 @@ trait Model
     }
 
     /**
-     * @param  mixed  $date
+     * @param mixed $date
      *
      * @return Carbon|null
      */
@@ -97,7 +97,8 @@ trait Model
     /**
      * Create a new Eloquent query builder for the model.
      *
-     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param \Illuminate\Database\Query\Builder $query
+     *
      * @return Builder
      */
     #[Pure]
@@ -144,15 +145,18 @@ trait Model
     public function setIsFromCache($is = true): static
     {
         $this->isFromCache = $is;
+
         return $this;
     }
 
     /**
      * 缓存的时间, 默认5-7天.
      *
-     * @param  int|null  $duration
-     * @return int
+     * @param int|null $duration
+     *
      * @throws Exception
+     *
+     * @return int
      */
     public function getCacheTtl(int $duration = null): int
     {
@@ -168,7 +172,8 @@ trait Model
     }
 
     /**
-     * @param  mixed  $id
+     * @param mixed $id
+     *
      * @return static|null
      */
     public static function findById(mixed $id): ?static
@@ -178,7 +183,8 @@ trait Model
     }
 
     /**
-     * @param  array  $ids
+     * @param array $ids
+     *
      * @return Collection
      */
     public static function findByIds(array $ids): Collection

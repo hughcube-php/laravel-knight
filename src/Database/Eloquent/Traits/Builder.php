@@ -23,7 +23,7 @@ use Psr\SimpleCache\InvalidArgumentException;
 /**
  * Trait Builder.
  *
- * @method Model getModel()
+ * @method Model      getModel()
  * @method Connection getConnection()
  */
 trait Builder
@@ -71,6 +71,7 @@ trait Builder
         if (!$nullCache instanceof CacheInterface) {
             $nullCache = new Repository(new NullStore());
         }
+
         return $nullCache;
     }
 
@@ -95,7 +96,7 @@ trait Builder
     }
 
     /**
-     * @param  mixed  $value
+     * @param mixed $value
      *
      * @return bool
      */
@@ -105,7 +106,7 @@ trait Builder
     }
 
     /**
-     * @param  array  $columns
+     * @param array $columns
      *
      * @return string
      */
@@ -121,24 +122,30 @@ trait Builder
         $cacheKey = json_encode($cacheKey);
 
         $string = sprintf('%s:%s:%s', get_class($this->getModel()), $cacheKey, $this->getModel()->getCacheVersion());
+
         return sprintf('model:%s-%s', md5($string), crc32($string));
     }
 
     /**
-     * @param  mixed  $pk
-     * @return mixed
+     * @param mixed $pk
+     *
      * @throws InvalidArgumentException
+     *
+     * @return mixed
      */
     public function findByPk(mixed $pk): mixed
     {
         $collection = $this->findByPks((empty($pk) ? [] : [$pk]));
+
         return $collection->get($pk);
     }
 
     /**
-     * @param  array  $pks
-     * @return EloquentCollection
+     * @param array $pks
+     *
      * @throws InvalidArgumentException
+     *
+     * @return EloquentCollection
      */
     public function findByPks(array $pks): EloquentCollection
     {
@@ -155,6 +162,7 @@ trait Builder
                 $collection->put($pk, $row);
             }
         }
+
         return $collection;
     }
 
@@ -164,17 +172,19 @@ trait Builder
     public function findUniqueRow(mixed $id)
     {
         $rows = $this->findUniqueRows([$id]);
+
         return $rows->isEmpty() ? null : $rows->first();
     }
 
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param  array[]  $ids  必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
+     * @param array[] $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
-     * @return EloquentCollection
      * @throws InvalidArgumentException
      * @throws Exception
+     *
+     * @return EloquentCollection
      */
     public function findUniqueRows(array $ids): EloquentCollection
     {
@@ -255,6 +265,7 @@ trait Builder
 
     /**
      * @inheritdoc
+     *
      * @throws InvalidArgumentException
      */
     public function delete()
@@ -269,6 +280,7 @@ trait Builder
 
     /**
      * @inheritdoc
+     *
      * @throws InvalidArgumentException
      */
     public function update(array $values)
@@ -284,6 +296,7 @@ trait Builder
 
     /**
      * @inheritdoc
+     *
      * @throws InvalidArgumentException
      */
     public function insert(array $values)
@@ -299,6 +312,7 @@ trait Builder
 
     /**
      * @inheritdoc
+     *
      * @throws InvalidArgumentException
      */
     public function insertOrIgnore(array $values)
@@ -314,6 +328,7 @@ trait Builder
 
     /**
      * @inheritdoc
+     *
      * @throws InvalidArgumentException
      */
     public function insertGetId(array $values, $sequence = null)
@@ -328,8 +343,9 @@ trait Builder
     }
 
     /**
-     * @return bool
      * @throws InvalidArgumentException
+     *
+     * @return bool
      */
     public function refreshRowCache(): bool
     {

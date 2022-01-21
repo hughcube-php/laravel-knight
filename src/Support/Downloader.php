@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/12/17
- * Time: 16:09
+ * Time: 16:09.
  */
 
 namespace HughCube\Laravel\Knight\Support;
@@ -24,28 +24,32 @@ class Downloader implements StaticInstanceInterface
     use StaticInstanceTrait;
 
     /**
-     * @param  string  $url
+     * @param string $url
+     *
      * @return string
      */
     public static function path(string $url): string
     {
         $extension = File::extension($url);
+
         return storage_path(sprintf(
-            "download/%s/%s/%s%s",
+            'download/%s/%s/%s%s',
             substr(md5($url), 0, 2),
             substr(md5(microtime()), 0, 2),
             md5($url),
-            ($extension ? ".{$extension}" : "")
+            ($extension ? ".{$extension}" : '')
         ));
     }
 
     /**
-     * @param  string  $method
-     * @param  string  $url
-     * @param  string  $file
-     * @param  array  $options
-     * @return void
+     * @param string $method
+     * @param string $url
+     * @param string $file
+     * @param array  $options
+     *
      * @throws GuzzleException
+     *
+     * @return void
      */
     private function to(string $method, string $url, string $file, array $options = [])
     {
@@ -60,10 +64,12 @@ class Downloader implements StaticInstanceInterface
     }
 
     /**
-     * @param  string  $method
-     * @param  array  $args
-     * @return void
+     * @param string $method
+     * @param array  $args
+     *
      * @throws GuzzleException
+     *
+     * @return void
      */
     public function __call(string $method, array $args)
     {
@@ -74,11 +80,12 @@ class Downloader implements StaticInstanceInterface
     /**
      * Handle dynamic, static calls to the object.
      *
-     * @param  string  $method
-     * @param  array  $args
-     * @return mixed
+     * @param string $method
+     * @param array  $args
      *
      * @throws RuntimeException
+     *
+     * @return mixed
      */
     public static function __callStatic(string $method, array $args)
     {

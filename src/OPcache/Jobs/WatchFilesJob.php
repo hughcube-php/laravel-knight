@@ -20,14 +20,15 @@ class WatchFilesJob extends \HughCube\Laravel\Knight\Queue\Job
     public function rules(): array
     {
         return [
-            'url' => ['string', 'nullable'],
+            'url'     => ['string', 'nullable'],
             'timeout' => ['integer', 'default:30'],
         ];
     }
 
     /**
-     * @return void
      * @throws GuzzleException
+     *
+     * @return void
      */
     protected function action(): void
     {
@@ -35,14 +36,15 @@ class WatchFilesJob extends \HughCube\Laravel\Knight\Queue\Job
     }
 
     /**
-     * @return mixed
      * @throws GuzzleException
+     *
+     * @return mixed
      */
     protected function getResponse(): mixed
     {
         $url = $this->getUrl();
         $response = $this->getHttpClient()->get($this->getUrl(), [
-            RequestOptions::TIMEOUT => floatval($this->get('timeout'))
+            RequestOptions::TIMEOUT => floatval($this->get('timeout')),
         ]);
 
         $results = json_decode($response->getBody()->getContents(), true);

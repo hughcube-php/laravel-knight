@@ -3,18 +3,19 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/6/10
- * Time: 4:29 下午
+ * Time: 4:29 下午.
  */
 
 namespace HughCube\Laravel\Knight;
 
 use HughCube\Laravel\Knight\Console\Commands\Config;
 use HughCube\Laravel\Knight\Console\Commands\Environment;
-use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
 use HughCube\Laravel\Knight\Console\Commands\KRTest;
+use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
 use HughCube\Laravel\Knight\Http\Actions\PingAction as PingAction;
 use HughCube\Laravel\Knight\Http\Actions\RequestLogAction as RequestLogAction;
 use HughCube\Laravel\Knight\Http\Actions\RequestShowAction as RequestShowAction;
+use HughCube\Laravel\Knight\Octane\Commands\PrepareCommand as OctanePrepareCommand;
 use HughCube\Laravel\Knight\OPcache\Actions\ScriptsAction as OPcacheScriptsAction;
 use HughCube\Laravel\Knight\OPcache\Actions\StatesAction as OPcacheStatesAction;
 use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand as OPcacheCompileFilesCommand;
@@ -22,7 +23,6 @@ use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use Laravel\Lumen\Application as LumenApplication;
-use HughCube\Laravel\Knight\Octane\Commands\PrepareCommand as OctanePrepareCommand;
 
 class ServiceProvider extends IlluminateServiceProvider
 {
@@ -49,7 +49,7 @@ class ServiceProvider extends IlluminateServiceProvider
     {
         $source = realpath(dirname(__DIR__).'/config/knight.php');
         if ($this->app instanceof LaravelApplication && $this->app->runningInConsole()) {
-            $this->publishes([$source => config_path("knight.php")]);
+            $this->publishes([$source => config_path('knight.php')]);
         } elseif ($this->app instanceof LumenApplication) {
             $this->app->configure('knight');
         }

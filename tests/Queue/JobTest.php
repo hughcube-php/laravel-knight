@@ -22,7 +22,7 @@ class JobTest extends TestCase
     public function testWriteLog()
     {
         /** @var Job $job */
-        $job = new class extends Job {
+        $job = new class() extends Job {
             protected function action(): void
             {
             }

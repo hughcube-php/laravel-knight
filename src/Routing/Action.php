@@ -47,17 +47,18 @@ trait Action
     abstract public function action(): mixed;
 
     /**
-     * @param  array  $data
-     * @param  int  $code
+     * @param array $data
+     * @param int   $code
+     *
      * @return JsonResponse
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
     {
         return response()->json(
             [
-                'code' => $code,
+                'code'    => $code,
                 'message' => 'ok',
-                'data' => $data
+                'data'    => $data,
             ]
         );
     }
@@ -71,8 +72,9 @@ trait Action
     }
 
     /**
-     * @return Repository
      * @throws BindingResolutionException
+     *
+     * @return Repository
      */
     protected function getContainerConfig(): Repository
     {
@@ -82,8 +84,9 @@ trait Action
     /**
      * Get HTTP Request.
      *
-     * @return Request
      * @throws BindingResolutionException
+     *
+     * @return Request
      */
     protected function getRequest(): Request
     {
@@ -100,6 +103,7 @@ trait Action
 
     /**
      * load parameters.
+     *
      * @throws ValidationException
      * @throws BindingResolutionException
      */
@@ -114,9 +118,10 @@ trait Action
     }
 
     /**
-     * @return ParameterBag
      * @throws BindingResolutionException
      * @throws ValidationException
+     *
+     * @return ParameterBag
      */
     protected function getParameter(): ParameterBag
     {
@@ -126,10 +131,11 @@ trait Action
     }
 
     /**
-     * @return mixed
      * @throws ValidationException
      * @throws BindingResolutionException
      * @throws InvalidArgumentException
+     *
+     * @return mixed
      */
     public function invoke(): mixed
     {
@@ -139,10 +145,11 @@ trait Action
     }
 
     /**
-     * @return mixed
      * @throws BindingResolutionException
      * @throws InvalidArgumentException
      * @throws ValidationException
+     *
+     * @return mixed
      */
     public function __invoke(): mixed
     {

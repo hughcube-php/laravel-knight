@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/4/15
- * Time: 8:42 下午
+ * Time: 8:42 下午.
  */
 
 namespace HughCube\Laravel\Knight\OPcache\Actions;
@@ -12,7 +12,6 @@ use Exception;
 use HughCube\Laravel\Knight\OPcache\LoadedOPcacheExtension;
 use HughCube\Laravel\Knight\Routing\Action;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\View\View;
 use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -30,9 +29,10 @@ class StatesAction
     }
 
     /**
-     * @return Response
      * @throws BindingResolutionException
      * @throws Exception
+     *
+     * @return Response
      */
     public function action(): Response
     {

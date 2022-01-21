@@ -17,8 +17,8 @@ class AutoCleanFileJob extends Job
     protected function rules(): array
     {
         return [
-            'dir' => ['required'],
-            'pattern' => ['nullable'],
+            'dir'      => ['required'],
+            'pattern'  => ['nullable'],
             'max_days' => ['integer', 'min:0'],
         ];
     }
@@ -60,6 +60,7 @@ class AutoCleanFileJob extends Job
     protected function getDirs(): array
     {
         $dir = $this->get('dir');
+
         return is_array($dir) ? $dir : [$dir];
     }
 
@@ -69,6 +70,7 @@ class AutoCleanFileJob extends Job
     protected function getPatterns(): array
     {
         $pattern = $this->get('pattern') ?: '*';
+
         return is_array($pattern) ? $pattern : [$pattern];
     }
 }

@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/12/17
- * Time: 17:33
+ * Time: 17:33.
  */
 
 namespace HughCube\Laravel\Knight\Support;
@@ -20,10 +20,12 @@ trait MultipleHandler
     }
 
     /**
-     * @param  bool  $skipHandlerException
-     * @param  bool  $logSkipHandlerException
-     * @return mixed
+     * @param bool $skipHandlerException
+     * @param bool $logSkipHandlerException
+     *
      * @throws Throwable
+     *
+     * @return mixed
      */
     protected function triggerHandlers(bool $skipHandlerException = false, bool $logSkipHandlerException = true): mixed
     {
@@ -31,6 +33,7 @@ trait MultipleHandler
 
         foreach ($this->getHandlers() as $handler) {
             $exception = null;
+
             try {
                 $results = $this->{$handler}();
             } catch (Throwable $exception) {
@@ -72,6 +75,7 @@ trait MultipleHandler
             $handlers[$method] = intval($sort);
         }
         asort($handlers);
+
         return array_keys($handlers);
     }
 }

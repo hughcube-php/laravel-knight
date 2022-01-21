@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/12/17
- * Time: 21:36
+ * Time: 21:36.
  */
 
 namespace HughCube\Laravel\Knight\Octane\Actions;
@@ -22,10 +22,11 @@ class WaitTaskCompleteAction
     use Action;
 
     /**
-     * @return JsonResponse
      * @throws BindingResolutionException
      * @throws InvalidArgumentException
      * @throws PhpVersionNotSupportedException
+     *
+     * @return JsonResponse
      */
     public function action(): JsonResponse
     {
@@ -45,18 +46,21 @@ class WaitTaskCompleteAction
     }
 
     /**
-     * @return LoggerInterface
      * @throws BindingResolutionException
+     *
+     * @return LoggerInterface
      */
     protected function getLogChannel(): LoggerInterface
     {
         $channel = $this->getContainerConfig()->get('knight.octane.wait_task_complete_log_channel');
+
         return Log::channel($channel);
     }
 
     /**
-     * @return mixed
      * @throws BindingResolutionException
+     *
+     * @return mixed
      */
     protected function getLogLevel(): mixed
     {

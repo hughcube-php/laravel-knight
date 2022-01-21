@@ -1,6 +1,6 @@
 <?php
 // phpcs:ignoreFile
-defined('THOUSAND_SEPARATOR') or define('THOUSAND_SEPARATOR',true);
+defined('THOUSAND_SEPARATOR') or define('THOUSAND_SEPARATOR', true);
 
 if (!extension_loaded('Zend OPcache')) {
     echo '<div style="background-color: #F2DEDE; color: #B94A48; padding: 1em;">You do not have the Zend OPcache extension loaded, sample data is being shown instead.</div>';
@@ -11,7 +11,7 @@ class OpCacheDataModel
 {
     private $_configuration;
     private $_status;
-    private $_d3Scripts = array();
+    private $_d3Scripts = [];
 
     public function __construct()
     {
@@ -21,12 +21,12 @@ class OpCacheDataModel
 
     public function getPageTitle()
     {
-        return 'PHP ' . phpversion() . " with OpCache {$this->_configuration['version']['version']}";
+        return 'PHP '.phpversion()." with OpCache {$this->_configuration['version']['version']}";
     }
 
     public function getStatusDataRows()
     {
-        $rows = array();
+        $rows = [];
         foreach ($this->_status as $key => $value) {
             if ($key === 'scripts') {
                 continue;
@@ -47,12 +47,12 @@ class OpCacheDataModel
                     }
                     if ($k === 'current_wasted_percentage' || $k === 'opcache_hit_rate') {
                         $v = number_format(
-                                $v,
-                                2
-                            ) . '%';
+                            $v,
+                            2
+                        ).'%';
                     }
                     if ($k === 'blacklist_miss_ratio') {
-                        $v = number_format($v, 2) . '%';
+                        $v = number_format($v, 2).'%';
                     }
                     if ($k === 'start_time' || $k === 'last_restart_time') {
                         $v = ($v ? date(DATE_RFC822, $v) : 'never');
@@ -79,7 +79,7 @@ class OpCacheDataModel
 
     public function getConfigDataRows()
     {
-        $rows = array();
+        $rows = [];
         foreach ($this->_configuration['directives'] as $key => $value) {
             if ($value === false) {
                 $value = 'false';
@@ -100,31 +100,33 @@ class OpCacheDataModel
     {
         foreach ($this->_status['scripts'] as $key => $data) {
             $dirs[dirname($key)][basename($key)] = $data;
-            $this->_arrayPset($this->_d3Scripts, $key, array(
+            $this->_arrayPset($this->_d3Scripts, $key, [
                 'name' => basename($key),
                 'size' => $data['memory_consumption'],
-            ));
+            ]);
         }
 
         asort($dirs);
 
         $basename = '';
         while (true) {
-            if (count($this->_d3Scripts) !=1) break;
-            $basename .= DIRECTORY_SEPARATOR . key($this->_d3Scripts);
+            if (count($this->_d3Scripts) != 1) {
+                break;
+            }
+            $basename .= DIRECTORY_SEPARATOR.key($this->_d3Scripts);
             $this->_d3Scripts = reset($this->_d3Scripts);
         }
 
         $this->_d3Scripts = $this->_processPartition($this->_d3Scripts, $basename);
         $id = 1;
 
-        $rows = array();
+        $rows = [];
         foreach ($dirs as $dir => $files) {
             $count = count($files);
             $file_plural = $count > 1 ? 's' : null;
             $m = 0;
             foreach ($files as $file => $data) {
-                $m += $data["memory_consumption"];
+                $m += $data['memory_consumption'];
             }
             $m = $this->_size_for_humans($m);
 
@@ -136,13 +138,13 @@ class OpCacheDataModel
 
             foreach ($files as $file => $data) {
                 $rows[] = "<tr id=\"row-{$id}\">";
-                $rows[] = "<td>" . $this->_format_value($data["hits"]) . "</td>";
-                $rows[] = "<td>" . $this->_size_for_humans($data["memory_consumption"]) . "</td>";
+                $rows[] = '<td>'.$this->_format_value($data['hits']).'</td>';
+                $rows[] = '<td>'.$this->_size_for_humans($data['memory_consumption']).'</td>';
                 $rows[] = $count > 1 ? "<td>{$file}</td>" : "<td>{$dir}/{$file}</td>";
                 $rows[] = '</tr>';
             }
 
-            ++$id;
+            $id++;
         }
 
         return implode("\n", $rows);
@@ -150,35 +152,35 @@ class OpCacheDataModel
 
     public function getScriptStatusCount()
     {
-        return count($this->_status["scripts"]);
+        return count($this->_status['scripts']);
     }
 
     public function getGraphDataSetJson()
     {
-        $dataset = array();
-        $dataset['memory'] = array(
+        $dataset = [];
+        $dataset['memory'] = [
             $this->_status['memory_usage']['used_memory'],
             $this->_status['memory_usage']['free_memory'],
             $this->_status['memory_usage']['wasted_memory'],
-        );
+        ];
 
-        $dataset['keys'] = array(
+        $dataset['keys'] = [
             $this->_status['opcache_statistics']['num_cached_keys'],
             $this->_status['opcache_statistics']['max_cached_keys'] - $this->_status['opcache_statistics']['num_cached_keys'],
-            0
-        );
+            0,
+        ];
 
-        $dataset['hits'] = array(
+        $dataset['hits'] = [
             $this->_status['opcache_statistics']['misses'],
             $this->_status['opcache_statistics']['hits'],
             0,
-        );
+        ];
 
-        $dataset['restarts'] = array(
+        $dataset['restarts'] = [
             $this->_status['opcache_statistics']['oom_restarts'],
             $this->_status['opcache_statistics']['manual_restarts'],
             $this->_status['opcache_statistics']['hash_restarts'],
-        );
+        ];
 
         if (THOUSAND_SEPARATOR === true) {
             $dataset['TSEP'] = 1;
@@ -235,7 +237,7 @@ class OpCacheDataModel
             return $value;
         }
 
-        $array = array('name' => $name,'children' => array());
+        $array = ['name' => $name, 'children' => []];
 
         foreach ($value as $k => $v) {
             $array['children'][] = $this->_processPartition($v, $k);
@@ -269,19 +271,21 @@ class OpCacheDataModel
     // Borrowed from Laravel
     private function _arrayPset(&$array, $key, $value)
     {
-        if (is_null($key)) return $array = $value;
+        if (is_null($key)) {
+            return $array = $value;
+        }
         $keys = explode(DIRECTORY_SEPARATOR, ltrim($key, DIRECTORY_SEPARATOR));
         while (count($keys) > 1) {
             $key = array_shift($keys);
-            if ( ! isset($array[$key]) || ! is_array($array[$key])) {
-                $array[$key] = array();
+            if (!isset($array[$key]) || !is_array($array[$key])) {
+                $array[$key] = [];
             }
-            $array =& $array[$key];
+            $array = &$array[$key];
         }
         $array[array_shift($keys)] = $value;
+
         return $array;
     }
-
 }
 
 $dataModel = new OpCacheDataModel();

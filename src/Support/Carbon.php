@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/12/17
- * Time: 14:51
+ * Time: 14:51.
  */
 
 namespace HughCube\Laravel\Knight\Support;
@@ -19,6 +19,7 @@ class Carbon extends \Illuminate\Support\Carbon
         }
 
         $results = static::createFromFormat($format, $date);
+
         return $results instanceof static ? $results : null;
     }
 
@@ -42,6 +43,7 @@ class Carbon extends \Illuminate\Support\Carbon
     public static function isPastDate($date, string $format = 'Y-m-d H:i:s'): bool
     {
         $date = static::fromDate($date, $format);
+
         return $date instanceof static && $date->isPast();
     }
 

@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/8/24
- * Time: 14:44
+ * Time: 14:44.
  */
 
 namespace HughCube\Laravel\Knight\Octane\Commands;
@@ -41,6 +41,6 @@ class PrepareCommand extends StartSwooleCommand
         SwooleExtension $extension
     ) {
         $this->writeServerStateFile($serverStateFile, $extension);
-        $this->info(sprintf("file writing succeeded: %s", $serverStateFile->path()));
+        $this->info(sprintf('file writing succeeded: %s', $serverStateFile->path()));
     }
 }
