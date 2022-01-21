@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/12/17
- * Time: 21:36
+ * Time: 21:36.
  */
 
 namespace HughCube\Laravel\Knight\Http\Actions;
@@ -19,9 +19,10 @@ class RequestLogAction
     use Action;
 
     /**
-     * @return Response
      * @throws BindingResolutionException
      * @throws Exception
+     *
+     * @return Response
      */
     public function action(): string
     {

@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/12/24
- * Time: 15:56
+ * Time: 15:56.
  */
 
 namespace HughCube\Laravel\Knight\Http\Middleware;
@@ -33,7 +33,8 @@ class HttpsGuard
     /**
      * Create a new middleware instance.
      *
-     * @param  Application  $app
+     * @param Application $app
+     *
      * @return void
      */
     public function __construct(Application $app)
@@ -42,16 +43,18 @@ class HttpsGuard
     }
 
     /**
-     * @param  Request  $request
-     * @param  callable  $next
-     * @param  int  $status
-     * @param  string|null  $hsts
+     * @param Request     $request
+     * @param callable    $next
+     * @param int         $status
+     * @param string|null $hsts
+     *
      * @return Response
      */
     public function handle(Request $request, callable $next, int $status = 301, ?string $hsts = null): Response
     {
         if ($this->isEnable($request) && !$this->isExcept($request) && !$request->isSecure()) {
             $url = Url::instance($request->getUri())->withScheme('https');
+
             return redirect()->to($url, $status);
         }
 
@@ -78,7 +81,8 @@ class HttpsGuard
     /**
      * Determine if the request has a URI that should be accessible in maintenance mode.
      *
-     * @param  Request  $request
+     * @param Request $request
+     *
      * @return bool
      */
     protected function isExcept(Request $request): bool
@@ -123,6 +127,7 @@ class HttpsGuard
         }
 
         $paths = ['initialize', 'invoke', 'pre-freeze', 'pre-stop'];
+
         return $request->fullUrlIs($paths) || $request->is($paths);
     }
 
@@ -134,6 +139,7 @@ class HttpsGuard
                 $fcHeaderCount++;
             }
         }
+
         return $fcHeaderCount >= 5;
     }
 }

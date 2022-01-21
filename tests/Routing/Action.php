@@ -22,11 +22,11 @@ class Action
         return $this->getParameter()->all();
     }
 
-    #[ArrayShape(["uuid" => "string"])]
+    #[ArrayShape(['uuid' => 'string'])]
     public function rules(): array
     {
         return [
-            "uuid" => "string"
+            'uuid' => 'string',
         ];
     }
 }

@@ -28,8 +28,9 @@ class KRTest extends Command
     /**
      * Execute the console command.
      *
-     * @return void
      * @throws BindingResolutionException
+     *
+     * @return void
      */
     public function handle()
     {
@@ -73,9 +74,9 @@ class KRTest extends Command
     }
 
     /**
-     * @return object
      * @throws BindingResolutionException
      *
+     * @return object
      */
     protected function makeInstance(): object
     {
@@ -95,7 +96,7 @@ class KRTest extends Command
     /**
      * 内存单位换算为M.
      *
-     * @param  int  $memory
+     * @param int $memory
      *
      * @return float
      */

@@ -25,7 +25,7 @@ class Config extends Command
     {
         parent::configure();
 
-        $this->addArgument('key', null, 'config key, Default output all', "");
+        $this->addArgument('key', null, 'config key, Default output all', '');
     }
 
     /**

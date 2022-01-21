@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/8/12
- * Time: 00:08
+ * Time: 00:08.
  */
 
 namespace HughCube\Laravel\Knight\Octane\Listeners;
@@ -15,7 +15,8 @@ class PrepareServerVariables
     /**
      * Handle the event.
      *
-     * @param  RequestReceived  $event
+     * @param RequestReceived $event
+     *
      * @return void
      */
     public function handle(mixed $event): void
@@ -24,7 +25,8 @@ class PrepareServerVariables
     }
 
     /**
-     * @param  RequestReceived  $event
+     * @param RequestReceived $event
+     *
      * @return void
      */
     protected function prepareHost(mixed $event)

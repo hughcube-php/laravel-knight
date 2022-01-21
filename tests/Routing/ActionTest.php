@@ -24,6 +24,7 @@ class ActionTest extends TestCase
 
     /**
      * @requires PHP >= 7.2
+     *
      * @throws Exception
      */
     public function testWebRoute()
@@ -59,7 +60,6 @@ class ActionTest extends TestCase
 
         $uuid = md5(random_bytes(100));
         $data = ['uuid' => $uuid, 'uuid2' => md5(random_bytes(100))];
-
 
         $request = Request::create(
             '/test',
@@ -125,14 +125,14 @@ class ActionTest extends TestCase
             $name,
             function () {
                 return random_int(0, 999999999999);
-            }
+            },
         ]);
 
         $this->assertSame($value, $this->callMethod($action, 'getOrSet', [
             $name,
             function () {
                 return random_int(0, 999999999999);
-            }
+            },
         ]));
 
         $count = 0;
@@ -141,15 +141,17 @@ class ActionTest extends TestCase
             $name,
             function () use (&$count) {
                 $count++;
+
                 return null;
-            }
+            },
         ]));
         $this->assertSame(null, $this->callMethod($action, 'getOrSet', [
             $name,
             function () use (&$count) {
                 $count++;
+
                 return null;
-            }
+            },
         ]));
         $this->assertSame(1, $count);
     }
