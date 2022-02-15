@@ -29,7 +29,7 @@ trait GetOrSet
      */
     protected function getOrSet(mixed $name, callable $callable): mixed
     {
-        $key = md5(serialize($name));
+        $key = sprintf("%s:%s", md5($key = serialize($name)), crc32($key));
         if (!array_key_exists($key, $this->hughCubeKnightClassSelfCacheStorage)) {
             $this->hughCubeKnightClassSelfCacheStorage[$key] = $callable();
         }
