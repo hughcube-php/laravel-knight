@@ -17,7 +17,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use Laravel\Lumen\Application as LumenApplication;
+use Laravel\SerializableClosure\Exceptions\PhpVersionNotSupportedException;
 use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
@@ -29,38 +29,28 @@ trait Action
     use GetOrSet;
     use Validation;
 
-    /**
-     * @var ParameterBag|null
-     */
-    protected ?ParameterBag $parameterBag = null;
-
-    /**
-     * @var Request|null
-     */
-    protected ?Request $request = null;
+    private ?ParameterBag $parameterBag = null;
 
     /**
      * action.
      *
      * @return mixed
      */
-    abstract public function action(): mixed;
+    abstract protected function action(): mixed;
 
     /**
-     * @param array $data
-     * @param int   $code
+     * @param  array  $data
+     * @param  int  $code
      *
      * @return JsonResponse
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
     {
-        return response()->json(
-            [
-                'code'    => $code,
-                'message' => 'ok',
-                'data'    => $data,
-            ]
-        );
+        return new JsonResponse([
+            'code' => $code,
+            'message' => 'ok',
+            'data' => $data,
+        ]);
     }
 
     /**
@@ -72,9 +62,8 @@ trait Action
     }
 
     /**
-     * @throws BindingResolutionException
-     *
      * @return Repository
+     * @throws BindingResolutionException
      */
     protected function getContainerConfig(): Repository
     {
@@ -82,30 +71,18 @@ trait Action
     }
 
     /**
-     * Get HTTP Request.
-     *
-     * @throws BindingResolutionException
-     *
      * @return Request
+     * @throws BindingResolutionException
      */
     protected function getRequest(): Request
     {
-        if ($this->request instanceof Request) {
-            return $this->request;
-        }
-
-        if ($this->getContainer() instanceof LumenApplication) {
-            return $this->request = $this->getContainer()->make(Request::class);
-        }
-
-        return $this->request = $this->getContainer()->make('request');
+        return $this->getContainer()->make('request');
     }
 
     /**
-     * load parameters.
-     *
-     * @throws ValidationException
+     * @return void
      * @throws BindingResolutionException
+     * @throws ValidationException
      */
     protected function loadParameters()
     {
@@ -118,10 +95,9 @@ trait Action
     }
 
     /**
+     * @return ParameterBag
      * @throws BindingResolutionException
      * @throws ValidationException
-     *
-     * @return ParameterBag
      */
     protected function getParameter(): ParameterBag
     {
@@ -131,31 +107,42 @@ trait Action
     }
 
     /**
-     * @throws ValidationException
+     * @return mixed
      * @throws BindingResolutionException
      * @throws InvalidArgumentException
-     *
-     * @return mixed
+     * @throws ValidationException
+     * @throws PhpVersionNotSupportedException
      */
     public function invoke(): mixed
     {
+        # Reset the status on each request
+        $this->parameterBag = null;
+        $this->flushHughCubeKnightClassSelfCacheStorage();
+
         $this->loadParameters();
 
         return $this->action();
     }
 
     /**
+     * @return mixed
      * @throws BindingResolutionException
      * @throws InvalidArgumentException
+     * @throws PhpVersionNotSupportedException
      * @throws ValidationException
-     *
-     * @return mixed
      */
     public function __invoke(): mixed
     {
         return $this->invoke();
     }
 
+    /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @throws BindingResolutionException
+     * @throws ValidationException
+     */
     public function __call($name, $arguments)
     {
         $parameter = $this->getParameter();

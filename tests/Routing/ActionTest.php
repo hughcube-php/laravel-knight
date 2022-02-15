@@ -70,7 +70,7 @@ class ActionTest extends TestCase
             ['CONTENT_TYPE' => 'application/json'],
             json_encode($data)
         );
-        $this->setProperty($action, 'request', $request);
+        $this->app->instance('request', $request);
 
         $parameter = $this->callMethod($action, 'getParameter');
         $this->assertInstanceOf(ParameterBag::class, $parameter);
@@ -107,9 +107,9 @@ class ActionTest extends TestCase
             ['CONTENT_TYPE' => 'application/json'],
             json_encode($data)
         );
-        $this->setProperty($action, 'request', $request);
+        $this->app->instance('request', $request);
 
-        $this->assertSame($action(), $action->action());
+        $this->assertSame($action(), $this->callMethod($action, 'action'));
         $this->assertSame($action()['uuid'], $uuid);
     }
 

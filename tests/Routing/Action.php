@@ -8,6 +8,7 @@
 
 namespace HughCube\Laravel\Knight\Tests\Routing;
 
+use Illuminate\Validation\ValidationException;
 use JetBrains\PhpStorm\ArrayShape;
 
 class Action
@@ -16,8 +17,9 @@ class Action
 
     /**
      * @return mixed
+     * @throws ValidationException
      */
-    public function action(): mixed
+    protected function action(): mixed
     {
         return $this->getParameter()->all();
     }

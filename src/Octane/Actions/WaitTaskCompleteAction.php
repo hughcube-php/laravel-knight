@@ -22,13 +22,13 @@ class WaitTaskCompleteAction
     use Action;
 
     /**
-     * @throws BindingResolutionException
+     * @return JsonResponse
      * @throws InvalidArgumentException
      * @throws PhpVersionNotSupportedException
      *
-     * @return JsonResponse
+     * @throws BindingResolutionException
      */
-    public function action(): JsonResponse
+    protected function action(): JsonResponse
     {
         $start = microtime(true);
         $workerCount = Octane::waitSwooleTasks();
@@ -46,9 +46,8 @@ class WaitTaskCompleteAction
     }
 
     /**
-     * @throws BindingResolutionException
-     *
      * @return LoggerInterface
+     *
      */
     protected function getLogChannel(): LoggerInterface
     {
@@ -58,9 +57,9 @@ class WaitTaskCompleteAction
     }
 
     /**
+     * @return mixed
      * @throws BindingResolutionException
      *
-     * @return mixed
      */
     protected function getLogLevel(): mixed
     {

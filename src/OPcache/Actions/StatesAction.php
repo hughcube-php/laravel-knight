@@ -29,12 +29,12 @@ class StatesAction
     }
 
     /**
-     * @throws BindingResolutionException
+     * @return Response
      * @throws Exception
      *
-     * @return Response
+     * @throws BindingResolutionException
      */
-    public function action(): Response
+    protected function action(): Response
     {
         $this->loadedOPcacheExtension();
 

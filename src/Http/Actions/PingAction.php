@@ -14,7 +14,7 @@ class PingAction
 {
     use Action;
 
-    public function action(): string
+    protected function action(): string
     {
         return 'done';
     }

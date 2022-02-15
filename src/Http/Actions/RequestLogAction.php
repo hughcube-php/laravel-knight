@@ -10,7 +10,6 @@ namespace HughCube\Laravel\Knight\Http\Actions;
 
 use Exception;
 use HughCube\Laravel\Knight\Routing\Action;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -19,12 +18,11 @@ class RequestLogAction
     use Action;
 
     /**
-     * @throws BindingResolutionException
+     * @return Response
      * @throws Exception
      *
-     * @return Response
      */
-    public function action(): string
+    protected function action(): string
     {
         Log::info(sprintf(
             'request: uri:%s, headers:%s, body:%s',

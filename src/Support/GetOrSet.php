@@ -8,6 +8,8 @@
 
 namespace HughCube\Laravel\Knight\Support;
 
+use Illuminate\Support\Facades\Cache;
+
 trait GetOrSet
 {
     /**
@@ -22,18 +24,23 @@ trait GetOrSet
      *     return Model::findById($this->getParameter()->get('id'));
      * });
      *
-     * @param mixed    $name
-     * @param callable $callable
-     *
+     * @param  string  $key
+     * @param  callable  $callable
      * @return mixed
      */
-    protected function getOrSet(mixed $name, callable $callable): mixed
+    protected function getOrSet(string $key, callable $callable): mixed
     {
-        $key = md5(serialize($name));
         if (!array_key_exists($key, $this->hughCubeKnightClassSelfCacheStorage)) {
             $this->hughCubeKnightClassSelfCacheStorage[$key] = $callable();
         }
-
         return $this->hughCubeKnightClassSelfCacheStorage[$key];
+    }
+
+    /**
+     * @return void
+     */
+    public function flushHughCubeKnightClassSelfCacheStorage()
+    {
+        $this->hughCubeKnightClassSelfCacheStorage = [];
     }
 }

@@ -18,12 +18,11 @@ class RequestShowAction
     use Action;
 
     /**
-     * @throws BindingResolutionException
      * @throws Exception
      *
      * @return Response
      */
-    public function action(): Response
+    protected function action(): Response
     {
         return $this->asJson([
             'uri'     => $this->getRequest()->getUri(),
