@@ -21,9 +21,6 @@ use Laravel\SerializableClosure\Exceptions\PhpVersionNotSupportedException;
 use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
-/**
- * @mixin ParameterBag
- */
 trait Action
 {
     use GetOrSet;
@@ -104,6 +101,16 @@ trait Action
         $this->loadParameters();
 
         return $this->parameterBag;
+    }
+
+    /**
+     * @return ParameterBag
+     * @throws BindingResolutionException
+     * @throws ValidationException
+     */
+    protected function p(): ParameterBag
+    {
+        return $this->getParameter();
     }
 
     /**
