@@ -25,7 +25,7 @@ trait Model
     private bool $isFromCache = false;
 
     /**
-     * @param mixed|null $date
+     * @param  mixed|null  $date
      *
      * @return Carbon|null
      */
@@ -35,7 +35,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return Carbon|null
      */
@@ -45,7 +45,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return Carbon|null
      */
@@ -55,7 +55,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return Carbon|null
      */
@@ -71,7 +71,15 @@ trait Model
     {
         $deletedAt = $this->getAttribute($this->getDeletedAtColumn());
 
-        return null === $deletedAt || (is_numeric($deletedAt) && 0 == $deletedAt);
+        if (null === $deletedAt) {
+            return false;
+        }
+
+        if (is_numeric($deletedAt) && 0 == $deletedAt) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -97,7 +105,7 @@ trait Model
     /**
      * Create a new Eloquent query builder for the model.
      *
-     * @param \Illuminate\Database\Query\Builder $query
+     * @param  \Illuminate\Database\Query\Builder  $query
      *
      * @return Builder
      */
@@ -152,11 +160,11 @@ trait Model
     /**
      * 缓存的时间, 默认5-7天.
      *
-     * @param int|null $duration
-     *
-     * @throws Exception
+     * @param  int|null  $duration
      *
      * @return int
+     * @throws Exception
+     *
      */
     public function getCacheTtl(int $duration = null): int
     {
@@ -172,7 +180,7 @@ trait Model
     }
 
     /**
-     * @param mixed $id
+     * @param  mixed  $id
      *
      * @return static|null
      */
@@ -183,7 +191,7 @@ trait Model
     }
 
     /**
-     * @param array $ids
+     * @param  array  $ids
      *
      * @return Collection
      */
