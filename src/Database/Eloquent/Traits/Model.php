@@ -8,7 +8,6 @@ use HughCube\Laravel\Knight\Database\Eloquent\Builder;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
-use JetBrains\PhpStorm\Pure;
 use Psr\SimpleCache\InvalidArgumentException;
 
 /**
@@ -33,7 +32,7 @@ trait Model
      *
      * @return Carbon|null
      */
-    public function toCarbon(mixed $date = null)
+    public function toCarbon($date = null)
     {
         return empty($date) ? null : Carbon::parse($date);
     }
@@ -43,7 +42,7 @@ trait Model
      *
      * @return Carbon|null
      */
-    public function getCreatedAtAttribute(mixed $date)
+    public function getCreatedAtAttribute($date)
     {
         return $this->toCarbon($date);
     }
@@ -53,7 +52,7 @@ trait Model
      *
      * @return Carbon|null
      */
-    public function getUpdatedAtAttribute(mixed $date)
+    public function getUpdatedAtAttribute($date)
     {
         return $this->toCarbon($date);
     }
@@ -63,7 +62,7 @@ trait Model
      *
      * @return Carbon|null
      */
-    public function getDeleteAtAttribute(mixed $date)
+    public function getDeleteAtAttribute($date)
     {
         return $this->toCarbon($date);
     }
@@ -75,7 +74,15 @@ trait Model
     {
         $deletedAt = $this->getAttribute($this->getDeletedAtColumn());
 
-        return null === $deletedAt || (is_numeric($deletedAt) && 0 == $deletedAt);
+        if (null === $deletedAt) {
+            return false;
+        }
+
+        if (0 == $deletedAt) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
