@@ -20,7 +20,7 @@ use ReflectionMethod;
 class TestCase extends OrchestraTestCase
 {
     /**
-     * @param Application $app
+     * @param  Application  $app
      *
      * @return array
      */
@@ -32,7 +32,7 @@ class TestCase extends OrchestraTestCase
     }
 
     /**
-     * @param Application $app
+     * @param  Application  $app
      *
      * @throws Exception
      */
@@ -44,7 +44,7 @@ class TestCase extends OrchestraTestCase
     }
 
     /**
-     * @param Application $app
+     * @param  Application  $app
      */
     protected function setupCache(Application $app)
     {
@@ -53,21 +53,21 @@ class TestCase extends OrchestraTestCase
 
         $appConfig->set('cache', [
             'default' => 'file',
-            'stores'  => [
+            'stores' => [
                 'array' => [
-                    'driver'    => 'array',
+                    'driver' => 'array',
                     'serialize' => true,
                 ],
                 'file' => [
                     'driver' => 'file',
-                    'path'   => '/tmp/test/',
+                    'path' => '/tmp/test/',
                 ],
             ],
         ]);
     }
 
     /**
-     * @param Application $app
+     * @param  Application  $app
      *
      * @throws Exception
      */
@@ -80,13 +80,13 @@ class TestCase extends OrchestraTestCase
         touch($file);
 
         $appConfig->set('database', [
-            'default'     => 'sqlite',
+            'default' => 'sqlite',
             'connections' => [
                 'sqlite' => [
-                    'driver'                  => 'sqlite',
-                    'url'                     => '',
-                    'database'                => $file,
-                    'prefix'                  => '',
+                    'driver' => 'sqlite',
+                    'url' => '',
+                    'database' => $file,
+                    'prefix' => '',
                     'foreign_key_constraints' => true,
                 ],
             ],
@@ -94,15 +94,14 @@ class TestCase extends OrchestraTestCase
     }
 
     /**
-     * @param object $object
-     * @param string $method
-     * @param array  $args
-     *
-     * @throws ReflectionException
+     * @param  string|object  $object  $object
+     * @param  string  $method
+     * @param  array  $args
      *
      * @return mixed
+     * @throws ReflectionException
      */
-    protected static function callMethod(object $object, string $method, array $args = []): mixed
+    protected static function callMethod(string|object $object, string $method, array $args = []): mixed
     {
         $class = new ReflectionClass($object);
 
@@ -114,12 +113,12 @@ class TestCase extends OrchestraTestCase
     }
 
     /**
-     * @param object $object $object
-     * @param string $name
-     *
-     * @throws ReflectionException
+     * @param  object  $object  $object
+     * @param  string  $name
      *
      * @return mixed
+     * @throws ReflectionException
+     *
      */
     protected static function getProperty(object $object, string $name): mixed
     {
@@ -132,9 +131,9 @@ class TestCase extends OrchestraTestCase
     }
 
     /**
-     * @param object $object
-     * @param string $name
-     * @param mixed  $value
+     * @param  object  $object
+     * @param  string  $name
+     * @param  mixed  $value
      *
      * @throws ReflectionException
      */

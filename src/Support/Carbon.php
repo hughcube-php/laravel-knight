@@ -8,6 +8,7 @@
 
 namespace HughCube\Laravel\Knight\Support;
 
+use Carbon\Carbon as BaseCarbon;
 use DateTime;
 
 class Carbon extends \Illuminate\Support\Carbon
@@ -18,9 +19,8 @@ class Carbon extends \Illuminate\Support\Carbon
             return null;
         }
 
-        $results = static::createFromFormat($format, $date);
-
-        return $results instanceof static ? $results : null;
+        $dateTime = static::createFromFormat($format, $date);
+        return $dateTime instanceof static ? $dateTime : null;
     }
 
     public static function asDate($value, $format = 'Y-m-d H:i:s'): ?string
@@ -29,22 +29,17 @@ class Carbon extends \Illuminate\Support\Carbon
             return $value->format($format);
         }
 
-        if (empty($value)) {
-            return null;
-        }
-
         if (is_numeric($value) && $value > 0) {
             return date($format, $value);
         }
 
-        return $value;
+        return null;
     }
 
     public static function isPastDate($date, string $format = 'Y-m-d H:i:s'): bool
     {
-        $date = static::fromDate($date, $format);
-
-        return $date instanceof static && $date->isPast();
+        $dateTime = static::fromDate($date, $format);
+        return $dateTime instanceof BaseCarbon && $dateTime->isPast();
     }
 
     public static function isPastTimestamp($timestamp): bool

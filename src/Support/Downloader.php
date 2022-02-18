@@ -8,6 +8,8 @@
 
 namespace HughCube\Laravel\Knight\Support;
 
+use BadMethodCallException;
+use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use HughCube\StaticInstanceInterface;
@@ -16,7 +18,9 @@ use Illuminate\Support\Facades\File;
 use RuntimeException;
 
 /**
- * @method static void save(string $url, string $file, array $options = [])
+ * @method static string save(string $url, string $file = null, array $options = [])
+ * @method static string get(string $url, string $file = null, array $options = [])
+ * @method static string post(string $url, string $file = null, array $options = [])
  */
 class Downloader implements StaticInstanceInterface
 {
@@ -24,7 +28,7 @@ class Downloader implements StaticInstanceInterface
     use StaticInstanceTrait;
 
     /**
-     * @param string $url
+     * @param  string  $url
      *
      * @return string
      */
@@ -42,50 +46,63 @@ class Downloader implements StaticInstanceInterface
     }
 
     /**
-     * @param string $method
-     * @param string $url
-     * @param string $file
-     * @param array  $options
-     *
+     * @param  string  $method
+     * @param  string  $url
+     * @param  null|string  $file
+     * @param  array  $options
+     * @return string
      * @throws GuzzleException
-     *
-     * @return void
+     * @throws Exception
      */
-    private function to(string $method, string $url, string $file, array $options = [])
+    public function to(string $method, string $url, ?string $file = null, array $options = []): string
     {
+        $file = $file ?: $this->path($url);
         if (!File::exists(dirname($file))) {
             File::makeDirectory(dirname($file), 0777, true);
         }
 
-        $this->getHttpClient()->request($method, $url, array_merge(
+        $response = $this->getHttpClient()->request($method, $url, array_merge(
             [RequestOptions::SINK => $file, RequestOptions::TIMEOUT => 120],
             $options
         ));
+
+        if (200 <= $response->getStatusCode() && 300 > $response->getStatusCode()) {
+            return $file;
+        }
+
+        throw new Exception('File download failure.');
     }
 
     /**
-     * @param string $method
-     * @param array  $args
-     *
+     * @param  string  $name
+     * @param  array  $args
+     * @return string
      * @throws GuzzleException
      *
-     * @return void
      */
-    public function __call(string $method, array $args)
+    public function __call(string $name, array $args): string
     {
-        array_unshift($args, ('SAVE' === strtoupper($method) ? 'GET' : $method));
-        $this->to(...$args);
+        if ('save' === strtolower($name)) {
+            return $this->get(...$args);
+        }
+
+        if (in_array(strtoupper($name), ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])) {
+            array_unshift($args, strtoupper($name));
+            return $this->to(...$args);
+        }
+
+        throw new BadMethodCallException("No such method exists: {$name}");
     }
 
     /**
      * Handle dynamic, static calls to the object.
      *
-     * @param string $method
-     * @param array  $args
-     *
-     * @throws RuntimeException
+     * @param  string  $method
+     * @param  array  $args
      *
      * @return mixed
+     * @throws RuntimeException
+     *
      */
     public static function __callStatic(string $method, array $args)
     {

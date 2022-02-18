@@ -14,41 +14,40 @@ use Throwable;
 
 trait MultipleHandler
 {
-    protected function isStopHandlerResults($results): bool
+    protected function isStopHandlerResults($results, Throwable $exception = null): bool
     {
         return null !== $results;
     }
 
     /**
-     * @param bool $skipHandlerException
-     * @param bool $logSkipHandlerException
-     *
-     * @throws Throwable
-     *
+     * @param  bool  $tryException
+     * @param  bool  $logException
      * @return mixed
+     * @throws Throwable
      */
-    protected function triggerHandlers(bool $skipHandlerException = false, bool $logSkipHandlerException = true): mixed
+    protected function triggerHandlers(bool $tryException = false, bool $logException = true): mixed
     {
         $results = null;
 
         foreach ($this->getHandlers() as $handler) {
             $exception = null;
-
             try {
                 $results = $this->{$handler}();
             } catch (Throwable $exception) {
             }
 
-            if ($exception instanceof Throwable && $skipHandlerException) {
-                $logSkipHandlerException and app(ExceptionHandler::class)->report($exception);
-                continue;
-            }
-
-            if ($exception instanceof Throwable && !$skipHandlerException) {
+            /** 抛出异常 */
+            if ($exception instanceof Throwable && !$tryException) {
                 throw $exception;
             }
 
-            if ($this->isStopHandlerResults($results)) {
+            /** 记录异常 */
+            if ($exception instanceof Throwable && $logException) {
+                app(ExceptionHandler::class)->report($exception);
+            }
+
+            /** 是否终止执行 */
+            if ($this->isStopHandlerResults($results, $exception)) {
                 return $results;
             }
         }
