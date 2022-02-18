@@ -19,7 +19,7 @@ use JetBrains\PhpStorm\ArrayShape;
 /**
  * @mixin Action
  */
-trait SimpleQueryBuilderPaginate
+trait SimplePaginateQuery
 {
     #[ArrayShape([])]
     protected function rules(): array

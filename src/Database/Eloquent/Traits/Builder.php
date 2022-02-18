@@ -12,6 +12,7 @@ use Exception;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use Illuminate\Cache\NullStore;
 use Illuminate\Cache\Repository;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
@@ -19,6 +20,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
+use Traversable;
 
 /**
  * Trait Builder.
@@ -76,15 +78,19 @@ trait Builder
     }
 
     /**
+     * @throws Exception
+     */
+    protected function getCacheTtl(): int
+    {
+        return $this->getModel()->getCacheTtl();
+    }
+
+    /**
      * @return string|null
      */
     protected function getCachePlaceholder(): ?string
     {
-        if (method_exists($this->getModel(), 'getCachePlaceholder')) {
-            return $this->getModel()->getCachePlaceholder();
-        }
-
-        return null;
+        return $this->getModel()->getCachePlaceholder();
     }
 
     /**
@@ -96,7 +102,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return bool
      */
@@ -106,7 +112,7 @@ trait Builder
     }
 
     /**
-     * @param array $columns
+     * @param  array  $columns
      *
      * @return string
      */
@@ -127,31 +133,31 @@ trait Builder
     }
 
     /**
-     * @param mixed $pk
-     *
-     * @throws InvalidArgumentException
+     * @param  mixed  $pk
      *
      * @return mixed
+     * @throws InvalidArgumentException
+     *
      */
     public function findByPk(mixed $pk): mixed
     {
-        $collection = $this->findByPks((empty($pk) ? [] : [$pk]));
-
-        return $collection->get($pk);
+        return $this->findByPks([$pk])->first();
     }
 
     /**
-     * @param array $pks
-     *
-     * @throws InvalidArgumentException
-     *
+     * @param  array|Arrayable|Traversable  $pks
      * @return EloquentCollection
+     * @throws InvalidArgumentException
      */
-    public function findByPks(array $pks): EloquentCollection
+    public function findByPks(array|Arrayable|Traversable $pks): EloquentCollection
     {
-        $collection = Collection::make($pks)->map(function ($value) {
-            return [$this->getModel()->getKeyName() => $value];
-        });
+        $collection = Collection::make($pks)
+            ->filter(function ($value) {
+                return $this->getModel()->isMatchPk($value);
+            })
+            ->map(function ($value) {
+                return [$this->getModel()->getKeyName() => $value];
+            });
 
         $rows = $this->findUniqueRows($collection->toArray())->keyBy($this->getModel()->getKeyName());
 
@@ -171,31 +177,26 @@ trait Builder
      */
     public function findUniqueRow(mixed $id)
     {
-        $rows = $this->findUniqueRows([$id]);
-
-        return $rows->isEmpty() ? null : $rows->first();
+        return $this->findUniqueRows([$id])->first();
     }
 
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param array[] $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
-     *
-     * @throws InvalidArgumentException
+     * @param  array|Arrayable|Traversable  $ids  必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
+     * @return EloquentCollection
      * @throws Exception
      *
-     * @return EloquentCollection
+     * @throws InvalidArgumentException
      */
-    public function findUniqueRows(array $ids): EloquentCollection
+    public function findUniqueRows(array|Arrayable|Traversable $ids): EloquentCollection
     {
-        $rows = $this->getModel()->newCollection([]);
+        $ids = Collection::make($ids)->values();
+        $rows = $this->getModel()->newCollection();
 
-        if (empty($ids)) {
+        if ($ids->isEmpty()) {
             return $rows;
         }
-
-        /** @var Collection $ids */
-        $ids = Collection::make($ids)->values();
 
         $cacheKeys = $ids->mapWithKeys(function ($id, $key) {
             return [$key => $this->makeColumnsCacheKey($id)];
@@ -221,7 +222,7 @@ trait Builder
         /** db 查询没有命中缓存的数据 */
         /** [['pk1' => 1, 'pk2' => 1], ['pk1' => 1, 'pk2' => 1]] => ['pk1' => [1, 1], 'pk2' => [1, 1]] */
         /** [['pk1' => 1, 'pk2' => 1]] => ['pk1' => 1, 'pk2' => 1] */
-        $condition = Collection::make(array_merge_recursive(...$ids->only($missIndexes->toArray())));
+        $condition = Collection::make(array_merge_recursive(...$ids->only($missIndexes->toArray())->toArray()));
         $fromDbRows = $this
             ->where(
                 function (self $query) use ($condition) {
@@ -236,9 +237,8 @@ trait Builder
                     }
                 }
             )
-            ->limit(count($missIndexes))
-            ->get()
-            ->keyBy(function (IlluminateModel $model) use ($condition) {
+            ->limit($missIndexes->count())
+            ->get()->keyBy(function (IlluminateModel $model) use ($condition) {
                 return $this->makeColumnsCacheKey(Arr::only($model->getAttributes(), $condition->keys()->toArray()));
             });
 
@@ -252,7 +252,7 @@ trait Builder
             }
         }
         if (!empty($cacheItems)) {
-            $this->getCache()->setMultiple($cacheItems, $this->getModel()->getCacheTtl());
+            $this->getCache()->setMultiple($cacheItems, $this->getCacheTtl());
         }
 
         /** 合并db的查询结果 */
@@ -343,9 +343,9 @@ trait Builder
     }
 
     /**
+     * @return bool
      * @throws InvalidArgumentException
      *
-     * @return bool
      */
     public function refreshRowCache(): bool
     {

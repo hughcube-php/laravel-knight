@@ -5,11 +5,13 @@ namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 use Carbon\Carbon;
 use Exception;
 use HughCube\Laravel\Knight\Database\Eloquent\Builder;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 use JetBrains\PhpStorm\Pure;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
+use Traversable;
 
 /**
  * Trait QueryCache.
@@ -181,21 +183,20 @@ trait Model
 
     /**
      * @param  mixed  $id
-     *
      * @return static|null
+     * @throws InvalidArgumentException
      */
     public static function findById(mixed $id): ?static
     {
-        /** @phpstan-ignore-next-line */
-        return static::query()->findByPk($id);
+        return static::findByIds([$id])->first();
     }
 
     /**
-     * @param  array  $ids
-     *
+     * @param  array|Arrayable|Traversable  $ids
      * @return Collection
+     * @throws InvalidArgumentException
      */
-    public static function findByIds(array $ids): Collection
+    public static function findByIds(array|Arrayable|Traversable $ids): Collection
     {
         return static::query()->findByPks($ids);
     }
@@ -216,6 +217,11 @@ trait Model
     public function refreshRowCache(): bool
     {
         return $this->newQuery()->refreshRowCache();
+    }
+
+    public function isMatchPk(mixed $value): bool
+    {
+        return !empty($value);
     }
 
     /**
