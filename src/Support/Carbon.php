@@ -13,6 +13,14 @@ use DateTime;
 
 class Carbon extends \Illuminate\Support\Carbon
 {
+    /**
+     * @return float
+     */
+    public function getFloatTimestamp(): float
+    {
+        return $this->diffInRealMicroseconds() / static::MICROSECONDS_PER_SECOND;
+    }
+
     public static function fromDate($date, string $format = 'Y-m-d H:i:s'): null|static
     {
         if (empty($date)) {
@@ -30,7 +38,7 @@ class Carbon extends \Illuminate\Support\Carbon
         }
 
         if (is_numeric($value) && $value > 0) {
-            return date($format, $value);
+            return static::createFromTimestamp($value)->format($format);
         }
 
         return null;
