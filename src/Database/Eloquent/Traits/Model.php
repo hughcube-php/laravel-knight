@@ -28,12 +28,21 @@ trait Model
 
     /**
      * @param  mixed|null  $date
-     *
      * @return Carbon|null
      */
     public function toCarbon(mixed $date = null): ?Carbon
     {
         return empty($date) ? null : Carbon::parse($date);
+    }
+
+    /**
+     * @param  mixed  $dateTime
+     * @param  string  $format
+     * @return string|null
+     */
+    public function toDate(mixed $dateTime, string $format = 'Y-m-d H:i:s'): ?string
+    {
+        return $dateTime instanceof Carbon ? $dateTime->format($format) : null;
     }
 
     /**
@@ -64,6 +73,33 @@ trait Model
     public function getDeleteAtAttribute(mixed $date): ?Carbon
     {
         return $this->toCarbon($date);
+    }
+
+    /**
+     * @param  string  $format
+     * @return string|null
+     */
+    public function getCreatedAtDate(string $format = 'Y-m-d H:i:s'): ?string
+    {
+        return $this->toDate($this->{$this->getCreatedAtColumn()}, $format);
+    }
+
+    /**
+     * @param  string  $format
+     * @return string|null
+     */
+    public function getUpdatedAtDate(string $format = 'Y-m-d H:i:s'): ?string
+    {
+        return $this->toDate($this->{$this->getUpdatedAtColumn()}, $format);
+    }
+
+    /**
+     * @param  string  $format
+     * @return string|null
+     */
+    public function getDeleteAtDate(string $format = 'Y-m-d H:i:s'): ?string
+    {
+        return $this->toDate($this->{$this->getDeletedAtColumn()}, $format);
     }
 
     /**
