@@ -46,22 +46,22 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     /**
      * @var array
      */
-    protected array $data = [];
+    protected $data = [];
 
     /**
      * @var array
      */
-    protected array $validData = [];
+    protected $validData = [];
 
     /**
      * @var array|string|null
      */
-    protected null|string|array $logChannel = null;
+    protected $logChannel = null;
 
     /**
-     * @var string|int|null
+     * @var int|null
      */
-    protected null|string|int $pid = null;
+    protected $pid = null;
 
     /**
      * Create a new job instance.
@@ -106,7 +106,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param int $flags
+     * @param  int  $flags
      *
      * @return string
      */
@@ -132,7 +132,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param int $flags
+     * @param  int  $flags
      *
      * @return string
      */
@@ -142,33 +142,31 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param string $key
-     * @param null   $default
-     *
+     * @param  string  $key
+     * @param  null  $default
      * @return mixed
      */
-    protected function get(string $key, $default = null): mixed
+    protected function get(string $key, $default = null)
     {
         return Arr::get($this->validData, $key, $default);
     }
 
     /**
-     * @param mixed $key
+     * @param  mixed  $key
      *
      * @return bool
      */
-    protected function has(mixed $key): bool
+    protected function has($key): bool
     {
         return Arr::has($this->validData, $key);
     }
 
     /**
-     * @param string $key
-     * @param mixed  $value
-     *
+     * @param  string  $key
+     * @param  mixed  $value
      * @return static
      */
-    protected function set(string $key, mixed $value): static
+    protected function set(string $key, $value)
     {
         Arr::set($this->validData, $key, $value);
 
@@ -176,55 +174,59 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @return string|int
+     * @return int
      */
-    protected function getPid(): string|int
+    protected function getPid()
     {
         if (null === $this->pid) {
-            $this->setPid(Str::random(5));
+            $this->setPid(crc32(Str::random(5)));
         }
 
         return $this->pid;
     }
 
     /**
-     * @param string|int|null $pid
-     *
+     * @param  string|int|null  $pid
      * @return $this
      */
-    public function setPid(null|string|int $pid): static
+    public function setPid($pid)
     {
         $this->pid = $pid;
 
         return $this;
     }
 
-    #[Pure]
     protected function getName($job = null): string
     {
         return Str::afterLast(get_class(($job ?? $this)), '\\');
     }
 
-    public function getLogChannel(): array|string|null
+    /**
+     * @return array|string|null
+     */
+    public function getLogChannel()
     {
         return $this->logChannel;
     }
 
-    public function setLogChannel(array|string|null $channel = null): static
+    /**
+     * @param  array|string|null  $channel
+     * @return $this
+     */
+    public function setLogChannel($channel = null)
     {
         $this->logChannel = $channel;
-
         return $this;
     }
 
     /**
      * @param $level
-     * @param string|Stringable $message
-     * @param array             $context
+     * @param  string|Stringable  $message
+     * @param  array  $context
      *
      * @return void
      */
-    protected function log($level, string|Stringable $message, array $context = [])
+    protected function log($level, $message, array $context = [])
     {
         $message = sprintf('[%s-%s] %s', $this->getName(), $this->getPid(), $message);
         Log::channel($this->getLogChannel())->log($level, $message, $context);

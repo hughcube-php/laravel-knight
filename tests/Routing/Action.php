@@ -9,7 +9,6 @@
 namespace HughCube\Laravel\Knight\Tests\Routing;
 
 use Illuminate\Validation\ValidationException;
-use JetBrains\PhpStorm\ArrayShape;
 
 class Action
 {
@@ -19,12 +18,11 @@ class Action
      * @return mixed
      * @throws ValidationException
      */
-    protected function action(): mixed
+    protected function action()
     {
         return $this->getParameter()->all();
     }
 
-    #[ArrayShape(['uuid' => 'string'])]
     public function rules(): array
     {
         return [

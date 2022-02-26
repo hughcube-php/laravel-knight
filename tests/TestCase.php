@@ -28,6 +28,7 @@ class TestCase extends OrchestraTestCase
     {
         return [
             DatabaseServiceProvider::class,
+            \HughCube\Laravel\Knight\ServiceProvider::class,
         ];
     }
 
@@ -38,6 +39,8 @@ class TestCase extends OrchestraTestCase
      */
     protected function getEnvironmentSetUp($app)
     {
+        $this->
+
         $app['config']->set('app.key', 'ZsZewWyUJ5FsKp9lMwv4tYbNlegQilM7');
 
         $this->setupEloquent($app);
@@ -101,7 +104,7 @@ class TestCase extends OrchestraTestCase
      * @return mixed
      * @throws ReflectionException
      */
-    protected static function callMethod(string|object $object, string $method, array $args = []): mixed
+    protected static function callMethod($object, string $method, array $args = [])
     {
         $class = new ReflectionClass($object);
 

@@ -23,6 +23,8 @@ use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use Laravel\Lumen\Application as LumenApplication;
+use Laravel\Octane\Commands\StartSwooleCommand;
+
 
 class ServiceProvider extends IlluminateServiceProvider
 {
@@ -62,8 +64,11 @@ class ServiceProvider extends IlluminateServiceProvider
             Environment::class,
             PhpIniFile::class,
             KRTest::class,
-            OctanePrepareCommand::class,
         ]);
+
+        if (class_exists(StartSwooleCommand::class)) {
+            $this->commands([OctanePrepareCommand::class]);
+        }
     }
 
     protected function bootOPcache()

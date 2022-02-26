@@ -26,14 +26,17 @@ trait Action
     use GetOrSet;
     use Validation;
 
-    private ?ParameterBag $parameterBag = null;
+    /**
+     * @var ParameterBag|null
+     */
+    private $parameterBag = null;
 
     /**
      * action.
      *
      * @return mixed
      */
-    abstract protected function action(): mixed;
+    abstract protected function action();
 
     /**
      * @param  array  $data
@@ -118,9 +121,8 @@ trait Action
      * @throws BindingResolutionException
      * @throws InvalidArgumentException
      * @throws ValidationException
-     * @throws PhpVersionNotSupportedException
      */
-    public function invoke(): mixed
+    public function invoke()
     {
         # Reset the status on each request
         $this->parameterBag = null;
@@ -135,10 +137,9 @@ trait Action
      * @return mixed
      * @throws BindingResolutionException
      * @throws InvalidArgumentException
-     * @throws PhpVersionNotSupportedException
      * @throws ValidationException
      */
-    public function __invoke(): mixed
+    public function __invoke()
     {
         return $this->invoke();
     }
