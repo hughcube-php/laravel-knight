@@ -13,7 +13,7 @@ trait GetOrSet
     /**
      * @var array
      */
-    private array $hughCubeKnightClassSelfCacheStorage = [];
+    private $hughCubeKnightClassSelfCacheStorage = [];
 
     /**
      * The user builds virtual properties.
@@ -27,7 +27,7 @@ trait GetOrSet
      *
      * @return mixed
      */
-    protected function getOrSet(mixed $name, callable $callable): mixed
+    protected function getOrSet($name, callable $callable)
     {
         $key = sprintf("%s:%s", md5($key = serialize($name)), crc32($key));
         if (!array_key_exists($key, $this->hughCubeKnightClassSelfCacheStorage)) {

@@ -7,9 +7,9 @@ use Jenssegers\Agent\Agent;
 trait Request
 {
     /**
-     * @var ?Agent
+     * @var null|Agent
      */
-    protected ?Agent $userAgentDetect;
+    protected $userAgentDetect;
 
     /**
      * 获取agent检测.

@@ -33,12 +33,12 @@ trait Builder
     /**
      * @var bool
      */
-    protected bool $enableCache = true;
+    protected $enableCache = true;
 
     /**
      * @return static
      */
-    public function noCache(): static
+    public function noCache()
     {
         $this->enableCache = false;
 
@@ -106,7 +106,7 @@ trait Builder
      *
      * @return bool
      */
-    protected function isCachePlaceholder(mixed $value): bool
+    protected function isCachePlaceholder($value): bool
     {
         return $value === $this->getCachePlaceholder() && $this->hasCachePlaceholder();
     }
@@ -134,12 +134,11 @@ trait Builder
 
     /**
      * @param  mixed  $pk
-     *
-     * @return mixed
+     * @return static|null
      * @throws InvalidArgumentException
      *
      */
-    public function findByPk(mixed $pk): mixed
+    public function findByPk($pk)
     {
         return $this->findByPks([$pk])->first();
     }
@@ -149,7 +148,7 @@ trait Builder
      * @return EloquentCollection
      * @throws InvalidArgumentException
      */
-    public function findByPks(array|Arrayable|Traversable $pks): EloquentCollection
+    public function findByPks($pks): EloquentCollection
     {
         $collection = Collection::make($pks)
             ->filter(function ($value) {
@@ -189,7 +188,7 @@ trait Builder
      *
      * @throws InvalidArgumentException
      */
-    public function findUniqueRows(array|Arrayable|Traversable $ids): EloquentCollection
+    public function findUniqueRows($ids): EloquentCollection
     {
         $ids = Collection::make($ids)->values();
         $rows = $this->getModel()->newCollection();

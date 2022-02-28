@@ -9,7 +9,7 @@ jobs:
       max-parallel: 15
       matrix:
         operating-system: [ ubuntu-latest, windows-latest, macOS-latest ]
-        php-versions: [ '7.0', '7.1', '7.2', '7.3', '7.4', '8.0' ]
+        php-versions: [ '7.2', '7.3', '7.4', '8.0', '8.1' ]
     name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
     steps:
       - name: Checkout
@@ -19,8 +19,8 @@ jobs:
         uses: shivammathur/setup-php@master
         with:
           php-version: ${{ matrix.php-versions }}
-          extension-csv: mbstring, xdebug #optional, setup extensions
-          ini-values-csv: post_max_size=256M, short_open_tag=On #optional, setup php.ini configuration
+          extension-csv: mbstring, xdebug, opcache #optional, setup extensions
+          ini-values-csv: post_max_size=256M, short_open_tag=On, opcache.enable_cli=1 #optional, setup php.ini configuration
           coverage: xdebug #optional, setup coverage driver
           pecl: true #optional, setup PECL
 

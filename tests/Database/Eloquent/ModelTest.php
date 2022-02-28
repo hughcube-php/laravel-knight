@@ -8,6 +8,8 @@
 
 namespace HughCube\Laravel\Knight\Tests\Database\Eloquent;
 
+use Exception;
+use HughCube\Laravel\Knight\Support\Carbon;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
@@ -20,6 +22,7 @@ class ModelTest extends TestCase
     {
         parent::getEnvironmentSetUp($app);
 
+        Schema::dropIfExists('users');
         Schema::create('users', function (Blueprint $table) {
             $table->bigIncrements('id')->unsigned()->comment('id');
             $table->string('nickname')->nullable();
@@ -29,7 +32,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws InvalidArgumentException
+     * @throws Exception
      */
     public function testQuery()
     {
@@ -104,5 +109,53 @@ class ModelTest extends TestCase
         foreach ($users as $user) {
             $this->assertTrue($user->isFromCache());
         }
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testConversionDateTime()
+    {
+        User::query()->truncate();
+        $user = new User();
+        $user->nickname = md5(random_bytes(1000));
+        $user->save();
+
+        $now = Carbon::now();
+
+        $user->created_at = $now;
+        $user->updated_at = $now;
+        $user->deleted_at = $now;
+        $user->save();
+
+        $this->assertFalse($user->isNormal());
+        $this->assertTrue($user->isDeleted());
+
+        /** @var User $user */
+        $user = User::query()->first();
+
+        $this->assertSame($user->created_at->getTimestamp(), $now->getTimestamp());
+        $this->assertSame($user->updated_at->getTimestamp(), $now->getTimestamp());
+        $this->assertSame($user->deleted_at->getTimestamp(), $now->getTimestamp());
+
+        $format = 'Y-m-d H:i:s';
+        $this->assertSame($user->formatCreatedAt($format), $now->format($format));
+        $this->assertSame($user->formatUpdatedAt($format), $now->format($format));
+        $this->assertSame($user->formatDeleteAt($format), $now->format($format));
+
+        $user->created_at = null;
+        $user->updated_at = null;
+        $user->deleted_at = null;
+        $this->assertTrue($user->isNormal());
+        $this->assertFalse($user->isDeleted());
+
+        $this->assertNull($user->created_at);
+        $this->assertNull($user->updated_at);
+        $this->assertNull($user->deleted_at);
+
+        $this->assertNull($user->formatCreatedAt());
+        $this->assertNull($user->formatCreatedAt());
+        $this->assertNull($user->formatCreatedAt());
     }
 }

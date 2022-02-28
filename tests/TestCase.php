@@ -9,6 +9,8 @@
 namespace HughCube\Laravel\Knight\Tests;
 
 use Exception;
+use HughCube\Laravel\Knight\OPcache\Jobs\WatchFilesJob;
+use HughCube\Laravel\Knight\Queue\Job;
 use Illuminate\Config\Repository;
 use Illuminate\Database\DatabaseServiceProvider;
 use Illuminate\Foundation\Application;
@@ -16,6 +18,7 @@ use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+use Throwable;
 
 class TestCase extends OrchestraTestCase
 {
@@ -28,6 +31,7 @@ class TestCase extends OrchestraTestCase
     {
         return [
             DatabaseServiceProvider::class,
+            \HughCube\Laravel\Knight\ServiceProvider::class,
         ];
     }
 
@@ -101,7 +105,7 @@ class TestCase extends OrchestraTestCase
      * @return mixed
      * @throws ReflectionException
      */
-    protected static function callMethod(string|object $object, string $method, array $args = []): mixed
+    protected static function callMethod($object, string $method, array $args = [])
     {
         $class = new ReflectionClass($object);
 
@@ -145,5 +149,15 @@ class TestCase extends OrchestraTestCase
         $property->setAccessible(true);
 
         $property->setValue($object, $value);
+    }
+
+    protected function assertJob(Job $job)
+    {
+        $exception = null;
+        try {
+            $job->handle();
+        } catch (Throwable $exception) {
+        }
+        $this->assertNull($exception);
     }
 }

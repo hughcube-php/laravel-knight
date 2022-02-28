@@ -23,9 +23,9 @@ class PingJob extends Job
     public function rules(): array
     {
         return [
-            'url'             => ['string', 'nullable'],
-            'method'          => ['string', 'default:GET'],
-            'timeout'         => ['integer', 'default:2'],
+            'url' => ['string', 'nullable'],
+            'method' => ['string', 'default:GET'],
+            'timeout' => ['integer', 'default:2'],
             'allow_redirects' => ['integer', 'default:0'],
         ];
     }
@@ -36,8 +36,8 @@ class PingJob extends Job
     protected function action(): void
     {
         $url = $this->getUrl();
-        $method = strtoupper($this->get('method'));
-        $timeout = $this->get('timeout');
+        $method = strtoupper($this->p()->get('method'));
+        $timeout = $this->p()->get('timeout');
 
         $response = null;
         $exception = null;
@@ -46,8 +46,8 @@ class PingJob extends Job
 
         try {
             $response = $this->request($method, $url, [
-                RequestOptions::HTTP_ERRORS     => false,
-                RequestOptions::TIMEOUT         => $timeout,
+                RequestOptions::HTTP_ERRORS => false,
+                RequestOptions::TIMEOUT => $timeout,
                 RequestOptions::ALLOW_REDIRECTS => $this->getAllowRedirects(),
             ]);
         } catch (Throwable $exception) {
@@ -87,12 +87,11 @@ class PingJob extends Job
 
     protected function getUrl(): string
     {
-        $url = $this->get('url', 'knight_ping');
+        $url = $this->p()->get('url', 'knight_ping');
         if (is_string($url) && PUrl::isUrlString($url)) {
             return $url;
         }
 
-        /** get app route */
         $url = Route::has($url) ? route($url) : URL::to($url);
 
         /** parse url */
@@ -107,16 +106,19 @@ class PingJob extends Job
         return $purl instanceof PUrl ? $purl->toString() : $url;
     }
 
-    protected function getAllowRedirects(): bool|array
+    /**
+     * @return array|false
+     */
+    protected function getAllowRedirects()
     {
-        if (0 >= ($redirects = intval($this->get('allow_redirects', 0)))) {
+        if (0 >= ($redirects = intval($this->p()->get('allow_redirects', 0)))) {
             return false;
         }
 
         return [
-            'max'       => $redirects,
-            'strict'    => true,
-            'referer'   => true,
+            'max' => $redirects,
+            'strict' => true,
+            'referer' => true,
             'protocols' => ['https', 'http'],
         ];
     }

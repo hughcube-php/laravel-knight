@@ -26,7 +26,12 @@ class GetOrSetTest extends TestCase
         $values = [];
         $key = Str::random();
         for ($i = 1; $i <= 10; $i++) {
-            $values[] = $this->callMethod($mock, 'getOrSet', [$key, fn() => Str::random(16)]);
+            $values[] = $this->callMethod($mock, 'getOrSet', [
+                $key,
+                function () {
+                    return Str::random();
+                }
+            ]);
         }
         $values = array_values(array_unique($values));
         $this->assertCount(1, $values);
@@ -43,9 +48,21 @@ class GetOrSetTest extends TestCase
 
         $key = Str::random();
 
-        $this->assertNull($this->callMethod($mock, 'getOrSet', [$key, fn() => null]));
-        $this->assertNull($this->callMethod($mock, 'getOrSet', [$key, fn() => Str::random()]));
-        $this->assertNull($this->callMethod($mock, 'getOrSet', [$key, fn() => Str::random()]));
+        $this->assertNull($this->callMethod($mock, 'getOrSet', [
+            $key, function () {
+                return null;
+            }
+        ]));
+        $this->assertNull($this->callMethod($mock, 'getOrSet', [
+            $key, function () {
+                return Str::random();
+            }
+        ]));
+        $this->assertNull($this->callMethod($mock, 'getOrSet', [
+            $key, function () {
+                return Str::random();
+            }
+        ]));
     }
 
     /**
@@ -56,8 +73,16 @@ class GetOrSetTest extends TestCase
     {
         $mock = $this->getMockForTrait(GetOrSet::class);
 
-        $value = $this->callMethod($mock, 'getOrSet', [Str::random(), fn() => Str::random()]);
+        $value = $this->callMethod($mock, 'getOrSet', [
+            Str::random(), function () {
+                return Str::random();
+            }
+        ]);
         $this->callMethod($mock, 'flushHughCubeKnightClassSelfCacheStorage');
-        $this->assertNotSame($value, $this->callMethod($mock, 'getOrSet', [Str::random(), fn() => Str::random()]));
+        $this->assertNotSame($value, $this->callMethod($mock, 'getOrSet', [
+            Str::random(), function () {
+                return Str::random();
+            }
+        ]));
     }
 }

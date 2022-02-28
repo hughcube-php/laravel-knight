@@ -33,11 +33,10 @@ class ScheduleJob extends Job
     /**
      * 判断是否可以运行.
      *
-     * @param $expression
-     *
+     * @param  string  $expression
      * @return bool
      */
-    protected function isDue($expression): bool
+    protected function isDue(string $expression): bool
     {
         $date = Date::now();
 
@@ -47,7 +46,7 @@ class ScheduleJob extends Job
     /**
      * push任务
      *
-     * @param Job $job
+     * @param  Job  $job
      *
      * @return void
      */
@@ -58,8 +57,8 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param string       $expression
-     * @param callable|Job $job
+     * @param  string  $expression
+     * @param  callable|Job  $job
      *
      * @return void
      */

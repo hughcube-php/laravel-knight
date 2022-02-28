@@ -9,23 +9,27 @@
 namespace HughCube\Laravel\Knight\Support;
 
 use ArrayIterator;
-use JetBrains\PhpStorm\Pure;
 
 class ParameterBag
 {
     /**
      * Parameter storage.
      */
-    protected array $parameters;
+    protected $parameters = [];
 
     public function __construct(array $parameters = [])
     {
         $this->parameters = $parameters;
     }
 
-    public function replace(array $parameters = [])
+    /**
+     * @param  array  $parameters
+     * @return $this
+     */
+    public function replace(array $parameters = []): ParameterBag
     {
         $this->parameters = $parameters;
+        return $this;
     }
 
     public function all(): array
@@ -38,32 +42,59 @@ class ParameterBag
         return array_keys($this->parameters);
     }
 
-    public function has(string|int $key): bool
+    /**
+     * @param  string|int  $key
+     * @return bool
+     */
+    public function has($key): bool
     {
         return array_key_exists($key, $this->parameters);
     }
 
-    #[Pure]
-    public function get(string|int $key, mixed $default = null): mixed
+    /**
+     * @param  string|int  $key
+     * @param  mixed  $default
+     * @return mixed
+     */
+    public function get($key, $default = null)
     {
         return $this->has($key) ? $this->parameters[$key] : $default;
     }
 
-    public function set(string|int $key, mixed $value)
+    /**
+     * @param  string|int  $key
+     * @param  mixed  $value
+     * @return $this
+     */
+    public function set($key, $value): ParameterBag
     {
         $this->parameters[$key] = $value;
+        return $this;
     }
 
-    public function add(string|int $key, mixed $value)
+    /**
+     * @param  string|int  $key
+     * @param  mixed  $value
+     * @return $this
+     */
+    public function add($key, $value): ParameterBag
     {
         if ($this->has($key)) {
             $this->set($key, $value);
         }
+        return $this;
     }
 
-    public function remove(string|int $key)
+    /**
+     * @param  string|int  $key
+     * @return $this
+     */
+    public function remove($key): ParameterBag
     {
-        unset($this->parameters[$key]);
+        if ($this->has($key)) {
+            unset($this->parameters[$key]);
+        }
+        return $this;
     }
 
     public function getIterator(): ArrayIterator

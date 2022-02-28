@@ -8,7 +8,9 @@
 
 namespace HughCube\Laravel\Knight\Queue;
 
+use BadMethodCallException;
 use HughCube\Laravel\Knight\Support\GetOrSet;
+use HughCube\Laravel\Knight\Support\ParameterBag;
 use HughCube\Laravel\Knight\Support\Validation;
 use HughCube\StaticInstanceInterface;
 use HughCube\StaticInstanceTrait;
@@ -18,14 +20,11 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Bus\PendingDispatch;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use JetBrains\PhpStorm\Pure;
 use Psr\Log\LoggerTrait;
-use Stringable;
 
 /**
  * @method static PendingDispatch|static dispatch(...$arguments)
@@ -46,22 +45,22 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     /**
      * @var array
      */
-    protected array $data = [];
+    protected $data = [];
 
     /**
-     * @var array
+     * @var ParameterBag|null
      */
-    protected array $validData = [];
+    protected $parameterBag = null;
 
     /**
      * @var array|string|null
      */
-    protected null|string|array $logChannel = null;
+    protected $logChannel = null;
 
     /**
-     * @var string|int|null
+     * @var int|null
      */
-    protected null|string|int $pid = null;
+    protected $pid = null;
 
     /**
      * Create a new job instance.
@@ -76,11 +75,10 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     public function handle(): void
     {
         try {
-            $this->validData = $this->validate($this->getData());
+            $this->parameterBag = new ParameterBag($this->validate($this->getData()));
         } catch (ValidationException $exception) {
             $errors = json_encode($exception->errors(), JSON_UNESCAPED_UNICODE);
             $this->info(sprintf('data validation error, errors: %s, data: %s', $errors, $this->getSerializeData()));
-
             return;
         }
 
@@ -98,6 +96,17 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
+     * @return ParameterBag
+     */
+    public function p(): ParameterBag
+    {
+        if (!$this->parameterBag instanceof ParameterBag) {
+            $this->parameterBag = new ParameterBag();
+        }
+        return $this->parameterBag;
+    }
+
+    /**
      * @return string
      */
     protected function getSerializeData(): string
@@ -106,7 +115,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param int $flags
+     * @param  int  $flags
      *
      * @return string
      */
@@ -120,7 +129,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
      */
     protected function getValidData(): array
     {
-        return $this->validData;
+        return $this->p()->all();
     }
 
     /**
@@ -128,105 +137,86 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
      */
     protected function getSerializeValidData(): string
     {
-        return base64_encode(serialize($this->validData));
+        return base64_encode(serialize($this->getValidData()));
     }
 
     /**
-     * @param int $flags
+     * @param  int  $flags
      *
      * @return string
      */
     protected function getJsonValidData(int $flags = JSON_UNESCAPED_UNICODE): string
     {
-        return json_encode($this->validData, $flags);
+        return json_encode($this->getValidData(), $flags);
     }
 
     /**
-     * @param string $key
-     * @param null   $default
-     *
-     * @return mixed
+     * @return int
      */
-    protected function get(string $key, $default = null): mixed
-    {
-        return Arr::get($this->validData, $key, $default);
-    }
-
-    /**
-     * @param mixed $key
-     *
-     * @return bool
-     */
-    protected function has(mixed $key): bool
-    {
-        return Arr::has($this->validData, $key);
-    }
-
-    /**
-     * @param string $key
-     * @param mixed  $value
-     *
-     * @return static
-     */
-    protected function set(string $key, mixed $value): static
-    {
-        Arr::set($this->validData, $key, $value);
-
-        return $this;
-    }
-
-    /**
-     * @return string|int
-     */
-    protected function getPid(): string|int
+    protected function getPid()
     {
         if (null === $this->pid) {
-            $this->setPid(Str::random(5));
+            $this->setPid(crc32(Str::random(5)));
         }
 
         return $this->pid;
     }
 
     /**
-     * @param string|int|null $pid
-     *
+     * @param  string|int|null  $pid
      * @return $this
      */
-    public function setPid(null|string|int $pid): static
+    public function setPid($pid): Job
     {
         $this->pid = $pid;
-
         return $this;
     }
 
-    #[Pure]
     protected function getName($job = null): string
     {
         return Str::afterLast(get_class(($job ?? $this)), '\\');
     }
 
-    public function getLogChannel(): array|string|null
+    /**
+     * @return array|string|null
+     */
+    public function getLogChannel()
     {
         return $this->logChannel;
     }
 
-    public function setLogChannel(array|string|null $channel = null): static
+    /**
+     * @param  array|string|null  $channel
+     * @return $this
+     */
+    public function setLogChannel($channel = null): Job
     {
         $this->logChannel = $channel;
-
         return $this;
     }
 
     /**
-     * @param $level
-     * @param string|Stringable $message
-     * @param array             $context
-     *
+     * @param  mixed  $level
+     * @param  string  $message
+     * @param  array  $context
      * @return void
      */
-    protected function log($level, string|Stringable $message, array $context = [])
+    protected function log($level, $message, array $context = [])
     {
         $message = sprintf('[%s-%s] %s', $this->getName(), $this->getPid(), $message);
         Log::channel($this->getLogChannel())->log($level, $message, $context);
+    }
+
+    /**
+     * @param  string  $name
+     * @param  array  $arguments
+     * @return false|mixed
+     */
+    public function __call(string $name, array $arguments)
+    {
+        if (method_exists($this->p(), $name)) {
+            return call_user_func_array([$this->p(), $name], $arguments);
+        }
+        throw new BadMethodCallException("No such method exists: {$name}");
     }
 }

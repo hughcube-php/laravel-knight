@@ -13,7 +13,7 @@ use Exception;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Http\Request;
 use ReflectionException;
-use Symfony\Component\HttpFoundation\ParameterBag;
+use HughCube\Laravel\Knight\Support\ParameterBag;
 
 class ActionTest extends TestCase
 {
@@ -72,7 +72,7 @@ class ActionTest extends TestCase
         );
         $this->app->instance('request', $request);
 
-        $parameter = $this->callMethod($action, 'getParameter');
+        $parameter = $this->callMethod($action, 'p');
         $this->assertInstanceOf(ParameterBag::class, $parameter);
 
         $this->assertTrue($parameter->has('uuid'));

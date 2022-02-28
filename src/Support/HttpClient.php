@@ -12,7 +12,10 @@ use GuzzleHttp\Client;
 
 trait HttpClient
 {
-    private ?Client $httpClient = null;
+    /**
+     * @var Client
+     */
+    private $httpClient = null;
 
     /**
      * @return Client

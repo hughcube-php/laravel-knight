@@ -21,7 +21,7 @@ class Carbon extends \Illuminate\Support\Carbon
         return $this->diffInRealMicroseconds() / static::MICROSECONDS_PER_SECOND;
     }
 
-    public static function fromDate($date, string $format = 'Y-m-d H:i:s'): null|static
+    public static function fromDate($date, string $format = 'Y-m-d H:i:s'): ?Carbon
     {
         if (empty($date)) {
             return null;
@@ -52,6 +52,6 @@ class Carbon extends \Illuminate\Support\Carbon
 
     public static function isPastTimestamp($timestamp): bool
     {
-        return !empty($timestamp) && $timestamp <= time();
+        return is_numeric($timestamp) && $timestamp <= time();
     }
 }

@@ -9,25 +9,21 @@
         }
     ],
     "require": {
-        "php": "8.*",
+        "php": ">=7.2|8.*",
         "ext-json": "*",
-        "ext-zend-opcache": "*",
-        "hughcube/laravel-validation": "^1.0",
-        "jenssegers/agent": "^2.6",
-        "hughcube/static-instance": "^1.0",
-        "hughcube/enum": "^1.1",
-        "guzzlehttp/guzzle": "^7.4",
-        "hughcube/purl": "^1.0"
+        "jenssegers/agent": "*",
+        "hughcube/laravel-validation": "*",
+        "hughcube/static-instance": "*",
+        "hughcube/enum": "*",
+        "guzzlehttp/guzzle": "*",
+        "hughcube/purl": "*"
     },
     "require-dev": {
         "laravel/framework": "*",
         "laravel/lumen-framework": "*",
         "squizlabs/php_codesniffer": "*",
         "phpstan/phpstan": "*",
-        "orchestra/testbench": "*",
-        "swoole/ide-helper": "~4.7.1",
-        "laravel/octane": "^1.0",
-        "hughcube/laravel-alifc": "*"
+        "orchestra/testbench": "*"
     },
     "autoload": {
         "psr-4": {
@@ -48,7 +44,7 @@
     },
     "scripts": {
         "test": "phpunit --verbose --coverage-clover=coverage.clover",
-        "phpstan": "phpstan analyse -vvv",
+        "phpstan": "phpstan analyse -vvv --memory-limit=-1",
         "check-style": "phpcs -p --standard=PSR2 src/ -v",
         "fix-style": "phpcbf -p --standard=PSR2 src/ -v"
     },

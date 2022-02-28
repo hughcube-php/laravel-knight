@@ -10,56 +10,52 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
-use JetBrains\PhpStorm\ArrayShape;
 
 class WatchFilesJob extends \HughCube\Laravel\Knight\Queue\Job
 {
     use HttpClient;
 
-    #[ArrayShape([])]
     public function rules(): array
     {
         return [
-            'url'     => ['string', 'nullable'],
+            'url' => ['string', 'nullable'],
             'timeout' => ['integer', 'default:30'],
         ];
     }
 
     /**
-     * @throws GuzzleException
-     *
      * @return void
+     * @throws GuzzleException
      */
     protected function action(): void
     {
-        $this->getResponse();
-    }
-
-    /**
-     * @throws GuzzleException
-     *
-     * @return mixed
-     */
-    protected function getResponse(): mixed
-    {
         $url = $this->getUrl();
-        $response = $this->getHttpClient()->get($this->getUrl(), [
-            RequestOptions::TIMEOUT => floatval($this->get('timeout')),
-        ]);
+        if (!PUrl::isUrlString($url)) {
+            $message = sprintf('Description Failed to run the %s job, ', $this->getName());
+            Log::warning(sprintf('%s, %s', $message, 'Remote interface URL cannot be found!'));
+            return;
+        }
 
-        $results = json_decode($response->getBody()->getContents(), true);
+        try {
+            $response = $this->getHttpClient()->get($this->getUrl(), [
+                RequestOptions::TIMEOUT => floatval($this->p()->get('timeout')),
+            ]);
+            $results = json_decode($response->getBody()->getContents(), true);
+        } catch (\Throwable $exception) {
+            $message = sprintf('Description Failed to run the %s job ', $this->getName());
+            Log::warning(sprintf('%s, http error: %s', $message, $exception->getMessage()));
+            return;
+        }
 
         /** debug log */
-        $count = Arr::get($results, 'data.count');
+        $count = Arr::get($results, 'data.count', 0);
         $message = 'watch OPcache files, count: %s, status: %s, url: %s';
         Log::debug(sprintf($message, $count, $response->getStatusCode(), $url));
-
-        return $results;
     }
 
-    protected function getUrl()
+    protected function getUrl(): string
     {
-        $url = $this->get('url', 'knight_opcache_scripts');
+        $url = $this->p()->get('url', 'knight_opcache_scripts');
         if (PUrl::isUrlString($url)) {
             return $url;
         }

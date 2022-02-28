@@ -10,6 +10,7 @@ namespace HughCube\Laravel\Knight\Routing;
 
 use BadMethodCallException;
 use HughCube\Laravel\Knight\Support\GetOrSet;
+use HughCube\Laravel\Knight\Support\ParameterBag;
 use HughCube\Laravel\Knight\Support\Validation;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container as IlluminateContainer;
@@ -17,23 +18,24 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use Laravel\SerializableClosure\Exceptions\PhpVersionNotSupportedException;
 use Psr\SimpleCache\InvalidArgumentException;
-use Symfony\Component\HttpFoundation\ParameterBag;
 
 trait Action
 {
     use GetOrSet;
     use Validation;
 
-    private ?ParameterBag $parameterBag = null;
+    /**
+     * @var ParameterBag|null
+     */
+    private $parameterBag = null;
 
     /**
      * action.
      *
      * @return mixed
      */
-    abstract protected function action(): mixed;
+    abstract protected function action();
 
     /**
      * @param  array  $data
@@ -95,12 +97,11 @@ trait Action
      * @return ParameterBag
      * @throws BindingResolutionException
      * @throws ValidationException
+     * @deprecated Will be removed in a future version.
      */
     protected function getParameter(): ParameterBag
     {
-        $this->loadParameters();
-
-        return $this->parameterBag;
+        return $this->p();
     }
 
     /**
@@ -110,7 +111,8 @@ trait Action
      */
     protected function p(): ParameterBag
     {
-        return $this->getParameter();
+        $this->loadParameters();
+        return $this->parameterBag;
     }
 
     /**
@@ -118,9 +120,8 @@ trait Action
      * @throws BindingResolutionException
      * @throws InvalidArgumentException
      * @throws ValidationException
-     * @throws PhpVersionNotSupportedException
      */
-    public function invoke(): mixed
+    public function invoke()
     {
         # Reset the status on each request
         $this->parameterBag = null;
@@ -135,26 +136,24 @@ trait Action
      * @return mixed
      * @throws BindingResolutionException
      * @throws InvalidArgumentException
-     * @throws PhpVersionNotSupportedException
      * @throws ValidationException
      */
-    public function __invoke(): mixed
+    public function __invoke()
     {
         return $this->invoke();
     }
 
     /**
-     * @param $name
-     * @param $arguments
+     * @param  string  $name
+     * @param  array  $arguments
      * @return mixed
      * @throws BindingResolutionException
      * @throws ValidationException
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments)
     {
-        $parameter = $this->getParameter();
-        if (method_exists($parameter, $name)) {
-            return $parameter->{$name}(...$arguments);
+        if (method_exists($this->p(), $name)) {
+            return call_user_func_array([$this->p(), $name], $arguments);
         }
 
         throw new BadMethodCallException("No such method exists: {$name}");

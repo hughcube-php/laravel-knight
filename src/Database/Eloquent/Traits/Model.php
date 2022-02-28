@@ -2,13 +2,14 @@
 
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
-use Carbon\Carbon;
+use Carbon\Carbon as BaseCarbon;
+use DateTime;
 use Exception;
 use HughCube\Laravel\Knight\Database\Eloquent\Builder;
+use HughCube\Laravel\Knight\Support\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
-use JetBrains\PhpStorm\Pure;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use Traversable;
@@ -24,25 +25,25 @@ trait Model
     /**
      * @var bool
      */
-    private bool $isFromCache = false;
+    private $isFromCache = false;
 
     /**
-     * @param  mixed|null  $date
+     * @param  null|string|DateTime|int  $date
      * @return Carbon|null
      */
-    public function toCarbon(mixed $date = null): ?Carbon
+    public function toDateTime($date = null): ?Carbon
     {
         return empty($date) ? null : Carbon::parse($date);
     }
 
     /**
-     * @param  mixed  $dateTime
+     * @param  null|DateTime|BaseCarbon  $dateTime
      * @param  string  $format
      * @return string|null
      */
-    public function toDate(mixed $dateTime, string $format = 'Y-m-d H:i:s'): ?string
+    public function formatDateTime($dateTime, string $format = 'Y-m-d H:i:s'): ?string
     {
-        return $dateTime instanceof Carbon ? $dateTime->format($format) : null;
+        return $dateTime instanceof BaseCarbon ? $dateTime->format($format) : null;
     }
 
     /**
@@ -50,9 +51,9 @@ trait Model
      *
      * @return Carbon|null
      */
-    public function getCreatedAtAttribute(mixed $date): ?Carbon
+    public function getCreatedAtAttribute($date): ?Carbon
     {
-        return $this->toCarbon($date);
+        return $this->toDateTime($date);
     }
 
     /**
@@ -60,9 +61,9 @@ trait Model
      *
      * @return Carbon|null
      */
-    public function getUpdatedAtAttribute(mixed $date): ?Carbon
+    public function getUpdatedAtAttribute($date): ?Carbon
     {
-        return $this->toCarbon($date);
+        return $this->toDateTime($date);
     }
 
     /**
@@ -70,36 +71,36 @@ trait Model
      *
      * @return Carbon|null
      */
-    public function getDeleteAtAttribute(mixed $date): ?Carbon
+    public function getDeletedAtAttribute($date): ?Carbon
     {
-        return $this->toCarbon($date);
+        return $this->toDateTime($date);
     }
 
     /**
      * @param  string  $format
      * @return string|null
      */
-    public function getCreatedAtDate(string $format = 'Y-m-d H:i:s'): ?string
+    public function formatCreatedAt(string $format = 'Y-m-d H:i:s'): ?string
     {
-        return $this->toDate($this->{$this->getCreatedAtColumn()}, $format);
+        return $this->formatDateTime($this->{$this->getCreatedAtColumn()}, $format);
     }
 
     /**
      * @param  string  $format
      * @return string|null
      */
-    public function getUpdatedAtDate(string $format = 'Y-m-d H:i:s'): ?string
+    public function formatUpdatedAt(string $format = 'Y-m-d H:i:s'): ?string
     {
-        return $this->toDate($this->{$this->getUpdatedAtColumn()}, $format);
+        return $this->formatDateTime($this->{$this->getUpdatedAtColumn()}, $format);
     }
 
     /**
      * @param  string  $format
      * @return string|null
      */
-    public function getDeleteAtDate(string $format = 'Y-m-d H:i:s'): ?string
+    public function formatDeleteAt(string $format = 'Y-m-d H:i:s'): ?string
     {
-        return $this->toDate($this->{$this->getDeletedAtColumn()}, $format);
+        return $this->formatDateTime($this->{$this->getDeletedAtColumn()}, $format);
     }
 
     /**
@@ -144,10 +145,8 @@ trait Model
      * Create a new Eloquent query builder for the model.
      *
      * @param  \Illuminate\Database\Query\Builder  $query
-     *
      * @return Builder
      */
-    #[Pure]
     public function newEloquentBuilder($query): Builder
     {
         return new Builder($query);
@@ -188,7 +187,7 @@ trait Model
     /**
      * @return $this
      */
-    public function setIsFromCache($is = true): static
+    public function setIsFromCache($is = true)
     {
         $this->isFromCache = $is;
 
@@ -222,7 +221,7 @@ trait Model
      * @return static|null
      * @throws InvalidArgumentException
      */
-    public static function findById(mixed $id): ?static
+    public static function findById($id)
     {
         return static::findByIds([$id])->first();
     }
@@ -232,7 +231,7 @@ trait Model
      * @return Collection
      * @throws InvalidArgumentException
      */
-    public static function findByIds(array|Arrayable|Traversable $ids): Collection
+    public static function findByIds($ids): Collection
     {
         return static::query()->findByPks($ids);
     }
@@ -255,7 +254,7 @@ trait Model
         return $this->newQuery()->refreshRowCache();
     }
 
-    public function isMatchPk(mixed $value): bool
+    public function isMatchPk($value): bool
     {
         return !empty($value);
     }

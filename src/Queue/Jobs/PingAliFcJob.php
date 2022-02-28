@@ -10,7 +10,6 @@ use Psr\Http\Message\ResponseInterface as Response;
 
 class PingAliFcJob extends PingJob
 {
-    #[ArrayShape([])]
     public function rules(): array
     {
         return [
@@ -35,6 +34,6 @@ class PingAliFcJob extends PingJob
      */
     protected function getAliFcClient(): Client
     {
-        return AliFC::client(($this->get('client') ?: null));
+        return AliFC::client(($this->p()->get('client') ?: null));
     }
 }

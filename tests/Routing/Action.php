@@ -8,23 +8,22 @@
 
 namespace HughCube\Laravel\Knight\Tests\Routing;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Validation\ValidationException;
-use JetBrains\PhpStorm\ArrayShape;
 
 class Action
 {
     use \HughCube\Laravel\Knight\Routing\Action;
 
     /**
-     * @return mixed
-     * @throws ValidationException
+     * @return array
+     * @throws ValidationException|BindingResolutionException
      */
-    protected function action(): mixed
+    protected function action(): array
     {
-        return $this->getParameter()->all();
+        return $this->p()->all();
     }
 
-    #[ArrayShape(['uuid' => 'string'])]
     public function rules(): array
     {
         return [

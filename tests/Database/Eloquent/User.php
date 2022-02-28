@@ -9,9 +9,17 @@
 namespace HughCube\Laravel\Knight\Tests\Database\Eloquent;
 
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Psr\SimpleCache\CacheInterface;
 
+/**
+ * @property int $id
+ * @property string $nickname
+ * @property null|Carbon $created_at
+ * @property null|Carbon $updated_at
+ * @property null|Carbon $deleted_at
+ */
 class User extends Model
 {
     const CACHE = 'array';

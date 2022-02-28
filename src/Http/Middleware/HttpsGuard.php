@@ -8,8 +8,7 @@
 
 namespace HughCube\Laravel\Knight\Http\Middleware;
 
-use HughCube\PUrl\Url;
-use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,41 +20,43 @@ class HttpsGuard
      *
      * @var array
      */
-    protected array $except = [];
+    protected $except = [];
 
     /**
      * The application instance.
      *
-     * @var Application
+     * @var Container
      */
-    protected Application $app;
+    protected $app;
+
+    /**
+     * @var callable[]
+     */
+    protected $disableCallable = [];
 
     /**
      * Create a new middleware instance.
      *
-     * @param Application $app
-     *
+     * @param  Container  $app
      * @return void
      */
-    public function __construct(Application $app)
+    public function __construct(Container $app)
     {
         $this->app = $app;
     }
 
     /**
-     * @param Request     $request
-     * @param callable    $next
-     * @param int         $status
-     * @param string|null $hsts
+     * @param  Request  $request
+     * @param  callable  $next
+     * @param  int  $status
+     * @param  string|null  $hsts
      *
      * @return Response
      */
     public function handle(Request $request, callable $next, int $status = 301, ?string $hsts = null): Response
     {
         if ($this->isEnable($request) && !$this->isExcept($request) && !$request->isSecure()) {
-            $url = Url::instance($request->getUri())->withScheme('https');
-
-            return redirect()->to($url, $status);
+            return redirect()->to($request->getUri(), $status, [], true);
         }
 
         /** @var Response $response */
@@ -81,7 +82,7 @@ class HttpsGuard
     /**
      * Determine if the request has a URI that should be accessible in maintenance mode.
      *
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return bool
      */
@@ -117,7 +118,18 @@ class HttpsGuard
 
     protected function isHostRequest(Request $request): bool
     {
-        return false === filter_var($request->getHost(), FILTER_VALIDATE_IP);
+        $host = $request->getHost();
+        return !empty($host) && false === filter_var($host, FILTER_VALIDATE_IP);
+    }
+
+    protected function isDisable(Request $request): bool
+    {
+        foreach ($this->disableCallable as $callable) {
+            if (!$callable($request)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected function isAliYunFcHandler(Request $request): bool
