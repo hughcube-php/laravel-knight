@@ -11,7 +11,7 @@
     "require": {
         "php": ">=7.2|8.*",
         "ext-json": "*",
-        "jenssegers/agent": "^2.6",
+        "jenssegers/agent": "*",
         "hughcube/laravel-validation": "*",
         "hughcube/static-instance": "*",
         "hughcube/enum": "*",

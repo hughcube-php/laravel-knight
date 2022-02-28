@@ -33,7 +33,13 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     public function boot()
     {
-        $this->bootPublishes();
+        $source = realpath(dirname(__DIR__).'/config/knight.php');
+        if ($this->app instanceof LaravelApplication && $this->app->runningInConsole()) {
+            $this->publishes([$source => config_path('knight.php')]);
+        } elseif ($this->app instanceof LumenApplication) {
+            $this->app->configure('knight');
+        }
+
         $this->bootCommands();
         $this->bootOPcache();
         $this->bootRequest();
@@ -47,24 +53,12 @@ class ServiceProvider extends IlluminateServiceProvider
     {
     }
 
-    protected function bootPublishes()
-    {
-        $source = realpath(dirname(__DIR__).'/config/knight.php');
-        if ($this->app instanceof LaravelApplication && $this->app->runningInConsole()) {
-            $this->publishes([$source => config_path('knight.php')]);
-        } elseif ($this->app instanceof LumenApplication) {
-            $this->app->configure('knight');
-        }
-    }
-
     protected function bootCommands()
     {
-        $this->commands([
-            Config::class,
-            Environment::class,
-            PhpIniFile::class,
-            KRTest::class,
-        ]);
+        $this->commands([Config::class]);
+        $this->commands([Environment::class]);
+        $this->commands([PhpIniFile::class]);
+        $this->commands([KRTest::class]);
     }
 
     protected function bootOPcache()
