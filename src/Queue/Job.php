@@ -20,6 +20,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Bus\PendingDispatch;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\Str;
@@ -117,7 +118,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param int $flags
+     * @param  int  $flags
      *
      * @return string
      */
@@ -143,7 +144,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param int $flags
+     * @param  int  $flags
      *
      * @return string
      */
@@ -165,7 +166,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param string|int|null $pid
+     * @param  string|int|null  $pid
      *
      * @return $this
      */
@@ -190,7 +191,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param array|string|null $channel
+     * @param  array|string|null  $channel
      *
      * @return $this
      */
@@ -202,21 +203,54 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param mixed  $level
-     * @param string $message
-     * @param array  $context
+     * @param  mixed  $level
+     * @param  string  $message
+     * @param  array  $context
      *
      * @return void
      */
-    protected function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = [])
     {
         $message = sprintf('[%s-%s] %s', $this->getName(), $this->getPid(), $message);
         Log::channel($this->getLogChannel())->log($level, $message, $context);
     }
 
     /**
-     * @param string $name
-     * @param array  $arguments
+     * @param  string  $key
+     * @param  null  $default
+     * @return mixed
+     * @deprecated Will be removed in a future version.
+     */
+    protected function get(string $key, $default = null)
+    {
+        return Arr::get($this->getValidData(), $key, $default);
+    }
+
+    /**
+     * @param  mixed  $key
+     * @return bool
+     * @deprecated Will be removed in a future version.
+     */
+    protected function has($key): bool
+    {
+        return Arr::has($this->getValidData(), $key);
+    }
+
+    /**
+     * @param  string  $key
+     * @param  mixed  $value
+     * @return $this
+     * @deprecated Will be removed in a future version.
+     */
+    protected function set(string $key, $value)
+    {
+        $this->p()->set($key, $value);
+        return $this;
+    }
+
+    /**
+     * @param  string  $name
+     * @param  array  $arguments
      *
      * @return false|mixed
      */

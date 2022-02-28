@@ -11,6 +11,7 @@ namespace HughCube\Laravel\Knight\Routing;
 use BadMethodCallException;
 use HughCube\Laravel\Knight\Support\GetOrSet;
 use HughCube\Laravel\Knight\Support\ParameterBag;
+use HughCube\Laravel\Knight\Support\ParameterBagBak;
 use HughCube\Laravel\Knight\Support\Validation;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container as IlluminateContainer;
@@ -18,8 +19,10 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use Psr\SimpleCache\InvalidArgumentException;
 
+/**
+ * @mixin ParameterBagBak
+ */
 trait Action
 {
     use GetOrSet;
@@ -40,7 +43,6 @@ trait Action
     /**
      * @param  array  $data
      * @param  int  $code
-     *
      * @return JsonResponse
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
@@ -83,7 +85,6 @@ trait Action
     /**
      * @return void
      * @throws ValidationException
-     *
      * @throws BindingResolutionException
      */
     protected function loadParameters()
@@ -98,9 +99,7 @@ trait Action
 
     /**
      * @return ParameterBag
-     *
      * @throws ValidationException
-     *
      * @throws BindingResolutionException
      * @deprecated Will be removed in a future version.
      */
@@ -112,7 +111,6 @@ trait Action
     /**
      * @return ParameterBag
      * @throws ValidationException
-     *
      * @throws BindingResolutionException
      */
     protected function p(): ParameterBag
@@ -124,10 +122,8 @@ trait Action
 
     /**
      * @return mixed
-     * @throws InvalidArgumentException
-     * @throws ValidationException
-     *
      * @throws BindingResolutionException
+     * @throws ValidationException
      */
     public function invoke()
     {
@@ -142,10 +138,8 @@ trait Action
 
     /**
      * @return mixed
-     * @throws InvalidArgumentException
-     * @throws ValidationException
-     *
      * @throws BindingResolutionException
+     * @throws ValidationException
      */
     public function __invoke()
     {
