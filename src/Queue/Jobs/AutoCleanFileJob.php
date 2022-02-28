@@ -13,7 +13,6 @@ class AutoCleanFileJob extends Job
     /**
      * @return string[][]
      */
-    #[ArrayShape([])]
     protected function rules(): array
     {
         return [

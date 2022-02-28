@@ -10,6 +10,7 @@ use HughCube\Laravel\Knight\Support\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use Traversable;
@@ -28,8 +29,7 @@ trait Model
     private $isFromCache = false;
 
     /**
-     * @param null|string|DateTime|int $date
-     *
+     * @param  null|string|DateTime|int  $date
      * @return Carbon|null
      */
     public function toDateTime($date = null): ?Carbon
@@ -38,9 +38,8 @@ trait Model
     }
 
     /**
-     * @param null|DateTime|BaseCarbon $dateTime
-     * @param string                   $format
-     *
+     * @param  null|DateTime|BaseCarbon  $dateTime
+     * @param  string  $format
      * @return string|null
      */
     public function formatDateTime($dateTime, string $format = 'Y-m-d H:i:s'): ?string
@@ -49,7 +48,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return Carbon|null
      */
@@ -59,7 +58,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return Carbon|null
      */
@@ -69,7 +68,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return Carbon|null
      */
@@ -79,8 +78,7 @@ trait Model
     }
 
     /**
-     * @param string $format
-     *
+     * @param  string  $format
      * @return string|null
      */
     public function formatCreatedAt(string $format = 'Y-m-d H:i:s'): ?string
@@ -89,8 +87,7 @@ trait Model
     }
 
     /**
-     * @param string $format
-     *
+     * @param  string  $format
      * @return string|null
      */
     public function formatUpdatedAt(string $format = 'Y-m-d H:i:s'): ?string
@@ -99,8 +96,7 @@ trait Model
     }
 
     /**
-     * @param string $format
-     *
+     * @param  string  $format
      * @return string|null
      */
     public function formatDeleteAt(string $format = 'Y-m-d H:i:s'): ?string
@@ -127,16 +123,6 @@ trait Model
     }
 
     /**
-     * 判断数据是否正常.
-     *
-     * @return bool
-     */
-    public function isNormal(): bool
-    {
-        return false == $this->isDeleted();
-    }
-
-    /**
      * Get the name of the "deleted at" column.
      *
      * @return string
@@ -149,8 +135,7 @@ trait Model
     /**
      * Create a new Eloquent query builder for the model.
      *
-     * @param \Illuminate\Database\Query\Builder $query
-     *
+     * @param  \Illuminate\Database\Query\Builder  $query
      * @return Builder
      */
     public function newEloquentBuilder($query): Builder
@@ -175,11 +160,11 @@ trait Model
      */
     public function getCache(): ?CacheInterface
     {
-        if (!defined('static::CACHE')) {
+        $cache = defined('static::CACHE') ? constant('static::CACHE') : null;
+        if (false === $cache) {
             return null;
         }
-
-        return Cache::store(constant('static::CACHE'));
+        return Cache::store($cache);
     }
 
     /**
@@ -203,11 +188,11 @@ trait Model
     /**
      * 缓存的时间, 默认5-7天.
      *
-     * @param int|null $duration
-     *
-     * @throws Exception
+     * @param  int|null  $duration
      *
      * @return int
+     * @throws Exception
+     *
      */
     public function getCacheTtl(int $duration = null): int
     {
@@ -219,15 +204,13 @@ trait Model
      */
     public function getCacheVersion(): ?string
     {
-        return '';
+        return 'v1.0.0';
     }
 
     /**
-     * @param mixed $id
-     *
-     * @throws InvalidArgumentException
-     *
+     * @param  mixed  $id
      * @return static|null
+     * @throws InvalidArgumentException
      */
     public static function findById($id)
     {
@@ -235,11 +218,9 @@ trait Model
     }
 
     /**
-     * @param array|Arrayable|Traversable $ids
-     *
-     * @throws InvalidArgumentException
-     *
+     * @param  array|Arrayable|Traversable  $ids
      * @return Collection
+     * @throws InvalidArgumentException
      */
     public static function findByIds($ids): Collection
     {
@@ -275,5 +256,20 @@ trait Model
     public function getCachePlaceholder(): ?string
     {
         return '@@fad7563e68d@@';
+    }
+
+    public function genModelVersion(): int
+    {
+        return crc32(serialize([Str::random(100), microtime()]));
+    }
+
+    /**
+     * 是否可用的数据
+     *
+     * @return bool
+     */
+    public function isAvailable(): bool
+    {
+        return !$this->isDeleted();
     }
 }

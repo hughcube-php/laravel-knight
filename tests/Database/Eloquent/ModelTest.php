@@ -131,7 +131,7 @@ class ModelTest extends TestCase
         $user->deleted_at = $now;
         $user->save();
 
-        $this->assertFalse($user->isNormal());
+        $this->assertFalse($user->isAvailable());
         $this->assertTrue($user->isDeleted());
 
         /** @var User $user */
@@ -149,7 +149,7 @@ class ModelTest extends TestCase
         $user->created_at = null;
         $user->updated_at = null;
         $user->deleted_at = null;
-        $this->assertTrue($user->isNormal());
+        $this->assertTrue($user->isAvailable());
         $this->assertFalse($user->isDeleted());
 
         $this->assertNull($user->created_at);
