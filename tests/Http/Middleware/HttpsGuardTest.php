@@ -36,41 +36,35 @@ class HttpsGuardTest extends TestCase
             [['HTTPS' => 'on'], false],
         ];
 
+        $excepts = [
+            [
+                function () {
+                    return true;
+                },
+                false,
+            ],
+            [
+                function () {
+                    return false;
+                },
+                true,
+            ]
+        ];
+
         $cases = [];
         foreach ($appUrls as $appUrl) {
             foreach ($hosts as $host) {
                 foreach ($secureServers as $secureServer) {
                     foreach (['GET', 'POST', 'HEAD', 'OPTIONS', 'PUT'] as $method) {
-                        $bIs = $appUrl[1] && $host[1] && $secureServer[1];
+                        foreach ($excepts as $except) {
+                            $bIs = $appUrl[1] && $host[1] && $secureServer[1] && $except[1];
 
-                        /** 普通情况 */
-                        $requestServer = [];
-                        $requestServer = array_merge($requestServer, $secureServer[0]);
-                        $requestServer = array_merge($requestServer, ['HTTP_HOST' => $host[0]]);
-                        $request = $this->createRequest($requestServer, Str::random(), $method);
-                        $cases[] = [$appUrl[0], $request, ($bIs ? 301 : 200)];
-
-                        /** 阿里云函数计算的情况 */
-                        foreach (['initialize', 'invoke', 'pre-freeze', 'pre-stop'] as $path) {
-                            $requestServer = [
-                                sprintf('HTTP_X-FC-%s', Str::random()) => Str::random(),
-                            ];
+                            /** 普通情况 */
+                            $requestServer = [];
                             $requestServer = array_merge($requestServer, $secureServer[0]);
                             $requestServer = array_merge($requestServer, ['HTTP_HOST' => $host[0]]);
-                            $request = $this->createRequest($requestServer, $path, $method);
-                            $cases[] = [$appUrl[0], $request, ($bIs ? 301 : 200)];
-
-                            $requestServer = [
-                                sprintf('HTTP_X-FC-%s', Str::random()) => Str::random(),
-                                sprintf('HTTP_X-FC-%s', Str::random()) => Str::random(),
-                                sprintf('HTTP_X-FC-%s', Str::random()) => Str::random(),
-                                sprintf('HTTP_X-FC-%s', Str::random()) => Str::random(),
-                                sprintf('HTTP_X-FC-%s', Str::random()) => Str::random(),
-                            ];
-                            $requestServer = array_merge($requestServer, $secureServer[0]);
-                            $requestServer = array_merge($requestServer, ['HTTP_HOST' => $host[0]]);
-                            $request = $this->createRequest($requestServer, $path, $method);
-                            $cases[] = [$appUrl[0], $request, 200];
+                            $request = $this->createRequest($requestServer, Str::random(), $method);
+                            $cases[] = [$appUrl[0], $request, (($bIs ? 301 : 200)), $except[0]];
                         }
                     }
                 }
@@ -83,8 +77,10 @@ class HttpsGuardTest extends TestCase
     /**
      * @dataProvider getCases
      */
-    public function testHandle(string $appUrl, Request $request, int $statusCode)
+    public function testHandle(string $appUrl, Request $request, int $statusCode, $except = null)
     {
+        HttpsGuard::customExcept(__METHOD__, $except);
+
         $this->app['config']->set('app.url', $appUrl);
         $guard = $this->makeGuard();
 

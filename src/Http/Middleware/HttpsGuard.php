@@ -10,17 +10,14 @@ namespace HughCube\Laravel\Knight\Http\Middleware;
 
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
 class HttpsGuard
 {
     /**
-     * The URIs that should be accessible while maintenance mode is enabled.
-     *
-     * @var array
+     * @var callable[]
      */
-    protected $except = [];
+    protected static $excepts = [];
 
     /**
      * The application instance.
@@ -37,7 +34,7 @@ class HttpsGuard
     /**
      * Create a new middleware instance.
      *
-     * @param Container $app
+     * @param  Container  $app
      *
      * @return void
      */
@@ -47,16 +44,20 @@ class HttpsGuard
     }
 
     /**
-     * @param Request     $request
-     * @param callable    $next
-     * @param int         $status
-     * @param string|null $hsts
+     * @param  Request  $request
+     * @param  callable  $next
+     * @param  int  $status
+     * @param  string|null  $hsts
      *
      * @return Response
      */
     public function handle(Request $request, callable $next, int $status = 301, ?string $hsts = null): Response
     {
-        if ($this->isEnable($request) && !$this->isExcept($request) && !$request->isSecure()) {
+        if (!$request->isSecure()
+            && $this->isHostRequest($request)
+            && $this->isSecureApplicationUrl()
+            && !$this->isExcept($request)
+        ) {
             return redirect()->to($request->getUri(), $status, [], true);
         }
 
@@ -73,28 +74,14 @@ class HttpsGuard
         return $response;
     }
 
-    protected function isEnable(Request $request): bool
-    {
-        return $this->isSecureApplicationUrl()
-            && $this->isHostRequest($request)
-            && !$this->isAliYunFcHandler($request);
-    }
-
     /**
-     * Determine if the request has a URI that should be accessible in maintenance mode.
-     *
-     * @param Request $request
-     *
+     * @param  Request  $request
      * @return bool
      */
     protected function isExcept(Request $request): bool
     {
-        foreach ($this->except as $except) {
-            if ($except !== '/') {
-                $except = trim($except, '/');
-            }
-
-            if ($request->fullUrlIs($except) || $request->is($except)) {
+        foreach (static::$excepts as $except) {
+            if ($except($request)) {
                 return true;
             }
         }
@@ -124,37 +111,8 @@ class HttpsGuard
         return !empty($host) && false === filter_var($host, FILTER_VALIDATE_IP);
     }
 
-    protected function isDisable(Request $request): bool
+    public static function customExcept($name, callable $except)
     {
-        foreach ($this->disableCallable as $callable) {
-            if (!$callable($request)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    protected function isAliYunFcHandler(Request $request): bool
-    {
-        if (!$this->isRunInAliYunFc($request)) {
-            return false;
-        }
-
-        $paths = ['initialize', 'invoke', 'pre-freeze', 'pre-stop'];
-
-        return $request->fullUrlIs($paths) || $request->is($paths);
-    }
-
-    protected function isRunInAliYunFc(Request $request): bool
-    {
-        $fcHeaderCount = 0;
-        foreach ($request->headers->all() as $name => $values) {
-            if (Str::startsWith($name, 'x-fc-')) {
-                $fcHeaderCount++;
-            }
-        }
-
-        return $fcHeaderCount >= 5;
+        static::$excepts[$name] = $except;
     }
 }
