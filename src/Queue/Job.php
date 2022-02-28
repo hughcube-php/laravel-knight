@@ -8,7 +8,9 @@
 
 namespace HughCube\Laravel\Knight\Queue;
 
+use BadMethodCallException;
 use HughCube\Laravel\Knight\Support\GetOrSet;
+use HughCube\Laravel\Knight\Support\ParameterBag;
 use HughCube\Laravel\Knight\Support\Validation;
 use HughCube\StaticInstanceInterface;
 use HughCube\StaticInstanceTrait;
@@ -18,14 +20,11 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Bus\PendingDispatch;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use JetBrains\PhpStorm\Pure;
 use Psr\Log\LoggerTrait;
-use Stringable;
 
 /**
  * @method static PendingDispatch|static dispatch(...$arguments)
@@ -49,9 +48,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     protected $data = [];
 
     /**
-     * @var array
+     * @var ParameterBag|null
      */
-    protected $validData = [];
+    protected $parameterBag = null;
 
     /**
      * @var array|string|null
@@ -76,11 +75,10 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     public function handle(): void
     {
         try {
-            $this->validData = $this->validate($this->getData());
+            $this->parameterBag = new ParameterBag($this->validate($this->getData()));
         } catch (ValidationException $exception) {
             $errors = json_encode($exception->errors(), JSON_UNESCAPED_UNICODE);
             $this->info(sprintf('data validation error, errors: %s, data: %s', $errors, $this->getSerializeData()));
-
             return;
         }
 
@@ -95,6 +93,17 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     public function getData(): array
     {
         return $this->data;
+    }
+
+    /**
+     * @return ParameterBag
+     */
+    public function p(): ParameterBag
+    {
+        if (!$this->parameterBag instanceof ParameterBag) {
+            $this->parameterBag = new ParameterBag();
+        }
+        return $this->parameterBag;
     }
 
     /**
@@ -120,7 +129,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
      */
     protected function getValidData(): array
     {
-        return $this->validData;
+        return $this->p()->all();
     }
 
     /**
@@ -128,7 +137,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
      */
     protected function getSerializeValidData(): string
     {
-        return base64_encode(serialize($this->validData));
+        return base64_encode(serialize($this->getValidData()));
     }
 
     /**
@@ -138,39 +147,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
      */
     protected function getJsonValidData(int $flags = JSON_UNESCAPED_UNICODE): string
     {
-        return json_encode($this->validData, $flags);
-    }
-
-    /**
-     * @param  string  $key
-     * @param  null  $default
-     * @return mixed
-     */
-    protected function get(string $key, $default = null)
-    {
-        return Arr::get($this->validData, $key, $default);
-    }
-
-    /**
-     * @param  mixed  $key
-     *
-     * @return bool
-     */
-    protected function has($key): bool
-    {
-        return Arr::has($this->validData, $key);
-    }
-
-    /**
-     * @param  string  $key
-     * @param  mixed  $value
-     * @return static
-     */
-    protected function set(string $key, $value)
-    {
-        Arr::set($this->validData, $key, $value);
-
-        return $this;
+        return json_encode($this->getValidData(), $flags);
     }
 
     /**
@@ -189,10 +166,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
      * @param  string|int|null  $pid
      * @return $this
      */
-    public function setPid($pid)
+    public function setPid($pid): Job
     {
         $this->pid = $pid;
-
         return $this;
     }
 
@@ -213,22 +189,34 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
      * @param  array|string|null  $channel
      * @return $this
      */
-    public function setLogChannel($channel = null)
+    public function setLogChannel($channel = null): Job
     {
         $this->logChannel = $channel;
         return $this;
     }
 
     /**
-     * @param $level
-     * @param  string|Stringable  $message
+     * @param  mixed  $level
+     * @param  string  $message
      * @param  array  $context
-     *
      * @return void
      */
     protected function log($level, $message, array $context = [])
     {
         $message = sprintf('[%s-%s] %s', $this->getName(), $this->getPid(), $message);
         Log::channel($this->getLogChannel())->log($level, $message, $context);
+    }
+
+    /**
+     * @param  string  $name
+     * @param  array  $arguments
+     * @return false|mixed
+     */
+    public function __call(string $name, array $arguments)
+    {
+        if (method_exists($this->p(), $name)) {
+            return call_user_func_array([$this->p(), $name], $arguments);
+        }
+        throw new BadMethodCallException("No such method exists: {$name}");
     }
 }

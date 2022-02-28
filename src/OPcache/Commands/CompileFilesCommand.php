@@ -13,10 +13,12 @@ use Exception;
 use GuzzleHttp\RequestOptions;
 use HughCube\Laravel\Knight\OPcache\LoadedOPcacheExtension;
 use HughCube\Laravel\Knight\Support\HttpClient;
-use HughCube\PUrl\Url;
+use HughCube\PUrl\Url as PUrl;
 use Illuminate\Console\Command;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Route;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\PhpProcess;
 use Symfony\Component\Process\Process;
@@ -31,7 +33,7 @@ class CompileFilesCommand extends Command
      * @inheritdoc
      */
     protected $signature = 'opcache:compile-files
-                            {--with_prod_files=knight_opcache_scripts : Whether to include cached files on line }
+                            {--with_remote_cached_scripts=knight_opcache_scripts }
                             {--with_app_files=0 : Whether to include app files }
                             {--with_composer_files=0 : Whether to include composer class files }';
 
@@ -41,16 +43,14 @@ class CompileFilesCommand extends Command
     protected $description = 'opcache compile file';
 
     /**
-     * @param Schedule $schedule
-     *
-     * @throws Exception
+     * @param  Schedule  $schedule
      *
      * @return void
+     * @throws Exception
+     *
      */
     public function handle(Schedule $schedule)
     {
-        $this->loadedOPcacheExtension();
-
         $scripts = $this->getFiles();
         $file = storage_path('opcache_compile_files.json');
         file_put_contents($file, json_encode($scripts));
@@ -96,9 +96,9 @@ class CompileFilesCommand extends Command
     }
 
     /**
+     * @return array
      * @throws Exception
      *
-     * @return array
      */
     protected function getFiles(): array
     {
@@ -166,11 +166,19 @@ class CompileFilesCommand extends Command
      */
     protected function getProdFiles(): array
     {
-        if (empty($url = $this->option('with_prod_files'))) {
+        if (empty($url = $this->option('with_remote_cached_scripts'))) {
             return [];
         }
 
-        $url = Url::isUrlString($url) ? $url : route($url);
+        if (!PUrl::isUrlString($url) && Route::has($url)) {
+            $url = route($url);
+        }
+
+        if (!PUrl::isUrlString($url)) {
+            $message = 'Description Failed to run the opcache:compile-files command, ';
+            Log::warning($message.'Remote interface URL cannot be found!');
+            return [];
+        }
 
         try {
             $response = $this->getHttpClient()->post($url, [

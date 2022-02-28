@@ -8,6 +8,7 @@
 
 namespace HughCube\Laravel\Knight\Tests\Routing;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Validation\ValidationException;
 
 class Action
@@ -15,12 +16,12 @@ class Action
     use \HughCube\Laravel\Knight\Routing\Action;
 
     /**
-     * @return mixed
-     * @throws ValidationException
+     * @return array
+     * @throws ValidationException|BindingResolutionException
      */
-    protected function action()
+    protected function action(): array
     {
-        return $this->getParameter()->all();
+        return $this->p()->all();
     }
 
     public function rules(): array

@@ -53,7 +53,7 @@ class ScriptsAction
         ]);
     }
 
-    protected function getScripts(): array|string
+    protected function getScripts(): array
     {
         if (!function_exists('opcache_get_status')) {
             return [];

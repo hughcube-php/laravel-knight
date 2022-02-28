@@ -18,9 +18,8 @@ class RequestLogAction
     use Action;
 
     /**
-     * @return Response
+     * @return string
      * @throws Exception
-     *
      */
     protected function action(): string
     {

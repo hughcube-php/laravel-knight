@@ -46,7 +46,7 @@
     },
     "scripts": {
         "test": "phpunit --verbose --coverage-clover=coverage.clover",
-        "phpstan": "phpstan analyse -vvv",
+        "phpstan": "phpstan analyse -vvv --memory-limit=-1",
         "check-style": "phpcs -p --standard=PSR2 src/ -v",
         "fix-style": "phpcbf -p --standard=PSR2 src/ -v"
     },

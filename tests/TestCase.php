@@ -9,6 +9,8 @@
 namespace HughCube\Laravel\Knight\Tests;
 
 use Exception;
+use HughCube\Laravel\Knight\OPcache\Jobs\WatchFilesJob;
+use HughCube\Laravel\Knight\Queue\Job;
 use Illuminate\Config\Repository;
 use Illuminate\Database\DatabaseServiceProvider;
 use Illuminate\Foundation\Application;
@@ -16,6 +18,7 @@ use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+use Throwable;
 
 class TestCase extends OrchestraTestCase
 {
@@ -39,8 +42,6 @@ class TestCase extends OrchestraTestCase
      */
     protected function getEnvironmentSetUp($app)
     {
-        $this->
-
         $app['config']->set('app.key', 'ZsZewWyUJ5FsKp9lMwv4tYbNlegQilM7');
 
         $this->setupEloquent($app);
@@ -148,5 +149,15 @@ class TestCase extends OrchestraTestCase
         $property->setAccessible(true);
 
         $property->setValue($object, $value);
+    }
+
+    protected function assertJob(Job $job)
+    {
+        $exception = null;
+        try {
+            $job->handle();
+        } catch (Throwable $exception) {
+        }
+        $this->assertNull($exception);
     }
 }

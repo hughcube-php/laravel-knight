@@ -15,7 +15,6 @@ use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
 use HughCube\Laravel\Knight\Http\Actions\PingAction as PingAction;
 use HughCube\Laravel\Knight\Http\Actions\RequestLogAction as RequestLogAction;
 use HughCube\Laravel\Knight\Http\Actions\RequestShowAction as RequestShowAction;
-use HughCube\Laravel\Knight\Octane\Commands\PrepareCommand as OctanePrepareCommand;
 use HughCube\Laravel\Knight\OPcache\Actions\ScriptsAction as OPcacheScriptsAction;
 use HughCube\Laravel\Knight\OPcache\Actions\StatesAction as OPcacheStatesAction;
 use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand as OPcacheCompileFilesCommand;
@@ -23,9 +22,10 @@ use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use Laravel\Lumen\Application as LumenApplication;
-use Laravel\Octane\Commands\StartSwooleCommand;
 
-
+/**
+ * @property LaravelApplication|LumenApplication $app
+ */
 class ServiceProvider extends IlluminateServiceProvider
 {
     /**
@@ -65,10 +65,6 @@ class ServiceProvider extends IlluminateServiceProvider
             PhpIniFile::class,
             KRTest::class,
         ]);
-
-        if (class_exists(StartSwooleCommand::class)) {
-            $this->commands([OctanePrepareCommand::class]);
-        }
     }
 
     protected function bootOPcache()

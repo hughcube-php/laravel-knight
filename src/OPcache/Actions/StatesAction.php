@@ -20,7 +20,6 @@ class StatesAction
     use Action;
     use LoadedOPcacheExtension;
 
-    #[ArrayShape([])]
     protected function rules(): array
     {
         return [
@@ -42,12 +41,19 @@ class StatesAction
             return $this->asJson(opcache_get_status());
         }
 
-        return response(require dirname(__DIR__).'/Views/opcache.php');
+        return response($this->renderView(dirname(__DIR__).'/Views/opcache.php'));
+    }
+
+    protected function renderView($file)
+    {
+        $obLevel = ob_get_level();
+        ob_start();
+        include $file;
+        return ob_get_clean();
     }
 
     protected function isAsJson(): bool
     {
-        /** @phpstan-ignore-next-line */
-        return 1 == $this->get('as_json');
+        return 1 == $this->p()->get('as_json');
     }
 }

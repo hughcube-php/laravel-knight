@@ -11,6 +11,7 @@ namespace HughCube\Laravel\Knight\Http\Actions;
 use Exception;
 use HughCube\Laravel\Knight\Routing\Action;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class RequestShowAction
@@ -18,17 +19,16 @@ class RequestShowAction
     use Action;
 
     /**
+     * @return JsonResponse
      * @throws Exception
-     *
-     * @return Response
      */
-    protected function action(): Response
+    protected function action(): JsonResponse
     {
         return $this->asJson([
-            'uri'     => $this->getRequest()->getUri(),
-            'https'   => $this->getRequest()->isSecure(),
-            'method'  => $this->getRequest()->getMethod(),
-            'host'    => $this->getRequest()->getHost(),
+            'uri' => $this->getRequest()->getUri(),
+            'https' => $this->getRequest()->isSecure(),
+            'method' => $this->getRequest()->getMethod(),
+            'host' => $this->getRequest()->getHost(),
             'headers' => $this->getRequest()->headers->all(),
             'content' => serialize($this->getRequest()->getContent()),
         ]);
