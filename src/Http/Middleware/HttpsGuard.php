@@ -10,7 +10,9 @@ namespace HughCube\Laravel\Knight\Http\Middleware;
 
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
+use HughCube\PUrl\Url as PUrl;
 
 class HttpsGuard
 {
@@ -58,7 +60,8 @@ class HttpsGuard
             && $this->isSecureApplicationUrl()
             && !$this->isExcept($request)
         ) {
-            return redirect()->to($request->getUri(), $status, [], true);
+            $url = PUrl::instance($request->getUri())->withScheme('https');
+            return redirect()->to($url, $status);
         }
 
         /** @var Response $response */
