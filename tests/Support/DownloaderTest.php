@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/2/18
- * Time: 23:17
+ * Time: 23:17.
  */
 
 namespace HughCube\Laravel\Knight\Tests\Support;
@@ -33,8 +33,9 @@ class DownloaderTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws GuzzleException
+     *
+     * @return void
      */
     public function testTo()
     {

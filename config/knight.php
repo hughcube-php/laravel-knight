@@ -9,8 +9,8 @@ return [
     'ping' => [
         'routes' => [
             [
-                'uri' => 'ping',
-                'name' => 'ping',
+                'uri'    => 'ping',
+                'name'   => 'ping',
                 'action' => PingAction::class,
             ],
         ],
@@ -19,8 +19,8 @@ return [
     'request' => [
         'routes' => [
             [
-                'uri' => 'ping',
-                'name' => 'ping',
+                'uri'    => 'ping',
+                'name'   => 'ping',
                 'action' => PingAction::class,
             ],
         ],
@@ -32,13 +32,13 @@ return [
         ],
         'routes' => [
             [
-                'uri' => 'opcache/scripts',
-                'name' => 'opcache_scripts',
+                'uri'    => 'opcache/scripts',
+                'name'   => 'opcache_scripts',
                 'action' => ScriptsAction::class,
             ],
             [
-                'uri' => 'opcache/states',
-                'name' => 'opcache_states',
+                'uri'    => 'opcache/states',
+                'name'   => 'opcache_states',
                 'action' => StatesAction::class,
             ],
         ],

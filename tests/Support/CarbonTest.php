@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/2/18
- * Time: 19:11
+ * Time: 19:11.
  */
 
 namespace HughCube\Laravel\Knight\Tests\Support;
@@ -19,7 +19,7 @@ class CarbonTest extends TestCase
     {
         $dateFormats = [
             CarbonInterface::DEFAULT_TO_STRING_FORMAT, CarbonInterface::RFC7231_FORMAT,
-            CarbonInterface::MOCK_DATETIME_FORMAT
+            CarbonInterface::MOCK_DATETIME_FORMAT,
         ];
         foreach ($dateFormats as $dateFormat) {
             $date = date($dateFormat, ($timestamp = time()));
@@ -36,7 +36,7 @@ class CarbonTest extends TestCase
         $timestamp = time();
         $dateFormats = [
             CarbonInterface::DEFAULT_TO_STRING_FORMAT, CarbonInterface::RFC7231_FORMAT,
-            CarbonInterface::MOCK_DATETIME_FORMAT
+            CarbonInterface::MOCK_DATETIME_FORMAT,
         ];
 
         foreach ($dateFormats as $dateFormat) {
@@ -53,7 +53,7 @@ class CarbonTest extends TestCase
         $timestamp = time();
         $dateFormats = [
             CarbonInterface::DEFAULT_TO_STRING_FORMAT, CarbonInterface::RFC7231_FORMAT,
-            CarbonInterface::MOCK_DATETIME_FORMAT
+            CarbonInterface::MOCK_DATETIME_FORMAT,
         ];
 
         foreach ($dateFormats as $dateFormat) {

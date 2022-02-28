@@ -43,11 +43,11 @@ class CompileFilesCommand extends Command
     protected $description = 'opcache compile file';
 
     /**
-     * @param  Schedule  $schedule
+     * @param Schedule $schedule
      *
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function handle(Schedule $schedule)
     {
@@ -96,9 +96,9 @@ class CompileFilesCommand extends Command
     }
 
     /**
-     * @return array
      * @throws Exception
      *
+     * @return array
      */
     protected function getFiles(): array
     {
@@ -177,6 +177,7 @@ class CompileFilesCommand extends Command
         if (!PUrl::isUrlString($url)) {
             $message = 'Description Failed to run the opcache:compile-files command, ';
             Log::warning($message.'Remote interface URL cannot be found!');
+
             return [];
         }
 

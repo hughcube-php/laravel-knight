@@ -10,6 +10,7 @@ class LumenRequestTest extends TestCase
     public function testMake()
     {
         $exception = null;
+
         try {
             LumenRequest::capture();
         } catch (\Throwable $exception) {

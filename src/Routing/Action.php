@@ -38,17 +38,17 @@ trait Action
     abstract protected function action();
 
     /**
-     * @param  array  $data
-     * @param  int  $code
+     * @param array $data
+     * @param int   $code
      *
      * @return JsonResponse
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
     {
         return new JsonResponse([
-            'code' => $code,
+            'code'    => $code,
             'message' => 'ok',
-            'data' => $data,
+            'data'    => $data,
         ]);
     }
 
@@ -61,8 +61,9 @@ trait Action
     }
 
     /**
-     * @return Repository
      * @throws BindingResolutionException
+     *
+     * @return Repository
      */
     protected function getContainerConfig(): Repository
     {
@@ -70,8 +71,9 @@ trait Action
     }
 
     /**
-     * @return Request
      * @throws BindingResolutionException
+     *
+     * @return Request
      */
     protected function getRequest(): Request
     {
@@ -79,9 +81,10 @@ trait Action
     }
 
     /**
-     * @return void
      * @throws BindingResolutionException
      * @throws ValidationException
+     *
+     * @return void
      */
     protected function loadParameters()
     {
@@ -94,9 +97,11 @@ trait Action
     }
 
     /**
-     * @return ParameterBag
      * @throws BindingResolutionException
      * @throws ValidationException
+     *
+     * @return ParameterBag
+     *
      * @deprecated Will be removed in a future version.
      */
     protected function getParameter(): ParameterBag
@@ -105,25 +110,28 @@ trait Action
     }
 
     /**
-     * @return ParameterBag
      * @throws BindingResolutionException
      * @throws ValidationException
+     *
+     * @return ParameterBag
      */
     protected function p(): ParameterBag
     {
         $this->loadParameters();
+
         return $this->parameterBag;
     }
 
     /**
-     * @return mixed
      * @throws BindingResolutionException
      * @throws InvalidArgumentException
      * @throws ValidationException
+     *
+     * @return mixed
      */
     public function invoke()
     {
-        # Reset the status on each request
+        // Reset the status on each request
         $this->parameterBag = null;
         $this->flushHughCubeKnightClassSelfCacheStorage();
 
@@ -133,10 +141,11 @@ trait Action
     }
 
     /**
-     * @return mixed
      * @throws BindingResolutionException
      * @throws InvalidArgumentException
      * @throws ValidationException
+     *
+     * @return mixed
      */
     public function __invoke()
     {
@@ -144,11 +153,13 @@ trait Action
     }
 
     /**
-     * @param  string  $name
-     * @param  array  $arguments
-     * @return mixed
+     * @param string $name
+     * @param array  $arguments
+     *
      * @throws BindingResolutionException
      * @throws ValidationException
+     *
+     * @return mixed
      */
     public function __call(string $name, array $arguments)
     {

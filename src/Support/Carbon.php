@@ -28,6 +28,7 @@ class Carbon extends \Illuminate\Support\Carbon
         }
 
         $dateTime = static::createFromFormat($format, $date);
+
         return $dateTime instanceof static ? $dateTime : null;
     }
 
@@ -47,6 +48,7 @@ class Carbon extends \Illuminate\Support\Carbon
     public static function isPastDate($date, string $format = 'Y-m-d H:i:s'): bool
     {
         $dateTime = static::fromDate($date, $format);
+
         return $dateTime instanceof BaseCarbon && $dateTime->isPast();
     }
 

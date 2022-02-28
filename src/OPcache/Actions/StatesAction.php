@@ -12,7 +12,6 @@ use Exception;
 use HughCube\Laravel\Knight\OPcache\LoadedOPcacheExtension;
 use HughCube\Laravel\Knight\Routing\Action;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\HttpFoundation\Response;
 
 class StatesAction
@@ -28,10 +27,10 @@ class StatesAction
     }
 
     /**
-     * @return Response
      * @throws Exception
-     *
      * @throws BindingResolutionException
+     *
+     * @return Response
      */
     protected function action(): Response
     {
@@ -49,6 +48,7 @@ class StatesAction
         $obLevel = ob_get_level();
         ob_start();
         include $file;
+
         return ob_get_clean();
     }
 

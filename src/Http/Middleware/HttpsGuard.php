@@ -37,7 +37,8 @@ class HttpsGuard
     /**
      * Create a new middleware instance.
      *
-     * @param  Container  $app
+     * @param Container $app
+     *
      * @return void
      */
     public function __construct(Container $app)
@@ -46,10 +47,10 @@ class HttpsGuard
     }
 
     /**
-     * @param  Request  $request
-     * @param  callable  $next
-     * @param  int  $status
-     * @param  string|null  $hsts
+     * @param Request     $request
+     * @param callable    $next
+     * @param int         $status
+     * @param string|null $hsts
      *
      * @return Response
      */
@@ -82,7 +83,7 @@ class HttpsGuard
     /**
      * Determine if the request has a URI that should be accessible in maintenance mode.
      *
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return bool
      */
@@ -119,6 +120,7 @@ class HttpsGuard
     protected function isHostRequest(Request $request): bool
     {
         $host = $request->getHost();
+
         return !empty($host) && false === filter_var($host, FILTER_VALIDATE_IP);
     }
 
@@ -129,6 +131,7 @@ class HttpsGuard
                 return true;
             }
         }
+
         return false;
     }
 

@@ -11,15 +11,15 @@ namespace HughCube\Laravel\Knight\Http\Actions;
 use Exception;
 use HughCube\Laravel\Knight\Routing\Action;
 use Illuminate\Support\Facades\Log;
-use Symfony\Component\HttpFoundation\Response;
 
 class RequestLogAction
 {
     use Action;
 
     /**
-     * @return string
      * @throws Exception
+     *
+     * @return string
      */
     protected function action(): string
     {

@@ -18,14 +18,15 @@ class WatchFilesJob extends \HughCube\Laravel\Knight\Queue\Job
     public function rules(): array
     {
         return [
-            'url' => ['string', 'nullable'],
+            'url'     => ['string', 'nullable'],
             'timeout' => ['integer', 'default:30'],
         ];
     }
 
     /**
-     * @return void
      * @throws GuzzleException
+     *
+     * @return void
      */
     protected function action(): void
     {
@@ -33,6 +34,7 @@ class WatchFilesJob extends \HughCube\Laravel\Knight\Queue\Job
         if (!PUrl::isUrlString($url)) {
             $message = sprintf('Description Failed to run the %s job, ', $this->getName());
             Log::warning(sprintf('%s, %s', $message, 'Remote interface URL cannot be found!'));
+
             return;
         }
 
@@ -44,6 +46,7 @@ class WatchFilesJob extends \HughCube\Laravel\Knight\Queue\Job
         } catch (\Throwable $exception) {
             $message = sprintf('Description Failed to run the %s job ', $this->getName());
             Log::warning(sprintf('%s, http error: %s', $message, $exception->getMessage()));
+
             return;
         }
 

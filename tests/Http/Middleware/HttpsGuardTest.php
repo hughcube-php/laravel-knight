@@ -76,6 +76,7 @@ class HttpsGuardTest extends TestCase
                 }
             }
         }
+
         return $cases;
     }
 

@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/2/18
- * Time: 23:38
+ * Time: 23:38.
  */
 
 namespace HughCube\Laravel\Knight\Tests\Support;
@@ -16,8 +16,9 @@ use ReflectionException;
 class GetOrSetTest extends TestCase
 {
     /**
-     * @return void
      * @throws ReflectionException
+     *
+     * @return void
      */
     public function testGetOrSetNotEmpty()
     {
@@ -30,7 +31,7 @@ class GetOrSetTest extends TestCase
                 $key,
                 function () {
                     return Str::random();
-                }
+                },
             ]);
         }
         $values = array_values(array_unique($values));
@@ -39,8 +40,9 @@ class GetOrSetTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws ReflectionException
+     *
+     * @return void
      */
     public function testGetOrSetEmpty()
     {
@@ -51,23 +53,24 @@ class GetOrSetTest extends TestCase
         $this->assertNull($this->callMethod($mock, 'getOrSet', [
             $key, function () {
                 return null;
-            }
+            },
         ]));
         $this->assertNull($this->callMethod($mock, 'getOrSet', [
             $key, function () {
                 return Str::random();
-            }
+            },
         ]));
         $this->assertNull($this->callMethod($mock, 'getOrSet', [
             $key, function () {
                 return Str::random();
-            }
+            },
         ]));
     }
 
     /**
-     * @return void
      * @throws ReflectionException
+     *
+     * @return void
      */
     public function testFlushHughCubeKnightClassSelfCacheStorage()
     {
@@ -76,13 +79,13 @@ class GetOrSetTest extends TestCase
         $value = $this->callMethod($mock, 'getOrSet', [
             Str::random(), function () {
                 return Str::random();
-            }
+            },
         ]);
         $this->callMethod($mock, 'flushHughCubeKnightClassSelfCacheStorage');
         $this->assertNotSame($value, $this->callMethod($mock, 'getOrSet', [
             Str::random(), function () {
                 return Str::random();
-            }
+            },
         ]));
     }
 }

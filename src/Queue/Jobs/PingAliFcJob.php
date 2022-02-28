@@ -5,7 +5,6 @@ namespace HughCube\Laravel\Knight\Queue\Jobs;
 use GuzzleHttp\Exception\GuzzleException;
 use HughCube\Laravel\AliFC\AliFC;
 use HughCube\Laravel\AliFC\Client;
-use JetBrains\PhpStorm\ArrayShape;
 use Psr\Http\Message\ResponseInterface as Response;
 
 class PingAliFcJob extends PingJob

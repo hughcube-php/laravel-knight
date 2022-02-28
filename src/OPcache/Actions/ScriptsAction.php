@@ -24,10 +24,10 @@ class ScriptsAction
     use LoadedOPcacheExtension;
 
     /**
-     * @return Response
      * @throws Exception
-     *
      * @throws InvalidArgumentException
+     *
+     * @return Response
      */
     protected function action(): Response
     {
@@ -48,7 +48,7 @@ class ScriptsAction
         $this->getCache()->set($this->getCacheKey(), $scripts, Carbon::now()->addYears());
 
         return $this->asJson([
-            'count' => count($scripts),
+            'count'   => count($scripts),
             'scripts' => array_keys($scripts),
         ]);
     }
@@ -71,9 +71,9 @@ class ScriptsAction
     }
 
     /**
-     * @return array
      * @throws InvalidArgumentException
      *
+     * @return array
      */
     protected function getHistoryScripts(): array
     {
