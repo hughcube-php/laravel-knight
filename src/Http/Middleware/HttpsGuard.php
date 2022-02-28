@@ -115,4 +115,9 @@ class HttpsGuard
     {
         static::$excepts[$name] = $except;
     }
+
+    public static function resetCustomExcepts()
+    {
+        static::$excepts = [];
+    }
 }
