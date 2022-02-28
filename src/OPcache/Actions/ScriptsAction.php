@@ -10,7 +10,7 @@ namespace HughCube\Laravel\Knight\OPcache\Actions;
 
 use Exception;
 use HughCube\Laravel\Knight\OPcache\LoadedOPcacheExtension;
-use HughCube\Laravel\Knight\Routing\Action;
+use HughCube\Laravel\Knight\Routing\Controller;
 use HughCube\Laravel\Knight\Support\Carbon;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Cache;
@@ -18,16 +18,15 @@ use Illuminate\Support\Str;
 use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 
-class ScriptsAction
+class ScriptsAction extends Controller
 {
-    use Action;
     use LoadedOPcacheExtension;
 
     /**
-     * @throws Exception
+     * @return Response
      * @throws InvalidArgumentException
      *
-     * @return Response
+     * @throws Exception
      */
     protected function action(): Response
     {
@@ -48,7 +47,7 @@ class ScriptsAction
         $this->getCache()->set($this->getCacheKey(), $scripts, Carbon::now()->addYears());
 
         return $this->asJson([
-            'count'   => count($scripts),
+            'count' => count($scripts),
             'scripts' => array_keys($scripts),
         ]);
     }
@@ -71,9 +70,9 @@ class ScriptsAction
     }
 
     /**
+     * @return array
      * @throws InvalidArgumentException
      *
-     * @return array
      */
     protected function getHistoryScripts(): array
     {

@@ -8,12 +8,10 @@
 
 namespace HughCube\Laravel\Knight\Http\Actions;
 
-use HughCube\Laravel\Knight\Routing\Action;
+use HughCube\Laravel\Knight\Routing\Controller;
 
-class PingAction
+class PingAction extends Controller
 {
-    use Action;
-
     protected function action(): string
     {
         return 'done';

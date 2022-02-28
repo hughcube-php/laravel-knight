@@ -38,17 +38,17 @@ trait Action
     abstract protected function action();
 
     /**
-     * @param array $data
-     * @param int   $code
+     * @param  array  $data
+     * @param  int  $code
      *
      * @return JsonResponse
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
     {
         return new JsonResponse([
-            'code'    => $code,
+            'code' => $code,
             'message' => 'ok',
-            'data'    => $data,
+            'data' => $data,
         ]);
     }
 
@@ -61,9 +61,9 @@ trait Action
     }
 
     /**
+     * @return Repository
      * @throws BindingResolutionException
      *
-     * @return Repository
      */
     protected function getContainerConfig(): Repository
     {
@@ -71,9 +71,9 @@ trait Action
     }
 
     /**
+     * @return Request
      * @throws BindingResolutionException
      *
-     * @return Request
      */
     protected function getRequest(): Request
     {
@@ -81,10 +81,10 @@ trait Action
     }
 
     /**
-     * @throws BindingResolutionException
+     * @return void
      * @throws ValidationException
      *
-     * @return void
+     * @throws BindingResolutionException
      */
     protected function loadParameters()
     {
@@ -97,11 +97,11 @@ trait Action
     }
 
     /**
-     * @throws BindingResolutionException
-     * @throws ValidationException
-     *
      * @return ParameterBag
      *
+     * @throws ValidationException
+     *
+     * @throws BindingResolutionException
      * @deprecated Will be removed in a future version.
      */
     protected function getParameter(): ParameterBag
@@ -110,10 +110,10 @@ trait Action
     }
 
     /**
-     * @throws BindingResolutionException
+     * @return ParameterBag
      * @throws ValidationException
      *
-     * @return ParameterBag
+     * @throws BindingResolutionException
      */
     protected function p(): ParameterBag
     {
@@ -123,11 +123,11 @@ trait Action
     }
 
     /**
-     * @throws BindingResolutionException
+     * @return mixed
      * @throws InvalidArgumentException
      * @throws ValidationException
      *
-     * @return mixed
+     * @throws BindingResolutionException
      */
     public function invoke()
     {
@@ -141,11 +141,11 @@ trait Action
     }
 
     /**
-     * @throws BindingResolutionException
+     * @return mixed
      * @throws InvalidArgumentException
      * @throws ValidationException
      *
-     * @return mixed
+     * @throws BindingResolutionException
      */
     public function __invoke()
     {
@@ -153,15 +153,13 @@ trait Action
     }
 
     /**
-     * @param string $name
-     * @param array  $arguments
-     *
-     * @throws BindingResolutionException
-     * @throws ValidationException
-     *
+     * @param  string  $name
+     * @param  array  $arguments
      * @return mixed
+     * @throws ValidationException
+     * @throws BindingResolutionException
      */
-    public function __call(string $name, array $arguments)
+    public function __call($name, $arguments)
     {
         if (method_exists($this->p(), $name)) {
             return call_user_func_array([$this->p(), $name], $arguments);

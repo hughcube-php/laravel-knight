@@ -10,13 +10,12 @@ namespace HughCube\Laravel\Knight\OPcache\Actions;
 
 use Exception;
 use HughCube\Laravel\Knight\OPcache\LoadedOPcacheExtension;
-use HughCube\Laravel\Knight\Routing\Action;
+use HughCube\Laravel\Knight\Routing\Controller;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Symfony\Component\HttpFoundation\Response;
 
-class StatesAction
+class StatesAction extends Controller
 {
-    use Action;
     use LoadedOPcacheExtension;
 
     protected function rules(): array
@@ -27,10 +26,10 @@ class StatesAction
     }
 
     /**
-     * @throws Exception
+     * @return Response
      * @throws BindingResolutionException
      *
-     * @return Response
+     * @throws Exception
      */
     protected function action(): Response
     {
