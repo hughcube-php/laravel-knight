@@ -9,6 +9,7 @@
 namespace HughCube\Laravel\Knight\Queue;
 
 use BadMethodCallException;
+use HughCube\Base\Base;
 use HughCube\Laravel\Knight\Support\GetOrSet;
 use HughCube\Laravel\Knight\Support\ParameterBag;
 use HughCube\Laravel\Knight\Support\Validation;
@@ -159,7 +160,11 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     protected function getPid()
     {
         if (null === $this->pid) {
-            $this->setPid(crc32(Str::random(5)));
+            $this->setPid(Base::conv(
+                crc32(Str::random(5)),
+                '0123456789',
+                'LaJhMxlTNSw813CnG2bduYAPrBpZVv0tiykIgUoz5KW6HQDej49csq7fmOXREF'
+            ));
         }
 
         return $this->pid;
