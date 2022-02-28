@@ -11,21 +11,19 @@
     "require": {
         "php": ">=7.2|8.*",
         "ext-json": "*",
-        "hughcube/laravel-validation": "^1.0",
         "jenssegers/agent": "^2.6",
-        "hughcube/static-instance": "^1.0",
-        "hughcube/enum": "^1.1",
-        "guzzlehttp/guzzle": "6.*|7.*",
-        "hughcube/purl": "^1.0"
+        "hughcube/laravel-validation": "*",
+        "hughcube/static-instance": "*",
+        "hughcube/enum": "*",
+        "guzzlehttp/guzzle": "*",
+        "hughcube/purl": "*"
     },
     "require-dev": {
         "laravel/framework": "*",
         "laravel/lumen-framework": "*",
         "squizlabs/php_codesniffer": "*",
         "phpstan/phpstan": "*",
-        "orchestra/testbench": "*",
-        "swoole/ide-helper": "~4.7.1",
-        "hughcube/laravel-alifc": "*"
+        "orchestra/testbench": "*"
     },
     "autoload": {
         "psr-4": {
