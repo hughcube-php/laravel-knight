@@ -61,7 +61,7 @@ class HttpsGuard
             && !$this->isExcept($request)
         ) {
             $url = PUrl::instance($request->getUri())->withScheme('https');
-            return redirect()->to($url, $status);
+            return redirect()->to($url->toString(), $status);
         }
 
         /** @var Response $response */
