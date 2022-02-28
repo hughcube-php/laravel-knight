@@ -79,6 +79,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
         } catch (ValidationException $exception) {
             $errors = json_encode($exception->errors(), JSON_UNESCAPED_UNICODE);
             $this->info(sprintf('data validation error, errors: %s, data: %s', $errors, $this->getSerializeData()));
+
             return;
         }
 
@@ -103,6 +104,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
         if (!$this->parameterBag instanceof ParameterBag) {
             $this->parameterBag = new ParameterBag();
         }
+
         return $this->parameterBag;
     }
 
@@ -115,7 +117,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  int  $flags
+     * @param int $flags
      *
      * @return string
      */
@@ -141,7 +143,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  int  $flags
+     * @param int $flags
      *
      * @return string
      */
@@ -163,12 +165,14 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  string|int|null  $pid
+     * @param string|int|null $pid
+     *
      * @return $this
      */
     public function setPid($pid): Job
     {
         $this->pid = $pid;
+
         return $this;
     }
 
@@ -186,19 +190,22 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  array|string|null  $channel
+     * @param array|string|null $channel
+     *
      * @return $this
      */
     public function setLogChannel($channel = null): Job
     {
         $this->logChannel = $channel;
+
         return $this;
     }
 
     /**
-     * @param  mixed  $level
-     * @param  string  $message
-     * @param  array  $context
+     * @param mixed  $level
+     * @param string $message
+     * @param array  $context
+     *
      * @return void
      */
     protected function log($level, $message, array $context = [])
@@ -208,8 +215,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  string  $name
-     * @param  array  $arguments
+     * @param string $name
+     * @param array  $arguments
+     *
      * @return false|mixed
      */
     public function __call(string $name, array $arguments)
@@ -217,6 +225,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
         if (method_exists($this->p(), $name)) {
             return call_user_func_array([$this->p(), $name], $arguments);
         }
+
         throw new BadMethodCallException("No such method exists: {$name}");
     }
 }

@@ -102,7 +102,7 @@ trait Builder
     }
 
     /**
-     * @param  mixed  $value
+     * @param mixed $value
      *
      * @return bool
      */
@@ -112,7 +112,7 @@ trait Builder
     }
 
     /**
-     * @param  array  $columns
+     * @param array $columns
      *
      * @return string
      */
@@ -133,10 +133,11 @@ trait Builder
     }
 
     /**
-     * @param  mixed  $pk
-     * @return static|null
+     * @param mixed $pk
+     *
      * @throws InvalidArgumentException
      *
+     * @return static|null
      */
     public function findByPk($pk)
     {
@@ -144,9 +145,11 @@ trait Builder
     }
 
     /**
-     * @param  array|Arrayable|Traversable  $pks
-     * @return EloquentCollection
+     * @param array|Arrayable|Traversable $pks
+     *
      * @throws InvalidArgumentException
+     *
+     * @return EloquentCollection
      */
     public function findByPks($pks): EloquentCollection
     {
@@ -182,11 +185,12 @@ trait Builder
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param  array|Arrayable|Traversable  $ids  必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
-     * @return EloquentCollection
-     * @throws Exception
+     * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
+     * @throws Exception
      * @throws InvalidArgumentException
+     *
+     * @return EloquentCollection
      */
     public function findUniqueRows($ids): EloquentCollection
     {
@@ -342,9 +346,9 @@ trait Builder
     }
 
     /**
-     * @return bool
      * @throws InvalidArgumentException
      *
+     * @return bool
      */
     public function refreshRowCache(): bool
     {

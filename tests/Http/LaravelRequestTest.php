@@ -10,6 +10,7 @@ class LaravelRequestTest extends TestCase
     public function testMake()
     {
         $exception = null;
+
         try {
             LaravelRequest::capture();
         } catch (\Throwable $exception) {

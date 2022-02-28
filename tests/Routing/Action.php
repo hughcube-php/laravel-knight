@@ -16,8 +16,9 @@ class Action
     use \HughCube\Laravel\Knight\Routing\Action;
 
     /**
-     * @return array
      * @throws ValidationException|BindingResolutionException
+     *
+     * @return array
      */
     protected function action(): array
     {

@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/2/26
- * Time: 20:19
+ * Time: 20:19.
  */
 
 namespace HughCube\Laravel\Knight\Tests\Console\Commands;

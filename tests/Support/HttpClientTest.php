@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/2/24
- * Time: 15:55
+ * Time: 15:55.
  */
 
 namespace HughCube\Laravel\Knight\Tests\Support;
@@ -16,8 +16,9 @@ use ReflectionException;
 class HttpClientTest extends TestCase
 {
     /**
-     * @return void
      * @throws ReflectionException
+     *
+     * @return void
      */
     public function testGetHttpClient()
     {

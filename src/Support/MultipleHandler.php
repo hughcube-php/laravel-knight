@@ -20,10 +20,12 @@ trait MultipleHandler
     }
 
     /**
-     * @param  bool  $tryException
-     * @param  bool  $logException
-     * @return mixed
+     * @param bool $tryException
+     * @param bool $logException
+     *
      * @throws Throwable
+     *
+     * @return mixed
      */
     protected function triggerHandlers(bool $tryException = false, bool $logException = true): mixed
     {
@@ -31,6 +33,7 @@ trait MultipleHandler
 
         foreach ($this->getHandlers() as $handler) {
             $exception = null;
+
             try {
                 $results = $this->{$handler}();
             } catch (Throwable $exception) {

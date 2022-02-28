@@ -10,10 +10,10 @@ namespace HughCube\Laravel\Knight\Tests\Routing;
 
 use Dotenv\Exception\ValidationException;
 use Exception;
+use HughCube\Laravel\Knight\Support\ParameterBag;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Http\Request;
 use ReflectionException;
-use HughCube\Laravel\Knight\Support\ParameterBag;
 
 class ActionTest extends TestCase
 {

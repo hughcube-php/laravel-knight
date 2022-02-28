@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/2/17
- * Time: 22:21
+ * Time: 22:21.
  */
 
 namespace HughCube\Laravel\Knight\Support;
@@ -23,12 +23,14 @@ class ParameterBag
     }
 
     /**
-     * @param  array  $parameters
+     * @param array $parameters
+     *
      * @return $this
      */
     public function replace(array $parameters = []): ParameterBag
     {
         $this->parameters = $parameters;
+
         return $this;
     }
 
@@ -43,7 +45,8 @@ class ParameterBag
     }
 
     /**
-     * @param  string|int  $key
+     * @param string|int $key
+     *
      * @return bool
      */
     public function has($key): bool
@@ -52,8 +55,9 @@ class ParameterBag
     }
 
     /**
-     * @param  string|int  $key
-     * @param  mixed  $default
+     * @param string|int $key
+     * @param mixed      $default
+     *
      * @return mixed
      */
     public function get($key, $default = null)
@@ -62,19 +66,22 @@ class ParameterBag
     }
 
     /**
-     * @param  string|int  $key
-     * @param  mixed  $value
+     * @param string|int $key
+     * @param mixed      $value
+     *
      * @return $this
      */
     public function set($key, $value): ParameterBag
     {
         $this->parameters[$key] = $value;
+
         return $this;
     }
 
     /**
-     * @param  string|int  $key
-     * @param  mixed  $value
+     * @param string|int $key
+     * @param mixed      $value
+     *
      * @return $this
      */
     public function add($key, $value): ParameterBag
@@ -82,11 +89,13 @@ class ParameterBag
         if ($this->has($key)) {
             $this->set($key, $value);
         }
+
         return $this;
     }
 
     /**
-     * @param  string|int  $key
+     * @param string|int $key
+     *
      * @return $this
      */
     public function remove($key): ParameterBag
@@ -94,6 +103,7 @@ class ParameterBag
         if ($this->has($key)) {
             unset($this->parameters[$key]);
         }
+
         return $this;
     }
 
