@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/2/28
- * Time: 17:18
+ * Time: 17:18.
  */
 
 namespace HughCube\Laravel\Knight\Routing;

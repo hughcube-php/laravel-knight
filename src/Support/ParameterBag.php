@@ -23,7 +23,7 @@ class ParameterBag
     }
 
     /**
-     * @param  array  $parameters
+     * @param array $parameters
      *
      * @return $this
      */
@@ -45,7 +45,7 @@ class ParameterBag
     }
 
     /**
-     * @param  string|int  $key
+     * @param string|int $key
      *
      * @return bool
      */
@@ -55,8 +55,8 @@ class ParameterBag
     }
 
     /**
-     * @param  string|int  $key
-     * @param  mixed  $default
+     * @param string|int $key
+     * @param mixed      $default
      *
      * @return mixed
      */
@@ -66,8 +66,8 @@ class ParameterBag
     }
 
     /**
-     * @param  string|int  $key
-     * @param  mixed  $value
+     * @param string|int $key
+     * @param mixed      $value
      *
      * @return $this
      */
@@ -79,8 +79,8 @@ class ParameterBag
     }
 
     /**
-     * @param  string|int  $key
-     * @param  mixed  $value
+     * @param string|int $key
+     * @param mixed      $value
      *
      * @return $this
      */
@@ -94,7 +94,8 @@ class ParameterBag
     }
 
     /**
-     * @param  string|int  $key
+     * @param string|int $key
+     *
      * @return $this
      */
     public function remove($key): ParameterBag
@@ -102,12 +103,14 @@ class ParameterBag
         if ($this->has($key)) {
             unset($this->parameters[$key]);
         }
+
         return $this;
     }
 
     /**
-     * @param  string|int  $key
-     * @param  mixed  $default
+     * @param string|int $key
+     * @param mixed      $default
+     *
      * @return bool
      */
     public function getBoolean($key, $default = false): bool
@@ -116,8 +119,9 @@ class ParameterBag
     }
 
     /**
-     * @param  string|int  $key
-     * @param  mixed  $default
+     * @param string|int $key
+     * @param mixed      $default
+     *
      * @return int
      */
     public function getInt($key, $default = 0): int

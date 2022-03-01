@@ -5,7 +5,6 @@ namespace HughCube\Laravel\Knight\Queue\Jobs;
 use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\Support\Carbon;
 use Illuminate\Support\Facades\File;
-use JetBrains\PhpStorm\ArrayShape;
 use Symfony\Component\Finder\Finder;
 
 class AutoCleanFileJob extends Job

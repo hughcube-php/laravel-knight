@@ -29,7 +29,8 @@ trait Model
     private $isFromCache = false;
 
     /**
-     * @param  null|string|DateTime|int  $date
+     * @param null|string|DateTime|int $date
+     *
      * @return Carbon|null
      */
     public function toDateTime($date = null): ?Carbon
@@ -38,8 +39,9 @@ trait Model
     }
 
     /**
-     * @param  null|DateTime|BaseCarbon  $dateTime
-     * @param  string  $format
+     * @param null|DateTime|BaseCarbon $dateTime
+     * @param string                   $format
+     *
      * @return string|null
      */
     public function formatDateTime($dateTime, string $format = 'Y-m-d H:i:s'): ?string
@@ -48,7 +50,7 @@ trait Model
     }
 
     /**
-     * @param  mixed  $date
+     * @param mixed $date
      *
      * @return Carbon|null
      */
@@ -58,7 +60,7 @@ trait Model
     }
 
     /**
-     * @param  mixed  $date
+     * @param mixed $date
      *
      * @return Carbon|null
      */
@@ -68,7 +70,7 @@ trait Model
     }
 
     /**
-     * @param  mixed  $date
+     * @param mixed $date
      *
      * @return Carbon|null
      */
@@ -78,7 +80,8 @@ trait Model
     }
 
     /**
-     * @param  string  $format
+     * @param string $format
+     *
      * @return string|null
      */
     public function formatCreatedAt(string $format = 'Y-m-d H:i:s'): ?string
@@ -87,7 +90,8 @@ trait Model
     }
 
     /**
-     * @param  string  $format
+     * @param string $format
+     *
      * @return string|null
      */
     public function formatUpdatedAt(string $format = 'Y-m-d H:i:s'): ?string
@@ -96,7 +100,8 @@ trait Model
     }
 
     /**
-     * @param  string  $format
+     * @param string $format
+     *
      * @return string|null
      */
     public function formatDeleteAt(string $format = 'Y-m-d H:i:s'): ?string
@@ -135,7 +140,8 @@ trait Model
     /**
      * Create a new Eloquent query builder for the model.
      *
-     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param \Illuminate\Database\Query\Builder $query
+     *
      * @return Builder
      */
     public function newEloquentBuilder($query): Builder
@@ -164,6 +170,7 @@ trait Model
         if (false === $cache) {
             return null;
         }
+
         return Cache::store($cache);
     }
 
@@ -188,11 +195,11 @@ trait Model
     /**
      * 缓存的时间, 默认5-7天.
      *
-     * @param  int|null  $duration
+     * @param int|null $duration
      *
-     * @return int
      * @throws Exception
      *
+     * @return int
      */
     public function getCacheTtl(int $duration = null): int
     {
@@ -208,9 +215,11 @@ trait Model
     }
 
     /**
-     * @param  mixed  $id
-     * @return static|null
+     * @param mixed $id
+     *
      * @throws InvalidArgumentException
+     *
+     * @return static|null
      */
     public static function findById($id)
     {
@@ -218,9 +227,11 @@ trait Model
     }
 
     /**
-     * @param  array|Arrayable|Traversable  $ids
-     * @return Collection
+     * @param array|Arrayable|Traversable $ids
+     *
      * @throws InvalidArgumentException
+     *
+     * @return Collection
      */
     public static function findByIds($ids): Collection
     {
@@ -264,7 +275,7 @@ trait Model
     }
 
     /**
-     * 是否可用的数据
+     * 是否可用的数据.
      *
      * @return bool
      */
