@@ -138,5 +138,5 @@ trait LoggerTrait
      *
      * @return void
      */
-    abstract public function log($level, string $message, array $context = []): void;
+    abstract public function log($level, string $message, array $context = []);
 }
