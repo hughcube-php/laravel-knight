@@ -14,26 +14,33 @@ class ScheduleJob extends Job
 {
     use MultipleHandler;
 
-    protected ?Carbon $startData = null;
+    /**
+     * @var Carbon
+     */
+    protected $startDateTime = null;
 
     /**
+     * @return void
      * @throws Throwable
      */
     protected function action(): void
     {
-        $this->startData = Carbon::now();
+        $this->startDateTime = Carbon::now();
         $this->triggerHandlers(true);
     }
 
+    /**
+     * @return int
+     */
     protected function getDelays(): int
     {
-        return $this->startData->diffInRealMilliseconds(Carbon::now());
+        return $this->startDateTime->diffInRealMilliseconds(Carbon::now());
     }
 
     /**
      * 判断是否可以运行.
      *
-     * @param string $expression
+     * @param  string  $expression
      *
      * @return bool
      */
@@ -47,7 +54,7 @@ class ScheduleJob extends Job
     /**
      * push任务
      *
-     * @param Job $job
+     * @param  Job  $job
      *
      * @return void
      */
@@ -58,8 +65,8 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param string       $expression
-     * @param callable|Job $job
+     * @param  string  $expression
+     * @param  callable|Job  $job
      *
      * @return void
      */

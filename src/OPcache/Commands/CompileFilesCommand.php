@@ -21,7 +21,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\PhpProcess;
-use Symfony\Component\Process\Process;
 use Throwable;
 
 class CompileFilesCommand extends Command
@@ -43,11 +42,11 @@ class CompileFilesCommand extends Command
     protected $description = 'opcache compile file';
 
     /**
-     * @param Schedule $schedule
-     *
-     * @throws Exception
+     * @param  Schedule  $schedule
      *
      * @return void
+     * @throws Exception
+     *
      */
     public function handle(Schedule $schedule)
     {
@@ -58,14 +57,7 @@ class CompileFilesCommand extends Command
         while (is_file($file)) {
             $process = new PhpProcess(sprintf('<?php %s ?>', $this->compileProcessCode($file)));
             $process->start();
-            $process->wait(function ($type, $buffer) {
-                if (Process::ERR === $type) {
-                    //echo 'ERR > '.$buffer;
-                } else {
-                    //echo 'OUT > '.$buffer;
-                }
-            });
-
+            $process->wait();
             $remainScripts = json_decode(file_get_contents($file), true);
             if (empty($remainScripts)) {
                 break;
@@ -96,9 +88,9 @@ class CompileFilesCommand extends Command
     }
 
     /**
+     * @return array
      * @throws Exception
      *
-     * @return array
      */
     protected function getFiles(): array
     {

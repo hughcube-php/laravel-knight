@@ -16,10 +16,8 @@ use HughCube\Laravel\Knight\Support\ParameterBagTrait;
 use HughCube\Laravel\Knight\Support\Validation;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container as IlluminateContainer;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 
 /**
  * @mixin ParameterBagBak
@@ -62,8 +60,8 @@ trait Action
 
     /**
      * @return Repository
-     * @throws BindingResolutionException
-     *
+     * @throws
+     * @phpstan-ignore-next-line
      */
     protected function getContainerConfig(): Repository
     {
@@ -72,8 +70,8 @@ trait Action
 
     /**
      * @return Request
-     * @throws BindingResolutionException
-     *
+     * @throws
+     * @phpstan-ignore-next-line
      */
     protected function getRequest(): Request
     {
@@ -106,9 +104,8 @@ trait Action
 
     /**
      * @return mixed
-     * @throws ValidationException
-     *
-     * @throws BindingResolutionException
+     * @throws
+     * @phpstan-ignore-next-line
      */
     public function invoke()
     {
@@ -123,9 +120,6 @@ trait Action
 
     /**
      * @return mixed
-     * @throws ValidationException
-     *
-     * @throws BindingResolutionException
      */
     public function __invoke()
     {

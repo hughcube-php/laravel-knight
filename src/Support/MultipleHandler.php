@@ -16,16 +16,16 @@ trait MultipleHandler
 {
     protected function isStopHandlerResults($results, Throwable $exception = null): bool
     {
-        return null !== $results;
+        return null !== $results && !$exception instanceof Throwable;
     }
 
     /**
-     * @param bool $tryException
-     * @param bool $logException
-     *
-     * @throws Throwable
+     * @param  bool  $tryException
+     * @param  bool  $logException
      *
      * @return mixed
+     * @throws Throwable
+     *
      */
     protected function triggerHandlers(bool $tryException = false, bool $logException = true)
     {

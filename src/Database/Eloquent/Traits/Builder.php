@@ -8,7 +8,6 @@
 
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
-use Exception;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use Illuminate\Cache\NullStore;
 use Illuminate\Cache\Repository;
@@ -19,7 +18,6 @@ use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\CacheInterface;
-use Psr\SimpleCache\InvalidArgumentException;
 use Traversable;
 
 /**
@@ -36,7 +34,7 @@ trait Builder
     protected $enableCache = true;
 
     /**
-     * @return static
+     * @return $this
      */
     public function noCache()
     {
@@ -78,7 +76,7 @@ trait Builder
     }
 
     /**
-     * @throws Exception
+     * @return int
      */
     protected function getCacheTtl(): int
     {
@@ -102,7 +100,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return bool
      */
@@ -112,7 +110,7 @@ trait Builder
     }
 
     /**
-     * @param array $columns
+     * @param  array  $columns
      *
      * @return string
      */
@@ -133,11 +131,8 @@ trait Builder
     }
 
     /**
-     * @param mixed $pk
-     *
-     * @throws InvalidArgumentException
-     *
-     * @return static|null
+     * @param  mixed  $pk
+     * @return Model|null
      */
     public function findByPk($pk)
     {
@@ -145,10 +140,7 @@ trait Builder
     }
 
     /**
-     * @param array|Arrayable|Traversable $pks
-     *
-     * @throws InvalidArgumentException
-     *
+     * @param  array|Arrayable|Traversable  $pks
      * @return EloquentCollection
      */
     public function findByPks($pks): EloquentCollection
@@ -175,9 +167,10 @@ trait Builder
     }
 
     /**
-     * @throws InvalidArgumentException
+     * @param  mixed  $id
+     * @return mixed
      */
-    public function findUniqueRow(mixed $id)
+    public function findUniqueRow($id)
     {
         return $this->findUniqueRows([$id])->first();
     }
@@ -185,12 +178,10 @@ trait Builder
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
-     *
-     * @throws Exception
-     * @throws InvalidArgumentException
-     *
+     * @param  array|Arrayable|Traversable  $ids  必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      * @return EloquentCollection
+     * @throws
+     * @phpstan-ignore-next-line
      */
     public function findUniqueRows($ids): EloquentCollection
     {
@@ -268,8 +259,6 @@ trait Builder
 
     /**
      * @inheritdoc
-     *
-     * @throws InvalidArgumentException
      */
     public function delete()
     {
@@ -283,8 +272,6 @@ trait Builder
 
     /**
      * @inheritdoc
-     *
-     * @throws InvalidArgumentException
      */
     public function update(array $values)
     {
@@ -299,8 +286,6 @@ trait Builder
 
     /**
      * @inheritdoc
-     *
-     * @throws InvalidArgumentException
      */
     public function insert(array $values)
     {
@@ -315,8 +300,6 @@ trait Builder
 
     /**
      * @inheritdoc
-     *
-     * @throws InvalidArgumentException
      */
     public function insertOrIgnore(array $values)
     {
@@ -331,8 +314,6 @@ trait Builder
 
     /**
      * @inheritdoc
-     *
-     * @throws InvalidArgumentException
      */
     public function insertGetId(array $values, $sequence = null)
     {
@@ -346,9 +327,9 @@ trait Builder
     }
 
     /**
-     * @throws InvalidArgumentException
-     *
      * @return bool
+     * @throws
+     * @phpstan-ignore-next-line
      */
     public function refreshRowCache(): bool
     {

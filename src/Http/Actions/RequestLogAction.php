@@ -8,15 +8,12 @@
 
 namespace HughCube\Laravel\Knight\Http\Actions;
 
-use Exception;
 use HughCube\Laravel\Knight\Routing\Controller;
 use Illuminate\Support\Facades\Log;
 
 class RequestLogAction extends Controller
 {
     /**
-     * @throws Exception
-     *
      * @return string
      */
     protected function action(): string

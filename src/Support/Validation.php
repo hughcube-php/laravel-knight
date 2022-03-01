@@ -24,11 +24,11 @@ trait Validation
     }
 
     /**
-     * @param array $request
-     *
-     * @throws ValidationException
+     * @param  array  $request
      *
      * @return array
+     * @throws ValidationException
+     *
      */
     protected function validate(array $request): array
     {

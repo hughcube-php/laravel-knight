@@ -28,7 +28,7 @@ class Downloader implements StaticInstanceInterface
     use StaticInstanceTrait;
 
     /**
-     * @param string $url
+     * @param  string  $url
      *
      * @return string
      */
@@ -46,15 +46,13 @@ class Downloader implements StaticInstanceInterface
     }
 
     /**
-     * @param string      $method
-     * @param string      $url
-     * @param null|string $file
-     * @param array       $options
-     *
+     * @param  string  $method
+     * @param  string  $url
+     * @param  string|null  $file
+     * @param  array  $options
+     * @return string
      * @throws GuzzleException
      * @throws Exception
-     *
-     * @return string
      */
     public function to(string $method, string $url, ?string $file = null, array $options = []): string
     {
@@ -76,12 +74,11 @@ class Downloader implements StaticInstanceInterface
     }
 
     /**
-     * @param string $name
-     * @param array  $args
-     *
-     * @throws GuzzleException
-     *
+     * @param  string  $name
+     * @param  array  $args
      * @return string
+     * @throws Exception
+     * @throws GuzzleException
      */
     public function __call(string $name, array $args): string
     {
@@ -91,7 +88,6 @@ class Downloader implements StaticInstanceInterface
 
         if (in_array(strtoupper($name), ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'])) {
             array_unshift($args, strtoupper($name));
-
             return $this->to(...$args);
         }
 
@@ -101,12 +97,12 @@ class Downloader implements StaticInstanceInterface
     /**
      * Handle dynamic, static calls to the object.
      *
-     * @param string $method
-     * @param array  $args
-     *
-     * @throws RuntimeException
+     * @param  string  $method
+     * @param  array  $args
      *
      * @return mixed
+     * @throws RuntimeException
+     *
      */
     public static function __callStatic(string $method, array $args)
     {

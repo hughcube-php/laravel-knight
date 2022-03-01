@@ -35,7 +35,7 @@ class HttpsGuard
     /**
      * Create a new middleware instance.
      *
-     * @param Container $app
+     * @param  Container  $app
      *
      * @return void
      */
@@ -45,10 +45,10 @@ class HttpsGuard
     }
 
     /**
-     * @param Request     $request
-     * @param callable    $next
-     * @param int         $status
-     * @param string|null $hsts
+     * @param  Request  $request
+     * @param  callable  $next
+     * @param  int  $status
+     * @param  string|null  $hsts
      *
      * @return Response
      */
@@ -78,7 +78,7 @@ class HttpsGuard
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return bool
      */

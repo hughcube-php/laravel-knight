@@ -39,7 +39,7 @@ class Handler extends ExceptionHandler
             $context["uri"] = request()->getUri();
             $context["headers"] = request()->headers->all();
             $context["body"] = request()->getContent();
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
         }
 
         return $context;

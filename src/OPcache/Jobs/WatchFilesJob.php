@@ -2,30 +2,29 @@
 
 namespace HughCube\Laravel\Knight\OPcache\Jobs;
 
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
+use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\Support\HttpClient;
 use HughCube\PUrl\Url as PUrl;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
+use Throwable;
 
-class WatchFilesJob extends \HughCube\Laravel\Knight\Queue\Job
+class WatchFilesJob extends Job
 {
     use HttpClient;
 
     public function rules(): array
     {
         return [
-            'url'     => ['string', 'nullable'],
+            'url' => ['string', 'nullable'],
             'timeout' => ['integer', 'default:30'],
         ];
     }
 
     /**
-     * @throws GuzzleException
-     *
      * @return void
      */
     protected function action(): void
@@ -43,7 +42,7 @@ class WatchFilesJob extends \HughCube\Laravel\Knight\Queue\Job
                 RequestOptions::TIMEOUT => floatval($this->p()->get('timeout')),
             ]);
             $results = json_decode($response->getBody()->getContents(), true);
-        } catch (\Throwable $exception) {
+        } catch (Throwable $exception) {
             $message = sprintf('Description Failed to run the %s job ', $this->getName());
             Log::warning(sprintf('%s, http error: %s', $message, $exception->getMessage()));
 
