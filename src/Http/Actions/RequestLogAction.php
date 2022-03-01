@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\Log;
 class RequestLogAction extends Controller
 {
     /**
-     * @return string
      * @throws Exception
      *
+     * @return string
      */
     protected function action(): string
     {

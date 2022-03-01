@@ -22,7 +22,9 @@ trait MultipleHandler
     /**
      * @param bool $tryException
      * @param bool $logException
+     *
      * @throws Throwable
+     *
      * @return mixed
      */
     protected function triggerHandlers(bool $tryException = false, bool $logException = true)

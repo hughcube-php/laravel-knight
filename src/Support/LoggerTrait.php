@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/3/1
- * Time: 15:05
+ * Time: 15:05.
  */
 
 namespace HughCube\Laravel\Knight\Support;
@@ -18,8 +18,8 @@ trait LoggerTrait
     /**
      * System is unusable.
      *
-     * @param  string  $message
-     * @param  array  $context
+     * @param string $message
+     * @param array  $context
      *
      * @return void
      */
@@ -34,8 +34,9 @@ trait LoggerTrait
      * Example: Entire website down, database unavailable, etc. This should
      * trigger the SMS alerts and wake you up.
      *
-     * @param  string  $message
-     * @param  array  $context
+     * @param string $message
+     * @param array  $context
+     *
      * @return void
      */
     public function alert(string $message, array $context = []): void
@@ -48,8 +49,8 @@ trait LoggerTrait
      *
      * Example: Application component unavailable, unexpected exception.
      *
-     * @param  string  $message
-     * @param  array  $context
+     * @param string $message
+     * @param array  $context
      *
      * @return void
      */
@@ -62,8 +63,8 @@ trait LoggerTrait
      * Runtime errors that do not require immediate action but should typically
      * be logged and monitored.
      *
-     * @param  string  $message
-     * @param  array  $context
+     * @param string $message
+     * @param array  $context
      *
      * @return void
      */
@@ -78,8 +79,8 @@ trait LoggerTrait
      * Example: Use of deprecated APIs, poor use of an API, undesirable things
      * that are not necessarily wrong.
      *
-     * @param  string  $message
-     * @param  array  $context
+     * @param string $message
+     * @param array  $context
      *
      * @return void
      */
@@ -91,8 +92,8 @@ trait LoggerTrait
     /**
      * Normal but significant events.
      *
-     * @param  string  $message
-     * @param  array  $context
+     * @param string $message
+     * @param array  $context
      *
      * @return void
      */
@@ -106,8 +107,8 @@ trait LoggerTrait
      *
      * Example: User logs in, SQL logs.
      *
-     * @param  string  $message
-     * @param  array  $context
+     * @param string $message
+     * @param array  $context
      *
      * @return void
      */
@@ -119,8 +120,8 @@ trait LoggerTrait
     /**
      * Detailed debug information.
      *
-     * @param  string  $message
-     * @param  array  $context
+     * @param string $message
+     * @param array  $context
      *
      * @return void
      */
@@ -130,9 +131,10 @@ trait LoggerTrait
     }
 
     /**
-     * @param  mixed  $level
-     * @param  string  $message
-     * @param  array  $context
+     * @param mixed  $level
+     * @param string $message
+     * @param array  $context
+     *
      * @return void
      */
     abstract public function log($level, string $message, array $context = []);
