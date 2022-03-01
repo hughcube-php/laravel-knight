@@ -21,7 +21,7 @@ trait SimplePaginateQuery
     protected function rules(): array
     {
         return [
-            'page' => ['remove_if_empty', 'default:1', 'required', 'integer', 'min:1'],
+            'page'      => ['remove_if_empty', 'default:1', 'required', 'integer', 'min:1'],
             'page_size' => ['remove_if_empty', 'default:15', 'required', 'integer', 'min:1', 'max:20'],
         ];
     }
@@ -41,10 +41,10 @@ trait SimplePaginateQuery
         $list = $this->buildList($rows);
 
         return $this->asJson([
-            'count' => $count,
-            'page' => $page,
+            'count'     => $count,
+            'page'      => $page,
             'page_size' => $pageSize,
-            'list' => array_values($list),
+            'list'      => array_values($list),
         ]);
     }
 
@@ -67,12 +67,14 @@ trait SimplePaginateQuery
     abstract protected function makeQuery(): Builder;
 
     /**
-     * @param  Collection|array  $rows
+     * @param Collection|array $rows
+     *
      * @return array
      */
     protected function buildList($rows): array
     {
         $rows = $rows instanceof Collection ? $rows->toArray() : $rows;
+
         return array_values($rows);
     }
 }

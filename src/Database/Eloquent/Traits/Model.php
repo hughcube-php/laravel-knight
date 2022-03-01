@@ -27,7 +27,7 @@ trait Model
     private $isFromCache = false;
 
     /**
-     * @param  null|string|DateTime|int  $date
+     * @param null|string|DateTime|int $date
      *
      * @return Carbon|null
      */
@@ -37,8 +37,8 @@ trait Model
     }
 
     /**
-     * @param  null|DateTime|BaseCarbon  $dateTime
-     * @param  string  $format
+     * @param null|DateTime|BaseCarbon $dateTime
+     * @param string                   $format
      *
      * @return string|null
      */
@@ -48,7 +48,7 @@ trait Model
     }
 
     /**
-     * @param  mixed  $date
+     * @param mixed $date
      *
      * @return Carbon|null
      */
@@ -58,7 +58,7 @@ trait Model
     }
 
     /**
-     * @param  mixed  $date
+     * @param mixed $date
      *
      * @return Carbon|null
      */
@@ -68,7 +68,7 @@ trait Model
     }
 
     /**
-     * @param  mixed  $date
+     * @param mixed $date
      *
      * @return Carbon|null
      */
@@ -78,7 +78,7 @@ trait Model
     }
 
     /**
-     * @param  string  $format
+     * @param string $format
      *
      * @return string|null
      */
@@ -88,7 +88,7 @@ trait Model
     }
 
     /**
-     * @param  string  $format
+     * @param string $format
      *
      * @return string|null
      */
@@ -98,7 +98,7 @@ trait Model
     }
 
     /**
-     * @param  string  $format
+     * @param string $format
      *
      * @return string|null
      */
@@ -138,7 +138,7 @@ trait Model
     /**
      * Create a new Eloquent query builder for the model.
      *
-     * @param  \Illuminate\Database\Query\Builder  $query
+     * @param \Illuminate\Database\Query\Builder $query
      *
      * @return Builder
      */
@@ -193,9 +193,11 @@ trait Model
     /**
      * 缓存的时间, 默认5-7天.
      *
-     * @param  int|null  $duration
-     * @return int
+     * @param int|null $duration
+     *
      * @throws
+     *
+     * @return int
      * @phpstan-ignore-next-line
      */
     public function getCacheTtl(int $duration = null): int
@@ -212,7 +214,8 @@ trait Model
     }
 
     /**
-     * @param  mixed  $id
+     * @param mixed $id
+     *
      * @return mixed
      */
     public static function findById($id)
@@ -221,7 +224,8 @@ trait Model
     }
 
     /**
-     * @param  array|Arrayable|Traversable  $ids
+     * @param array|Arrayable|Traversable $ids
+     *
      * @return Collection
      */
     public static function findByIds($ids): Collection

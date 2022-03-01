@@ -20,8 +20,9 @@ class ScheduleJob extends Job
     protected $startDateTime = null;
 
     /**
-     * @return void
      * @throws Throwable
+     *
+     * @return void
      */
     protected function action(): void
     {
@@ -40,7 +41,7 @@ class ScheduleJob extends Job
     /**
      * 判断是否可以运行.
      *
-     * @param  string  $expression
+     * @param string $expression
      *
      * @return bool
      */
@@ -54,7 +55,7 @@ class ScheduleJob extends Job
     /**
      * push任务
      *
-     * @param  Job  $job
+     * @param Job $job
      *
      * @return void
      */
@@ -65,8 +66,8 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param  string  $expression
-     * @param  callable|Job  $job
+     * @param string       $expression
+     * @param callable|Job $job
      *
      * @return void
      */

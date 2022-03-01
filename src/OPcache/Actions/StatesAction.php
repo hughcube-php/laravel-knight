@@ -26,10 +26,10 @@ class StatesAction extends Controller
     }
 
     /**
-     * @return Response
      * @throws Exception
-     *
      * @throws BindingResolutionException
+     *
+     * @return Response
      */
     protected function action(): Response
     {
