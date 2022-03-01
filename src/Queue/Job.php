@@ -11,6 +11,7 @@ namespace HughCube\Laravel\Knight\Queue;
 use BadMethodCallException;
 use HughCube\Base\Base;
 use HughCube\Laravel\Knight\Support\GetOrSet;
+use HughCube\Laravel\Knight\Support\LoggerTrait;
 use HughCube\Laravel\Knight\Support\ParameterBag;
 use HughCube\Laravel\Knight\Support\Validation;
 use HughCube\StaticInstanceInterface;
@@ -26,7 +27,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Psr\Log\LoggerTrait;
 
 /**
  * @method static PendingDispatch|static dispatch(...$arguments)
@@ -211,10 +211,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
      * @param  mixed  $level
      * @param  string  $message
      * @param  array  $context
-     *
      * @return void
      */
-    public function log($level, $message, array $context = [])
+    public function log($level, string $message, array $context = [])
     {
         $message = sprintf('[%s-%s] %s', $this->getName(), $this->getPid(), $message);
         Log::channel($this->getLogChannel())->log($level, $message, $context);
