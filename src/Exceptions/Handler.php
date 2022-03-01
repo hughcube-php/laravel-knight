@@ -36,9 +36,9 @@ class Handler extends ExceptionHandler
         $context = parent::context();
 
         try {
-            $context["uri"] = request()->getUri();
-            $context["headers"] = request()->headers->all();
-            $context["body"] = request()->getContent();
+            $context['uri'] = request()->getUri();
+            $context['headers'] = request()->headers->all();
+            $context['body'] = request()->getContent();
         } catch (Throwable $exception) {
         }
 
@@ -59,10 +59,12 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * @param  Request  $request
-     * @param  Throwable  $e
-     * @return Response
+     * @param Request   $request
+     * @param Throwable $e
+     *
      * @throws Throwable
+     *
+     * @return Response
      */
     public function render($request, Throwable $e): Response
     {
@@ -73,9 +75,9 @@ class Handler extends ExceptionHandler
             $response = new PsrResponse($e->getStatusCode());
             $results = ['code' => $response->getStatusCode(), 'message' => $response->getReasonPhrase()];
         } elseif ($e instanceof AuthenticationException) {
-            $results = ['code' => 401, 'message' => "请先登录!"];
+            $results = ['code' => 401, 'message' => '请先登录!'];
         } elseif ($e instanceof ValidationException) {
-            $results = ['code' => $e->status, 'message' => "非法请求!", 'errors' => $e->errors()];
+            $results = ['code' => $e->status, 'message' => '非法请求!', 'errors' => $e->errors()];
         } elseif ($e instanceof ExceptionWithData) {
             $results = ['code' => $e->getCode(), 'message' => $e->getMessage(), 'data' => $e->getData()];
         } elseif ($e instanceof UserException) {
@@ -83,12 +85,12 @@ class Handler extends ExceptionHandler
         } elseif ($e instanceof Exception) {
             $results = ['code' => 500, 'message' => $e->getMessage()];
         } else {
-            $results = ['code' => 500, 'message' => "服务器繁忙, 请稍后再试!"];
+            $results = ['code' => 500, 'message' => '服务器繁忙, 请稍后再试!'];
         }
 
         $results['data'] = empty($results['data']) ? new stdClass() : $results['data'];
-        if (true == config("app.debug")) {
-            $results["debug"] = $this->convertExceptionToArray($e);
+        if (true == config('app.debug')) {
+            $results['debug'] = $this->convertExceptionToArray($e);
         }
 
         return response()->json($results);
@@ -96,22 +98,24 @@ class Handler extends ExceptionHandler
 
     /**
      * Converts an exception into an array.
-     * @param  Throwable  $e
+     *
+     * @param Throwable $e
+     *
      * @return array the array representation of the exception.
      */
     protected function convertExceptionToArray(Throwable $e): array
     {
         $array = [
-            'name' => get_class($e),
-            'message' => $e->getMessage(),
-            'code' => $e->getCode(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'stack-trace' => explode("\n", $e->getTraceAsString())
+            'name'        => get_class($e),
+            'message'     => $e->getMessage(),
+            'code'        => $e->getCode(),
+            'file'        => $e->getFile(),
+            'line'        => $e->getLine(),
+            'stack-trace' => explode("\n", $e->getTraceAsString()),
         ];
 
         if ($e instanceof ValidationException) {
-            $array["errors"] = $e->errors();
+            $array['errors'] = $e->errors();
         }
 
         if (($prev = $e->getPrevious()) !== null) {

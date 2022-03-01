@@ -47,9 +47,9 @@ class OpCacheDataModel
                     }
                     if ($k === 'current_wasted_percentage' || $k === 'opcache_hit_rate') {
                         $v = number_format(
-                                $v,
-                                2
-                            ).'%';
+                            $v,
+                            2
+                        ).'%';
                     }
                     if ($k === 'blacklist_miss_ratio') {
                         $v = number_format($v, 2).'%';

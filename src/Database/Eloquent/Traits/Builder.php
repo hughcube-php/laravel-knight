@@ -100,7 +100,7 @@ trait Builder
     }
 
     /**
-     * @param  mixed  $value
+     * @param mixed $value
      *
      * @return bool
      */
@@ -110,7 +110,7 @@ trait Builder
     }
 
     /**
-     * @param  array  $columns
+     * @param array $columns
      *
      * @return string
      */
@@ -131,7 +131,8 @@ trait Builder
     }
 
     /**
-     * @param  mixed  $pk
+     * @param mixed $pk
+     *
      * @return Model|null
      */
     public function findByPk($pk)
@@ -140,7 +141,8 @@ trait Builder
     }
 
     /**
-     * @param  array|Arrayable|Traversable  $pks
+     * @param array|Arrayable|Traversable $pks
+     *
      * @return EloquentCollection
      */
     public function findByPks($pks): EloquentCollection
@@ -167,7 +169,8 @@ trait Builder
     }
 
     /**
-     * @param  mixed  $id
+     * @param mixed $id
+     *
      * @return mixed
      */
     public function findUniqueRow($id)
@@ -178,9 +181,11 @@ trait Builder
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param  array|Arrayable|Traversable  $ids  必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
-     * @return EloquentCollection
+     * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
+     *
      * @throws
+     *
+     * @return EloquentCollection
      * @phpstan-ignore-next-line
      */
     public function findUniqueRows($ids): EloquentCollection
@@ -327,8 +332,9 @@ trait Builder
     }
 
     /**
-     * @return bool
      * @throws
+     *
+     * @return bool
      * @phpstan-ignore-next-line
      */
     public function refreshRowCache(): bool

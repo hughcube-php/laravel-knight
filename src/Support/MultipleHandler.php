@@ -20,12 +20,12 @@ trait MultipleHandler
     }
 
     /**
-     * @param  bool  $tryException
-     * @param  bool  $logException
+     * @param bool $tryException
+     * @param bool $logException
      *
-     * @return mixed
      * @throws Throwable
      *
+     * @return mixed
      */
     protected function triggerHandlers(bool $tryException = false, bool $logException = true)
     {

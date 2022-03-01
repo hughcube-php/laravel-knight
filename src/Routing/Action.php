@@ -36,17 +36,17 @@ trait Action
     abstract protected function action();
 
     /**
-     * @param  array  $data
-     * @param  int  $code
+     * @param array $data
+     * @param int   $code
      *
      * @return JsonResponse
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
     {
         return new JsonResponse([
-            'code' => $code,
+            'code'    => $code,
             'message' => 'ok',
-            'data' => $data,
+            'data'    => $data,
         ]);
     }
 
@@ -59,8 +59,9 @@ trait Action
     }
 
     /**
-     * @return Repository
      * @throws
+     *
+     * @return Repository
      * @phpstan-ignore-next-line
      */
     protected function getContainerConfig(): Repository
@@ -69,8 +70,9 @@ trait Action
     }
 
     /**
-     * @return Request
      * @throws
+     *
+     * @return Request
      * @phpstan-ignore-next-line
      */
     protected function getRequest(): Request
@@ -80,6 +82,7 @@ trait Action
 
     /**
      * @inheritDoc
+     *
      * @throws
      * @phpstan-ignore-next-line
      */
@@ -95,6 +98,7 @@ trait Action
 
     /**
      * @return ParameterBag
+     *
      * @deprecated Will be removed in a future version.
      */
     protected function getParameter(): ParameterBag
@@ -103,8 +107,9 @@ trait Action
     }
 
     /**
-     * @return mixed
      * @throws
+     *
+     * @return mixed
      * @phpstan-ignore-next-line
      */
     public function invoke()
@@ -127,8 +132,8 @@ trait Action
     }
 
     /**
-     * @param  string  $name
-     * @param  array  $arguments
+     * @param string $name
+     * @param array  $arguments
      *
      * @return mixed
      */
