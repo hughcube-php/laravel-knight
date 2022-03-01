@@ -48,7 +48,7 @@ class HttpsGuardTest extends TestCase
                     return false;
                 },
                 true,
-            ]
+            ],
         ];
 
         $cases = [];

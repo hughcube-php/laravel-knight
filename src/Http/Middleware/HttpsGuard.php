@@ -8,11 +8,10 @@
 
 namespace HughCube\Laravel\Knight\Http\Middleware;
 
+use HughCube\PUrl\Url as PUrl;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\URL;
 use Symfony\Component\HttpFoundation\Response;
-use HughCube\PUrl\Url as PUrl;
 
 class HttpsGuard
 {
@@ -36,7 +35,7 @@ class HttpsGuard
     /**
      * Create a new middleware instance.
      *
-     * @param  Container  $app
+     * @param Container $app
      *
      * @return void
      */
@@ -46,10 +45,10 @@ class HttpsGuard
     }
 
     /**
-     * @param  Request  $request
-     * @param  callable  $next
-     * @param  int  $status
-     * @param  string|null  $hsts
+     * @param Request     $request
+     * @param callable    $next
+     * @param int         $status
+     * @param string|null $hsts
      *
      * @return Response
      */
@@ -61,6 +60,7 @@ class HttpsGuard
             && !$this->isExcept($request)
         ) {
             $url = PUrl::instance($request->getUri())->withScheme('https');
+
             return redirect()->to($url->toString(), $status);
         }
 
@@ -78,7 +78,8 @@ class HttpsGuard
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
+     *
      * @return bool
      */
     protected function isExcept(Request $request): bool
