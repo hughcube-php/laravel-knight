@@ -12,6 +12,7 @@ use BadMethodCallException;
 use HughCube\Laravel\Knight\Support\GetOrSet;
 use HughCube\Laravel\Knight\Support\ParameterBag;
 use HughCube\Laravel\Knight\Support\ParameterBagBak;
+use HughCube\Laravel\Knight\Support\ParameterBagTrait;
 use HughCube\Laravel\Knight\Support\Validation;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container as IlluminateContainer;
@@ -27,11 +28,7 @@ trait Action
 {
     use GetOrSet;
     use Validation;
-
-    /**
-     * @var ParameterBag|null
-     */
-    private $parameterBag = null;
+    use ParameterBagTrait;
 
     /**
      * action.
@@ -41,17 +38,17 @@ trait Action
     abstract protected function action();
 
     /**
-     * @param array $data
-     * @param int   $code
+     * @param  array  $data
+     * @param  int  $code
      *
      * @return JsonResponse
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
     {
         return new JsonResponse([
-            'code'    => $code,
+            'code' => $code,
             'message' => 'ok',
-            'data'    => $data,
+            'data' => $data,
         ]);
     }
 
@@ -64,9 +61,9 @@ trait Action
     }
 
     /**
+     * @return Repository
      * @throws BindingResolutionException
      *
-     * @return Repository
      */
     protected function getContainerConfig(): Repository
     {
@@ -74,9 +71,9 @@ trait Action
     }
 
     /**
+     * @return Request
      * @throws BindingResolutionException
      *
-     * @return Request
      */
     protected function getRequest(): Request
     {
@@ -84,10 +81,9 @@ trait Action
     }
 
     /**
-     * @throws ValidationException
-     * @throws BindingResolutionException
-     *
-     * @return void
+     * @inheritDoc
+     * @throws
+     * @phpstan-ignore-next-line
      */
     protected function loadParameters()
     {
@@ -100,11 +96,7 @@ trait Action
     }
 
     /**
-     * @throws ValidationException
-     * @throws BindingResolutionException
-     *
      * @return ParameterBag
-     *
      * @deprecated Will be removed in a future version.
      */
     protected function getParameter(): ParameterBag
@@ -113,23 +105,10 @@ trait Action
     }
 
     /**
-     * @throws ValidationException
-     * @throws BindingResolutionException
-     *
-     * @return ParameterBag
-     */
-    protected function p(): ParameterBag
-    {
-        $this->loadParameters();
-
-        return $this->parameterBag;
-    }
-
-    /**
-     * @throws BindingResolutionException
-     * @throws ValidationException
-     *
      * @return mixed
+     * @throws ValidationException
+     *
+     * @throws BindingResolutionException
      */
     public function invoke()
     {
@@ -143,10 +122,10 @@ trait Action
     }
 
     /**
-     * @throws BindingResolutionException
+     * @return mixed
      * @throws ValidationException
      *
-     * @return mixed
+     * @throws BindingResolutionException
      */
     public function __invoke()
     {
@@ -154,11 +133,8 @@ trait Action
     }
 
     /**
-     * @param string $name
-     * @param array  $arguments
-     *
-     * @throws ValidationException
-     * @throws BindingResolutionException
+     * @param  string  $name
+     * @param  array  $arguments
      *
      * @return mixed
      */
