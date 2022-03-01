@@ -12,6 +12,7 @@ use Psr\Log\LogLevel;
 
 /**
  * @deprecated If the entire package is upgraded to 8.0, it needs to be removed
+ * @mixin \Psr\Log\LoggerTrait
  */
 trait LoggerTrait
 {
@@ -135,5 +136,5 @@ trait LoggerTrait
      * @param  array  $context
      * @return void
      */
-    abstract public function log($level, string $message, array $context = []);
+    abstract public function log($level, string $message, array $context = []): void;
 }
