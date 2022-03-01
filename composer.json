@@ -11,13 +11,14 @@
     "require": {
         "php": ">=7.2",
         "ext-json": "*",
-        "jenssegers/agent": "*",
-        "hughcube/laravel-validation": "*",
-        "hughcube/static-instance": "*",
         "hughcube/enum": "*",
-        "guzzlehttp/guzzle": "*",
         "hughcube/purl": "*",
-        "hughcube/base": "*"
+        "hughcube/base": "*",
+        "hughcube/htree": "*",
+        "guzzlehttp/guzzle": "*",
+        "jenssegers/agent": "*",
+        "hughcube/static-instance": "*",
+        "hughcube/laravel-validation": "*"
     },
     "require-dev": {
         "laravel/framework": "*",
