@@ -16,9 +16,9 @@ class Carbon extends \Illuminate\Support\Carbon
     /**
      * @return float
      */
-    public function getFloatTimestamp(): float
+    public function getTimestampAsFloat(): float
     {
-        return $this->diffInRealMicroseconds() / static::MICROSECONDS_PER_SECOND;
+        return $this->getPreciseTimestamp() / static::MICROSECONDS_PER_SECOND;
     }
 
     public static function fromDate($date, string $format = 'Y-m-d H:i:s'): ?Carbon

@@ -10,16 +10,11 @@ namespace HughCube\Laravel\Knight\Tests\Http\Actions;
 
 use HughCube\Laravel\Knight\Http\Actions\PingAction;
 use HughCube\Laravel\Knight\Tests\TestCase;
-use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Validation\ValidationException;
-use Psr\SimpleCache\InvalidArgumentException;
 
 class PingActionTest extends TestCase
 {
     /**
-     * @throws BindingResolutionException
-     * @throws ValidationException
-     * @throws InvalidArgumentException
+     * @return void
      */
     public function testRun()
     {

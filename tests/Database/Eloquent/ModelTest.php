@@ -14,7 +14,6 @@ use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
-use Psr\SimpleCache\InvalidArgumentException;
 
 class ModelTest extends TestCase
 {
@@ -32,10 +31,8 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @throws InvalidArgumentException
-     * @throws Exception
-     *
      * @return void
+     * @throws Exception
      */
     public function testQuery()
     {
@@ -113,9 +110,8 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @throws Exception
-     *
      * @return void
+     * @throws Exception
      */
     public function testConversionDateTime()
     {

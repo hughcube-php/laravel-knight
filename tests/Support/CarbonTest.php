@@ -68,7 +68,6 @@ class CarbonTest extends TestCase
     public function testIsPastTimestamp()
     {
         $timestamp = time();
-
         $this->assertTrue(Carbon::isPastTimestamp($timestamp - 1000));
 
         $this->assertFalse(Carbon::isPastTimestamp(null));

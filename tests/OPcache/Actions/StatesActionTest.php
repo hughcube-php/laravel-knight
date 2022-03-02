@@ -10,9 +10,6 @@ namespace HughCube\Laravel\Knight\Tests\OPcache\Actions;
 
 use HughCube\Laravel\Knight\OPcache\Actions\StatesAction;
 use HughCube\Laravel\Knight\Tests\TestCase;
-use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Validation\ValidationException;
-use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -21,9 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 class StatesActionTest extends TestCase
 {
     /**
-     * @throws BindingResolutionException
-     * @throws ValidationException
-     * @throws InvalidArgumentException
+     * @return void
      */
     public function testRun()
     {

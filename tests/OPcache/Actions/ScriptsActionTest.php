@@ -21,11 +21,6 @@ use Psr\SimpleCache\InvalidArgumentException;
  */
 class ScriptsActionTest extends TestCase
 {
-    /**
-     * @throws BindingResolutionException
-     * @throws ValidationException
-     * @throws InvalidArgumentException
-     */
     public function testRun()
     {
         if (!opcache_reset()) {

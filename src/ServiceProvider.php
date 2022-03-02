@@ -40,7 +40,11 @@ class ServiceProvider extends IlluminateServiceProvider
             $this->app->configure('knight');
         }
 
-        $this->bootCommands();
+        $this->commands([Config::class]);
+        $this->commands([Environment::class]);
+        $this->commands([PhpIniFile::class]);
+        $this->commands([KRTest::class]);
+
         $this->bootOPcache();
         $this->bootRequest();
         $this->bootPing();
@@ -53,19 +57,12 @@ class ServiceProvider extends IlluminateServiceProvider
     {
     }
 
-    protected function bootCommands()
-    {
-        $this->commands([Config::class]);
-        $this->commands([Environment::class]);
-        $this->commands([PhpIniFile::class]);
-        $this->commands([KRTest::class]);
-    }
-
     protected function bootOPcache()
     {
         $this->commands([OPcacheCompileFilesCommand::class]);
 
-        if (!$this->app->routesAreCached() && !empty($prefix = config('knight.opcache.route_prefix'))) {
+        $prefix = config('knight.opcache.route_prefix');
+        if (!$this->app->routesAreCached() && !empty($prefix)) {
             Route::group(['prefix' => $prefix], function () {
                 Route::any('/scripts', OPcacheScriptsAction::class)->name('knight_opcache_scripts');
                 Route::any('/states', OPcacheStatesAction::class)->name('knight_opcache_states');
@@ -80,7 +77,8 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     protected function bootRequest()
     {
-        if (!$this->app->routesAreCached() && !empty($prefix = config('knight.request.route_prefix'))) {
+        $prefix = config('knight.request.route_prefix');
+        if (!$this->app->routesAreCached() && !empty($prefix)) {
             Route::group(['prefix' => $prefix], function () {
                 Route::any('/log', RequestLogAction::class)->name('knight_request_log');
                 Route::any('/show', RequestShowAction::class)->name('knight_request_show');
@@ -95,7 +93,8 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     protected function bootPing()
     {
-        if (!$this->app->routesAreCached() && false !== config('knight.ping.routes')) {
+        $enable = false !== config('knight.ping.routes');
+        if (!$this->app->routesAreCached() && $enable) {
             Route::group(['prefix' => config('knight.ping.route_prefix')], function () {
                 Route::any('/ping', PingAction::class)->name('knight_ping');
             });

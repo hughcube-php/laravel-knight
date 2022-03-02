@@ -10,16 +10,11 @@ namespace HughCube\Laravel\Knight\Tests\Http\Actions;
 
 use HughCube\Laravel\Knight\Http\Actions\RequestLogAction;
 use HughCube\Laravel\Knight\Tests\TestCase;
-use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Validation\ValidationException;
-use Psr\SimpleCache\InvalidArgumentException;
 
 class RequestLogActionTest extends TestCase
 {
     /**
-     * @throws BindingResolutionException
-     * @throws ValidationException
-     * @throws InvalidArgumentException
+     * @return void
      */
     public function testRun()
     {
