@@ -119,7 +119,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  int  $flags
+     * @param int $flags
      *
      * @return string
      */
@@ -145,7 +145,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  int  $flags
+     * @param int $flags
      *
      * @return string
      */
@@ -171,7 +171,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  string|int|null  $pid
+     * @param string|int|null $pid
      *
      * @return $this
      */
@@ -196,7 +196,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  array|string|null  $channel
+     * @param array|string|null $channel
      *
      * @return $this
      */
@@ -208,9 +208,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  mixed  $level
-     * @param  string  $message
-     * @param  array  $context
+     * @param mixed  $level
+     * @param string $message
+     * @param array  $context
      *
      * @return void
      */
@@ -221,8 +221,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  string  $key
-     * @param  null  $default
+     * @param string $key
+     * @param null   $default
      *
      * @return mixed
      *
@@ -234,7 +234,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  mixed  $key
+     * @param mixed $key
      *
      * @return bool
      *
@@ -246,8 +246,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  string  $key
-     * @param  mixed  $value
+     * @param string $key
+     * @param mixed  $value
      *
      * @return $this
      *
@@ -261,8 +261,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  string  $name
-     * @param  array  $arguments
+     * @param string $name
+     * @param array  $arguments
      *
      * @return false|mixed
      */
