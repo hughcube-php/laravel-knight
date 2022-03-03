@@ -52,11 +52,6 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     protected $data = [];
 
     /**
-     * @var ParameterBag|null
-     */
-    protected $parameterBag = null;
-
-    /**
      * @var array|string|null
      */
     protected $logChannel = null;

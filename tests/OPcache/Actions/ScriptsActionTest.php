@@ -10,11 +10,8 @@ namespace HughCube\Laravel\Knight\Tests\OPcache\Actions;
 
 use HughCube\Laravel\Knight\OPcache\Actions\ScriptsAction;
 use HughCube\Laravel\Knight\Tests\TestCase;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
-use Illuminate\Validation\ValidationException;
-use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * @requires function opcache_reset
