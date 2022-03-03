@@ -13,7 +13,7 @@ trait ParameterBagTrait
     /**
      * @var ParameterBag|null
      */
-    protected $parameterBag = null;
+    private $parameterBag = null;
 
     /**
      * @return mixed

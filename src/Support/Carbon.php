@@ -8,9 +8,12 @@
 
 namespace HughCube\Laravel\Knight\Support;
 
-use Carbon\Carbon as BaseCarbon;
 use DateTime;
+use DateTimeZone;
 
+/**
+ * @method static static|false createFromFormat(string $format, string $time, string|DateTimeZone $timezone = null)
+ */
 class Carbon extends \Illuminate\Support\Carbon
 {
     /**
@@ -21,18 +24,25 @@ class Carbon extends \Illuminate\Support\Carbon
         return $this->getPreciseTimestamp() / static::MICROSECONDS_PER_SECOND;
     }
 
-    public static function fromDate($date, string $format = 'Y-m-d H:i:s'): ?Carbon
+    /**
+     * @param  string  $date
+     * @param  string  $format
+     * @return static|false|null
+     */
+    public static function fromDate(string $date, string $format = 'Y-m-d H:i:s')
     {
         if (empty($date)) {
             return null;
         }
-
-        $dateTime = static::createFromFormat($format, $date);
-
-        return $dateTime instanceof static ? $dateTime : null;
+        return static::createFromFormat($format, $date);
     }
 
-    public static function asDate($value, $format = 'Y-m-d H:i:s'): ?string
+    /**
+     * @param  DateTime|int|float  $value
+     * @param  string  $format
+     * @return string|null
+     */
+    public static function asDate($value, string $format = 'Y-m-d H:i:s'): ?string
     {
         if ($value instanceof DateTime) {
             return $value->format($format);
@@ -45,15 +55,51 @@ class Carbon extends \Illuminate\Support\Carbon
         return null;
     }
 
+    /**
+     * @param  mixed  $date
+     * @param  string  $format
+     * @return bool
+     */
     public static function isPastDate($date, string $format = 'Y-m-d H:i:s'): bool
     {
         $dateTime = static::fromDate($date, $format);
-
-        return $dateTime instanceof BaseCarbon && $dateTime->isPast();
+        return $dateTime instanceof static && $dateTime->isPast();
     }
 
+    /**
+     * @param  mixed  $timestamp
+     * @return bool
+     */
     public static function isPastTimestamp($timestamp): bool
     {
         return is_numeric($timestamp) && $timestamp <= time();
+    }
+
+    /**
+     * @param  string  $date
+     * @param  bool  $extended
+     * @return static|false
+     */
+    public static function createFromRfc3339(string $date, bool $extended = false)
+    {
+        $format = $extended ? static::RFC3339_EXTENDED : static::RFC3339;
+        return static::createFromFormat($format, $date);
+    }
+
+    /**
+     * @param  string  $date
+     * @return static|false
+     */
+    public static function createFromRfc3339Extended(string $date)
+    {
+        return static::createFromRfc3339($date, true);
+    }
+
+    /**
+     * @return string
+     */
+    public function toRfc3339ExtendedString(): string
+    {
+        return $this->toRfc3339String(true);
     }
 }

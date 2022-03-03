@@ -17,17 +17,22 @@ class ScheduleJob extends Job
     /**
      * @var Carbon
      */
-    protected $startDateTime = null;
+    private $jobStartedAt = null;
 
     /**
+     * @return void
      * @throws Throwable
      *
-     * @return void
      */
     protected function action(): void
     {
-        $this->startDateTime = Carbon::now();
+        $this->jobStartedAt = Carbon::now();
         $this->triggerHandlers(true);
+    }
+
+    protected function isStopHandlerResults($results, Throwable $exception = null): bool
+    {
+        return false;
     }
 
     /**
@@ -35,13 +40,13 @@ class ScheduleJob extends Job
      */
     protected function getDelays(): int
     {
-        return $this->startDateTime->diffInRealMilliseconds(Carbon::now());
+        return $this->jobStartedAt->diffInRealMilliseconds(Carbon::now());
     }
 
     /**
      * 判断是否可以运行.
      *
-     * @param string $expression
+     * @param  string  $expression
      *
      * @return bool
      */
@@ -55,7 +60,7 @@ class ScheduleJob extends Job
     /**
      * push任务
      *
-     * @param Job $job
+     * @param  Job  $job
      *
      * @return void
      */
@@ -66,12 +71,12 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param string       $expression
-     * @param callable|Job $job
+     * @param  string  $expression
+     * @param  callable|Job  $job
      *
      * @return void
      */
-    protected function pushJobIfDue(string $expression, callable|Job $job)
+    protected function pushJobIfDue(string $expression, $job)
     {
         if ($this->isDue($expression)) {
             $this->pushJob((is_callable($job) ? $job() : $job));
