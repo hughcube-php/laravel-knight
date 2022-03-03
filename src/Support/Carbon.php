@@ -25,8 +25,9 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * @param  string  $date
-     * @param  string  $format
+     * @param string $date
+     * @param string $format
+     *
      * @return static|false|null
      */
     public static function fromDate(string $date, string $format = 'Y-m-d H:i:s')
@@ -34,12 +35,14 @@ class Carbon extends \Illuminate\Support\Carbon
         if (empty($date)) {
             return null;
         }
+
         return static::createFromFormat($format, $date);
     }
 
     /**
-     * @param  DateTime|int|float  $value
-     * @param  string  $format
+     * @param DateTime|int|float $value
+     * @param string             $format
+     *
      * @return string|null
      */
     public static function asDate($value, string $format = 'Y-m-d H:i:s'): ?string
@@ -56,18 +59,21 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * @param  mixed  $date
-     * @param  string  $format
+     * @param mixed  $date
+     * @param string $format
+     *
      * @return bool
      */
     public static function isPastDate($date, string $format = 'Y-m-d H:i:s'): bool
     {
         $dateTime = static::fromDate($date, $format);
+
         return $dateTime instanceof static && $dateTime->isPast();
     }
 
     /**
-     * @param  mixed  $timestamp
+     * @param mixed $timestamp
+     *
      * @return bool
      */
     public static function isPastTimestamp($timestamp): bool
@@ -76,18 +82,21 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * @param  string  $date
-     * @param  bool  $extended
+     * @param string $date
+     * @param bool   $extended
+     *
      * @return static|false
      */
     public static function createFromRfc3339(string $date, bool $extended = false)
     {
         $format = $extended ? static::RFC3339_EXTENDED : static::RFC3339;
+
         return static::createFromFormat($format, $date);
     }
 
     /**
-     * @param  string  $date
+     * @param string $date
+     *
      * @return static|false
      */
     public static function createFromRfc3339Extended(string $date)

@@ -31,8 +31,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
+     *
+     * @return void
      */
     public function testQuery()
     {
@@ -110,8 +111,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
+     *
+     * @return void
      */
     public function testConversionDateTime()
     {
