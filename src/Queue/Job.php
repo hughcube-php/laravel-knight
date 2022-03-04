@@ -175,7 +175,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
      *
      * @return $this
      */
-    public function setPid($pid): Job
+    public function setPid($pid)
     {
         $this->pid = $pid;
 
@@ -200,7 +200,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
      *
      * @return $this
      */
-    public function setLogChannel($channel = null): Job
+    public function setLogChannel($channel = null)
     {
         $this->logChannel = $channel;
 
