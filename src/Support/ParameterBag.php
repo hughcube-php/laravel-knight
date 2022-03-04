@@ -59,6 +59,11 @@ class ParameterBag
         return empty($this->get($key));
     }
 
+    public function isNull($key): bool
+    {
+        return null === $this->get($key);
+    }
+
     /**
      * @param  string|int  $key
      * @param  mixed  $default
@@ -110,6 +115,45 @@ class ParameterBag
         }
 
         return $this;
+    }
+
+    /**
+     * @param  string|int  $key
+     * @param  callable  $callable
+     * @return void
+     */
+    public function whenHas($key, callable $callable)
+    {
+        if (!$this->has($key)) {
+            return;
+        }
+        $callable($this->get($key));
+    }
+
+    /**
+     * @param  string|int  $key
+     * @param  callable  $callable
+     * @return void
+     */
+    public function whenNotNull($key, callable $callable)
+    {
+        if ($this->isNull($key)) {
+            return;
+        }
+        $callable($this->get($key));
+    }
+
+    /**
+     * @param  string|int  $key
+     * @param  callable  $callable
+     * @return void
+     */
+    public function whenNotEmpty($key, callable $callable)
+    {
+        if ($this->isEmpty($key)) {
+            return;
+        }
+        $callable($this->get($key));
     }
 
     public function getIterator(): ArrayIterator

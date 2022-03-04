@@ -25,6 +25,8 @@ use Traversable;
  *
  * @method Model      getModel()
  * @method Connection getConnection()
+ *
+ * @mixin \Illuminate\Database\Eloquent\Builder
  */
 trait Builder
 {
@@ -100,7 +102,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return bool
      */
@@ -110,7 +112,7 @@ trait Builder
     }
 
     /**
-     * @param array $columns
+     * @param  array  $columns
      *
      * @return string
      */
@@ -131,7 +133,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $pk
+     * @param  mixed  $pk
      *
      * @return Model|null
      */
@@ -141,7 +143,7 @@ trait Builder
     }
 
     /**
-     * @param array|Arrayable|Traversable $pks
+     * @param  array|Arrayable|Traversable  $pks
      *
      * @return EloquentCollection
      */
@@ -169,7 +171,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $id
+     * @param  mixed  $id
      *
      * @return mixed
      */
@@ -181,12 +183,12 @@ trait Builder
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
-     *
-     * @throws
+     * @param  array|Arrayable|Traversable  $ids  必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
      * @return EloquentCollection
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function findUniqueRows($ids): EloquentCollection
     {
@@ -332,10 +334,40 @@ trait Builder
     }
 
     /**
-     * @throws
-     *
+     * @param  string  $column
+     * @param  string  $value
+     * @return static
+     */
+    public function whereLike(string $column, string $value)
+    {
+        return $this->where($column, 'LIKE', "%$value%");
+    }
+
+    /**
+     * @param  string  $column
+     * @param  string  $value
+     * @return static
+     */
+    public function whereLeftLike(string $column, string $value)
+    {
+        return $this->where($column, 'LIKE', "$value%");
+    }
+
+    /**
+     * @param  string  $column
+     * @param  string  $value
+     * @return static
+     */
+    public function whereRightLike(string $column, string $value)
+    {
+        return $this->where($column, 'LIKE', "%$value");
+    }
+
+    /**
      * @return bool
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function refreshRowCache(): bool
     {
