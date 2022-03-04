@@ -20,10 +20,15 @@ trait SimplePaginateQuery
 {
     protected function rules(): array
     {
-        return [
-            'page'      => ['remove_if_empty', 'default:1', 'required', 'integer', 'min:1'],
-            'page_size' => ['remove_if_empty', 'default:15', 'required', 'integer', 'min:1', 'max:20'],
-        ];
+        return $this->appendPaginateRules([]);
+    }
+
+    protected function appendPaginateRules($rules = []): array
+    {
+        $rules['page'] = ['remove_if_empty_string', 'remove_if_null', 'integer', 'min:1', 'remove_if_empty'];
+        $rules['page_size'] = ['remove_if_empty_string', 'remove_if_null', 'integer', 'min:1', 'remove_if_empty'];
+
+        return $rules;
     }
 
     /**
@@ -32,49 +37,88 @@ trait SimplePaginateQuery
     protected function action(): JsonResponse
     {
         $query = $this->makeQuery();
-        $count = $query->count();
 
         $page = $this->getPage();
         $pageSize = $this->getPageSize();
-        $rows = $query->forPage($page, $pageSize)->get();
+        $count = $this->queryCount($query);
+        $collection = $this->queryCollection($query, $page, $pageSize);
 
-        $list = $this->buildList($rows);
+        $results = ['list' => $this->formatCollection($collection)];
+        null !== $count and $results['count'] = $count;
+        null !== $page and $results['page'] = $page;
+        null !== $pageSize and $results['page_size'] = $pageSize;
 
-        return $this->asJson([
-            'count'     => $count,
-            'page'      => $page,
-            'page_size' => $pageSize,
-            'list'      => array_values($list),
-        ]);
+        return $this->asJson($this->formatResults($results));
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    protected function getPage(): int
+    protected function getPage(): ?int
     {
-        return $this->p()->getInt('page');
+        return $this->p()->getInt('page') ?: 1;
     }
 
     /**
-     * @return int
+     * @return int|null
      */
-    protected function getPageSize(): int
+    protected function getPageSize(): ?int
     {
-        return $this->p()->getInt('page_size');
+        return $this->p()->getInt('page_size') ?: 10;
     }
 
-    abstract protected function makeQuery(): Builder;
+    /**
+     * @return Builder|null
+     */
+    abstract protected function makeQuery(): ?Builder;
 
     /**
-     * @param Collection|array $rows
-     *
+     * @param  Builder|mixed  $query
+     * @return null|integer
+     */
+    protected function queryCount($query): ?int
+    {
+        if ($query instanceof Builder) {
+            return $query->count();
+        }
+
+        return 0;
+    }
+
+    /**
+     * @param  Builder|mixed  $query
+     * @param  int|null  $page
+     * @param  int|null  $pageSize
+     * @return Collection
+     */
+    protected function queryCollection($query, ?int $page, ?int $pageSize): Collection
+    {
+        if ($query instanceof Builder && is_int($page) && is_int($pageSize)) {
+            $query = $query->forPage($page, $pageSize);
+        }
+
+        if ($query instanceof Builder) {
+            return $query->get();
+        }
+
+        return Collection::make();
+    }
+
+    /**
+     * @param  Collection  $rows
      * @return array
      */
-    protected function buildList($rows): array
+    protected function formatCollection(Collection $rows): array
     {
-        $rows = $rows instanceof Collection ? $rows->toArray() : $rows;
+        return $rows->toArray();
+    }
 
-        return array_values($rows);
+    /**
+     * @param  mixed  $results
+     * @return mixed
+     */
+    protected function formatResults($results)
+    {
+        return $results;
     }
 }

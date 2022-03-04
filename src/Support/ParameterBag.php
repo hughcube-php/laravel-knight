@@ -23,7 +23,7 @@ class ParameterBag
     }
 
     /**
-     * @param array $parameters
+     * @param  array  $parameters
      *
      * @return $this
      */
@@ -45,7 +45,7 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
+     * @param  string|int  $key
      *
      * @return bool
      */
@@ -54,9 +54,14 @@ class ParameterBag
         return array_key_exists($key, $this->parameters);
     }
 
+    public function isEmpty($key): bool
+    {
+        return empty($this->get($key));
+    }
+
     /**
-     * @param string|int $key
-     * @param mixed      $default
+     * @param  string|int  $key
+     * @param  mixed  $default
      *
      * @return mixed
      */
@@ -66,8 +71,8 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param mixed      $value
+     * @param  string|int  $key
+     * @param  mixed  $value
      *
      * @return $this
      */
@@ -79,8 +84,8 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param mixed      $value
+     * @param  string|int  $key
+     * @param  mixed  $value
      *
      * @return $this
      */
@@ -94,7 +99,7 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
+     * @param  string|int  $key
      *
      * @return $this
      */
@@ -107,28 +112,6 @@ class ParameterBag
         return $this;
     }
 
-    /**
-     * @param string|int $key
-     * @param mixed      $default
-     *
-     * @return bool
-     */
-    public function getBoolean($key, $default = false): bool
-    {
-        return true === filter_var($this->get($key, $default), FILTER_VALIDATE_BOOLEAN);
-    }
-
-    /**
-     * @param string|int $key
-     * @param mixed      $default
-     *
-     * @return int
-     */
-    public function getInt($key, $default = 0): int
-    {
-        return intval($this->get($key, $default));
-    }
-
     public function getIterator(): ArrayIterator
     {
         return new ArrayIterator($this->parameters);
@@ -137,5 +120,106 @@ class ParameterBag
     public function count(): int
     {
         return count($this->parameters);
+    }
+
+    /**
+     * @param  string|int  $key
+     * @param  mixed  $default
+     *
+     * @return null|bool
+     */
+    public function getBoolean($key, $default = false): ?bool
+    {
+        $value = $this->get($key);
+
+        if (in_array($value, [1, '1', true, 'true', 'on', 'yes'], true)) {
+            return true;
+        }
+
+        if (in_array($value, [0, '0', false, 'false', 'off', 'no'], true)) {
+            return false;
+        }
+
+        return $default;
+    }
+
+    /**
+     * @param  string|int  $key
+     * @param  mixed  $default
+     * @return null|int
+     */
+    public function getInt($key, $default = 0): ?int
+    {
+        $value = $this->get($key);
+
+        if (is_int($value)) {
+            return $value;
+        }
+
+        if (is_numeric($value) && ctype_digit(strval($value))) {
+            return intval($value);
+        }
+
+        return $default;
+    }
+
+    /**
+     * @param  string|int  $key
+     * @param  mixed  $default
+     * @return null|float
+     */
+    public function getFloat($key, $default = 0): ?float
+    {
+        $value = $this->get($key);
+
+        if (is_float($value)) {
+            return $value;
+        }
+
+        if (is_numeric($value)) {
+            return floatval($value);
+        }
+
+        return $default;
+    }
+
+    /**
+     * 获取一个由数字和字母组成的参数
+     *
+     * @param  string|int  $key
+     * @param  string  $default
+     * @return null|string
+     */
+    public function getAlpha($key, string $default = ''): ?string
+    {
+        $value = $this->get($key);
+        return ctype_alpha($value) ? $value : $default;
+    }
+
+    /**
+     * 获取一个由数字和字母组成的参数
+     *
+     * @param  string|int  $key
+     * @param  string  $default
+     * @return null|string
+     */
+    public function getAlnum($key, string $default = ''): ?string
+    {
+        $value = $this->get($key);
+        return ctype_alnum($value) ? $value : $default;
+    }
+
+    /**
+     * @param  string|int  $key
+     * @param  string  $default
+     * @return null|string
+     */
+    public function getDigits($key, string $default = '0'): ?string
+    {
+        $value = $this->get($key);
+        if (is_numeric($value) && ctype_digit(strval($value))) {
+            return strval($value);
+        }
+        return $default;
     }
 }
