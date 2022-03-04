@@ -102,7 +102,7 @@ trait Builder
     }
 
     /**
-     * @param  mixed  $value
+     * @param mixed $value
      *
      * @return bool
      */
@@ -112,7 +112,7 @@ trait Builder
     }
 
     /**
-     * @param  array  $columns
+     * @param array $columns
      *
      * @return string
      */
@@ -133,7 +133,7 @@ trait Builder
     }
 
     /**
-     * @param  mixed  $pk
+     * @param mixed $pk
      *
      * @return Model|null
      */
@@ -143,7 +143,7 @@ trait Builder
     }
 
     /**
-     * @param  array|Arrayable|Traversable  $pks
+     * @param array|Arrayable|Traversable $pks
      *
      * @return EloquentCollection
      */
@@ -171,7 +171,7 @@ trait Builder
     }
 
     /**
-     * @param  mixed  $id
+     * @param mixed $id
      *
      * @return mixed
      */
@@ -183,12 +183,12 @@ trait Builder
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param  array|Arrayable|Traversable  $ids  必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
+     * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
+     *
+     * @throws
      *
      * @return EloquentCollection
      * @phpstan-ignore-next-line
-     * @throws
-     *
      */
     public function findUniqueRows($ids): EloquentCollection
     {
@@ -334,8 +334,9 @@ trait Builder
     }
 
     /**
-     * @param  string  $column
-     * @param  string  $value
+     * @param string $column
+     * @param string $value
+     *
      * @return static
      */
     public function whereLike(string $column, string $value)
@@ -344,8 +345,9 @@ trait Builder
     }
 
     /**
-     * @param  string  $column
-     * @param  string  $value
+     * @param string $column
+     * @param string $value
+     *
      * @return static
      */
     public function whereLeftLike(string $column, string $value)
@@ -354,8 +356,9 @@ trait Builder
     }
 
     /**
-     * @param  string  $column
-     * @param  string  $value
+     * @param string $column
+     * @param string $value
+     *
      * @return static
      */
     public function whereRightLike(string $column, string $value)
@@ -364,10 +367,10 @@ trait Builder
     }
 
     /**
-     * @return bool
-     * @phpstan-ignore-next-line
      * @throws
      *
+     * @return bool
+     * @phpstan-ignore-next-line
      */
     public function refreshRowCache(): bool
     {

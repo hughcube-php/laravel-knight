@@ -31,11 +31,10 @@ class ModelTest extends TestCase
         });
     }
 
-
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testQuery()
     {
@@ -113,9 +112,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testConversionDateTime()
     {
@@ -162,9 +161,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testQueryWhereLike()
     {
