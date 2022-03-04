@@ -25,12 +25,12 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * @param string $date
+     * @param  string|null  $date
      * @param string $format
      *
      * @return static|false|null
      */
-    public static function fromDate(string $date, string $format = 'Y-m-d H:i:s')
+    public static function fromDate(?string $date, string $format = 'Y-m-d H:i:s')
     {
         if (empty($date)) {
             return null;

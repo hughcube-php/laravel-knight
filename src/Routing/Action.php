@@ -11,7 +11,6 @@ namespace HughCube\Laravel\Knight\Routing;
 use BadMethodCallException;
 use HughCube\Laravel\Knight\Support\GetOrSet;
 use HughCube\Laravel\Knight\Support\ParameterBag;
-use HughCube\Laravel\Knight\Support\ParameterBagBak;
 use HughCube\Laravel\Knight\Support\ParameterBagTrait;
 use HughCube\Laravel\Knight\Support\Validation;
 use Illuminate\Config\Repository;
@@ -19,9 +18,6 @@ use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-/**
- * @mixin ParameterBagBak
- */
 trait Action
 {
     use GetOrSet;
@@ -36,17 +32,17 @@ trait Action
     abstract protected function action();
 
     /**
-     * @param array $data
-     * @param int   $code
+     * @param  array  $data
+     * @param  int  $code
      *
      * @return JsonResponse
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
     {
         return new JsonResponse([
-            'code'    => $code,
+            'code' => $code,
             'message' => 'ok',
-            'data'    => $data,
+            'data' => $data,
         ]);
     }
 
@@ -59,10 +55,10 @@ trait Action
     }
 
     /**
-     * @throws
-     *
      * @return Repository
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     protected function getContainerConfig(): Repository
     {
@@ -70,10 +66,10 @@ trait Action
     }
 
     /**
-     * @throws
-     *
      * @return Request
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     protected function getRequest(): Request
     {
@@ -107,10 +103,10 @@ trait Action
     }
 
     /**
-     * @throws
-     *
      * @return mixed
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function invoke()
     {
@@ -132,8 +128,8 @@ trait Action
     }
 
     /**
-     * @param string $name
-     * @param array  $arguments
+     * @param  string  $name
+     * @param  array  $arguments
      *
      * @return mixed
      */
