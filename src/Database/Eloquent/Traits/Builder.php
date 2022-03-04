@@ -367,6 +367,39 @@ trait Builder
     }
 
     /**
+     * @param string $column
+     * @param string $value
+     *
+     * @return static
+     */
+    public function orWhereLike(string $column, string $value)
+    {
+        return $this->orWhere($column, 'LIKE', "%$value%");
+    }
+
+    /**
+     * @param string $column
+     * @param string $value
+     *
+     * @return static
+     */
+    public function orWhereLeftLike(string $column, string $value)
+    {
+        return $this->orWhere($column, 'LIKE', "$value%");
+    }
+
+    /**
+     * @param string $column
+     * @param string $value
+     *
+     * @return static
+     */
+    public function orWhereRightLike(string $column, string $value)
+    {
+        return $this->orWhere($column, 'LIKE', "%$value");
+    }
+
+    /**
      * @throws
      *
      * @return bool
