@@ -216,7 +216,7 @@ trait Model
     /**
      * @param mixed $id
      *
-     * @return mixed
+     * @return static
      */
     public static function findById($id)
     {
