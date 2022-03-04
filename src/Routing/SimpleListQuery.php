@@ -39,8 +39,9 @@ trait SimpleListQuery
     }
 
     /**
-     * @param  Builder|mixed  $query
-     * @return null|integer
+     * @param Builder|mixed $query
+     *
+     * @return null|int
      */
     protected function queryCount($query): ?int
     {

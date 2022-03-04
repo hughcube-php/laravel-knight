@@ -32,17 +32,17 @@ trait Action
     abstract protected function action();
 
     /**
-     * @param  array  $data
-     * @param  int  $code
+     * @param array $data
+     * @param int   $code
      *
      * @return JsonResponse
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
     {
         return new JsonResponse([
-            'code' => $code,
+            'code'    => $code,
             'message' => 'ok',
-            'data' => $data,
+            'data'    => $data,
         ]);
     }
 
@@ -55,10 +55,10 @@ trait Action
     }
 
     /**
-     * @return Repository
-     * @phpstan-ignore-next-line
      * @throws
      *
+     * @return Repository
+     * @phpstan-ignore-next-line
      */
     protected function getContainerConfig(): Repository
     {
@@ -66,10 +66,10 @@ trait Action
     }
 
     /**
-     * @return Request
-     * @phpstan-ignore-next-line
      * @throws
      *
+     * @return Request
+     * @phpstan-ignore-next-line
      */
     protected function getRequest(): Request
     {
@@ -103,10 +103,10 @@ trait Action
     }
 
     /**
-     * @return mixed
-     * @phpstan-ignore-next-line
      * @throws
      *
+     * @return mixed
+     * @phpstan-ignore-next-line
      */
     public function invoke()
     {
@@ -128,8 +128,8 @@ trait Action
     }
 
     /**
-     * @param  string  $name
-     * @param  array  $arguments
+     * @param string $name
+     * @param array  $arguments
      *
      * @return mixed
      */

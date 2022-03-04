@@ -73,8 +73,9 @@ trait SimplePaginateQuery
     abstract protected function makeQuery(): ?Builder;
 
     /**
-     * @param  Builder|mixed  $query
-     * @return null|integer
+     * @param Builder|mixed $query
+     *
+     * @return null|int
      */
     protected function queryCount($query): ?int
     {
@@ -86,9 +87,10 @@ trait SimplePaginateQuery
     }
 
     /**
-     * @param  Builder|mixed  $query
-     * @param  int|null  $page
-     * @param  int|null  $pageSize
+     * @param Builder|mixed $query
+     * @param int|null      $page
+     * @param int|null      $pageSize
+     *
      * @return Collection
      */
     protected function queryCollection($query, ?int $page, ?int $pageSize): Collection
@@ -105,7 +107,8 @@ trait SimplePaginateQuery
     }
 
     /**
-     * @param  Collection  $rows
+     * @param Collection $rows
+     *
      * @return array
      */
     protected function formatCollection(Collection $rows): array
@@ -114,7 +117,8 @@ trait SimplePaginateQuery
     }
 
     /**
-     * @param  mixed  $results
+     * @param mixed $results
+     *
      * @return mixed
      */
     protected function formatResults($results)
