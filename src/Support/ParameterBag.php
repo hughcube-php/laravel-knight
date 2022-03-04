@@ -127,7 +127,7 @@ class ParameterBag
         if (!$this->has($key)) {
             return;
         }
-        $callable($this->get($key));
+        $callable($this->get($key), $key);
     }
 
     /**
@@ -140,7 +140,7 @@ class ParameterBag
         if ($this->isNull($key)) {
             return;
         }
-        $callable($this->get($key));
+        $callable($this->get($key), $key);
     }
 
     /**
@@ -153,7 +153,7 @@ class ParameterBag
         if ($this->isEmpty($key)) {
             return;
         }
-        $callable($this->get($key));
+        $callable($this->get($key), $key);
     }
 
     public function getIterator(): ArrayIterator
