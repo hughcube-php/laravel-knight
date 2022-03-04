@@ -25,8 +25,8 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * @param  string|null  $date
-     * @param string $format
+     * @param string|null $date
+     * @param string      $format
      *
      * @return static|false|null
      */
