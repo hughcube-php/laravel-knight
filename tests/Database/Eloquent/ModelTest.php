@@ -14,6 +14,7 @@ use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class ModelTest extends TestCase
 {
@@ -30,10 +31,11 @@ class ModelTest extends TestCase
         });
     }
 
+
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testQuery()
     {
@@ -111,9 +113,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testConversionDateTime()
     {
@@ -157,5 +159,37 @@ class ModelTest extends TestCase
         $this->assertNull($user->formatCreatedAt());
         $this->assertNull($user->formatCreatedAt());
         $this->assertNull($user->formatCreatedAt());
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     *
+     */
+    public function testQueryWhereLike()
+    {
+        User::query()->truncate();
+
+        $user = new User();
+        $user->nickname = md5(random_bytes(1000));
+        $user->save();
+
+        $keyword = substr(substr($user->nickname, 10), -10);
+        $queryUser = User::query()->whereLike('nickname', $keyword)->first();
+        $this->assertSame($user->id, $queryUser->id);
+
+        $keyword = md5(random_bytes(1000)).$user->nickname;
+        $queryUser = User::query()->whereLike('nickname', $keyword)->first();
+        $this->assertNull($queryUser);
+
+        $keyword = substr($user->nickname, 0, 10);
+        $this->assertTrue(Str::startsWith($user->nickname, $keyword));
+        $queryUser = User::query()->whereLeftLike('nickname', $keyword)->first();
+        $this->assertSame($user->id, $queryUser->id);
+
+        $keyword = substr($user->nickname, -10);
+        $this->assertTrue(Str::endsWith($user->nickname, $keyword));
+        $queryUser = User::query()->whereRightLike('nickname', $keyword)->first();
+        $this->assertSame($user->id, $queryUser->id);
     }
 }
