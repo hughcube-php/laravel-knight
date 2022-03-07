@@ -5,8 +5,8 @@ namespace HughCube\Laravel\Knight\Queue\Jobs;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
+use HughCube\GuzzleHttp\HttpClientTrait;
 use HughCube\Laravel\Knight\Queue\Job;
-use HughCube\Laravel\Knight\Support\HttpClient;
 use HughCube\PUrl\Url as PUrl;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
@@ -16,14 +16,14 @@ use Throwable;
 
 class PingJob extends Job
 {
-    use HttpClient;
+    use HttpClientTrait;
 
     public function rules(): array
     {
         return [
-            'url'             => ['string', 'nullable'],
-            'method'          => ['string', 'default:GET'],
-            'timeout'         => ['integer', 'default:2'],
+            'url' => ['string', 'nullable'],
+            'method' => ['string', 'default:GET'],
+            'timeout' => ['integer', 'default:2'],
             'allow_redirects' => ['integer', 'default:0'],
         ];
     }
@@ -44,8 +44,8 @@ class PingJob extends Job
 
         try {
             $response = $this->request($method, $url, [
-                RequestOptions::HTTP_ERRORS     => false,
-                RequestOptions::TIMEOUT         => $timeout,
+                RequestOptions::HTTP_ERRORS => false,
+                RequestOptions::TIMEOUT => $timeout,
                 RequestOptions::ALLOW_REDIRECTS => $this->getAllowRedirects(),
             ]);
         } catch (Throwable $exception) {
@@ -114,9 +114,9 @@ class PingJob extends Job
         }
 
         return [
-            'max'       => $redirects,
-            'strict'    => true,
-            'referer'   => true,
+            'max' => $redirects,
+            'strict' => true,
+            'referer' => true,
             'protocols' => ['https', 'http'],
         ];
     }

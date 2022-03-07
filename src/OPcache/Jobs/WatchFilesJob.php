@@ -3,8 +3,8 @@
 namespace HughCube\Laravel\Knight\OPcache\Jobs;
 
 use GuzzleHttp\RequestOptions;
+use HughCube\GuzzleHttp\HttpClientTrait;
 use HughCube\Laravel\Knight\Queue\Job;
-use HughCube\Laravel\Knight\Support\HttpClient;
 use HughCube\PUrl\Url as PUrl;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
@@ -14,12 +14,12 @@ use Throwable;
 
 class WatchFilesJob extends Job
 {
-    use HttpClient;
+    use HttpClientTrait;
 
     public function rules(): array
     {
         return [
-            'url'     => ['string', 'nullable'],
+            'url' => ['string', 'nullable'],
             'timeout' => ['integer', 'default:30'],
         ];
     }

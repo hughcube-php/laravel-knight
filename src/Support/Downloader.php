@@ -12,6 +12,7 @@ use BadMethodCallException;
 use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
+use HughCube\GuzzleHttp\HttpClientTrait;
 use HughCube\StaticInstanceInterface;
 use HughCube\StaticInstanceTrait;
 use Illuminate\Support\Facades\File;
@@ -24,7 +25,7 @@ use RuntimeException;
  */
 class Downloader implements StaticInstanceInterface
 {
-    use HttpClient;
+    use HttpClientTrait;
     use StaticInstanceTrait;
 
     /**

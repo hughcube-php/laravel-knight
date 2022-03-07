@@ -11,8 +11,8 @@ namespace HughCube\Laravel\Knight\OPcache\Commands;
 
 use Exception;
 use GuzzleHttp\RequestOptions;
+use HughCube\GuzzleHttp\HttpClientTrait;
 use HughCube\Laravel\Knight\OPcache\LoadedOPcacheExtension;
-use HughCube\Laravel\Knight\Support\HttpClient;
 use HughCube\PUrl\Url as PUrl;
 use Illuminate\Console\Command;
 use Illuminate\Console\Scheduling\Schedule;
@@ -25,7 +25,7 @@ use Throwable;
 
 class CompileFilesCommand extends Command
 {
-    use HttpClient;
+    use HttpClientTrait;
     use LoadedOPcacheExtension;
 
     /**
@@ -42,11 +42,11 @@ class CompileFilesCommand extends Command
     protected $description = 'opcache compile file';
 
     /**
-     * @param Schedule $schedule
-     *
-     * @throws Exception
+     * @param  Schedule  $schedule
      *
      * @return void
+     * @throws Exception
+     *
      */
     public function handle(Schedule $schedule)
     {
@@ -88,9 +88,9 @@ class CompileFilesCommand extends Command
     }
 
     /**
+     * @return array
      * @throws Exception
      *
-     * @return array
      */
     protected function getFiles(): array
     {

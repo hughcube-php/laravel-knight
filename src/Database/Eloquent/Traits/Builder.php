@@ -8,6 +8,7 @@
 
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
+use Closure;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use Illuminate\Cache\NullStore;
 use Illuminate\Cache\Repository;
@@ -15,6 +16,7 @@ use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\CacheInterface;
@@ -102,7 +104,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return bool
      */
@@ -112,7 +114,7 @@ trait Builder
     }
 
     /**
-     * @param array $columns
+     * @param  array  $columns
      *
      * @return string
      */
@@ -133,7 +135,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $pk
+     * @param  mixed  $pk
      *
      * @return Model|null
      */
@@ -143,7 +145,7 @@ trait Builder
     }
 
     /**
-     * @param array|Arrayable|Traversable $pks
+     * @param  array|Arrayable|Traversable  $pks
      *
      * @return EloquentCollection
      */
@@ -171,7 +173,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $id
+     * @param  mixed  $id
      *
      * @return mixed
      */
@@ -183,12 +185,12 @@ trait Builder
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
-     *
-     * @throws
+     * @param  array|Arrayable|Traversable  $ids  必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
      * @return EloquentCollection
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function findUniqueRows($ids): EloquentCollection
     {
@@ -334,76 +336,10 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
-     *
-     * @return static
-     */
-    public function whereLike(string $column, string $value)
-    {
-        return $this->where($column, 'LIKE', "%$value%");
-    }
-
-    /**
-     * @param string $column
-     * @param string $value
-     *
-     * @return static
-     */
-    public function whereLeftLike(string $column, string $value)
-    {
-        return $this->where($column, 'LIKE', "$value%");
-    }
-
-    /**
-     * @param string $column
-     * @param string $value
-     *
-     * @return static
-     */
-    public function whereRightLike(string $column, string $value)
-    {
-        return $this->where($column, 'LIKE', "%$value");
-    }
-
-    /**
-     * @param string $column
-     * @param string $value
-     *
-     * @return static
-     */
-    public function orWhereLike(string $column, string $value)
-    {
-        return $this->orWhere($column, 'LIKE', "%$value%");
-    }
-
-    /**
-     * @param string $column
-     * @param string $value
-     *
-     * @return static
-     */
-    public function orWhereLeftLike(string $column, string $value)
-    {
-        return $this->orWhere($column, 'LIKE', "$value%");
-    }
-
-    /**
-     * @param string $column
-     * @param string $value
-     *
-     * @return static
-     */
-    public function orWhereRightLike(string $column, string $value)
-    {
-        return $this->orWhere($column, 'LIKE', "%$value");
-    }
-
-    /**
-     * @throws
-     *
      * @return bool
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function refreshRowCache(): bool
     {
@@ -413,5 +349,90 @@ trait Builder
             });
 
         return $this->getCache()->deleteMultiple($cacheKeys->values()->toArray());
+    }
+
+    /**
+     * @param  string  $column
+     * @param  string  $value
+     *
+     * @return static
+     */
+    public function whereLike(string $column, string $value)
+    {
+        return $this->where($column, 'LIKE', "%$value%");
+    }
+
+    /**
+     * @param  string  $column
+     * @param  string  $value
+     *
+     * @return static
+     */
+    public function whereLeftLike(string $column, string $value)
+    {
+        return $this->where($column, 'LIKE', "$value%");
+    }
+
+    /**
+     * @param  string  $column
+     * @param  string  $value
+     *
+     * @return static
+     */
+    public function whereRightLike(string $column, string $value)
+    {
+        return $this->where($column, 'LIKE', "%$value");
+    }
+
+    /**
+     * @param  string  $column
+     * @param  string  $value
+     *
+     * @return static
+     */
+    public function orWhereLike(string $column, string $value)
+    {
+        return $this->orWhere($column, 'LIKE', "%$value%");
+    }
+
+    /**
+     * @param  string  $column
+     * @param  string  $value
+     *
+     * @return static
+     */
+    public function orWhereLeftLike(string $column, string $value)
+    {
+        return $this->orWhere($column, 'LIKE', "$value%");
+    }
+
+    /**
+     * @param  string  $column
+     * @param  string  $value
+     *
+     * @return static
+     */
+    public function orWhereRightLike(string $column, string $value)
+    {
+        return $this->orWhere($column, 'LIKE', "%$value");
+    }
+
+    /**
+     * Add a basic where clause to the query.
+     *
+     * @param  bool  $when
+     * @param  Closure|string|array|Expression  $column
+     * @param  mixed  $operator
+     * @param  mixed  $value
+     * @param  string  $boolean
+     * @return static
+     */
+    public function whenWhere(bool $when, $column, $operator = null, $value = null, $boolean = 'and')
+    {
+        if ($when) {
+            $this->where($column, $operator = null, $value = null, $boolean = 'and');
+        }
+
+        return $this;
     }
 }

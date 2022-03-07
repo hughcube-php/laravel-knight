@@ -8,24 +8,12 @@
 
 namespace HughCube\Laravel\Knight\Support;
 
-use GuzzleHttp\Client;
+use HughCube\GuzzleHttp\HttpClientTrait;
 
+/**
+ * @deprecated Use \HughCube\GuzzleHttp\HttpClientTrait
+ */
 trait HttpClient
 {
-    /**
-     * @var Client
-     */
-    private $httpClient = null;
-
-    /**
-     * @return Client
-     */
-    protected function getHttpClient(): Client
-    {
-        if (!$this->httpClient instanceof Client) {
-            $this->httpClient = new Client();
-        }
-
-        return $this->httpClient;
-    }
+    use HttpClientTrait;
 }
