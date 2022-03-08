@@ -19,7 +19,7 @@ class WatchFilesJob extends Job
     public function rules(): array
     {
         return [
-            'url' => ['string', 'nullable'],
+            'url'     => ['string', 'nullable'],
             'timeout' => ['integer', 'default:30'],
         ];
     }

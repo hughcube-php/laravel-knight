@@ -42,11 +42,11 @@ class CompileFilesCommand extends Command
     protected $description = 'opcache compile file';
 
     /**
-     * @param  Schedule  $schedule
+     * @param Schedule $schedule
      *
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function handle(Schedule $schedule)
     {
@@ -88,9 +88,9 @@ class CompileFilesCommand extends Command
     }
 
     /**
-     * @return array
      * @throws Exception
      *
+     * @return array
      */
     protected function getFiles(): array
     {

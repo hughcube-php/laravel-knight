@@ -104,7 +104,7 @@ trait Builder
     }
 
     /**
-     * @param  mixed  $value
+     * @param mixed $value
      *
      * @return bool
      */
@@ -114,7 +114,7 @@ trait Builder
     }
 
     /**
-     * @param  array  $columns
+     * @param array $columns
      *
      * @return string
      */
@@ -135,7 +135,7 @@ trait Builder
     }
 
     /**
-     * @param  mixed  $pk
+     * @param mixed $pk
      *
      * @return Model|null
      */
@@ -145,7 +145,7 @@ trait Builder
     }
 
     /**
-     * @param  array|Arrayable|Traversable  $pks
+     * @param array|Arrayable|Traversable $pks
      *
      * @return EloquentCollection
      */
@@ -173,7 +173,7 @@ trait Builder
     }
 
     /**
-     * @param  mixed  $id
+     * @param mixed $id
      *
      * @return mixed
      */
@@ -185,12 +185,12 @@ trait Builder
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param  array|Arrayable|Traversable  $ids  必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
+     * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
+     *
+     * @throws
      *
      * @return EloquentCollection
      * @phpstan-ignore-next-line
-     * @throws
-     *
      */
     public function findUniqueRows($ids): EloquentCollection
     {
@@ -336,10 +336,10 @@ trait Builder
     }
 
     /**
-     * @return bool
-     * @phpstan-ignore-next-line
      * @throws
      *
+     * @return bool
+     * @phpstan-ignore-next-line
      */
     public function refreshRowCache(): bool
     {
@@ -352,8 +352,8 @@ trait Builder
     }
 
     /**
-     * @param  string  $column
-     * @param  string  $value
+     * @param string $column
+     * @param string $value
      *
      * @return static
      */
@@ -363,8 +363,8 @@ trait Builder
     }
 
     /**
-     * @param  string  $column
-     * @param  string  $value
+     * @param string $column
+     * @param string $value
      *
      * @return static
      */
@@ -374,8 +374,8 @@ trait Builder
     }
 
     /**
-     * @param  string  $column
-     * @param  string  $value
+     * @param string $column
+     * @param string $value
      *
      * @return static
      */
@@ -385,8 +385,8 @@ trait Builder
     }
 
     /**
-     * @param  string  $column
-     * @param  string  $value
+     * @param string $column
+     * @param string $value
      *
      * @return static
      */
@@ -396,8 +396,8 @@ trait Builder
     }
 
     /**
-     * @param  string  $column
-     * @param  string  $value
+     * @param string $column
+     * @param string $value
      *
      * @return static
      */
@@ -407,8 +407,8 @@ trait Builder
     }
 
     /**
-     * @param  string  $column
-     * @param  string  $value
+     * @param string $column
+     * @param string $value
      *
      * @return static
      */
@@ -420,11 +420,12 @@ trait Builder
     /**
      * Add a basic where clause to the query.
      *
-     * @param  bool  $when
-     * @param  Closure|string|array|Expression  $column
-     * @param  mixed  $operator
-     * @param  mixed  $value
-     * @param  string  $boolean
+     * @param bool                            $when
+     * @param Closure|string|array|Expression $column
+     * @param mixed                           $operator
+     * @param mixed                           $value
+     * @param string                          $boolean
+     *
      * @return static
      */
     public function whenWhere(bool $when, $column, $operator = null, $value = null, $boolean = 'and')
