@@ -268,6 +268,7 @@ trait Builder
 
     /**
      * @param mixed $value
+     *
      * @return static
      */
     public function whereDeletedAtColumn($value = null)
@@ -275,6 +276,7 @@ trait Builder
         if (null === $value) {
             return $this->whereNull($this->getModel()->getDeletedAtColumn());
         }
+
         return $this->whereNull($this->getModel()->getDeletedAtColumn(), $value);
     }
 

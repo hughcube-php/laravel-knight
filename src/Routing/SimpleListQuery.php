@@ -39,7 +39,7 @@ trait SimpleListQuery
     }
 
     /**
-     * @param  Builder|mixed  $query
+     * @param Builder|mixed $query
      *
      * @return null|int
      */
