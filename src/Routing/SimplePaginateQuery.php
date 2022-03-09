@@ -116,7 +116,7 @@ trait SimplePaginateQuery
             $query->limit($limit);
         }
 
-        if ($query instanceof Builder && is_int($offset) && null !== $query->limit) {
+        if ($query instanceof Builder && is_int($offset)) {
             $query->offset($offset);
         }
 
