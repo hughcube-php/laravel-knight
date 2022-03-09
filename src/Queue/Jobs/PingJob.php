@@ -21,9 +21,9 @@ class PingJob extends Job
     public function rules(): array
     {
         return [
-            'url' => ['string', 'nullable'],
-            'method' => ['string', 'default:GET'],
-            'timeout' => ['integer', 'default:2'],
+            'url'             => ['string', 'nullable'],
+            'method'          => ['string', 'default:GET'],
+            'timeout'         => ['integer', 'default:2'],
             'allow_redirects' => ['integer', 'default:0'],
         ];
     }
@@ -44,8 +44,8 @@ class PingJob extends Job
 
         try {
             $response = $this->request($method, $url, [
-                RequestOptions::HTTP_ERRORS => false,
-                RequestOptions::TIMEOUT => $timeout,
+                RequestOptions::HTTP_ERRORS     => false,
+                RequestOptions::TIMEOUT         => $timeout,
                 RequestOptions::ALLOW_REDIRECTS => $this->getAllowRedirects(),
             ]);
         } catch (Throwable $exception) {
@@ -114,9 +114,9 @@ class PingJob extends Job
         }
 
         return [
-            'max' => $redirects,
-            'strict' => true,
-            'referer' => true,
+            'max'       => $redirects,
+            'strict'    => true,
+            'referer'   => true,
             'protocols' => ['https', 'http'],
         ];
     }
