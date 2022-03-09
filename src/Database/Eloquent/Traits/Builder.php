@@ -267,6 +267,18 @@ trait Builder
     }
 
     /**
+     * @param mixed $value
+     * @return static
+     */
+    public function whereDeletedAtColumn($value = null)
+    {
+        if (null === $value) {
+            return $this->whereNull($this->getModel()->getDeletedAtColumn());
+        }
+        return $this->whereNull($this->getModel()->getDeletedAtColumn(), $value);
+    }
+
+    /**
      * @inheritdoc
      */
     public function delete()

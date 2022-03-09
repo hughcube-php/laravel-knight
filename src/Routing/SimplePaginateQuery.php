@@ -41,7 +41,9 @@ trait SimplePaginateQuery
         $page = $this->getPage();
         $pageSize = $this->getPageSize();
         $count = $this->queryCount($query);
-        $collection = $this->queryCollection($query, $page, $pageSize);
+
+        $offset = $this->getOffset($page, $pageSize);
+        $collection = $this->queryCollection($query, $offset, $pageSize);
 
         $results = ['list' => $this->formatCollection($collection)];
         null !== $count and $results['count'] = $count;
@@ -68,12 +70,26 @@ trait SimplePaginateQuery
     }
 
     /**
+     * @param  int|null  $page
+     * @param  int|null  $pageSize
+     * @return int|null
+     */
+    protected function getOffset(?int $page, ?int $pageSize): ?int
+    {
+        if (is_int($page) && is_int($pageSize)) {
+            return ($page - 1) * $pageSize;
+        }
+
+        return null;
+    }
+
+    /**
      * @return Builder|null
      */
     abstract protected function makeQuery(): ?Builder;
 
     /**
-     * @param Builder|mixed $query
+     * @param  Builder|mixed  $query
      *
      * @return null|int
      */
@@ -87,16 +103,20 @@ trait SimplePaginateQuery
     }
 
     /**
-     * @param Builder|mixed $query
-     * @param int|null      $page
-     * @param int|null      $pageSize
+     * @param  Builder|mixed  $query
+     * @param  int|null  $offset
+     * @param  int|null  $limit
      *
      * @return Collection
      */
-    protected function queryCollection($query, ?int $page, ?int $pageSize): Collection
+    protected function queryCollection($query, ?int $offset, ?int $limit): Collection
     {
-        if ($query instanceof Builder && is_int($page) && is_int($pageSize)) {
-            $query = $query->forPage($page, $pageSize);
+        if ($query instanceof Builder && is_int($limit)) {
+            $query->limit($limit);
+        }
+
+        if ($query instanceof Builder && is_int($offset) && null !== $query->limit) {
+            $query->offset($offset);
         }
 
         if ($query instanceof Builder) {
@@ -107,7 +127,7 @@ trait SimplePaginateQuery
     }
 
     /**
-     * @param Collection $rows
+     * @param  Collection  $rows
      *
      * @return array
      */
@@ -117,7 +137,7 @@ trait SimplePaginateQuery
     }
 
     /**
-     * @param mixed $results
+     * @param  mixed  $results
      *
      * @return mixed
      */
