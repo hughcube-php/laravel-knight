@@ -135,11 +135,11 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @param  int  $count
+     * @param int $count
      *
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     protected function createUsers(int $count = 1)
     {
@@ -180,9 +180,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testCacheOnCreate()
     {
@@ -218,9 +218,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testCacheOnUpdate()
     {
@@ -256,9 +256,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testCacheOnForceDelete()
     {
@@ -284,9 +284,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testCacheOnDelete()
     {
@@ -342,8 +342,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
+     *
+     * @return void
      */
     public function testFindById()
     {
@@ -373,8 +374,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
+     *
+     * @return void
      */
     public function testFindByIds()
     {
@@ -402,7 +404,7 @@ class ModelTest extends TestCase
         $this->assertCacheMissedAndPutCount(20, function () use (&$cacheIds) {
             $ids = Collection::make([
                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-                1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010
+                1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010,
             ])->shuffle()->shuffle()->values();
 
             $users = User::findByIds($ids);
@@ -431,7 +433,7 @@ class ModelTest extends TestCase
             $this->assertCacheMissedAndPutCount(10, function () use (&$cacheIds) {
                 $ids = Collection::make([
                     6, 7, 8, 9, 10, 1001, 1002, 1003, 1004, 1005,
-                    11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+                    11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
                 ])->shuffle()->shuffle()->values();
 
                 $users = User::findByIds($ids);
@@ -463,9 +465,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testConversionDateTime()
     {
@@ -524,9 +526,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testQueryWhereLike()
     {
