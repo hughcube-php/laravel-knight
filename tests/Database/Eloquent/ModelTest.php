@@ -31,7 +31,6 @@ class ModelTest extends TestCase
 
     protected $cachePutCount = 0;
 
-
     protected function getEnvironmentSetUp($app)
     {
         parent::getEnvironmentSetUp($app);
@@ -120,9 +119,11 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @param  int  $count
-     * @return void
+     * @param int $count
+     *
      * @throws Exception
+     *
+     * @return void
      */
     protected function createUsers(int $count = 1)
     {
@@ -134,8 +135,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
+     *
+     * @return void
      */
     public function testCacheOnCreate()
     {
@@ -171,8 +173,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
+     *
+     * @return void
      */
     public function testCacheOnUpdate()
     {
@@ -208,8 +211,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
+     *
+     * @return void
      */
     public function testCacheOnForceDelete()
     {
@@ -235,8 +239,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
+     *
+     * @return void
      */
     public function testCacheOnDelete()
     {
@@ -291,11 +296,10 @@ class ModelTest extends TestCase
         $this->assertSame(1, User::withTrashed()->count());
     }
 
-
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testQuery()
     {
@@ -313,7 +317,6 @@ class ModelTest extends TestCase
         }
         $this->assertSame(1000, User::query()->count());
         $this->assertNull(User::findById(1));
-
 
         /** @var User $user */
         $user = User::query()->noCache()->findByPk(1);
@@ -376,9 +379,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testConversionDateTime()
     {
@@ -411,7 +414,6 @@ class ModelTest extends TestCase
         $this->assertSame($user->updated_at->getTimestamp(), $now->getTimestamp());
         $this->assertSame($user->deleted_at->getTimestamp(), $now->getTimestamp());
 
-
         /** @var User $user */
         $user = User::withTrashed()->first();
         $format = 'Y-m-d H:i:s';
@@ -438,9 +440,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testQueryWhereLike()
     {

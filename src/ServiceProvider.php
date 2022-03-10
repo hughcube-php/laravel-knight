@@ -19,7 +19,7 @@ use HughCube\Laravel\Knight\Http\Actions\RequestShowAction;
 use HughCube\Laravel\Knight\OPcache\Actions\ScriptsAction as OPcacheScriptsAction;
 use HughCube\Laravel\Knight\OPcache\Actions\StatesAction as OPcacheStatesAction;
 use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand as OPcacheCompileFilesCommand;
-use Illuminate\Contracts\Events\Dispatcher as Dispatcher;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\Facades\Route;
@@ -108,6 +108,7 @@ class ServiceProvider extends IlluminateServiceProvider
 
     /**
      * @return void
+     *
      * @see \Illuminate\Database\Eloquent\Concerns\HasEvents::getObservableEvents
      */
     protected function registerRefreshModelCacheEvent()
@@ -118,8 +119,8 @@ class ServiceProvider extends IlluminateServiceProvider
         }
 
         $events = [
-            "eloquent.created: *", "eloquent.deleted: *",
-            "eloquent.updated: *", "eloquent.restored: *"
+            'eloquent.created: *', 'eloquent.deleted: *',
+            'eloquent.updated: *', 'eloquent.restored: *',
         ];
         $dispatcher->listen($events, function ($event, $models) {
             /** @var Model $model */
