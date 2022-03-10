@@ -18,6 +18,7 @@ use Illuminate\Cache\Events\KeyWritten;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
@@ -30,6 +31,8 @@ class ModelTest extends TestCase
     protected $cacheHitCount = 0;
 
     protected $cachePutCount = 0;
+
+    protected $databaseQueryCount = 0;
 
     protected function getEnvironmentSetUp($app)
     {
@@ -57,6 +60,10 @@ class ModelTest extends TestCase
 
         $this->listenCacheEvent(KeyWritten::class, function () {
             $this->cachePutCount++;
+        });
+
+        DB::listen(function () {
+            $this->databaseQueryCount++;
         });
     }
 
@@ -103,6 +110,15 @@ class ModelTest extends TestCase
         });
     }
 
+    protected function assertDatabaseQueryCount($value, $callable)
+    {
+        $count = $this->databaseQueryCount;
+        $results = $callable();
+        $this->assertSame($count + $value, $this->databaseQueryCount);
+
+        return $results;
+    }
+
     protected function listenCacheEvent($events, $listener = null)
     {
         $dispatcher = app(Dispatcher::class);
@@ -119,11 +135,11 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @param int $count
-     *
-     * @throws Exception
+     * @param  int  $count
      *
      * @return void
+     * @throws Exception
+     *
      */
     protected function createUsers(int $count = 1)
     {
@@ -134,10 +150,39 @@ class ModelTest extends TestCase
         }
     }
 
+    public function testIsMatchPk()
+    {
+        $this->resetTable();
+
+        $this->assertTrue(!User::isMatchPk(0));
+        $this->assertTrue(!User::isMatchPk(null));
+        $this->assertTrue(!User::isMatchPk(''));
+
+        $this->assertTrue(User::isMatchPk(1));
+        $this->assertTrue(User::isMatchPk('1'));
+
+        $this->assertDatabaseQueryCount(0, function () {
+            $this->assertCacheHitCount(0, function () {
+                $this->assertCacheForgetCount(0, function () {
+                    $this->assertCacheMissedAndPutCount(0, function () {
+                        User::findByIds([0]);
+                        User::findByIds([null, 0, '']);
+                    });
+                });
+            });
+        });
+
+        $this->assertDatabaseQueryCount(1, function () {
+            $this->assertCacheMissedAndPutCount(1, function () {
+                User::findByIds([null, 0, 1]);
+            });
+        });
+    }
+
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testCacheOnCreate()
     {
@@ -173,9 +218,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testCacheOnUpdate()
     {
@@ -211,9 +256,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testCacheOnForceDelete()
     {
@@ -239,9 +284,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testCacheOnDelete()
     {
@@ -297,91 +342,130 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @throws Exception
-     *
      * @return void
+     * @throws Exception
      */
-    public function testQuery()
+    public function testFindById()
     {
-        $this->markTestSkipped();
+        $this->resetTable();
 
-        User::query()->truncate();
+        $this->assertCacheMissedAndPutCount(1, function () {
+            $user = User::findById(1);
+            $this->assertNull($user);
+        });
 
-        $this->assertNull(User::findById(1));
+        $this->assertCacheHitCount(1, function () {
+            $user = User::findById(1);
+            $this->assertNull($user);
+        });
 
-        $this->assertSame(0, User::query()->count());
-        for ($i = 1; $i <= 1000; $i++) {
-            $user = new User();
-            $user->nickname = md5(random_bytes(1000));
-            $user->save();
-        }
-        $this->assertSame(1000, User::query()->count());
-        $this->assertNull(User::findById(1));
+        $this->createUsers();
 
-        /** @var User $user */
-        $user = User::query()->noCache()->findByPk(1);
-        $user->refreshRowCache();
+        $this->assertCacheMissedAndPutCount(1, function () {
+            $user = User::findById(1);
+            $this->assertInstanceOf(User::class, $user);
+        });
 
-        $cacheIds = Collection::make();
-
-        /** @var User $user */
-        for ($i = 1; $i <= 100; $i++) {
-            $user = User::findById($i);
-            $this->assertFalse($user->isFromCache());
-
-            $user = User::findById($i);
-            $this->assertTrue($user->isFromCache());
-            $cacheIds->push($i);
-        }
-
-        for ($i = 1; $i <= 1000; $i++) {
-            $startId = random_int(1, 900);
-            $endId = $startId + 10;
-
-            $ids = range($startId, $endId);
-            $users = User::findByIds($ids);
-            $this->assertSame(count($ids), $users->count());
-            $this->assertInstanceOf(Collection::class, $users);
-            foreach ($users as $user) {
-                $this->assertSame($user->isFromCache(), (false !== $cacheIds->search($user->id)));
-                $cacheIds->push($user->id);
-            }
-        }
-
-        $userIds = Collection::make(range(1, 100))->shuffle();
-        $users = User::findByIds($userIds->toArray());
-        $this->assertInstanceOf(Collection::class, $users);
-        $this->assertSame($users->keys()->toArray(), $userIds->toArray());
-
-        $users = User::noCacheQuery()->findByPks(range(1, 100));
-        foreach ($users as $user) {
-            $this->assertFalse($user->isFromCache());
-        }
-
-        $manyColumnItems = [];
-        $users = User::noCacheQuery()->findByPks(range(1, 100));
-        foreach ($users as $user) {
-            $where = ['id' => $user->id, 'nickname' => $user->nickname];
-            $user = User::query()->findUniqueRows([$where])->first();
-            $this->assertFalse($user->isFromCache());
-
-            $user = User::query()->findUniqueRows([$where])->first();
-            $this->assertTrue($user->isFromCache());
-
-            $manyColumnItems[] = $where;
-        }
-
-        $users = User::query()->findUniqueRows($manyColumnItems);
-        $this->assertSame(count($manyColumnItems), $users->count());
-        foreach ($users as $user) {
-            $this->assertTrue($user->isFromCache());
-        }
+        $this->assertCacheHitCount(1, function () {
+            $user = User::findById(1);
+            $this->assertInstanceOf(User::class, $user);
+        });
     }
 
     /**
+     * @return void
+     * @throws Exception
+     */
+    public function testFindByIds()
+    {
+        $this->resetTable();
+        $cacheIds = Collection::make();
+
+        $this->assertDatabaseQueryCount(1, function () {
+            $this->assertCacheMissedAndPutCount(100, function () {
+                $users = User::findByIds(range(1, 100));
+                $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $users);
+                $this->assertTrue($users->isEmpty());
+            });
+        });
+
+        $this->assertDatabaseQueryCount(0, function () {
+            $this->assertCacheHitCount(100, function () {
+                $users = User::findByIds(range(1, 100));
+                $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $users);
+                $this->assertTrue($users->isEmpty());
+            });
+        });
+
+        $this->createUsers(100);
+
+        $this->assertCacheMissedAndPutCount(20, function () use (&$cacheIds) {
+            $ids = Collection::make([
+                1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010
+            ])->shuffle()->shuffle()->values();
+
+            $users = User::findByIds($ids);
+            $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $users);
+
+            /** 查询结果正确 */
+            $this->assertSame(10, $users->count());
+
+            /** isFromCache正确 */
+            $users->each(function (User $user) {
+                $this->assertFalse($user->isFromCache());
+            });
+
+            /** id排序正确 */
+            $this->assertSame(
+                $ids->filter(function ($item) {
+                    return 1000 > $item;
+                })->values()->toArray(),
+                $users->keys()->values()->toArray()
+            );
+
+            $cacheIds = $cacheIds->merge($ids);
+        });
+
+        $this->assertCacheHitCount(10, function () use (&$cacheIds) {
+            $this->assertCacheMissedAndPutCount(10, function () use (&$cacheIds) {
+                $ids = Collection::make([
+                    6, 7, 8, 9, 10, 1001, 1002, 1003, 1004, 1005,
+                    11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+                ])->shuffle()->shuffle()->values();
+
+                $users = User::findByIds($ids);
+                $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $users);
+
+                /** 查询结果正确 */
+                $this->assertSame(15, $users->count());
+
+                /** isFromCache正确 */
+                $users->each(function (User $user) use ($cacheIds) {
+                    $this->assertSame($cacheIds->contains($user->id), $user->isFromCache());
+                });
+
+                /** id排序正确 */
+                $this->assertSame(
+                    $ids->filter(function ($item) {
+                        return 1000 > $item;
+                    })->values()->toArray(),
+                    $users->keys()->values()->toArray()
+                );
+
+                $cacheIds = $cacheIds->merge($ids);
+            });
+        });
+
+        $this->assertDatabaseQueryCount(0, function () use ($cacheIds) {
+            User::findByIds($cacheIds);
+        });
+    }
+
+    /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testConversionDateTime()
     {
@@ -440,9 +524,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testQueryWhereLike()
     {
