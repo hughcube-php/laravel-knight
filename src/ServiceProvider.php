@@ -12,12 +12,15 @@ use HughCube\Laravel\Knight\Console\Commands\Config;
 use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\KRTest;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
+use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use HughCube\Laravel\Knight\Http\Actions\PingAction;
 use HughCube\Laravel\Knight\Http\Actions\RequestLogAction;
 use HughCube\Laravel\Knight\Http\Actions\RequestShowAction;
 use HughCube\Laravel\Knight\OPcache\Actions\ScriptsAction as OPcacheScriptsAction;
 use HughCube\Laravel\Knight\OPcache\Actions\StatesAction as OPcacheStatesAction;
 use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand as OPcacheCompileFilesCommand;
+use Illuminate\Contracts\Events\Dispatcher as Dispatcher;
+use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
@@ -48,6 +51,8 @@ class ServiceProvider extends IlluminateServiceProvider
         $this->bootOPcache();
         $this->bootRequest();
         $this->bootPing();
+
+        $this->registerRefreshModelCacheEvent();
     }
 
     /**
@@ -99,5 +104,30 @@ class ServiceProvider extends IlluminateServiceProvider
                 Route::any('/ping', PingAction::class)->name('knight_ping');
             });
         }
+    }
+
+    /**
+     * @return void
+     * @see \Illuminate\Database\Eloquent\Concerns\HasEvents::getObservableEvents
+     */
+    protected function registerRefreshModelCacheEvent()
+    {
+        $dispatcher = EloquentModel::getEventDispatcher();
+        if (!$dispatcher instanceof Dispatcher) {
+            return;
+        }
+
+        $events = [
+            "eloquent.created: *", "eloquent.deleted: *",
+            "eloquent.updated: *", "eloquent.restored: *"
+        ];
+        $dispatcher->listen($events, function ($event, $models) {
+            /** @var Model $model */
+            foreach ($models as $model) {
+                if (method_exists($model, 'refreshRowCache')) {
+                    $model->refreshRowCache();
+                }
+            }
+        });
     }
 }

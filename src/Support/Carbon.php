@@ -8,8 +8,10 @@
 
 namespace HughCube\Laravel\Knight\Support;
 
-use DateTime;
+use DateTimeInterface;
 use DateTimeZone;
+use Illuminate\Support\Facades\Date;
+use InvalidArgumentException;
 
 /**
  * @method static static|false createFromFormat(string $format, string $time, string|DateTimeZone $timezone = null)
@@ -25,42 +27,50 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * @param string|null $date
-     * @param string      $format
+     * @param  DateTimeInterface|int|float|string  $date
+     * @param  string|null  $format
      *
-     * @return static|false|null
+     * @return static|null
      */
-    public static function fromDate(?string $date, string $format = 'Y-m-d H:i:s')
+    public static function fromDate($date, ?string $format = null): ?Carbon
     {
         if (empty($date)) {
             return null;
         }
 
-        return static::createFromFormat($format, $date);
+        if ($date instanceof DateTimeInterface) {
+            return static::instance($date);
+        }
+
+        if (is_numeric($date)) {
+            return static::createFromTimestamp($date);
+        }
+
+        try {
+            $dateTime = Date::createFromFormat($format, $date);
+        } catch (InvalidArgumentException $e) {
+            $dateTime = false;
+        }
+
+        return false == $dateTime ? null : static::parse($date);
     }
 
     /**
-     * @param DateTime|int|float $value
-     * @param string             $format
+     * @param  DateTimeInterface|int|float  $value
+     * @param  string  $format
      *
      * @return string|null
      */
     public static function asDate($value, string $format = 'Y-m-d H:i:s'): ?string
     {
-        if ($value instanceof DateTime) {
-            return $value->format($format);
-        }
+        $dateTime = static::fromDate($value);
 
-        if (is_numeric($value) && $value > 0) {
-            return static::createFromTimestamp($value)->format($format);
-        }
-
-        return null;
+        return $dateTime instanceof static ? $dateTime->format($format) : null;
     }
 
     /**
-     * @param mixed  $date
-     * @param string $format
+     * @param  mixed  $date
+     * @param  string  $format
      *
      * @return bool
      */
@@ -72,7 +82,7 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * @param mixed $timestamp
+     * @param  mixed  $timestamp
      *
      * @return bool
      */
@@ -82,8 +92,8 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * @param string $date
-     * @param bool   $extended
+     * @param  string  $date
+     * @param  bool  $extended
      *
      * @return static|false
      */
@@ -95,7 +105,7 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * @param string $date
+     * @param  string  $date
      *
      * @return static|false
      */

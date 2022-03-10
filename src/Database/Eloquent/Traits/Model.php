@@ -2,13 +2,11 @@
 
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
-use Carbon\Carbon as BaseCarbon;
-use DateTime;
+use DateTimeInterface;
 use HughCube\Laravel\Knight\Database\Eloquent\Builder;
 use HughCube\Laravel\Knight\Support\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Psr\SimpleCache\CacheInterface;
 use Traversable;
@@ -18,6 +16,11 @@ use Traversable;
  *
  * @method static Builder query()
  * @method static Builder newQuery()
+ *
+ * @method static Builder withTrashed(bool $withTrashed = true)
+ * @method static Builder onlyTrashed()
+ * @method static Builder withoutTrashed()
+ *
  */
 trait Model
 {
@@ -27,28 +30,32 @@ trait Model
     private $isFromCache = false;
 
     /**
-     * @param null|string|DateTime|int $date
-     *
+     * @param  DateTimeInterface|int|float|string|null  $date
+     * @param  string|null  $format
      * @return Carbon|null
      */
-    public function toDateTime($date = null): ?Carbon
+    protected function toDateTime($date = null, ?string $format = null): ?Carbon
     {
-        return empty($date) ? null : Carbon::parse($date);
+        $format = $format ?? $this->getDateFormat();
+
+        return Carbon::fromDate($date, $format);
     }
 
     /**
-     * @param null|DateTime|BaseCarbon $dateTime
-     * @param string                   $format
+     * @param  DateTimeInterface|int|float|null  $dateTime
+     * @param  string  $format
      *
      * @return string|null
      */
-    public function formatDateTime($dateTime, string $format = 'Y-m-d H:i:s'): ?string
+    protected function formatDateTime($dateTime, string $format = 'Y-m-d H:i:s'): ?string
     {
-        return $dateTime instanceof BaseCarbon ? $dateTime->format($format) : null;
+        $dateTime = $this->toDateTime($dateTime);
+
+        return $dateTime instanceof DateTimeInterface ? $dateTime->format($format) : null;
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return Carbon|null
      */
@@ -58,7 +65,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return Carbon|null
      */
@@ -68,7 +75,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return Carbon|null
      */
@@ -78,7 +85,7 @@ trait Model
     }
 
     /**
-     * @param string $format
+     * @param  string  $format
      *
      * @return string|null
      */
@@ -88,7 +95,7 @@ trait Model
     }
 
     /**
-     * @param string $format
+     * @param  string  $format
      *
      * @return string|null
      */
@@ -98,7 +105,7 @@ trait Model
     }
 
     /**
-     * @param string $format
+     * @param  string  $format
      *
      * @return string|null
      */
@@ -130,7 +137,7 @@ trait Model
      *
      * @return string
      */
-    public function getDeletedAtColumn(): string
+    public function getDeletedAtColumn()
     {
         return defined('static::DELETED_AT') ? constant('static::DELETED_AT') : 'deleted_at';
     }
@@ -138,7 +145,7 @@ trait Model
     /**
      * Create a new Eloquent query builder for the model.
      *
-     * @param \Illuminate\Database\Query\Builder $query
+     * @param  \Illuminate\Database\Query\Builder  $query
      *
      * @return Builder
      */
@@ -164,12 +171,7 @@ trait Model
      */
     public function getCache(): ?CacheInterface
     {
-        $cache = defined('static::CACHE') ? constant('static::CACHE') : null;
-        if (false === $cache) {
-            return null;
-        }
-
-        return Cache::store($cache);
+        return null;
     }
 
     /**
@@ -193,12 +195,12 @@ trait Model
     /**
      * 缓存的时间, 默认5-7天.
      *
-     * @param int|null $duration
-     *
-     * @throws
+     * @param  int|null  $duration
      *
      * @return int
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function getCacheTtl(int $duration = null): int
     {
@@ -211,26 +213,6 @@ trait Model
     public function getCacheVersion(): ?string
     {
         return 'v1.0.0';
-    }
-
-    /**
-     * @param mixed $id
-     *
-     * @return static
-     */
-    public static function findById($id)
-    {
-        return static::findByIds([$id])->first();
-    }
-
-    /**
-     * @param array|Arrayable|Traversable $ids
-     *
-     * @return Collection
-     */
-    public static function findByIds($ids): Collection
-    {
-        return static::query()->findByPks($ids);
     }
 
     /**
@@ -251,6 +233,32 @@ trait Model
         return $this->newQuery()->refreshRowCache();
     }
 
+    /**
+     * @param  mixed  $id
+     *
+     * @return static
+     */
+    public static function findById($id)
+    {
+        return static::findByIds([$id])->first();
+    }
+
+    /**
+     * @param  array|Arrayable|Traversable  $ids
+     *
+     * @return Collection
+     */
+    public static function findByIds($ids): Collection
+    {
+        return static::query()->findByPks($ids);
+    }
+
+    /**
+     * Is a primary key value
+     *
+     * @param  mixed  $value
+     * @return bool
+     */
     public static function isMatchPk($value): bool
     {
         return !empty($value);
@@ -261,7 +269,7 @@ trait Model
      */
     public function getCachePlaceholder(): ?string
     {
-        return '@@fad7563e68d@@';
+        return null;
     }
 
     public function genModelVersion(): int
@@ -277,5 +285,33 @@ trait Model
     public function isAvailable(): bool
     {
         return !$this->isDeleted();
+    }
+
+    /**
+     *
+     * @return null|$this
+     *
+     * @example $model->isAvailable() ? $model : null
+     *          $model->ifReturnSelf($model->isAvailable())
+     *
+     * @example $model instanceof Model && $model->isAvailable() ? $model : null
+     *          $model?->ifReturnSelf($model?->isAvailable())
+     */
+    public function ifReturnSelf($condition)
+    {
+        return $condition ? $this : null;
+    }
+
+    /**
+     * @return null|$this
+     * @example $model->isAvailable() ? $model : null
+     *          $model->ifAvailableReturnSelf()
+     *
+     * @example $model instanceof Model && $model->isAvailable() ? $model : null
+     *          $model?->ifAvailableReturnSelf()
+     */
+    public function ifAvailableReturnSelf()
+    {
+        return $this->ifReturnSelf($this->isAvailable());
     }
 }

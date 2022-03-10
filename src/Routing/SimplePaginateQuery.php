@@ -70,8 +70,8 @@ trait SimplePaginateQuery
     }
 
     /**
-     * @param int|null $page
-     * @param int|null $pageSize
+     * @param  int|null  $page
+     * @param  int|null  $pageSize
      *
      * @return int|null
      */
@@ -90,7 +90,7 @@ trait SimplePaginateQuery
     abstract protected function makeQuery(): ?Builder;
 
     /**
-     * @param Builder|mixed $query
+     * @param  Builder|mixed  $query
      *
      * @return null|int
      */
@@ -99,14 +99,13 @@ trait SimplePaginateQuery
         if ($query instanceof Builder) {
             return $query->count();
         }
-
         return 0;
     }
 
     /**
-     * @param Builder|mixed $query
-     * @param int|null      $offset
-     * @param int|null      $limit
+     * @param  Builder|mixed  $query
+     * @param  int|null  $offset
+     * @param  int|null  $limit
      *
      * @return Collection
      */
@@ -128,7 +127,7 @@ trait SimplePaginateQuery
     }
 
     /**
-     * @param Collection $rows
+     * @param  Collection  $rows
      *
      * @return array
      */
@@ -138,7 +137,7 @@ trait SimplePaginateQuery
     }
 
     /**
-     * @param mixed $results
+     * @param  mixed  $results
      *
      * @return mixed
      */

@@ -11,6 +11,11 @@ namespace HughCube\Laravel\Knight\Tests\Database\Eloquent;
 use Exception;
 use HughCube\Laravel\Knight\Support\Carbon;
 use HughCube\Laravel\Knight\Tests\TestCase;
+use Illuminate\Cache\Events\CacheHit;
+use Illuminate\Cache\Events\CacheMissed;
+use Illuminate\Cache\Events\KeyForgotten;
+use Illuminate\Cache\Events\KeyWritten;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
@@ -18,6 +23,15 @@ use Illuminate\Support\Str;
 
 class ModelTest extends TestCase
 {
+    protected $cacheForgetCount = 0;
+
+    protected $cacheMissedCount = 0;
+
+    protected $cacheHitCount = 0;
+
+    protected $cachePutCount = 0;
+
+
     protected function getEnvironmentSetUp($app)
     {
         parent::getEnvironmentSetUp($app);
@@ -29,15 +43,264 @@ class ModelTest extends TestCase
             $table->timestamps();
             $table->softDeletes();
         });
+
+        $this->listenCacheEvent(KeyForgotten::class, function () {
+            $this->cacheForgetCount++;
+        });
+
+        $this->listenCacheEvent(CacheMissed::class, function () {
+            $this->cacheMissedCount++;
+        });
+
+        $this->listenCacheEvent(CacheHit::class, function () {
+            $this->cacheHitCount++;
+        });
+
+        $this->listenCacheEvent(KeyWritten::class, function () {
+            $this->cachePutCount++;
+        });
+    }
+
+    protected function assertCacheForgetCount($value, $callable)
+    {
+        $count = $this->cacheForgetCount;
+        $results = $callable();
+        $this->assertSame($count + $value, $this->cacheForgetCount);
+
+        return $results;
+    }
+
+    protected function assertCacheMissedCount($value, $callable)
+    {
+        $count = $this->cacheMissedCount;
+        $results = $callable();
+        $this->assertSame($count + $value, $this->cacheMissedCount);
+
+        return $results;
+    }
+
+    protected function assertCacheHitCount($value, $callable)
+    {
+        $count = $this->cacheHitCount;
+        $results = $callable();
+        $this->assertSame($count + $value, $this->cacheHitCount);
+
+        return $results;
+    }
+
+    protected function assertCachePutCount($value, $callable)
+    {
+        $count = $this->cachePutCount;
+        $results = $callable();
+        $this->assertSame($count + $value, $this->cachePutCount);
+
+        return $results;
+    }
+
+    protected function assertCacheMissedAndPutCount($value, $callable)
+    {
+        return $this->assertCachePutCount($value, function () use ($value, $callable) {
+            return $this->assertCacheMissedCount($value, $callable);
+        });
+    }
+
+    protected function listenCacheEvent($events, $listener = null)
+    {
+        $dispatcher = app(Dispatcher::class);
+
+        if ($dispatcher instanceof Dispatcher) {
+            $dispatcher->listen($events, $listener);
+        }
+    }
+
+    protected function resetTable()
+    {
+        User::query()->truncate();
+        User::query()->getCache()->clear();
     }
 
     /**
+     * @param  int  $count
+     * @return void
+     * @throws Exception
+     */
+    protected function createUsers(int $count = 1)
+    {
+        for ($i = 1; $i <= $count; $i++) {
+            $user = new User();
+            $user->nickname = md5(random_bytes(1000));
+            $user->save();
+        }
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testCacheOnCreate()
+    {
+        $this->resetTable();
+
+        /** Miss */
+        $this->assertCacheMissedAndPutCount(1, function () {
+            $user = User::findById(1);
+            $this->assertNull($user);
+        });
+
+        /** hit */
+        $this->assertCacheHitCount(1, function () {
+            $user = User::findById(1);
+            $this->assertNull($user);
+        });
+
+        $this->createUsers();
+
+        /** miss */
+        $this->assertCacheMissedAndPutCount(1, function () {
+            $user = User::findById(1);
+            $this->assertInstanceOf(User::class, $user);
+            $this->assertFalse($user->isFromCache());
+        });
+
+        /** hit */
+        $this->assertCacheHitCount(1, function () {
+            $user = User::findById(1);
+            $this->assertInstanceOf(User::class, $user);
+            $this->assertTrue($user->isFromCache());
+        });
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testCacheOnUpdate()
+    {
+        $this->resetTable();
+        $this->createUsers();
+
+        $nickname = Str::random();
+
+        $this->assertCacheMissedAndPutCount(1, function () {
+            $user = User::findById(1);
+            $this->assertInstanceOf(User::class, $user);
+        });
+
+        $this->assertCacheForgetCount(1, function () use ($nickname) {
+            $user = User::findById(1);
+            $user->nickname = $nickname;
+            $user->save();
+        });
+
+        $this->assertCacheMissedAndPutCount(1, function () use ($nickname) {
+            $user = User::findById(1);
+            $this->assertInstanceOf(User::class, $user);
+            $this->assertFalse($user->isFromCache());
+            $this->assertSame($user->nickname, $nickname);
+        });
+
+        $this->assertCacheHitCount(1, function () use ($nickname) {
+            $user = User::findById(1);
+            $this->assertInstanceOf(User::class, $user);
+            $this->assertTrue($user->isFromCache());
+            $this->assertSame($user->nickname, $nickname);
+        });
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testCacheOnForceDelete()
+    {
+        $this->resetTable();
+        $this->createUsers();
+
+        $this->assertCacheMissedAndPutCount(1, function () {
+            $user = User::findById(1);
+            $this->assertInstanceOf(User::class, $user);
+        });
+
+        $this->assertCacheForgetCount(1, function () {
+            $user = User::findById(1);
+            $user->forceDelete();
+        });
+
+        $this->assertCacheMissedAndPutCount(1, function () {
+            $user = User::findById(1);
+            $this->assertNull($user);
+        });
+
+        $this->assertSame(0, User::query()->count());
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testCacheOnDelete()
+    {
+        $this->resetTable();
+        $this->createUsers();
+
+        $this->assertCacheMissedAndPutCount(1, function () {
+            $user = User::findById(1);
+            $this->assertInstanceOf(User::class, $user);
+        });
+
+        $this->assertCacheForgetCount(1, function () {
+            $user = User::findById(1);
+            $user->delete();
+        });
+
+        $this->assertCacheMissedAndPutCount(1, function () {
+            $user = User::findById(1);
+            $this->assertNull($user);
+        });
+
+        $this->assertCacheForgetCount(1, function () {
+            $user = User::withTrashed()->whereKey(1)->first();
+            $this->assertInstanceOf(User::class, $user);
+            $user->nickname = Str::random();
+            $user->save();
+        });
+
+        $this->assertCacheMissedAndPutCount(1, function () {
+            $user = User::findById(1);
+            $this->assertNull($user);
+        });
+
+        $this->assertCacheForgetCount(1, function () {
+            $user = User::withTrashed()->whereKey(1)->first();
+            $this->assertInstanceOf(User::class, $user);
+            $user->restore();
+        });
+
+        $this->assertCacheMissedAndPutCount(1, function () {
+            $user = User::findById(1);
+            $this->assertInstanceOf(User::class, $user);
+            $this->assertFalse($user->isFromCache());
+        });
+
+        $this->assertCacheHitCount(1, function () {
+            $user = User::findById(1);
+            $this->assertInstanceOf(User::class, $user);
+            $this->assertTrue($user->isFromCache());
+        });
+
+        $this->assertSame(1, User::withTrashed()->count());
+    }
+
+
+    /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testQuery()
     {
+        $this->markTestSkipped();
+
         User::query()->truncate();
 
         $this->assertNull(User::findById(1));
@@ -49,8 +312,9 @@ class ModelTest extends TestCase
             $user->save();
         }
         $this->assertSame(1000, User::query()->count());
-
         $this->assertNull(User::findById(1));
+
+
         /** @var User $user */
         $user = User::query()->noCache()->findByPk(1);
         $user->refreshRowCache();
@@ -112,34 +376,44 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testConversionDateTime()
     {
-        User::query()->truncate();
+        $this->resetTable();
+
         $user = new User();
         $user->nickname = md5(random_bytes(1000));
         $user->save();
 
-        $now = Carbon::now();
+        /** @var User $user */
+        $user = User::withTrashed()->first();
+        $this->assertInstanceOf(Carbon::class, $user->created_at);
+        $this->assertInstanceOf(Carbon::class, $user->updated_at);
+        $this->assertNull($user->deleted_at);
 
+        $now = Carbon::now();
         $user->created_at = $now;
         $user->updated_at = $now;
         $user->deleted_at = $now;
         $user->save();
 
+        /** @var User $user */
+        $user = User::withTrashed()->first();
         $this->assertFalse($user->isAvailable());
         $this->assertTrue($user->isDeleted());
 
         /** @var User $user */
-        $user = User::query()->first();
-
+        $user = User::withTrashed()->first();
         $this->assertSame($user->created_at->getTimestamp(), $now->getTimestamp());
         $this->assertSame($user->updated_at->getTimestamp(), $now->getTimestamp());
         $this->assertSame($user->deleted_at->getTimestamp(), $now->getTimestamp());
 
+
+        /** @var User $user */
+        $user = User::withTrashed()->first();
         $format = 'Y-m-d H:i:s';
         $this->assertSame($user->formatCreatedAt($format), $now->format($format));
         $this->assertSame($user->formatUpdatedAt($format), $now->format($format));
@@ -148,6 +422,9 @@ class ModelTest extends TestCase
         $user->created_at = null;
         $user->updated_at = null;
         $user->deleted_at = null;
+        $user->save();
+        /** @var User $user */
+        $user = User::withTrashed()->first();
         $this->assertTrue($user->isAvailable());
         $this->assertFalse($user->isDeleted());
 
@@ -161,34 +438,34 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testQueryWhereLike()
     {
-        User::query()->truncate();
+        $this->resetTable();
 
         $user = new User();
         $user->nickname = md5(random_bytes(1000));
         $user->save();
 
         $keyword = substr(substr($user->nickname, 10), -10);
-        $queryUser = User::query()->whereLike('nickname', $keyword)->first();
+        $queryUser = User::withTrashed()->whereLike('nickname', $keyword)->first();
         $this->assertSame($user->id, $queryUser->id);
 
         $keyword = md5(random_bytes(1000)).$user->nickname;
-        $queryUser = User::query()->whereLike('nickname', $keyword)->first();
+        $queryUser = User::withTrashed()->whereLike('nickname', $keyword)->first();
         $this->assertNull($queryUser);
 
         $keyword = substr($user->nickname, 0, 10);
         $this->assertTrue(Str::startsWith($user->nickname, $keyword));
-        $queryUser = User::query()->whereLeftLike('nickname', $keyword)->first();
+        $queryUser = User::withTrashed()->whereLeftLike('nickname', $keyword)->first();
         $this->assertSame($user->id, $queryUser->id);
 
         $keyword = substr($user->nickname, -10);
         $this->assertTrue(Str::endsWith($user->nickname, $keyword));
-        $queryUser = User::query()->whereRightLike('nickname', $keyword)->first();
+        $queryUser = User::withTrashed()->whereRightLike('nickname', $keyword)->first();
         $this->assertSame($user->id, $queryUser->id);
     }
 }

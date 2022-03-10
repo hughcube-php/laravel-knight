@@ -10,6 +10,7 @@ namespace HughCube\Laravel\Knight\Tests;
 
 use Exception;
 use HughCube\Laravel\Knight\Queue\Job;
+use HughCube\Laravel\Knight\ServiceProvider;
 use Illuminate\Config\Repository;
 use Illuminate\Database\DatabaseServiceProvider;
 use Illuminate\Foundation\Application;
@@ -30,7 +31,7 @@ class TestCase extends OrchestraTestCase
     {
         return [
             DatabaseServiceProvider::class,
-            \HughCube\Laravel\Knight\ServiceProvider::class,
+            ServiceProvider::class,
         ];
     }
 

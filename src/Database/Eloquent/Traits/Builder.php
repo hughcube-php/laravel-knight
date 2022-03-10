@@ -55,14 +55,7 @@ trait Builder
         if (!$this->enableCache) {
             return $this->getNullCache();
         }
-
-        if (!method_exists($this->getModel(), 'getCache')) {
-            return $this->getNullCache();
-        }
-
-        $cache = $this->getModel()->getCache();
-
-        return $cache instanceof CacheInterface ? $cache : $this->getNullCache();
+        return $this->getModel()->getCache() ?? $this->getNullCache();
     }
 
     /**
@@ -104,7 +97,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return bool
      */
@@ -114,7 +107,7 @@ trait Builder
     }
 
     /**
-     * @param array $columns
+     * @param  array  $columns
      *
      * @return string
      */
@@ -135,7 +128,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $pk
+     * @param  mixed  $pk
      *
      * @return Model|null
      */
@@ -145,7 +138,7 @@ trait Builder
     }
 
     /**
-     * @param array|Arrayable|Traversable $pks
+     * @param  array|Arrayable|Traversable  $pks
      *
      * @return EloquentCollection
      */
@@ -173,7 +166,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $id
+     * @param  mixed  $id
      *
      * @return mixed
      */
@@ -185,12 +178,12 @@ trait Builder
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
-     *
-     * @throws
+     * @param  array|Arrayable|Traversable  $ids  必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
      * @return EloquentCollection
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function findUniqueRows($ids): EloquentCollection
     {
@@ -267,7 +260,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return static
      */
@@ -281,79 +274,10 @@ trait Builder
     }
 
     /**
-     * @inheritdoc
-     */
-    public function delete()
-    {
-        $results = parent::delete();
-        if (false !== $results) {
-            $this->refreshRowCache();
-        }
-
-        return $results;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function update(array $values)
-    {
-        /** @var int|bool $results */
-        $results = parent::update($values);
-        if (false !== $results && $this->getModel()->exists) {
-            $this->refreshRowCache();
-        }
-
-        return $results;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function insert(array $values)
-    {
-        /** @var int|bool $results */
-        $results = parent::insert($values);
-        if (false !== $results && $this->getModel()->exists) {
-            $this->refreshRowCache();
-        }
-
-        return $results;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function insertOrIgnore(array $values)
-    {
-        /** @var int|bool $results */
-        $results = parent::insertOrIgnore($values);
-        if (false !== $results && $this->getModel()->exists) {
-            $this->refreshRowCache();
-        }
-
-        return $results;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function insertGetId(array $values, $sequence = null)
-    {
-        /** @var int|bool $results */
-        $results = parent::insertGetId($values, $sequence);
-        if (false !== $results && $this->getModel()->exists) {
-            $this->refreshRowCache();
-        }
-
-        return $results;
-    }
-
-    /**
-     * @throws
-     *
      * @return bool
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function refreshRowCache(): bool
     {
@@ -366,8 +290,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -377,8 +301,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -388,8 +312,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -399,8 +323,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -410,8 +334,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -421,8 +345,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -434,11 +358,11 @@ trait Builder
     /**
      * Add a basic where clause to the query.
      *
-     * @param bool                            $when
-     * @param Closure|string|array|Expression $column
-     * @param mixed                           $operator
-     * @param mixed                           $value
-     * @param string                          $boolean
+     * @param  bool  $when
+     * @param  Closure|string|array|Expression  $column
+     * @param  mixed  $operator
+     * @param  mixed  $value
+     * @param  string  $boolean
      *
      * @return static
      */

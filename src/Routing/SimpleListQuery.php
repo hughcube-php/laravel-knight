@@ -31,14 +31,6 @@ trait SimpleListQuery
     }
 
     /**
-     * @return int|null
-     */
-    protected function getPageSize(): ?int
-    {
-        return null;
-    }
-
-    /**
      * @param  Builder|mixed  $query
      *
      * @return null|int
