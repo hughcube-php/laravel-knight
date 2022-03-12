@@ -8,23 +8,18 @@
 
 namespace HughCube\Laravel\Knight\Tests\Database\Eloquent;
 
-use HughCube\Laravel\Knight\Database\Eloquent\Builder;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use HughCube\Laravel\Knight\Database\Eloquent\Traits\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Psr\SimpleCache\CacheInterface;
 
 /**
- * @property int         $id
- * @property string      $nickname
+ * @property int $id
+ * @property string $nickname
  * @property null|Carbon $created_at
  * @property null|Carbon $updated_at
  * @property null|Carbon $deleted_at
- *
- * @method static Builder withTrashed(bool $withTrashed = true)
- * @method static Builder onlyTrashed()
- * @method static Builder withoutTrashed()
  */
 class User extends Model
 {

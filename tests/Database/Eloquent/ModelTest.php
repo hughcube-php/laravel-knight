@@ -135,11 +135,11 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @param int $count
-     *
-     * @throws Exception
+     * @param  int  $count
      *
      * @return void
+     * @throws Exception
+     *
      */
     protected function createUsers(int $count = 1)
     {
@@ -180,9 +180,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testCacheOnCreate()
     {
@@ -218,9 +218,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testCacheOnUpdate()
     {
@@ -256,9 +256,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testCacheOnForceDelete()
     {
@@ -284,9 +284,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testCacheOnDelete()
     {
@@ -342,9 +342,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testFindById()
     {
@@ -374,9 +374,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testFindByIds()
     {
@@ -465,9 +465,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testConversionDateTime()
     {
@@ -526,9 +526,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testQueryWhereLike()
     {
@@ -539,21 +539,21 @@ class ModelTest extends TestCase
         $user->save();
 
         $keyword = substr(substr($user->nickname, 10), -10);
-        $queryUser = User::withTrashed()->whereLike('nickname', $keyword)->first();
+        $queryUser = User::query()->whereLike('nickname', $keyword)->first();
         $this->assertSame($user->id, $queryUser->id);
 
         $keyword = md5(random_bytes(1000)).$user->nickname;
-        $queryUser = User::withTrashed()->whereLike('nickname', $keyword)->first();
+        $queryUser = User::query()->whereLike('nickname', $keyword)->first();
         $this->assertNull($queryUser);
 
         $keyword = substr($user->nickname, 0, 10);
         $this->assertTrue(Str::startsWith($user->nickname, $keyword));
-        $queryUser = User::withTrashed()->whereLeftLike('nickname', $keyword)->first();
+        $queryUser = User::query()->whereLeftLike('nickname', $keyword)->first();
         $this->assertSame($user->id, $queryUser->id);
 
         $keyword = substr($user->nickname, -10);
         $this->assertTrue(Str::endsWith($user->nickname, $keyword));
-        $queryUser = User::withTrashed()->whereRightLike('nickname', $keyword)->first();
+        $queryUser = User::query()->whereRightLike('nickname', $keyword)->first();
         $this->assertSame($user->id, $queryUser->id);
     }
 }

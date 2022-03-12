@@ -16,9 +16,9 @@ use Traversable;
  *
  * @method static Builder query()
  * @method static Builder newQuery()
- * @method static Builder withTrashed(bool $withTrashed = true)
- * @method static Builder onlyTrashed()
- * @method static Builder withoutTrashed()
+ *
+ * @mixin SoftDeletes
+ * @mixin \Illuminate\Database\Eloquent\Model
  */
 trait Model
 {
@@ -28,8 +28,8 @@ trait Model
     private $isFromCache = false;
 
     /**
-     * @param DateTimeInterface|int|float|string|null $date
-     * @param string|null                             $format
+     * @param  DateTimeInterface|int|float|string|null  $date
+     * @param  string|null  $format
      *
      * @return Carbon|null
      */
@@ -41,8 +41,8 @@ trait Model
     }
 
     /**
-     * @param DateTimeInterface|int|float|null $dateTime
-     * @param string                           $format
+     * @param  DateTimeInterface|int|float|null  $dateTime
+     * @param  string  $format
      *
      * @return string|null
      */
@@ -54,7 +54,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return Carbon|null
      */
@@ -64,7 +64,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return Carbon|null
      */
@@ -74,7 +74,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return Carbon|null
      */
@@ -84,7 +84,7 @@ trait Model
     }
 
     /**
-     * @param string $format
+     * @param  string  $format
      *
      * @return string|null
      */
@@ -94,7 +94,7 @@ trait Model
     }
 
     /**
-     * @param string $format
+     * @param  string  $format
      *
      * @return string|null
      */
@@ -104,7 +104,7 @@ trait Model
     }
 
     /**
-     * @param string $format
+     * @param  string  $format
      *
      * @return string|null
      */
@@ -144,7 +144,7 @@ trait Model
     /**
      * Create a new Eloquent query builder for the model.
      *
-     * @param \Illuminate\Database\Query\Builder $query
+     * @param  \Illuminate\Database\Query\Builder  $query
      *
      * @return Builder
      */
@@ -194,12 +194,12 @@ trait Model
     /**
      * 缓存的时间, 默认5-7天.
      *
-     * @param int|null $duration
-     *
-     * @throws
+     * @param  int|null  $duration
      *
      * @return int
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function getCacheTtl(int $duration = null): int
     {
@@ -233,7 +233,7 @@ trait Model
     }
 
     /**
-     * @param mixed $id
+     * @param  mixed  $id
      *
      * @return static
      */
@@ -243,7 +243,7 @@ trait Model
     }
 
     /**
-     * @param array|Arrayable|Traversable $ids
+     * @param  array|Arrayable|Traversable  $ids
      *
      * @return Collection
      */
@@ -255,7 +255,7 @@ trait Model
     /**
      * Is a primary key value.
      *
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return bool
      */

@@ -10,7 +10,7 @@ namespace HughCube\Laravel\Knight\Exceptions;
 
 use Throwable;
 
-class ExceptionWithData extends \Exception
+class ExceptionWithData extends Exception
 {
     /**
      * @var mixed|null

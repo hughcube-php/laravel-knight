@@ -5,7 +5,7 @@ namespace HughCube\Laravel\Knight\Queue\Jobs;
 use Carbon\Carbon;
 use Cron\CronExpression;
 use HughCube\Laravel\Knight\Queue\Job;
-use HughCube\Laravel\Knight\Support\MultipleHandler;
+use HughCube\Laravel\Knight\Traits\MultipleHandler;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Support\Facades\Date;
 use Throwable;
@@ -20,9 +20,9 @@ class ScheduleJob extends Job
     private $jobStartedAt = null;
 
     /**
+     * @return void
      * @throws Throwable
      *
-     * @return void
      */
     protected function action(): void
     {
@@ -46,7 +46,7 @@ class ScheduleJob extends Job
     /**
      * 判断是否可以运行.
      *
-     * @param string $expression
+     * @param  string  $expression
      *
      * @return bool
      */
@@ -60,7 +60,7 @@ class ScheduleJob extends Job
     /**
      * push任务
      *
-     * @param Job $job
+     * @param  Job  $job
      *
      * @return void
      */
@@ -71,8 +71,8 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param string       $expression
-     * @param callable|Job $job
+     * @param  string  $expression
+     * @param  callable|Job  $job
      *
      * @return void
      */

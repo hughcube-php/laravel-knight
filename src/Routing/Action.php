@@ -9,20 +9,25 @@
 namespace HughCube\Laravel\Knight\Routing;
 
 use BadMethodCallException;
-use HughCube\Laravel\Knight\Support\GetOrSet;
+use HughCube\Laravel\Knight\Http\LaravelRequest;
+use HughCube\Laravel\Knight\Http\LumenRequest;
 use HughCube\Laravel\Knight\Support\ParameterBag;
-use HughCube\Laravel\Knight\Support\ParameterBagTrait;
-use HughCube\Laravel\Knight\Support\Validation;
-use Illuminate\Config\Repository;
-use Illuminate\Container\Container as IlluminateContainer;
+use HughCube\Laravel\Knight\Traits\Container;
+use HughCube\Laravel\Knight\Traits\GetOrSet;
+use HughCube\Laravel\Knight\Traits\ParameterBag as ParameterBagTrait;
+use HughCube\Laravel\Knight\Traits\Validation;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 trait Action
 {
     use GetOrSet;
     use Validation;
     use ParameterBagTrait;
+    use Container;
 
     /**
      * action.
@@ -32,44 +37,52 @@ trait Action
     abstract protected function action();
 
     /**
-     * @param array $data
-     * @param int   $code
+     * @param  bool  $must
+     * @return int|string|null
+     * @throws AuthenticationException
+     */
+    protected function getAuthUserId(bool $must = true)
+    {
+        $id = Auth::id() ?: null;
+        if ($must && empty($id)) {
+            throw new AuthenticationException();
+        }
+        return $id;
+    }
+
+    /**
+     * @param  bool  $must
+     * @return Authenticatable|null
+     * @throws AuthenticationException
+     */
+    protected function getAuthUser(bool $must = true): ?Authenticatable
+    {
+        $user = Auth::user();
+        if ($must && !$user instanceof Authenticatable) {
+            throw new AuthenticationException();
+        }
+        return $user instanceof Authenticatable ? $user : null;
+    }
+
+    /**
+     * @param  array  $data
+     * @param  int  $code
      *
      * @return JsonResponse
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
     {
         return new JsonResponse([
-            'code'    => $code,
+            'code' => $code,
             'message' => 'ok',
-            'data'    => $data,
+            'data' => $data,
         ]);
     }
 
     /**
-     * @return IlluminateContainer
-     */
-    protected function getContainer(): IlluminateContainer
-    {
-        return IlluminateContainer::getInstance();
-    }
-
-    /**
-     * @throws
-     *
-     * @return Repository
+     * @return Request|LumenRequest|LaravelRequest
      * @phpstan-ignore-next-line
-     */
-    protected function getContainerConfig(): Repository
-    {
-        return $this->getContainer()->make('config');
-    }
-
-    /**
      * @throws
-     *
-     * @return Request
-     * @phpstan-ignore-next-line
      */
     protected function getRequest(): Request
     {
@@ -103,10 +116,10 @@ trait Action
     }
 
     /**
-     * @throws
-     *
      * @return mixed
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function invoke()
     {
@@ -128,8 +141,8 @@ trait Action
     }
 
     /**
-     * @param string $name
-     * @param array  $arguments
+     * @param  string  $name
+     * @param  array  $arguments
      *
      * @return mixed
      */

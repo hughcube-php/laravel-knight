@@ -10,11 +10,12 @@ namespace HughCube\Laravel\Knight\Queue;
 
 use BadMethodCallException;
 use HughCube\Base\Base;
-use HughCube\Laravel\Knight\Support\GetOrSet;
-use HughCube\Laravel\Knight\Support\LoggerTrait;
 use HughCube\Laravel\Knight\Support\ParameterBag;
-use HughCube\Laravel\Knight\Support\ParameterBagTrait;
-use HughCube\Laravel\Knight\Support\Validation;
+use HughCube\Laravel\Knight\Traits\Container;
+use HughCube\Laravel\Knight\Traits\GetOrSet;
+use HughCube\Laravel\Knight\Traits\Logger;
+use HughCube\Laravel\Knight\Traits\ParameterBag as ParameterBagTrait;
+use HughCube\Laravel\Knight\Traits\Validation;
 use HughCube\StaticInstanceInterface;
 use HughCube\StaticInstanceTrait;
 use Illuminate\Bus\Queueable;
@@ -42,9 +43,10 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     use SerializesModels;
     use GetOrSet;
     use Validation;
-    use LoggerTrait;
+    use Logger;
     use StaticInstanceTrait;
     use ParameterBagTrait;
+    use Container;
 
     /**
      * @var array
@@ -119,7 +121,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param int $flags
+     * @param  int  $flags
      *
      * @return string
      */
@@ -145,7 +147,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param int $flags
+     * @param  int  $flags
      *
      * @return string
      */
@@ -171,7 +173,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param string|int|null $pid
+     * @param  string|int|null  $pid
      *
      * @return $this
      */
@@ -196,7 +198,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param array|string|null $channel
+     * @param  array|string|null  $channel
      *
      * @return $this
      */
@@ -208,9 +210,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param mixed  $level
-     * @param string $message
-     * @param array  $context
+     * @param  mixed  $level
+     * @param  string  $message
+     * @param  array  $context
      *
      * @return void
      */
@@ -221,8 +223,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param string $key
-     * @param null   $default
+     * @param  string  $key
+     * @param  null  $default
      *
      * @return mixed
      *
@@ -234,7 +236,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param mixed $key
+     * @param  mixed  $key
      *
      * @return bool
      *
@@ -246,8 +248,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param string $key
-     * @param mixed  $value
+     * @param  string  $key
+     * @param  mixed  $value
      *
      * @return $this
      *
@@ -261,8 +263,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param string $name
-     * @param array  $arguments
+     * @param  string  $name
+     * @param  array  $arguments
      *
      * @return false|mixed
      */
