@@ -23,8 +23,8 @@ trait ParameterBag
     abstract protected function loadParameters();
 
     /**
-     * @param  string|int  $key
-     * @param  mixed  $default
+     * @param string|int $key
+     * @param mixed      $default
      *
      * @return ParameterBag|mixed
      */

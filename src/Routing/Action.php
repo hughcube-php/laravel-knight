@@ -37,9 +37,11 @@ trait Action
     abstract protected function action();
 
     /**
-     * @param  bool  $must
-     * @return int|string|null
+     * @param bool $must
+     *
      * @throws AuthenticationException
+     *
+     * @return int|string|null
      */
     protected function getAuthUserId(bool $must = true)
     {
@@ -47,13 +49,16 @@ trait Action
         if ($must && empty($id)) {
             throw new AuthenticationException();
         }
+
         return $id;
     }
 
     /**
-     * @param  bool  $must
-     * @return Authenticatable|null
+     * @param bool $must
+     *
      * @throws AuthenticationException
+     *
+     * @return Authenticatable|null
      */
     protected function getAuthUser(bool $must = true): ?Authenticatable
     {
@@ -61,28 +66,30 @@ trait Action
         if ($must && !$user instanceof Authenticatable) {
             throw new AuthenticationException();
         }
+
         return $user instanceof Authenticatable ? $user : null;
     }
 
     /**
-     * @param  array  $data
-     * @param  int  $code
+     * @param array $data
+     * @param int   $code
      *
      * @return JsonResponse
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
     {
         return new JsonResponse([
-            'code' => $code,
+            'code'    => $code,
             'message' => 'ok',
-            'data' => $data,
+            'data'    => $data,
         ]);
     }
 
     /**
+     * @throws
+     *
      * @return Request|LumenRequest|LaravelRequest
      * @phpstan-ignore-next-line
-     * @throws
      */
     protected function getRequest(): Request
     {
@@ -116,10 +123,10 @@ trait Action
     }
 
     /**
-     * @return mixed
-     * @phpstan-ignore-next-line
      * @throws
      *
+     * @return mixed
+     * @phpstan-ignore-next-line
      */
     public function invoke()
     {
@@ -141,8 +148,8 @@ trait Action
     }
 
     /**
-     * @param  string  $name
-     * @param  array  $arguments
+     * @param string $name
+     * @param array  $arguments
      *
      * @return mixed
      */
