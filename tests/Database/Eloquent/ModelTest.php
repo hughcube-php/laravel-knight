@@ -135,11 +135,11 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @param  int  $count
+     * @param int $count
      *
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     protected function createUsers(int $count = 1)
     {
@@ -180,9 +180,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testCacheOnCreate()
     {
@@ -218,9 +218,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testCacheOnUpdate()
     {
@@ -256,9 +256,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testCacheOnForceDelete()
     {
@@ -284,9 +284,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testCacheOnDelete()
     {
@@ -342,9 +342,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testFindById()
     {
@@ -374,9 +374,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testFindByIds()
     {
@@ -465,9 +465,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testConversionDateTime()
     {
@@ -526,9 +526,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testQueryWhereLike()
     {

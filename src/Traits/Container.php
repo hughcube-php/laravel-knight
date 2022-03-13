@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/3/11
- * Time: 19:08
+ * Time: 19:08.
  */
 
 namespace HughCube\Laravel\Knight\Traits;
@@ -22,9 +22,10 @@ trait Container
     }
 
     /**
+     * @throws
+     *
      * @return Repository
      * @phpstan-ignore-next-line
-     * @throws
      */
     protected function getContainerConfig(): Repository
     {

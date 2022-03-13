@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/3/12
- * Time: 21:22
+ * Time: 21:22.
  */
 
 namespace HughCube\Laravel\Knight\Traits;
@@ -20,12 +20,12 @@ trait MultipleHandler
     }
 
     /**
-     * @param  bool  $tryException
-     * @param  bool  $logException
+     * @param bool $tryException
+     * @param bool $logException
      *
-     * @return mixed
      * @throws Throwable
      *
+     * @return mixed
      */
     protected function triggerHandlers(bool $tryException = false, bool $logException = true)
     {
