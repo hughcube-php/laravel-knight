@@ -102,7 +102,11 @@ class ScheduleJob extends Job
 
         $jobs = [];
         foreach ($files as $file) {
-            $class = trim(Str::replaceFirst($basePath, '', $file->getRealPath()), DIRECTORY_SEPARATOR);
+            $class = Str::replaceFirst($basePath, '', $file->getRealPath());
+            $class = trim($class, DIRECTORY_SEPARATOR);
+            $class = rtrim($class, '.php');
+            $class = strtr($class, ['/' => '\\']);
+            $class = Str::ucfirst($class);
 
             try {
                 $reflection = new ReflectionClass($class);
