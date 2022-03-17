@@ -24,9 +24,9 @@ class ScheduleJob extends Job
     private $jobStartedAt = null;
 
     /**
-     * @return void
      * @throws Throwable
      *
+     * @return void
      */
     protected function action(): void
     {
@@ -50,7 +50,7 @@ class ScheduleJob extends Job
     /**
      * 判断是否可以运行.
      *
-     * @param  string  $expression
+     * @param string $expression
      *
      * @return bool
      */
@@ -64,7 +64,7 @@ class ScheduleJob extends Job
     /**
      * push任务
      *
-     * @param  object  $job
+     * @param object $job
      *
      * @return void
      */
@@ -75,8 +75,8 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param  string  $expression
-     * @param  callable|Job  $job
+     * @param string       $expression
+     * @param callable|Job $job
      *
      * @return void
      */
@@ -88,16 +88,17 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param  string|array  $name
-     * @param  string|array|null  $in
-     * @param  string|null  $basePath
+     * @param string|array      $name
+     * @param string|array|null $in
+     * @param string|null       $basePath
+     *
      * @return void
      */
     protected function pushDirJobs($name = '*.php', $in = null, string $basePath = null)
     {
         $in = $in ?: app_path('Jobs');
         $basePath = $basePath ?: base_path();
-        $files = (new Finder)->files()->in($in)->name($name);
+        $files = (new Finder())->files()->in($in)->name($name);
 
         $jobs = [];
         foreach ($files as $file) {
@@ -122,10 +123,11 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param  string  $expression
-     * @param  string|array  $name
-     * @param  string|array|null  $in
-     * @param  string|null  $basePath
+     * @param string            $expression
+     * @param string|array      $name
+     * @param string|array|null $in
+     * @param string|null       $basePath
+     *
      * @return void
      */
     protected function pushDirJobsIfDue(string $expression, $name = '*.php', $in = null, string $basePath = null)
