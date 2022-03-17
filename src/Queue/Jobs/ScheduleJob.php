@@ -39,12 +39,20 @@ class ScheduleJob extends Job
         return false;
     }
 
+    protected function getJobStartedAt(): Carbon
+    {
+        if (null === $this->jobStartedAt) {
+            $this->jobStartedAt = Carbon::now();
+        }
+        return $this->jobStartedAt;
+    }
+
     /**
      * @return int
      */
     protected function getDelays(): int
     {
-        return $this->jobStartedAt->diffInRealMilliseconds(Carbon::now());
+        return $this->getJobStartedAt()->diffInRealMilliseconds(Carbon::now());
     }
 
     /**
