@@ -64,11 +64,11 @@ class ScheduleJob extends Job
     /**
      * push任务
      *
-     * @param object $job
+     * @param Job $job
      *
      * @return void
      */
-    protected function pushJob(object $job)
+    protected function pushJob(Job $job)
     {
         $id = app(Dispatcher::class)->dispatch($job);
         $this->info(sprintf('job: %s, id:%s, delays:%sms', $this->getName($job), $id, $this->getDelays()));
