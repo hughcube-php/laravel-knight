@@ -8,6 +8,10 @@ use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\Traits\MultipleHandler;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Str;
+use ReflectionClass;
+use ReflectionException;
+use Symfony\Component\Finder\Finder;
 use Throwable;
 
 class ScheduleJob extends Job
@@ -20,9 +24,9 @@ class ScheduleJob extends Job
     private $jobStartedAt = null;
 
     /**
+     * @return void
      * @throws Throwable
      *
-     * @return void
      */
     protected function action(): void
     {
@@ -46,7 +50,7 @@ class ScheduleJob extends Job
     /**
      * 判断是否可以运行.
      *
-     * @param string $expression
+     * @param  string  $expression
      *
      * @return bool
      */
@@ -60,19 +64,19 @@ class ScheduleJob extends Job
     /**
      * push任务
      *
-     * @param Job $job
+     * @param  object  $job
      *
      * @return void
      */
-    protected function pushJob(Job $job)
+    protected function pushJob(object $job)
     {
         $id = app(Dispatcher::class)->dispatch($job);
         $this->info(sprintf('job: %s, id:%s, delays:%sms', $this->getName($job), $id, $this->getDelays()));
     }
 
     /**
-     * @param string       $expression
-     * @param callable|Job $job
+     * @param  string  $expression
+     * @param  callable|Job  $job
      *
      * @return void
      */
@@ -80,6 +84,54 @@ class ScheduleJob extends Job
     {
         if ($this->isDue($expression)) {
             $this->pushJob((is_callable($job) ? $job() : $job));
+        }
+    }
+
+    /**
+     * @param  string|array  $name
+     * @param  string|array|null  $in
+     * @param  string|null  $basePath
+     * @return void
+     */
+    protected function pushDirJobs($name = '*.php', $in = null, string $basePath = null)
+    {
+        $in = $in ?: app_path('Jobs');
+        $basePath = $basePath ?: base_path();
+        $files = (new Finder)->files()->in($in)->name($name);
+
+        $jobs = [];
+        foreach ($files as $file) {
+            $class = trim(Str::replaceFirst($basePath, '', $file->getRealPath()), DIRECTORY_SEPARATOR);
+
+            try {
+                $reflection = new ReflectionClass($class);
+            } catch (ReflectionException $e) {
+                continue;
+            }
+
+            if (!$reflection->isInstantiable()) {
+                continue;
+            }
+
+            $jobs[] = new $class();
+        }
+
+        foreach ($jobs as $job) {
+            $this->pushJob($job);
+        }
+    }
+
+    /**
+     * @param  string  $expression
+     * @param  string|array  $name
+     * @param  string|array|null  $in
+     * @param  string|null  $basePath
+     * @return void
+     */
+    protected function pushDirJobsIfDue(string $expression, $name = '*.php', $in = null, string $basePath = null)
+    {
+        if ($this->isDue($expression)) {
+            $this->pushDirJobs($name, $in, $basePath);
         }
     }
 }
