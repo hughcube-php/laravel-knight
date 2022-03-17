@@ -40,7 +40,7 @@ class AutoCleanFileJob extends Job
         }
 
         $this->info(sprintf(
-            'Delete %s %s files in the %s.',
+            'Delete %s "%s" files in the "%s".',
             $count,
             implode(',', $this->getPatterns()),
             implode(',', $this->getDirs())

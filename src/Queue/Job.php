@@ -59,7 +59,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     protected $logChannel = null;
 
     /**
-     * @var int|null
+     * @var string|int|null
      */
     protected $pid = null;
 
@@ -157,7 +157,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @return int
+     * @return string|int
      */
     protected function getPid()
     {
