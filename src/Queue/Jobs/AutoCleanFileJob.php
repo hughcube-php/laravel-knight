@@ -7,6 +7,10 @@ use HughCube\Laravel\Knight\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\Finder;
 
+/**
+ * @deprecated
+ * @see CleanFilesJob
+ */
 class AutoCleanFileJob extends Job
 {
     /**
@@ -15,8 +19,8 @@ class AutoCleanFileJob extends Job
     protected function rules(): array
     {
         return [
-            'dir'      => ['required'],
-            'pattern'  => ['nullable'],
+            'dir' => ['required'],
+            'pattern' => ['nullable'],
             'max_days' => ['integer', 'min:0'],
         ];
     }
