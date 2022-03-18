@@ -17,8 +17,8 @@ class CleanFilesJob extends Job
         return [
             'items' => ['required', 'array', 'min:1'],
 
-            'items.*.dir' => ['required'],
-            'items.*.pattern' => ['nullable'],
+            'items.*.dir'      => ['required'],
+            'items.*.pattern'  => ['nullable'],
             'items.*.max_days' => ['required', 'integer', 'min:0'],
         ];
     }
