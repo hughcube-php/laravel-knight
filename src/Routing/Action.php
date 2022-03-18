@@ -39,10 +39,9 @@ trait Action
     /**
      * @param bool $must
      *
-     * @throws
+     * @throws AuthenticationException
      *
      * @return int|string|null
-     * @phpstan-ignore-next-line
      */
     protected function getAuthId(bool $must = true)
     {
@@ -57,10 +56,9 @@ trait Action
     /**
      * @param bool $must
      *
-     * @throws
+     * @throws AuthenticationException
      *
      * @return Authenticatable|null
-     * @phpstan-ignore-next-line
      */
     protected function getAuthUser(bool $must = true): ?Authenticatable
     {
