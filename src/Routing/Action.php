@@ -43,7 +43,7 @@ trait Action
      *
      * @return int|string|null
      */
-    protected function getAuthId(bool $must = true)
+    protected function getAuthId(bool $must = false)
     {
         $id = Auth::id() ?: null;
         if ($must && empty($id)) {
@@ -60,7 +60,7 @@ trait Action
      *
      * @return Authenticatable|null
      */
-    protected function getAuthUser(bool $must = true): ?Authenticatable
+    protected function getAuthUser(bool $must = false): ?Authenticatable
     {
         $user = Auth::user();
         if ($must && !$user instanceof Authenticatable) {
