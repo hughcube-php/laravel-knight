@@ -44,6 +44,7 @@ class ScheduleJob extends Job
         if (null === $this->jobStartedAt) {
             $this->jobStartedAt = Carbon::now();
         }
+
         return $this->jobStartedAt;
     }
 
