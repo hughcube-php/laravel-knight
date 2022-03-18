@@ -16,8 +16,9 @@ use HughCube\Laravel\Knight\Exceptions\UserException;
 trait SendPinCodeSms
 {
     /**
-     * @return mixed|void
      * @throws UserException
+     *
+     * @return mixed|void
      */
     protected function action()
     {
@@ -55,8 +56,9 @@ trait SendPinCodeSms
     }
 
     /**
-     * @param  int|string|null  $mobile
-     * @param  int|string|null  $iddCode
+     * @param int|string|null $mobile
+     * @param int|string|null $iddCode
+     *
      * @return bool
      */
     protected function checkMobile($mobile, $iddCode = null): bool
@@ -66,12 +68,14 @@ trait SendPinCodeSms
         }
 
         $pattern = '/^(13[0-9]|14[0-9]|15[0-9]|17[0-9]|18[0-9]|19[0-9])\d{8}$/';
+
         return false != preg_match($pattern, $mobile);
     }
 
     /**
-     * @return mixed
      * @throws UserException
+     *
+     * @return mixed
      */
     protected function emptyMobileResponse()
     {
@@ -79,8 +83,9 @@ trait SendPinCodeSms
     }
 
     /**
-     * @return mixed
      * @throws UserException
+     *
+     * @return mixed
      */
     protected function invalidMobileResponse()
     {
@@ -88,16 +93,18 @@ trait SendPinCodeSms
     }
 
     /**
-     * @param  int|string  $mobile
-     * @param  int|string  $iddCode
+     * @param int|string $mobile
+     * @param int|string $iddCode
+     *
      * @return mixed
      */
     abstract protected function getPinCode($mobile, $iddCode);
 
     /**
-     * @param  mixed  $pinCode
-     * @param  int|string  $mobile
-     * @param  int|string  $iddCode
+     * @param mixed      $pinCode
+     * @param int|string $mobile
+     * @param int|string $iddCode
+     *
      * @return mixed
      */
     abstract protected function send($pinCode, $mobile, $iddCode);
