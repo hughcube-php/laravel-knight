@@ -26,7 +26,7 @@ trait ParameterBag
      * @param string|int $key
      * @param mixed      $default
      *
-     * @return ParameterBag|mixed
+     * @return BaseParameterBag|mixed
      */
     protected function p($key = null, $default = null)
     {
