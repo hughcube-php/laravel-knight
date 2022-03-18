@@ -38,12 +38,11 @@ trait Action
 
     /**
      * @param bool $must
-     *
-     * @throws AuthenticationException
-     *
      * @return int|string|null
+     * @throws
+     * @phpstan-ignore-next-line
      */
-    protected function getAuthUserId(bool $must = true)
+    protected function getAuthId(bool $must = true)
     {
         $id = Auth::id() ?: null;
         if ($must && empty($id)) {
@@ -55,10 +54,9 @@ trait Action
 
     /**
      * @param bool $must
-     *
-     * @throws AuthenticationException
-     *
      * @return Authenticatable|null
+     * @throws
+     * @phpstan-ignore-next-line
      */
     protected function getAuthUser(bool $must = true): ?Authenticatable
     {
