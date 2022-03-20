@@ -168,6 +168,7 @@ trait Model
     public function setIsFromCache($is = true)
     {
         $this->isFromCache = $is;
+
         return $this;
     }
 
