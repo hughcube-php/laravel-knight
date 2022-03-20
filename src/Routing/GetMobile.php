@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/3/21
- * Time: 00:00
+ * Time: 00:00.
  */
 
 namespace HughCube\Laravel\Knight\Routing;
@@ -32,8 +32,8 @@ trait GetMobile
     }
 
     /**
-     * @param  int|string|null  $mobile
-     * @param  int|string|null  $iddCode
+     * @param int|string|null $mobile
+     * @param int|string|null $iddCode
      *
      * @return bool
      */
@@ -49,9 +49,9 @@ trait GetMobile
     }
 
     /**
-     * @return mixed
      * @throws UserException
      *
+     * @return mixed
      */
     protected function emptyMobileResponse()
     {
@@ -59,9 +59,9 @@ trait GetMobile
     }
 
     /**
-     * @return mixed
      * @throws UserException
      *
+     * @return mixed
      */
     protected function invalidMobileResponse()
     {
