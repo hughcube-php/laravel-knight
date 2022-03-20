@@ -8,10 +8,8 @@
 
 namespace HughCube\Laravel\Knight\Routing;
 
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @mixin Action
@@ -32,9 +30,9 @@ trait SimplePaginateQuery
     }
 
     /**
-     * @throws Exception
+     * @return mixed
      */
-    protected function action(): Response
+    protected function action()
     {
         $query = $this->makeQuery();
 
@@ -50,7 +48,7 @@ trait SimplePaginateQuery
         null !== $page and $results['page'] = $page;
         null !== $pageSize and $results['page_size'] = $pageSize;
 
-        return $this->toResponse($results);
+        return $this->createResponse($results);
     }
 
     /**
@@ -138,11 +136,11 @@ trait SimplePaginateQuery
     }
 
     /**
-     * @param  array  $results
+     * @param  mixed  $results
      *
-     * @return Response
+     * @return mixed
      */
-    protected function toResponse(array $results): Response
+    protected function createResponse($results)
     {
         return $this->asJson($results);
     }
