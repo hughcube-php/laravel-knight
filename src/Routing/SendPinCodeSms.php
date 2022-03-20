@@ -18,9 +18,9 @@ trait SendPinCodeSms
     use GetMobile;
 
     /**
-     * @return mixed|void
      * @throws UserException
      *
+     * @return mixed|void
      */
     protected function action()
     {
@@ -42,17 +42,17 @@ trait SendPinCodeSms
     }
 
     /**
-     * @param  int|string  $mobile
-     * @param  int|string  $iddCode
+     * @param int|string $mobile
+     * @param int|string $iddCode
      *
      * @return mixed
      */
     abstract protected function getPinCode($mobile, $iddCode);
 
     /**
-     * @param  mixed  $pinCode
-     * @param  int|string  $mobile
-     * @param  int|string  $iddCode
+     * @param mixed      $pinCode
+     * @param int|string $mobile
+     * @param int|string $iddCode
      *
      * @return mixed
      */
