@@ -10,8 +10,8 @@ namespace HughCube\Laravel\Knight\Routing;
 
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @mixin Action
@@ -34,7 +34,7 @@ trait SimplePaginateQuery
     /**
      * @throws Exception
      */
-    protected function action(): JsonResponse
+    protected function action(): Response
     {
         $query = $this->makeQuery();
 
@@ -50,7 +50,7 @@ trait SimplePaginateQuery
         null !== $page and $results['page'] = $page;
         null !== $pageSize and $results['page_size'] = $pageSize;
 
-        return $this->asJson($this->formatResults($results));
+        return $this->toResponse($results);
     }
 
     /**
@@ -70,8 +70,8 @@ trait SimplePaginateQuery
     }
 
     /**
-     * @param int|null $page
-     * @param int|null $pageSize
+     * @param  int|null  $page
+     * @param  int|null  $pageSize
      *
      * @return int|null
      */
@@ -90,7 +90,7 @@ trait SimplePaginateQuery
     abstract protected function makeQuery(): ?Builder;
 
     /**
-     * @param Builder|mixed $query
+     * @param  Builder|mixed  $query
      *
      * @return null|int
      */
@@ -104,9 +104,9 @@ trait SimplePaginateQuery
     }
 
     /**
-     * @param Builder|mixed $query
-     * @param int|null      $offset
-     * @param int|null      $limit
+     * @param  Builder|mixed  $query
+     * @param  int|null  $offset
+     * @param  int|null  $limit
      *
      * @return Collection
      */
@@ -128,7 +128,7 @@ trait SimplePaginateQuery
     }
 
     /**
-     * @param Collection $rows
+     * @param  Collection  $rows
      *
      * @return Collection|array
      */
@@ -138,12 +138,12 @@ trait SimplePaginateQuery
     }
 
     /**
-     * @param mixed $results
+     * @param  array  $results
      *
-     * @return mixed
+     * @return Response
      */
-    protected function formatResults($results)
+    protected function toResponse(array $results): Response
     {
-        return $results;
+        return $this->asJson($results);
     }
 }
