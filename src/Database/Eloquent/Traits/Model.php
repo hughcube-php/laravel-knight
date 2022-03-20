@@ -53,64 +53,39 @@ trait Model
         return $dateTime instanceof DateTimeInterface ? $dateTime->format($format) : null;
     }
 
-    /**
-     * @param mixed $date
-     *
-     * @return Carbon|null
-     */
     public function getCreatedAtAttribute($date): ?Carbon
     {
         return $this->toDateTime($date);
     }
 
-    /**
-     * @param mixed $date
-     *
-     * @return Carbon|null
-     */
     public function getUpdatedAtAttribute($date): ?Carbon
     {
         return $this->toDateTime($date);
     }
 
-    /**
-     * @param mixed $date
-     *
-     * @return Carbon|null
-     */
     public function getDeletedAtAttribute($date): ?Carbon
     {
         return $this->toDateTime($date);
     }
 
-    /**
-     * @param string $format
-     *
-     * @return string|null
-     */
+    public function formatDateColumn($name, string $format = 'Y-m-d H:i:s'): ?string
+    {
+        return $this->formatDateTime($this->{$name}, $format);
+    }
+
     public function formatCreatedAt(string $format = 'Y-m-d H:i:s'): ?string
     {
-        return $this->formatDateTime($this->{$this->getCreatedAtColumn()}, $format);
+        return $this->formatDateColumn($this->getCreatedAtColumn(), $format);
     }
 
-    /**
-     * @param string $format
-     *
-     * @return string|null
-     */
     public function formatUpdatedAt(string $format = 'Y-m-d H:i:s'): ?string
     {
-        return $this->formatDateTime($this->{$this->getUpdatedAtColumn()}, $format);
+        return $this->formatDateColumn($this->getUpdatedAtColumn(), $format);
     }
 
-    /**
-     * @param string $format
-     *
-     * @return string|null
-     */
     public function formatDeleteAt(string $format = 'Y-m-d H:i:s'): ?string
     {
-        return $this->formatDateTime($this->{$this->getDeletedAtColumn()}, $format);
+        return $this->formatDateColumn($this->getDeletedAtColumn(), $format);
     }
 
     /**
@@ -131,11 +106,6 @@ trait Model
         return true;
     }
 
-    /**
-     * Get the name of the "deleted at" column.
-     *
-     * @return string
-     */
     public function getDeletedAtColumn()
     {
         return defined('static::DELETED_AT') ? constant('static::DELETED_AT') : 'deleted_at';
@@ -153,29 +123,40 @@ trait Model
         return new Builder($query);
     }
 
-    /**
-     * 跳过缓存执行.
-     *
-     * @return Builder
-     */
     public static function noCacheQuery(): Builder
     {
         return static::query()->noCache();
     }
 
-    /**
-     * 获取缓存.
-     *
-     * @return CacheInterface|null
-     */
+    public static function availableQuery(): Builder
+    {
+        return static::query()->whereDeletedAtColumn();
+    }
+
     public function getCache(): ?CacheInterface
     {
         return null;
     }
 
+    public function getCachePlaceholder(): ?string
+    {
+        return null;
+    }
+
+    public function getCacheVersion(): ?string
+    {
+        return 'v1.0.0';
+    }
+
     /**
-     * @return bool
+     * @throws
+     * @phpstan-ignore-next-line
      */
+    public function getCacheTtl(int $duration = null): int
+    {
+        return null === $duration ? random_int((5 * 24 * 3600), (7 * 24 * 3600)) : $duration;
+    }
+
     public function isFromCache(): bool
     {
         return $this->isFromCache;
@@ -187,31 +168,7 @@ trait Model
     public function setIsFromCache($is = true)
     {
         $this->isFromCache = $is;
-
         return $this;
-    }
-
-    /**
-     * 缓存的时间, 默认5-7天.
-     *
-     * @param int|null $duration
-     *
-     * @throws
-     *
-     * @return int
-     * @phpstan-ignore-next-line
-     */
-    public function getCacheTtl(int $duration = null): int
-    {
-        return null === $duration ? random_int((5 * 24 * 3600), (7 * 24 * 3600)) : $duration;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getCacheVersion(): ?string
-    {
-        return 'v1.0.0';
     }
 
     /**
@@ -264,15 +221,7 @@ trait Model
         return !empty($value);
     }
 
-    /**
-     * @return string|null
-     */
-    public function getCachePlaceholder(): ?string
-    {
-        return null;
-    }
-
-    public function genModelVersion(): int
+    public static function genModelVersion(): int
     {
         return abs(crc32(serialize([Str::random(100), microtime()])));
     }
