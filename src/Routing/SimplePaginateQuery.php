@@ -130,9 +130,9 @@ trait SimplePaginateQuery
     /**
      * @param Collection $rows
      *
-     * @return array
+     * @return Collection|array
      */
-    protected function formatCollection(Collection $rows): array
+    protected function formatCollection(Collection $rows)
     {
         return $rows->toArray();
     }

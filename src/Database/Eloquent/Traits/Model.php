@@ -173,7 +173,7 @@ trait Model
     }
 
     /**
-     * @return array[]
+     * @return array<string, string>
      */
     public function onChangeRefreshCacheKeys(): array
     {
