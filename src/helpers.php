@@ -10,7 +10,7 @@ if (!function_exists('log_path')) {
      */
     function log_path(string $path = ''): string
     {
-        $logPath = config('app.log_path', storage_path('logs'));
+        $logPath = config('app.log_path') ?: storage_path('logs');
 
         if (empty($path)) {
             return $logPath;
