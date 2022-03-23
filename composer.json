@@ -29,6 +29,9 @@
         "ext-zend-opcache": "*"
     },
     "autoload": {
+        "files": [
+            "src/helpers.php"
+        ],
         "psr-4": {
             "HughCube\\Laravel\\Knight\\": "src"
         }
