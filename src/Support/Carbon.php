@@ -10,7 +10,6 @@ namespace HughCube\Laravel\Knight\Support;
 
 use DateTimeInterface;
 use DateTimeZone;
-use Illuminate\Support\Facades\Date;
 use InvalidArgumentException;
 
 /**
