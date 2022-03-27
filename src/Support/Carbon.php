@@ -47,12 +47,16 @@ class Carbon extends \Illuminate\Support\Carbon
         }
 
         try {
-            $dateTime = Date::createFromFormat($format, $date);
+            $dateTime = static::createFromFormat($format, $date);
         } catch (InvalidArgumentException $e) {
             $dateTime = false;
         }
 
-        return false == $dateTime ? null : static::parse($date);
+        if ($dateTime instanceof static) {
+            return $dateTime;
+        }
+
+        return static::parse($date);
     }
 
     /**
