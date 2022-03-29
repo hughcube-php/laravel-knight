@@ -45,9 +45,9 @@ trait SendPinCodeSms
      * @param int|string $mobile
      * @param int|string $iddCode
      *
-     * @return mixed
+     * @return string
      */
-    abstract protected function getPinCode($mobile, $iddCode);
+    abstract protected function getPinCode($mobile, $iddCode):string;
 
     /**
      * @param mixed      $pinCode
