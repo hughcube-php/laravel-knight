@@ -8,6 +8,8 @@
 
 namespace HughCube\Laravel\Knight\Routing;
 
+use HughCube\Laravel\Knight\Exceptions\ValidatePinCodeException;
+
 /**
  * @mixin Action
  */
@@ -20,10 +22,26 @@ trait ValidatePinCodeSms
         return $this->getRequest()->get('pincode');
     }
 
-    protected function validatePinCode(): bool
+    /**
+     * @param  bool  $deleteAfterSuccess
+     * @return void
+     * @throws ValidatePinCodeException
+     */
+    protected function validatePinCode(bool $deleteAfterSuccess = true)
     {
-        return $this->runValidatePinCode($this->getMobile(), $this->getIDDCode(), $this->getPinCode());
+        $mobile = $this->getMobile();
+        $iddCode = $this->getIDDCode();
+        $pincode = $this->getPinCode();
+
+        $ok = false;
+        if (!empty($mobile) && !empty($iddCode) && !empty($pincode) && $this->checkMobile($mobile, $iddCode)) {
+            $ok = $this->runValidatePinCode($mobile, $iddCode, $pincode, $deleteAfterSuccess);
+        }
+
+        if (!$ok) {
+            throw new ValidatePinCodeException('请输入正确的验证码!');
+        }
     }
 
-    abstract protected function runValidatePinCode($mobile, $iddCode, $pincode): bool;
+    abstract protected function runValidatePinCode($mobile, $iddCode, $pincode, $deleteAfterSuccess): bool;
 }

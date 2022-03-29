@@ -8,7 +8,8 @@
 
 namespace HughCube\Laravel\Knight\Routing;
 
-use HughCube\Laravel\Knight\Exceptions\UserException;
+use HughCube\Laravel\Knight\Exceptions\MobileEmptyException;
+use HughCube\Laravel\Knight\Exceptions\MobileInvalidException;
 
 /**
  * @mixin Action
@@ -32,8 +33,8 @@ trait GetMobile
     }
 
     /**
-     * @param int|string|null $mobile
-     * @param int|string|null $iddCode
+     * @param  int|string|null  $mobile
+     * @param  int|string|null  $iddCode
      *
      * @return bool
      */
@@ -49,22 +50,20 @@ trait GetMobile
     }
 
     /**
-     * @throws UserException
-     *
      * @return mixed
+     * @throws MobileEmptyException
      */
     protected function emptyMobileResponse()
     {
-        throw new UserException('手机号码为空!');
+        throw new MobileEmptyException('手机号码为空!');
     }
 
     /**
-     * @throws UserException
-     *
      * @return mixed
+     * @throws MobileInvalidException
      */
     protected function invalidMobileResponse()
     {
-        throw new UserException('手机号码错误!');
+        throw new MobileInvalidException('手机号码错误!');
     }
 }
