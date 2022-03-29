@@ -23,9 +23,11 @@ trait ValidatePinCodeSms
     }
 
     /**
-     * @param  bool  $deleteAfterSuccess
-     * @return void
+     * @param bool $deleteAfterSuccess
+     *
      * @throws ValidatePinCodeException
+     *
+     * @return void
      */
     protected function validatePinCode(bool $deleteAfterSuccess = true)
     {

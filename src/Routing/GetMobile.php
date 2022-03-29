@@ -33,8 +33,8 @@ trait GetMobile
     }
 
     /**
-     * @param  int|string|null  $mobile
-     * @param  int|string|null  $iddCode
+     * @param int|string|null $mobile
+     * @param int|string|null $iddCode
      *
      * @return bool
      */
@@ -50,8 +50,9 @@ trait GetMobile
     }
 
     /**
-     * @return mixed
      * @throws MobileEmptyException
+     *
+     * @return mixed
      */
     protected function emptyMobileResponse()
     {
@@ -59,8 +60,9 @@ trait GetMobile
     }
 
     /**
-     * @return mixed
      * @throws MobileInvalidException
+     *
+     * @return mixed
      */
     protected function invalidMobileResponse()
     {
