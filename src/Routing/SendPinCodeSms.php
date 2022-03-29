@@ -36,7 +36,7 @@ trait SendPinCodeSms
         }
 
         $pinCode = $this->getPinCode($mobile, $iddCode);
-        $this->send($pinCode, $mobile, $iddCode);
+        $this->send($mobile, $iddCode, $pinCode);
 
         return $this->asJson();
     }
@@ -50,11 +50,11 @@ trait SendPinCodeSms
     abstract protected function getPinCode($mobile, $iddCode):string;
 
     /**
-     * @param mixed      $pinCode
      * @param int|string $mobile
      * @param int|string $iddCode
+     * @param mixed      $pinCode
      *
-     * @return mixed
+     * @return void
      */
-    abstract protected function send($pinCode, $mobile, $iddCode);
+    abstract protected function send($mobile, $iddCode, $pinCode):void;
 }
