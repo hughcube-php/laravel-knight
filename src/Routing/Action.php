@@ -43,13 +43,12 @@ trait Action
      *
      * @return int|string|null
      */
-    protected function getAuthId(bool $must = false)
+    protected function getAuthId(bool $must = true)
     {
         $id = Auth::id() ?: null;
         if ($must && empty($id)) {
             throw new AuthenticationException();
         }
-
         return $id;
     }
 
@@ -60,13 +59,12 @@ trait Action
      *
      * @return Authenticatable|null
      */
-    protected function getAuthUser(bool $must = false): ?Authenticatable
+    protected function getAuthUser(bool $must = true): ?Authenticatable
     {
         $user = Auth::user();
         if ($must && !$user instanceof Authenticatable) {
             throw new AuthenticationException();
         }
-
         return $user instanceof Authenticatable ? $user : null;
     }
 
