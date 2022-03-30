@@ -22,24 +22,23 @@ trait MultipleHandler
     }
 
     /**
-     * @param bool $tryException
-     * @param bool $logException
+     * @param  bool  $tryException
+     * @param  bool  $logException
      *
+     * @return array
      * @throws Throwable
      *
-     * @return mixed
      */
-    protected function triggerHandlers(bool $tryException = false, bool $logException = true)
+    protected function triggerHandlers(bool $tryException = false, bool $logException = true): array
     {
-        $results = null;
-
+        $results = [];
         foreach ($this->getHandlers() as $handler) {
-            $exception = null;
-
+            $result = $exception = null;
             try {
-                $results = $this->{$handler}();
+                $result = $this->{$handler}();
             } catch (Throwable $exception) {
             }
+            $results[] = ['handler' => $handler, 'result' => $result, 'exception' => $exception];
 
             /** 抛出异常 */
             if ($exception instanceof Throwable && !$tryException) {
@@ -52,16 +51,15 @@ trait MultipleHandler
             }
 
             /** 是否终止执行 */
-            if ($this->isStopHandlerResults($results, $exception)) {
-                return $results;
+            if ($this->isStopHandlerResults($result, $exception)) {
+                break;
             }
         }
-
         return $results;
     }
 
     /**
-     * @return array
+     * @return string[]
      */
     protected function getHandlers(): array
     {
@@ -81,7 +79,7 @@ trait MultipleHandler
     }
 
     /**
-     * @param ReflectionMethod $method
+     * @param  ReflectionMethod  $method
      *
      * @return null|array
      */
