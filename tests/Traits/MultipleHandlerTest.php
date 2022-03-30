@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/3/30
- * Time: 17:36
+ * Time: 17:36.
  */
 
 namespace HughCube\Laravel\Knight\Tests\Traits;
@@ -22,7 +22,6 @@ class MultipleHandlerTest extends TestCase
             use MultipleHandler;
 
             public $doneHandlers = [];
-
 
             protected function aHandler10000()
             {
