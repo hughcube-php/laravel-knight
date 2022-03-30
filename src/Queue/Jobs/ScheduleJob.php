@@ -7,7 +7,6 @@ use Cron\CronExpression;
 use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\Traits\MultipleHandler;
 use Illuminate\Contracts\Bus\Dispatcher;
-use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
 use ReflectionClass;
 use ReflectionException;

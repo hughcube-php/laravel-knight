@@ -47,7 +47,7 @@ trait SendPinCodeSms
      *
      * @return string
      */
-    abstract protected function getPinCode($mobile, $iddCode):string;
+    abstract protected function getPinCode($mobile, $iddCode): string;
 
     /**
      * @param int|string $mobile
@@ -56,5 +56,5 @@ trait SendPinCodeSms
      *
      * @return void
      */
-    abstract protected function send($mobile, $iddCode, $pinCode):void;
+    abstract protected function send($mobile, $iddCode, $pinCode): void;
 }
