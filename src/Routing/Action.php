@@ -49,6 +49,7 @@ trait Action
         if ($must && empty($id)) {
             throw new AuthenticationException();
         }
+
         return $id;
     }
 
@@ -65,6 +66,7 @@ trait Action
         if ($must && !$user instanceof Authenticatable) {
             throw new AuthenticationException();
         }
+
         return $user instanceof Authenticatable ? $user : null;
     }
 
