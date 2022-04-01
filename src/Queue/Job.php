@@ -111,7 +111,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  int  $flags
+     * @param int $flags
      *
      * @return string
      */
@@ -137,7 +137,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  int  $flags
+     * @param int $flags
      *
      * @return string
      */
@@ -154,11 +154,12 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
         if (null === $this->pid) {
             $this->setPid(base_convert(abs(crc32(Str::random())), 10, 36));
         }
+
         return $this->pid;
     }
 
     /**
-     * @param  string|int|null  $pid
+     * @param string|int|null $pid
      *
      * @return $this
      */
@@ -170,8 +171,10 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  object|null  $job
+     * @param object|null $job
+     *
      * @return string
+     *
      * @deprecated
      */
     protected function getName(object $job = null): string
@@ -188,7 +191,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  array|string|null  $channel
+     * @param array|string|null $channel
      *
      * @return $this
      */
@@ -200,9 +203,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  mixed  $level
-     * @param  string  $message
-     * @param  array  $context
+     * @param mixed  $level
+     * @param string $message
+     * @param array  $context
      *
      * @return void
      */
@@ -214,8 +217,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  string  $key
-     * @param  null  $default
+     * @param string $key
+     * @param null   $default
      *
      * @return mixed
      *
@@ -227,7 +230,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  mixed  $key
+     * @param mixed $key
      *
      * @return bool
      *
@@ -239,8 +242,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  string  $key
-     * @param  mixed  $value
+     * @param string $key
+     * @param mixed  $value
      *
      * @return $this
      *
@@ -254,8 +257,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param  string  $name
-     * @param  array  $arguments
+     * @param string $name
+     * @param array  $arguments
      *
      * @return false|mixed
      */
