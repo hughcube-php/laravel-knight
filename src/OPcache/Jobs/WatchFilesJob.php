@@ -18,7 +18,7 @@ class WatchFilesJob extends Job
     public function rules(): array
     {
         return [
-            'url' => ['string', 'nullable'],
+            'url'     => ['string', 'nullable'],
             'timeout' => ['integer', 'default:30'],
         ];
     }
@@ -31,6 +31,7 @@ class WatchFilesJob extends Job
         $url = $this->getUrl();
         if (!PUrl::isUrlString($url)) {
             $this->warning('Remote interface URL cannot be found!');
+
             return;
         }
 
@@ -41,6 +42,7 @@ class WatchFilesJob extends Job
             $results = json_decode($response->getBody()->getContents(), true);
         } catch (Throwable $exception) {
             $this->warning(sprintf('http error: %s!', $exception->getMessage()));
+
             return;
         }
 
