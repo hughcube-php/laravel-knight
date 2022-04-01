@@ -88,7 +88,7 @@ trait Action
     /**
      * @throws
      *
-     * @return Request|LumenRequest|LaravelRequest
+     * @return Request|LaravelRequest
      * @phpstan-ignore-next-line
      */
     protected function getRequest(): Request
