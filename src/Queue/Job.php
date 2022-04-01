@@ -9,7 +9,6 @@
 namespace HughCube\Laravel\Knight\Queue;
 
 use BadMethodCallException;
-use HughCube\Base\Base;
 use HughCube\Laravel\Knight\Support\ParameterBag;
 use HughCube\Laravel\Knight\Traits\Container;
 use HughCube\Laravel\Knight\Traits\GetOrSet;
@@ -28,7 +27,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 
 /**
  * @method static PendingDispatch|static dispatch(...$arguments)
@@ -75,15 +73,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
 
     public function handle(): void
     {
-        try {
-            $this->loadParameters();
-        } catch (ValidationException $exception) {
-            $errors = json_encode($exception->errors(), JSON_UNESCAPED_UNICODE);
-            $this->info(sprintf('data validation error, errors: %s, data: %s', $errors, $this->getSerializeData()));
-
-            return;
-        }
-
+        $this->loadParameters();
         $this->action();
     }
 
@@ -121,7 +111,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param int $flags
+     * @param  int  $flags
      *
      * @return string
      */
@@ -147,7 +137,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param int $flags
+     * @param  int  $flags
      *
      * @return string
      */
@@ -162,18 +152,13 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     protected function getPid()
     {
         if (null === $this->pid) {
-            $this->setPid(Base::conv(
-                crc32(Str::random(5)),
-                '0123456789',
-                'LaJhMxlTNSw813CnG2bduYAPrBpZVv0tiykIgUoz5KW6HQDej49csq7fmOXREF'
-            ));
+            $this->setPid(base_convert(abs(crc32(Str::random())), 10, 36));
         }
-
         return $this->pid;
     }
 
     /**
-     * @param string|int|null $pid
+     * @param  string|int|null  $pid
      *
      * @return $this
      */
@@ -184,7 +169,12 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
         return $this;
     }
 
-    protected function getName($job = null): string
+    /**
+     * @param  object|null  $job
+     * @return string
+     * @deprecated
+     */
+    protected function getName(object $job = null): string
     {
         return Str::afterLast(get_class(($job ?? $this)), '\\');
     }
@@ -198,7 +188,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param array|string|null $channel
+     * @param  array|string|null  $channel
      *
      * @return $this
      */
@@ -210,21 +200,22 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param mixed  $level
-     * @param string $message
-     * @param array  $context
+     * @param  mixed  $level
+     * @param  string  $message
+     * @param  array  $context
      *
      * @return void
      */
     public function log($level, string $message, array $context = [])
     {
-        $message = sprintf('[%s-%s] %s', $this->getName(), $this->getPid(), $message);
+        $name = Str::afterLast(get_class($this), '\\');
+        $message = sprintf('[%s-%s] %s', $name, $this->getPid(), $message);
         Log::channel($this->getLogChannel())->log($level, $message, $context);
     }
 
     /**
-     * @param string $key
-     * @param null   $default
+     * @param  string  $key
+     * @param  null  $default
      *
      * @return mixed
      *
@@ -236,7 +227,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param mixed $key
+     * @param  mixed  $key
      *
      * @return bool
      *
@@ -248,8 +239,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param string $key
-     * @param mixed  $value
+     * @param  string  $key
+     * @param  mixed  $value
      *
      * @return $this
      *
@@ -263,8 +254,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param string $name
-     * @param array  $arguments
+     * @param  string  $name
+     * @param  array  $arguments
      *
      * @return false|mixed
      */
