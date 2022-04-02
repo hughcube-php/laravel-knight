@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/4/2
- * Time: 15:35
+ * Time: 15:35.
  */
 
 namespace HughCube\Laravel\Knight\Exceptions;

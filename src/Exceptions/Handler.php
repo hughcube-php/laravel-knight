@@ -60,7 +60,8 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * @param  Throwable  $e
+     * @param Throwable $e
+     *
      * @return null|array
      */
     protected function convertExceptionToResponseData(Throwable $e): ?array
