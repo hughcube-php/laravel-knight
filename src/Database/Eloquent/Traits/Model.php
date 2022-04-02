@@ -172,9 +172,6 @@ trait Model
         return $this;
     }
 
-    /**
-     * @return array<string, string>
-     */
     public function onChangeRefreshCacheKeys(): array
     {
         return [
@@ -193,7 +190,7 @@ trait Model
     /**
      * @param mixed $id
      *
-     * @return static
+     * @return null|static
      */
     public static function findById($id)
     {
