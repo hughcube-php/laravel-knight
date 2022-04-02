@@ -19,7 +19,7 @@ trait GetMobile
     /**
      * @return int|string|null
      */
-    protected function getMobile(): ?int
+    protected function getMobile(): ?string
     {
         return $this->getRequest()->get('mobile');
     }
