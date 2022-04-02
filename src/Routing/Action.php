@@ -10,7 +10,6 @@ namespace HughCube\Laravel\Knight\Routing;
 
 use BadMethodCallException;
 use HughCube\Laravel\Knight\Http\LaravelRequest;
-use HughCube\Laravel\Knight\Http\LumenRequest;
 use HughCube\Laravel\Knight\Support\ParameterBag;
 use HughCube\Laravel\Knight\Traits\Container;
 use HughCube\Laravel\Knight\Traits\GetOrSet;
