@@ -5,6 +5,7 @@ namespace HughCube\Laravel\Knight\Exceptions;
 use GuzzleHttp\Psr7\Response as PsrResponse;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use stdClass;
@@ -59,6 +60,15 @@ class Handler extends ExceptionHandler
     }
 
     /**
+     * @param  Throwable  $e
+     * @return null|array
+     */
+    protected function convertExceptionToResponseData(Throwable $e): ?array
+    {
+        return null;
+    }
+
+    /**
      * @param Request   $request
      * @param Throwable $e
      *
@@ -84,6 +94,8 @@ class Handler extends ExceptionHandler
             $results = ['code' => $e->getCode(), 'message' => $e->getMessage()];
         } elseif ($e instanceof Exception) {
             $results = ['code' => 500, 'message' => $e->getMessage()];
+        } elseif (empty($data = $this->convertExceptionToResponseData($e))) {
+            $results = $data;
         } else {
             $results = ['code' => 500, 'message' => '服务器繁忙, 请稍后再试!'];
         }
@@ -93,7 +105,7 @@ class Handler extends ExceptionHandler
             $results['debug'] = $this->convertExceptionToArray($e);
         }
 
-        return response()->json($results);
+        return new JsonResponse($results);
     }
 
     /**
