@@ -8,10 +8,10 @@
 
 namespace HughCube\Laravel\Knight\Routing;
 
+use HughCube\Laravel\Knight\Exceptions\NotExtendedHttpException;
 use HughCube\Laravel\Knight\Routing\Action as BaseAction;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Controller extends \Illuminate\Routing\Controller
 {
@@ -21,6 +21,6 @@ class Controller extends \Illuminate\Routing\Controller
 
     protected function action()
     {
-        throw new NotFoundHttpException();
+        throw new NotExtendedHttpException();
     }
 }
