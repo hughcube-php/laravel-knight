@@ -81,9 +81,8 @@ class Handler extends ExceptionHandler
         $e = method_exists($this, 'mapException') ? $this->mapException($e) : $e;
         $e = $this->prepareException($e);
 
-        if ($e instanceof HttpException) {
-            $response = new PsrResponse($e->getStatusCode());
-            $results = ['code' => $response->getStatusCode(), 'message' => $response->getReasonPhrase()];
+        if (!empty($data = $this->convertExceptionToResponseData($e))) {
+            $results = $data;
         } elseif ($e instanceof AuthenticationException) {
             $results = ['code' => 401, 'message' => '请先登录!'];
         } elseif ($e instanceof ValidationException) {
@@ -94,8 +93,9 @@ class Handler extends ExceptionHandler
             $results = ['code' => $e->getCode(), 'message' => $e->getMessage()];
         } elseif ($e instanceof Exception) {
             $results = ['code' => 500, 'message' => $e->getMessage()];
-        } elseif (empty($data = $this->convertExceptionToResponseData($e))) {
-            $results = $data;
+        } elseif ($e instanceof HttpException) {
+            $response = new PsrResponse($e->getStatusCode());
+            $results = ['code' => $response->getStatusCode(), 'message' => $response->getReasonPhrase()];
         } else {
             $results = ['code' => 500, 'message' => '服务器繁忙, 请稍后再试!'];
         }
