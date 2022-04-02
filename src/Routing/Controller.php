@@ -21,6 +21,8 @@ class Controller extends \Illuminate\Routing\Controller
 
     protected function action()
     {
-        throw new NotExtendedHttpException();
+        throw new NotExtendedHttpException(
+            'Further extensions to the request are required for the server to fulfill it.'
+        );
     }
 }
