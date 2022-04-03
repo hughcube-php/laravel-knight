@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/4/3
- * Time: 22:21
+ * Time: 22:21.
  */
 
 namespace HughCube\Laravel\Knight\Traits;
@@ -11,8 +11,9 @@ namespace HughCube\Laravel\Knight\Traits;
 trait BuildUniqueKey
 {
     /**
-     * @param  mixed  $data
-     * @param  int|null  $length
+     * @param mixed    $data
+     * @param int|null $length
+     *
      * @return string
      */
     protected function buildUniqueKey($data, ?int $length = null): string
