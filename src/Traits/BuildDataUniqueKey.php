@@ -8,9 +8,9 @@
 
 namespace HughCube\Laravel\Knight\Traits;
 
-trait BuildCacheKey
+trait BuildDataUniqueKey
 {
-    protected function buildCacheKey($data, $length = 32): string
+    protected function buildDataUniqueKey($data, $length = 32): string
     {
         $string = serialize($data);
 
