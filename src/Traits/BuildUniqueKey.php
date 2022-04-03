@@ -16,7 +16,7 @@ trait BuildUniqueKey
      *
      * @return string
      */
-    protected function buildUniqueKey($data, ?int $length = null): string
+    protected static function buildUniqueKey($data, ?int $length = null): string
     {
         $string = serialize($data);
 
