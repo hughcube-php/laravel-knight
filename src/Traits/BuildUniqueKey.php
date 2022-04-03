@@ -10,7 +10,7 @@ namespace HughCube\Laravel\Knight\Traits;
 
 trait BuildUniqueKey
 {
-    protected function buildUniqueKey($data, $length = 32): string
+    protected function buildUniqueKey($data, $length = 100): string
     {
         $string = serialize($data);
 
