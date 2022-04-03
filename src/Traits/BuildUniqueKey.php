@@ -10,13 +10,18 @@ namespace HughCube\Laravel\Knight\Traits;
 
 trait BuildUniqueKey
 {
-    protected function buildUniqueKey($data, $length = 100): string
+    /**
+     * @param  mixed  $data
+     * @param  int|null  $length
+     * @return string
+     */
+    protected function buildUniqueKey($data, ?int $length = null): string
     {
         $string = serialize($data);
 
         $crc32 = base_convert(abs(crc32($string)), 10, 36);
         $hash = sprintf('%s%s', $crc32, md5($string));
 
-        return substr($hash, 0, $length);
+        return null === $length ? $hash : substr($hash, 0, $length);
     }
 }
