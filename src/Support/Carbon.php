@@ -17,12 +17,21 @@ use InvalidArgumentException;
  */
 class Carbon extends \Illuminate\Support\Carbon
 {
-    /**
-     * @return float
-     */
     public function getTimestampAsFloat(): float
     {
         return $this->getPreciseTimestamp() / static::MICROSECONDS_PER_SECOND;
+    }
+
+    /**
+     * Mainly used for BC Math extensions
+     */
+    public function getTimestampAsString(): string
+    {
+        return sprintf(
+            '%s.%s',
+            $this->getTimestamp(),
+            (($this->getPreciseTimestamp() % static::MICROSECONDS_PER_SECOND) ?: '0')
+        );
     }
 
     /**

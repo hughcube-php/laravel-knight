@@ -78,6 +78,11 @@ class CarbonTest extends TestCase
     public function testGetTimestampAsFloat()
     {
         $this->assertIsFloat(Carbon::now()->getTimestampAsFloat());
-        $this->assertIsNumeric(strval(Carbon::now()->getTimestampAsFloat()));
+    }
+
+    public function testGetTimestampAsString()
+    {
+        $now = Carbon::now();
+        $this->assertIsNumeric($now->getTimestampAsString());
     }
 }
