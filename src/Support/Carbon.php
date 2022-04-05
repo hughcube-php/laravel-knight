@@ -23,7 +23,7 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * Mainly used for BC Math extensions
+     * Mainly used for BC Math extensions.
      */
     public function getTimestampAsString(): string
     {
