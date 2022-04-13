@@ -76,7 +76,7 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param string       $expression
+     * @param string              $expression
      * @param callable|Job|object $job
      *
      * @return void
