@@ -9,9 +9,9 @@
 namespace HughCube\Laravel\Knight\Tests\Traits;
 
 use HughCube\Laravel\Knight\Tests\TestCase;
+use HughCube\Laravel\Knight\Traits\GetOrSet;
 use Illuminate\Support\Str;
 use ReflectionException;
-use HughCube\Laravel\Knight\Traits\GetOrSet;
 
 class GetOrSetTest extends TestCase
 {
