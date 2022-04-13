@@ -6,12 +6,12 @@
  * Time: 23:38.
  */
 
-namespace HughCube\Laravel\Knight\Tests\Support;
+namespace HughCube\Laravel\Knight\Tests\Traits;
 
-use HughCube\Laravel\Knight\Support\GetOrSet;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Support\Str;
 use ReflectionException;
+use HughCube\Laravel\Knight\Traits\GetOrSet;
 
 class GetOrSetTest extends TestCase
 {

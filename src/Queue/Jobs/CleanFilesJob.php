@@ -16,7 +16,7 @@ class CleanFilesJob extends Job
     protected function rules(): array
     {
         return [
-            'items' => ['required', 'array', 'min:1'],
+            'items' => ['array'],
 
             'items.*.dir'      => ['required'],
             'items.*.pattern'  => ['nullable'],

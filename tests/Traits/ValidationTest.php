@@ -6,10 +6,10 @@
  * Time: 14:36.
  */
 
-namespace HughCube\Laravel\Knight\Tests\Support;
+namespace HughCube\Laravel\Knight\Tests\Traits;
 
-use HughCube\Laravel\Knight\Support\Validation;
 use HughCube\Laravel\Knight\Tests\TestCase;
+use HughCube\Laravel\Knight\Traits\Validation;
 
 class ValidationTest extends TestCase
 {
