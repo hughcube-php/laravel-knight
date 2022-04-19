@@ -33,8 +33,8 @@ class CompileFilesCommand extends Command
      */
     protected $signature = 'opcache:compile-files
                             {--with_remote_cached_scripts=knight_opcache_scripts }
-                            {--with_app_files=0 : Whether to include app files }
-                            {--with_composer_files=0 : Whether to include composer class files }';
+                            {--with_app_files : Whether to include app files }
+                            {--with_composer_files : Whether to include composer class files }';
 
     /**
      * @inheritdoc
@@ -42,11 +42,11 @@ class CompileFilesCommand extends Command
     protected $description = 'opcache compile file';
 
     /**
-     * @param Schedule $schedule
-     *
-     * @throws Exception
+     * @param  Schedule  $schedule
      *
      * @return void
+     * @throws Exception
+     *
      */
     public function handle(Schedule $schedule)
     {
@@ -88,9 +88,9 @@ class CompileFilesCommand extends Command
     }
 
     /**
+     * @return array
      * @throws Exception
      *
-     * @return array
      */
     protected function getFiles(): array
     {
@@ -115,12 +115,15 @@ class CompileFilesCommand extends Command
             return [];
         }
 
-        $file = base_path('vendor/composer/autoload_classmap.php');
-        if (!is_file($file)) {
-            return [];
-        }
+        $files = [];
 
-        return array_values(require $file);
+        $file = base_path('vendor/composer/autoload_classmap.php');
+        $files = array_merge($files, array_values(is_file($file) ? require $file : []));
+
+        $file = base_path('vendor/composer/autoload_files.php');
+        $files = array_merge($files, array_values(is_file($file) ? require $file : []));
+
+        return array_values(array_filter(array_unique($files)));
     }
 
     /**
