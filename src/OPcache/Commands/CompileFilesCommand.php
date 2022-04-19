@@ -13,6 +13,7 @@ use Exception;
 use GuzzleHttp\RequestOptions;
 use HughCube\GuzzleHttp\HttpClientTrait;
 use HughCube\Laravel\Knight\OPcache\LoadedOPcacheExtension;
+use HughCube\Laravel\Knight\Support\Carbon;
 use HughCube\PUrl\Url as PUrl;
 use Illuminate\Console\Command;
 use Illuminate\Console\Scheduling\Schedule;
@@ -50,10 +51,11 @@ class CompileFilesCommand extends Command
      */
     public function handle(Schedule $schedule)
     {
+        $start = Carbon::now();
+
         $scripts = $this->getFiles();
         $file = storage_path('opcache_compile_files.json');
         file_put_contents($file, json_encode($scripts));
-
         while (is_file($file)) {
             $process = new PhpProcess(sprintf('<?php %s ?>', $this->compileProcessCode($file)));
             $process->start();
@@ -63,12 +65,15 @@ class CompileFilesCommand extends Command
                 break;
             }
         }
-
         File::delete($file);
 
-        $this->info(PHP_EOL.PHP_EOL.PHP_EOL);
-        $this->info(sprintf('opcache compile file count: %s', count($scripts)));
-        $this->info(PHP_EOL.PHP_EOL.PHP_EOL);
+        $end = Carbon::now();
+
+        $this->info(sprintf(
+            'opcache compile file count: %s, duration: %ss',
+            count($scripts),
+            $end->getTimestampAsFloat() - $start->getTimestampAsFloat()
+        ));
     }
 
     protected function compileProcessCode($file): string
