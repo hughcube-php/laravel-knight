@@ -23,9 +23,9 @@ class ScheduleJob extends Job
     private $jobStartedAt = null;
 
     /**
+     * @return void
      * @throws Throwable
      *
-     * @return void
      */
     protected function action(): void
     {
@@ -58,7 +58,7 @@ class ScheduleJob extends Job
     /**
      * 判断是否可以运行.
      *
-     * @param string $expression
+     * @param  string  $expression
      *
      * @return bool
      */
@@ -67,35 +67,13 @@ class ScheduleJob extends Job
         return (new CronExpression($expression))->isDue($this->getJobStartedAt()->toDateTimeString());
     }
 
-    protected function pushJob($job)
-    {
-        $id = app(Dispatcher::class)->dispatch($job);
-
-        $name = Str::afterLast(get_class($job), '\\');
-        $this->info(sprintf('job: %s, id:%s, delays:%sms', $name, $id, $this->getDelays()));
-    }
-
     /**
-     * @param string              $expression
-     * @param callable|Job|object $job
-     *
-     * @return void
+     * @param  string|array  $name
+     * @param  string|array|null  $in
+     * @param  string|null  $basePath
+     * @return array<integer, object>
      */
-    protected function pushJobIfDue(string $expression, $job)
-    {
-        if ($this->isDue($expression)) {
-            $this->pushJob((is_callable($job) ? $job() : $job));
-        }
-    }
-
-    /**
-     * @param string|array      $name
-     * @param string|array|null $in
-     * @param string|null       $basePath
-     *
-     * @return void
-     */
-    protected function pushDirJobs($name = '*.php', $in = null, string $basePath = null)
+    protected function parseDirJobs($name = '*.php', $in = null, string $basePath = null): array
     {
         $in = $in ?: app_path('Jobs');
         $basePath = $basePath ?: base_path();
@@ -122,23 +100,59 @@ class ScheduleJob extends Job
             $jobs[] = new $class();
         }
 
-        foreach ($jobs as $job) {
-            $this->pushJob($job);
+        return $jobs;
+    }
+
+    protected function getDispatcher(): Dispatcher
+    {
+        return app(Dispatcher::class);
+    }
+
+    protected function prepareJob($job)
+    {
+        return $job;
+    }
+
+    protected function pushJob($job)
+    {
+        $id = $this->getDispatcher()->dispatch($this->prepareJob($job));
+
+        $name = Str::afterLast(get_class($job), '\\');
+        $this->info(sprintf('job: %s, id:%s, delays:%sms', $name, (is_scalar($id) ? $id : ''), $this->getDelays()));
+    }
+
+    /**
+     * @param  string  $expression
+     * @param  callable|Job|object  $job
+     *
+     * @return void
+     */
+    protected function pushJobIfDue(string $expression, $job)
+    {
+        if ($this->isDue($expression)) {
+            $this->pushJob((is_callable($job) ? $job() : $job));
         }
     }
 
     /**
-     * @param string            $expression
-     * @param string|array      $name
-     * @param string|array|null $in
-     * @param string|null       $basePath
+     * @param  mixed  $job
+     * @return mixed
+     */
+    protected function fireJob($job)
+    {
+        return $this->getDispatcher()->dispatchNow($this->prepareJob($job));
+    }
+
+    /**
+     * @param  string  $expression
+     * @param  callable|Job|object  $job
      *
      * @return void
      */
-    protected function pushDirJobsIfDue(string $expression, $name = '*.php', $in = null, string $basePath = null)
+    protected function fireJobIfDue(string $expression, $job)
     {
         if ($this->isDue($expression)) {
-            $this->pushDirJobs($name, $in, $basePath);
+            $this->fireJob((is_callable($job) ? $job() : $job));
         }
     }
 }
