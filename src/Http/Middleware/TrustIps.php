@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/4/26
- * Time: 10:47
+ * Time: 10:47.
  */
 
 namespace HughCube\Laravel\Knight\Http\Middleware;
@@ -27,7 +27,7 @@ class TrustIps
     /**
      * Create a new middleware instance.
      *
-     * @param  Container  $app
+     * @param Container $app
      *
      * @return void
      */
@@ -37,11 +37,13 @@ class TrustIps
     }
 
     /**
-     * @param  Request  $request
-     * @param  callable  $next
-     * @param  null|string  $ips
-     * @return Response
+     * @param Request     $request
+     * @param callable    $next
+     * @param null|string $ips
+     *
      * @throws AuthorizationException
+     *
+     * @return Response
      */
     public function handle(Request $request, callable $next, string $ips = null): Response
     {
