@@ -25,9 +25,14 @@ class TrustIps
     protected $app;
 
     /**
+     * @var array
+     */
+    protected $trustIps = [];
+
+    /**
      * Create a new middleware instance.
      *
-     * @param Container $app
+     * @param  Container  $app
      *
      * @return void
      */
@@ -37,17 +42,17 @@ class TrustIps
     }
 
     /**
-     * @param Request     $request
-     * @param callable    $next
-     * @param null|string $ips
-     *
-     * @throws AuthorizationException
+     * @param  Request  $request
+     * @param  callable  $next
+     * @param  null|string|array  $trustIps
      *
      * @return Response
+     * @throws AuthorizationException
+     *
      */
-    public function handle(Request $request, callable $next, string $ips = null): Response
+    public function handle(Request $request, callable $next, $trustIps = null): Response
     {
-        if (!$this->isTrustIp($request->ip(), $ips)) {
+        if (!$this->isTrustIp($request->ip(), ($trustIps ?? $this->trustIps))) {
             throw new AuthorizationException('An untrusted IP address!');
         }
 
