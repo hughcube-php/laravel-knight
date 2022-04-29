@@ -23,7 +23,7 @@ class ParameterBag
     }
 
     /**
-     * @param array $parameters
+     * @param  array  $parameters
      *
      * @return $this
      */
@@ -45,7 +45,7 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
+     * @param  string|int  $key
      *
      * @return bool
      */
@@ -65,8 +65,8 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param mixed      $default
+     * @param  string|int  $key
+     * @param  mixed  $default
      *
      * @return mixed
      */
@@ -76,8 +76,8 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param mixed      $value
+     * @param  string|int  $key
+     * @param  mixed  $value
      *
      * @return $this
      */
@@ -89,8 +89,8 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param mixed      $value
+     * @param  string|int  $key
+     * @param  mixed  $value
      *
      * @return $this
      */
@@ -104,7 +104,7 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
+     * @param  string|int  $key
      *
      * @return $this
      */
@@ -118,48 +118,52 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param callable   $callable
-     *
-     * @return false|mixed
+     * @param  bool  $when
+     * @param  integer|string  $key
+     * @param  callable  $callable
+     * @param  callable|mixed  $default
+     * @return mixed
      */
-    public function whenHas($key, callable $callable)
+    public function when(bool $when, $key, callable $callable, $default = null)
     {
-        if (!$this->has($key)) {
-            return false;
+        $value = $this->get($key);
+        if ($when) {
+            return $callable($value, $key, $this);
         }
-
-        return $callable($this->get($key), $key);
+        return is_callable($default) ? $default($value, $key, $this) : $default;
     }
 
     /**
-     * @param string|int $key
-     * @param callable   $callable
-     *
-     * @return false|mixed
+     * @param  string|int  $key
+     * @param  callable  $callable
+     * @param  callable|mixed  $default
+     * @return mixed
      */
-    public function whenNotNull($key, callable $callable)
+    public function whenHas($key, callable $callable, $default = null)
     {
-        if ($this->isNull($key)) {
-            return false;
-        }
-
-        return $callable($this->get($key), $key);
+        return $this->when($this->has($key), $key, $callable, $default);
     }
 
     /**
-     * @param string|int $key
-     * @param callable   $callable
-     *
-     * @return false|mixed
+     * @param  string|int  $key
+     * @param  callable  $callable
+     * @param  callable|mixed  $default
+     * @return mixed
      */
-    public function whenNotEmpty($key, callable $callable)
+    public function whenNotNull($key, callable $callable, $default = null)
     {
-        if ($this->isEmpty($key)) {
-            return false;
-        }
+        return $this->when(!$this->isNull($key), $key, $callable, $default);
+    }
 
-        return $callable($this->get($key), $key);
+    /**
+     * @param  string|int  $key
+     * @param  callable  $callable
+     * @param  callable|mixed  $default
+     * @return mixed
+     */
+    public function whenNotEmpty($key, callable $callable, $default = null)
+    {
+        return $this->when(!$this->isEmpty($key), $key, $callable, $default);
     }
 
     public function getIterator(): ArrayIterator
@@ -173,8 +177,8 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param mixed      $default
+     * @param  string|int  $key
+     * @param  mixed  $default
      *
      * @return null|bool
      */
@@ -194,8 +198,8 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param mixed      $default
+     * @param  string|int  $key
+     * @param  mixed  $default
      *
      * @return null|int
      */
@@ -215,8 +219,8 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param mixed      $default
+     * @param  string|int  $key
+     * @param  mixed  $default
      *
      * @return null|float
      */
@@ -238,8 +242,8 @@ class ParameterBag
     /**
      * 获取一个由数字和字母组成的参数.
      *
-     * @param string|int $key
-     * @param string     $default
+     * @param  string|int  $key
+     * @param  string  $default
      *
      * @return null|string
      */
@@ -253,8 +257,8 @@ class ParameterBag
     /**
      * 获取一个由数字和字母组成的参数.
      *
-     * @param string|int $key
-     * @param string     $default
+     * @param  string|int  $key
+     * @param  string  $default
      *
      * @return null|string
      */
@@ -266,8 +270,8 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param string     $default
+     * @param  string|int  $key
+     * @param  string  $default
      *
      * @return null|string
      */
