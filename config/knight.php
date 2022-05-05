@@ -7,40 +7,17 @@ use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand;
 
 return [
     'ping' => [
-        'routes' => [
-            [
-                'uri'    => 'ping',
-                'name'   => 'ping',
-                'action' => PingAction::class,
-            ],
-        ],
+        'route_prefix' => false,
     ],
 
     'request' => [
-        'routes' => [
-            [
-                'uri'    => 'ping',
-                'name'   => 'ping',
-                'action' => PingAction::class,
-            ],
-        ],
+        'route_prefix' => false,
     ],
 
     'opcache' => [
         'commands' => [
             CompileFilesCommand::class,
         ],
-        'routes' => [
-            [
-                'uri'    => 'opcache/scripts',
-                'name'   => 'opcache_scripts',
-                'action' => ScriptsAction::class,
-            ],
-            [
-                'uri'    => 'opcache/states',
-                'name'   => 'opcache_states',
-                'action' => StatesAction::class,
-            ],
-        ],
+        'route_prefix' => false,
     ],
 ];

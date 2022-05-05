@@ -32,6 +32,13 @@ use Laravel\Lumen\Application as LumenApplication;
 class ServiceProvider extends IlluminateServiceProvider
 {
     /**
+     * Register the provider.
+     */
+    public function register()
+    {
+    }
+
+    /**
      * Boot the provider.
      */
     public function boot()
@@ -55,22 +62,15 @@ class ServiceProvider extends IlluminateServiceProvider
         $this->registerRefreshModelCacheEvent();
     }
 
-    /**
-     * Register the provider.
-     */
-    public function register()
-    {
-    }
-
     protected function bootOPcache()
     {
         $this->commands([OPcacheCompileFilesCommand::class]);
 
-        $prefix = config('knight.opcache.route_prefix');
-        if (!$this->app->routesAreCached() && !empty($prefix)) {
+        $prefix = config('knight.opcache.route_prefix', false);
+        if (!$this->app->routesAreCached() && false !== $prefix) {
             Route::group(['prefix' => $prefix], function () {
-                Route::any('/scripts', OPcacheScriptsAction::class)->name('knight_opcache_scripts');
-                Route::any('/states', OPcacheStatesAction::class)->name('knight_opcache_states');
+                Route::any('/opcache/scripts', OPcacheScriptsAction::class)->name('knight.opcache.scripts');
+                Route::any('/opcache/states', OPcacheStatesAction::class)->name('knight.opcache.states');
             });
         }
     }
@@ -82,11 +82,11 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     protected function bootRequest()
     {
-        $prefix = config('knight.request.route_prefix');
-        if (!$this->app->routesAreCached() && !empty($prefix)) {
+        $prefix = config('knight.request.route_prefix', false);
+        if (!$this->app->routesAreCached() && false !== $prefix) {
             Route::group(['prefix' => $prefix], function () {
-                Route::any('/log', RequestLogAction::class)->name('knight_request_log');
-                Route::any('/show', RequestShowAction::class)->name('knight_request_show');
+                Route::any('/request/log', RequestLogAction::class)->name('knight.request.log');
+                Route::any('/request/show', RequestShowAction::class)->name('knight.request.show');
             });
         }
     }
@@ -98,10 +98,10 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     protected function bootPing()
     {
-        $enable = false !== config('knight.ping.routes');
-        if (!$this->app->routesAreCached() && $enable) {
-            Route::group(['prefix' => config('knight.ping.route_prefix')], function () {
-                Route::any('/ping', PingAction::class)->name('knight_ping');
+        $prefix = config('knight.request.route_prefix', '');
+        if (!$this->app->routesAreCached() && false !== $prefix) {
+            Route::group(['prefix' => $prefix], function () {
+                Route::any('/ping', PingAction::class)->name('knight.ping');
             });
         }
     }
