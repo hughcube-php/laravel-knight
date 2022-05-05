@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/5/2
- * Time: 23:20
+ * Time: 23:20.
  */
 
 namespace HughCube\Laravel\Knight\Traits;
@@ -13,8 +13,9 @@ use Illuminate\Contracts\Events\Dispatcher;
 trait GetDispatcher
 {
     /**
-     * @return Dispatcher
      * @throws
+     *
+     * @return Dispatcher
      * @phpstan-ignore-next-line
      */
     protected function getDispatcher(): Dispatcher

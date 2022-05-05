@@ -1,8 +1,5 @@
 <?php
 
-use HughCube\Laravel\Knight\Http\Actions\PingAction;
-use HughCube\Laravel\Knight\OPcache\Actions\ScriptsAction;
-use HughCube\Laravel\Knight\OPcache\Actions\StatesAction;
 use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand;
 
 return [
