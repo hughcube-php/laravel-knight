@@ -20,6 +20,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 trait Action
 {
@@ -82,6 +83,17 @@ trait Action
             'message' => 'ok',
             'data'    => $data,
         ]);
+    }
+
+    /**
+     * @param array $data
+     * @param int   $code
+     *
+     * @return Response
+     */
+    protected function asResponse(array $data = [], int $code = 200): Response
+    {
+        return $this->asResponse($data, $code);
     }
 
     /**
