@@ -75,14 +75,11 @@ trait Action
      * @param int   $code
      *
      * @return JsonResponse
+     * @deprecated It's a name change
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
     {
-        return new JsonResponse([
-            'code'    => $code,
-            'message' => 'ok',
-            'data'    => $data,
-        ]);
+        return $this->asResponse($data, $code);
     }
 
     /**
@@ -93,7 +90,11 @@ trait Action
      */
     protected function asResponse(array $data = [], int $code = 200): Response
     {
-        return $this->asResponse($data, $code);
+        return new JsonResponse([
+            'code'    => $code,
+            'message' => 'ok',
+            'data'    => $data,
+        ]);
     }
 
     /**
