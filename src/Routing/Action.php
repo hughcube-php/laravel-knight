@@ -75,6 +75,7 @@ trait Action
      * @param int   $code
      *
      * @return JsonResponse
+     *
      * @deprecated It's a name change
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
