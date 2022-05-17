@@ -80,6 +80,7 @@ trait Action
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
     {
+        /** @phpstan-ignore-next-line  */
         return $this->asResponse($data, $code);
     }
 

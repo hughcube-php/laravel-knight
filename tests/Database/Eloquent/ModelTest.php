@@ -484,6 +484,7 @@ class ModelTest extends TestCase
         $this->assertNull($user->deleted_at);
 
         $now = Carbon::now();
+        $user->timestamps = false;
         $user->created_at = $now;
         $user->updated_at = $now;
         $user->deleted_at = $now;
