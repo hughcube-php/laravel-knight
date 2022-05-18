@@ -85,12 +85,12 @@ class Handler extends ExceptionHandler
             $results = $data;
         } elseif ($e instanceof ResultsExceptionInterface) {
             $results = $e->getResults();
+        } elseif ($e instanceof DataExceptionInterface) {
+            $results = ['code' => $e->getCode(), 'message' => $e->getMessage(), 'data' => $e->getData()];
         } elseif ($e instanceof AuthenticationException) {
             $results = ['code' => 401, 'message' => '请先登录!'];
         } elseif ($e instanceof ValidationException) {
             $results = ['code' => $e->status, 'message' => '非法请求!', 'errors' => $e->errors()];
-        } elseif ($e instanceof DataExceptionInterface) {
-            $results = ['code' => $e->getCode(), 'message' => $e->getMessage(), 'data' => $e->getData()];
         } elseif ($e instanceof UserException) {
             $results = ['code' => $e->getCode(), 'message' => $e->getMessage()];
         } elseif ($e instanceof Exception) {
