@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/5/18
- * Time: 11:47
+ * Time: 11:47.
  */
 
 namespace HughCube\Laravel\Knight\Tests\Routing;
@@ -16,6 +16,7 @@ class ClientApiVersionTest extends TestCase
 {
     /**
      * @dataProvider instanceDataProvider
+     *
      * @throws ReflectionException
      */
     public function testClientApiVersionFormat($instance)
@@ -29,6 +30,7 @@ class ClientApiVersionTest extends TestCase
 
     /**
      * @dataProvider instanceDataProvider
+     *
      * @throws ReflectionException
      */
     public function testClientApiVersionCompare($instance)
@@ -40,6 +42,7 @@ class ClientApiVersionTest extends TestCase
 
     /**
      * @dataProvider instanceDataProvider
+     *
      * @throws ReflectionException
      */
     public function testIsEqClientApiVersion($instance)
@@ -50,6 +53,7 @@ class ClientApiVersionTest extends TestCase
 
     /**
      * @dataProvider instanceDataProvider
+     *
      * @throws ReflectionException
      */
     public function testIsLtClientApiVersion($instance)
@@ -60,6 +64,7 @@ class ClientApiVersionTest extends TestCase
 
     /**
      * @dataProvider instanceDataProvider
+     *
      * @throws ReflectionException
      */
     public function testIsGtClientApiVersion($instance)
@@ -72,15 +77,15 @@ class ClientApiVersionTest extends TestCase
     {
         return [
             [
-                new class {
+                new class() {
                     use ClientApiVersion;
 
                     protected function getClientApiVersion(): string
                     {
                         return '1.1.1';
                     }
-                }
-            ]
+                },
+            ],
         ];
     }
 }
