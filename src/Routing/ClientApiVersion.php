@@ -19,7 +19,7 @@ trait ClientApiVersion
     {
         $length = $length ?? 3;
 
-        return implode('.', array_slice(array_pad(explode('.', $version), $length, 0), 0, $length));
+        return implode('.', array_slice(array_pad((explode('.', $version) ?: []), $length, '0'), 0, $length));
     }
 
     protected function clientApiVersionCompare(string $operator, string $version, ?int $length = null): bool
