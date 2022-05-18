@@ -18,6 +18,7 @@ trait ClientApiVersion
     protected function clientApiVersionFormat(string $version, ?int $length = null): string
     {
         $length = $length ?? 3;
+
         return implode('.', array_slice(array_pad(explode('.', $version), $length, 0), 0, $length));
     }
 
@@ -31,7 +32,7 @@ trait ClientApiVersion
     }
 
     /**
-     * 判断请求是否来自指定版本的客户端
+     * 判断请求是否来自指定版本的客户端.
      *
      * 1.0(client) == 1.0 => true
      */
@@ -40,9 +41,8 @@ trait ClientApiVersion
         return $this->clientApiVersionCompare('=', $version, $length);
     }
 
-
     /**
-     * 判断请求是否来自大于指定版本的客户端
+     * 判断请求是否来自大于指定版本的客户端.
      *
      * 2.0(client) > 1.0 => true
      */
@@ -52,7 +52,7 @@ trait ClientApiVersion
     }
 
     /**
-     * 判断请求是否来自小于指定版本的客户端
+     * 判断请求是否来自小于指定版本的客户端.
      *
      * 1.0(client) < 2.0 => true
      */
