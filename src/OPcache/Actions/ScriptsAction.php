@@ -46,7 +46,7 @@ class ScriptsAction extends Controller
 
         $this->getCache()->set($this->getCacheKey(), $scripts, Carbon::now()->addYears());
 
-        return $this->asJson([
+        return $this->asResponse([
             'count'   => count($scripts),
             'scripts' => array_keys($scripts),
         ]);

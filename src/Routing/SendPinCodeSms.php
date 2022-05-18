@@ -38,7 +38,7 @@ trait SendPinCodeSms
         $pinCode = $this->getPinCode($mobile, $iddCode);
         $this->send($mobile, $iddCode, $pinCode);
 
-        return $this->asJson();
+        return $this->asResponse();
     }
 
     /**

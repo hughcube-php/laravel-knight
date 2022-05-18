@@ -10,15 +10,16 @@ namespace HughCube\Laravel\Knight\Http\Actions;
 
 use HughCube\Laravel\Knight\Routing\Controller;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class RequestShowAction extends Controller
 {
     /**
-     * @return JsonResponse
+     * @return Response
      */
-    protected function action(): JsonResponse
+    protected function action(): Response
     {
-        return $this->asJson([
+        return $this->asResponse([
             'uri'     => $this->getRequest()->getUri(),
             'https'   => $this->getRequest()->isSecure(),
             'method'  => $this->getRequest()->getMethod(),

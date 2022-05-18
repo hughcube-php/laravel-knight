@@ -10,6 +10,7 @@ namespace HughCube\Laravel\Knight\Routing;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @mixin Action
@@ -144,6 +145,6 @@ trait SimplePaginateQuery
      */
     protected function createResponse($results)
     {
-        return $this->asJson($results);
+        return $this->asResponse($results);
     }
 }
