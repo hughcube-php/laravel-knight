@@ -10,7 +10,6 @@ namespace HughCube\Laravel\Knight\Routing;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * @mixin Action
