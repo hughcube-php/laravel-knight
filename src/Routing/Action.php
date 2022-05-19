@@ -37,11 +37,11 @@ trait Action
     abstract protected function action();
 
     /**
-     * @param bool $must
-     *
-     * @throws AuthenticationException
+     * @param  bool  $must
      *
      * @return int|string|null
+     * @throws AuthenticationException
+     *
      */
     protected function getAuthId(bool $must = true)
     {
@@ -54,11 +54,11 @@ trait Action
     }
 
     /**
-     * @param bool $must
-     *
-     * @throws AuthenticationException
+     * @param  bool  $must
      *
      * @return Authenticatable|null
+     * @throws AuthenticationException
+     *
      */
     protected function getAuthUser(bool $must = true): ?Authenticatable
     {
@@ -71,8 +71,8 @@ trait Action
     }
 
     /**
-     * @param array $data
-     * @param int   $code
+     * @param  array  $data
+     * @param  int  $code
      *
      * @return JsonResponse
      *
@@ -80,30 +80,30 @@ trait Action
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
     {
-        /** @phpstan-ignore-next-line  */
+        /** @phpstan-ignore-next-line */
         return $this->asResponse($data, $code);
     }
 
     /**
-     * @param array $data
-     * @param int   $code
+     * @param  array  $data
+     * @param  int  $code
      *
      * @return Response
      */
     protected function asResponse(array $data = [], int $code = 200): Response
     {
         return new JsonResponse([
-            'code'    => $code,
+            'code' => $code,
             'message' => 'ok',
-            'data'    => $data,
+            'data' => $data,
         ]);
     }
 
     /**
-     * @throws
-     *
      * @return Request|LaravelRequest
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     protected function getRequest(): Request
     {
@@ -137,17 +137,17 @@ trait Action
     }
 
     /**
-     * @throws
-     *
      * @return mixed
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function invoke()
     {
         // Reset the status on each request
         // In Octane, the state of the controller is not reset
         $this->parameterBag = null;
-        $this->flushHughCubeKnightClassSelfCacheStorage();
+        $this->getIHKCStore()->clear();
 
         $this->loadParameters();
 
@@ -163,8 +163,8 @@ trait Action
     }
 
     /**
-     * @param string $name
-     * @param array  $arguments
+     * @param  string  $name
+     * @param  array  $arguments
      *
      * @return mixed
      */

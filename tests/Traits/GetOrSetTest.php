@@ -16,9 +16,9 @@ use ReflectionException;
 class GetOrSetTest extends TestCase
 {
     /**
+     * @return void
      * @throws ReflectionException
      *
-     * @return void
      */
     public function testGetOrSetNotEmpty()
     {
@@ -40,9 +40,9 @@ class GetOrSetTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws ReflectionException
      *
-     * @return void
      */
     public function testGetOrSetEmpty()
     {
@@ -51,26 +51,29 @@ class GetOrSetTest extends TestCase
         $key = Str::random();
 
         $this->assertNull($this->callMethod($mock, 'getOrSet', [
-            $key, function () {
+            $key,
+            function () {
                 return null;
             },
         ]));
         $this->assertNull($this->callMethod($mock, 'getOrSet', [
-            $key, function () {
+            $key,
+            function () {
                 return Str::random();
             },
         ]));
         $this->assertNull($this->callMethod($mock, 'getOrSet', [
-            $key, function () {
+            $key,
+            function () {
                 return Str::random();
             },
         ]));
     }
 
     /**
+     * @return void
      * @throws ReflectionException
      *
-     * @return void
      */
     public function testFlushHughCubeKnightClassSelfCacheStorage()
     {

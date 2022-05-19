@@ -8,12 +8,22 @@
 
 namespace HughCube\Laravel\Knight\Traits;
 
+use HughCube\Laravel\Knight\Cache\HKStore;
+
 trait GetOrSet
 {
     /**
-     * @var array
+     * @var null|HKStore
      */
-    private $hughCubeKnightClassSelfCacheStorage = [];
+    private $IHKCStore = null;
+
+    protected function getIHKCStore(): HKStore
+    {
+        if (!$this->IHKCStore instanceof HKStore) {
+            $this->IHKCStore = new HKStore();
+        }
+        return $this->IHKCStore;
+    }
 
     /**
      * The user builds virtual properties.
@@ -22,26 +32,24 @@ trait GetOrSet
      *     return Model::findById($this->getParameter()->get('id'));
      * });
      *
-     * @param mixed    $name
-     * @param callable $callable
+     * @param  mixed  $name
+     * @param  callable  $callable
      *
      * @return mixed
      */
     protected function getOrSet($name, callable $callable)
     {
-        $key = sprintf('%s:%s', md5($key = serialize($name)), crc32($key));
-        if (!array_key_exists($key, $this->hughCubeKnightClassSelfCacheStorage)) {
-            $this->hughCubeKnightClassSelfCacheStorage[$key] = $callable();
-        }
+        $cacheKey = sprintf('%s:%s', md5($scalarName = serialize($name)), crc32($scalarName));
 
-        return $this->hughCubeKnightClassSelfCacheStorage[$key];
+        return $this->getIHKCStore()->getOrSet($cacheKey, $callable);
     }
 
     /**
      * @return void
+     * @deprecated
      */
     public function flushHughCubeKnightClassSelfCacheStorage()
     {
-        $this->hughCubeKnightClassSelfCacheStorage = [];
+        $this->getIHKCStore()->clear();
     }
 }
