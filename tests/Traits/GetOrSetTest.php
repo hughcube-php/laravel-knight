@@ -16,9 +16,9 @@ use ReflectionException;
 class GetOrSetTest extends TestCase
 {
     /**
-     * @return void
      * @throws ReflectionException
      *
+     * @return void
      */
     public function testGetOrSetNotEmpty()
     {
@@ -40,9 +40,9 @@ class GetOrSetTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws ReflectionException
      *
+     * @return void
      */
     public function testGetOrSetEmpty()
     {
@@ -71,9 +71,9 @@ class GetOrSetTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws ReflectionException
      *
+     * @return void
      */
     public function testFlushHughCubeKnightClassSelfCacheStorage()
     {
