@@ -9,7 +9,6 @@
 namespace HughCube\Laravel\Knight\Http\Actions;
 
 use HughCube\Laravel\Knight\Routing\Controller;
-use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class RequestShowAction extends Controller
