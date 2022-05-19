@@ -50,7 +50,7 @@ class Carbon extends \Illuminate\Support\Carbon
             return static::instance($date);
         }
 
-        if (is_numeric($date)) {
+        if (is_numeric($date) && empty($format)) {
             return static::createFromTimestamp($date);
         }
 

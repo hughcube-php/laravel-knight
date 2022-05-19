@@ -145,6 +145,7 @@ trait Action
     public function invoke()
     {
         // Reset the status on each request
+        // In Octane, the state of the controller is not reset
         $this->parameterBag = null;
         $this->flushHughCubeKnightClassSelfCacheStorage();
 
