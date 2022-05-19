@@ -11,6 +11,7 @@ namespace HughCube\Laravel\Knight\Support;
 use DateTimeInterface;
 use DateTimeZone;
 use InvalidArgumentException;
+use Throwable;
 
 /**
  * @method static static|false createFromFormat(string $format, string $time, string|DateTimeZone $timezone = null)
@@ -35,8 +36,8 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * @param DateTimeInterface|int|float|string $date
-     * @param string|null                        $format
+     * @param  DateTimeInterface|int|float|string  $date
+     * @param  string|null  $format
      *
      * @return static|null
      */
@@ -68,8 +69,8 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * @param DateTimeInterface|int|float $value
-     * @param string                      $format
+     * @param  DateTimeInterface|int|float  $value
+     * @param  string  $format
      *
      * @return string|null
      */
@@ -81,8 +82,8 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * @param mixed  $date
-     * @param string $format
+     * @param  mixed  $date
+     * @param  string  $format
      *
      * @return bool
      */
@@ -94,7 +95,7 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * @param mixed $timestamp
+     * @param  mixed  $timestamp
      *
      * @return bool
      */
@@ -104,8 +105,8 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * @param string $date
-     * @param bool   $extended
+     * @param  string  $date
+     * @param  bool  $extended
      *
      * @return static|false
      */
@@ -117,7 +118,7 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * @param string $date
+     * @param  string  $date
      *
      * @return static|false
      */
@@ -132,5 +133,20 @@ class Carbon extends \Illuminate\Support\Carbon
     public function toRfc3339ExtendedString(): string
     {
         return $this->toRfc3339String(true);
+    }
+
+    /**
+     * @param  string|DateTimeInterface|null  $time
+     * @param  DateTimeZone|string|null  $tz
+     * @return Carbon|null
+     */
+    public static function tryParse($time = null, $tz = null): ?Carbon
+    {
+        try {
+            $date = static::parse($time, $tz);
+        } catch (Throwable $exception) {
+            $date = false;
+        }
+        return $date instanceof static ? $date : null;
     }
 }
