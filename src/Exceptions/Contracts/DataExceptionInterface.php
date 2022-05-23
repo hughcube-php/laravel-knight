@@ -6,7 +6,7 @@
  * Time: 21:16.
  */
 
-namespace HughCube\Laravel\Knight\Exceptions;
+namespace HughCube\Laravel\Knight\Exceptions\Contracts;
 
 interface DataExceptionInterface
 {

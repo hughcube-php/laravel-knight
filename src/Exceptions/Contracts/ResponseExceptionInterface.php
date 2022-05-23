@@ -6,12 +6,12 @@
  * Time: 21:16.
  */
 
-namespace HughCube\Laravel\Knight\Exceptions;
+namespace HughCube\Laravel\Knight\Exceptions\Contracts;
 
-interface ResultsExceptionInterface
+interface ResponseExceptionInterface
 {
     /**
      * Get the underlying response instance.
      */
-    public function getResults();
+    public function getResponse();
 }

@@ -8,6 +8,7 @@
 
 namespace HughCube\Laravel\Knight\Exceptions;
 
+use HughCube\Laravel\Knight\Exceptions\Contracts\DataExceptionInterface;
 use Throwable;
 
 class ExceptionWithData extends Exception implements DataExceptionInterface

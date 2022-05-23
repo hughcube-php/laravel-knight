@@ -2,6 +2,8 @@
 
 namespace HughCube\Laravel\Knight\Exceptions;
 
+use HughCube\Laravel\Knight\Exceptions\Contracts\DataExceptionInterface;
+use HughCube\Laravel\Knight\Exceptions\Contracts\ResponseExceptionInterface;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
@@ -20,6 +22,8 @@ class Handler extends ExceptionHandler
     protected $dontReport = [
         HttpException::class,
         UserException::class,
+        DataExceptionInterface::class,
+        ResponseExceptionInterface::class,
     ];
 
     /**
@@ -59,7 +63,7 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * @param Throwable $e
+     * @param  Throwable  $e
      *
      * @return null|array
      */
@@ -69,12 +73,12 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * @param Request   $request
-     * @param Throwable $e
-     *
-     * @throws Throwable
+     * @param  Request  $request
+     * @param  Throwable  $e
      *
      * @return Response
+     * @throws Throwable
+     *
      */
     public function render($request, Throwable $e): Response
     {
@@ -83,8 +87,8 @@ class Handler extends ExceptionHandler
 
         if (!empty($data = $this->convertExceptionToResponseData($e))) {
             $results = $data;
-        } elseif ($e instanceof ResultsExceptionInterface) {
-            $results = $e->getResults();
+        } elseif ($e instanceof ResponseExceptionInterface) {
+            $results = $e->getResponse();
         } elseif ($e instanceof DataExceptionInterface) {
             $results = ['code' => $e->getCode(), 'message' => $e->getMessage(), 'data' => $e->getData()];
         } elseif ($e instanceof AuthenticationException) {
@@ -113,18 +117,18 @@ class Handler extends ExceptionHandler
     /**
      * Converts an exception into an array.
      *
-     * @param Throwable $e
+     * @param  Throwable  $e
      *
      * @return array the array representation of the exception.
      */
     protected function convertExceptionToArray(Throwable $e): array
     {
         $array = [
-            'name'        => get_class($e),
-            'message'     => $e->getMessage(),
-            'code'        => $e->getCode(),
-            'file'        => $e->getFile(),
-            'line'        => $e->getLine(),
+            'name' => get_class($e),
+            'message' => $e->getMessage(),
+            'code' => $e->getCode(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
             'stack-trace' => explode("\n", $e->getTraceAsString()),
         ];
 
@@ -139,8 +143,20 @@ class Handler extends ExceptionHandler
         return $array;
     }
 
-    protected function convertResultsToResponse(array $results): Response
+    /**
+     * @param  array|Response|string  $results
+     * @return Response
+     */
+    protected function convertResultsToResponse($results): Response
     {
+        if ($results instanceof Response) {
+            return $results;
+        }
+
+        if (is_string($results)) {
+            return new Response($results);
+        }
+
         return new JsonResponse($results);
     }
 }
