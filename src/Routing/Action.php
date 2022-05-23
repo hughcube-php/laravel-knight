@@ -21,6 +21,10 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use ReflectionClass;
+use ReflectionException;
+use ReflectionMethod;
 use Symfony\Component\HttpFoundation\Response;
 
 trait Action
@@ -31,6 +35,30 @@ trait Action
     use Container;
 
     /**
+     * @return $this
+     * @throws ReflectionException
+     */
+    protected function initializers()
+    {
+        $reflection = new ReflectionClass($this);
+        $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED);
+
+        foreach ($methods as $method) {
+            if (!Str::startsWith($method->getName(), 'initialize')) {
+                continue;
+            }
+
+            if ($method->getName() === __FUNCTION__) {
+                continue;
+            }
+
+            $method->invoke($this);
+        }
+
+        return $this;
+    }
+
+    /**
      * action.
      *
      * @return mixed
@@ -38,11 +66,11 @@ trait Action
     abstract protected function action();
 
     /**
-     * @param bool $must
-     *
-     * @throws AuthenticationException
+     * @param  bool  $must
      *
      * @return int|string|null
+     * @throws AuthenticationException
+     *
      */
     protected function getAuthId(bool $must = true)
     {
@@ -55,11 +83,11 @@ trait Action
     }
 
     /**
-     * @param bool $must
-     *
-     * @throws AuthenticationException
+     * @param  bool  $must
      *
      * @return Authenticatable|null
+     * @throws AuthenticationException
+     *
      */
     protected function getAuthUser(bool $must = true): ?Authenticatable
     {
@@ -82,8 +110,8 @@ trait Action
     }
 
     /**
-     * @param array $data
-     * @param int   $code
+     * @param  array  $data
+     * @param  int  $code
      *
      * @return JsonResponse
      *
@@ -96,25 +124,25 @@ trait Action
     }
 
     /**
-     * @param array $data
-     * @param int   $code
+     * @param  array  $data
+     * @param  int  $code
      *
      * @return Response
      */
     protected function asResponse(array $data = [], int $code = 200): Response
     {
         return new JsonResponse([
-            'code'    => $code,
+            'code' => $code,
             'message' => 'ok',
-            'data'    => $data,
+            'data' => $data,
         ]);
     }
 
     /**
-     * @throws
-     *
      * @return Request|LaravelRequest
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     protected function getRequest(): Request
     {
@@ -148,10 +176,10 @@ trait Action
     }
 
     /**
-     * @throws
-     *
      * @return mixed
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function invoke()
     {
@@ -165,7 +193,7 @@ trait Action
 
         $this->loadParameters();
 
-        return $this->action();
+        return $this->initializers()->action();
     }
 
     /**
@@ -182,8 +210,8 @@ trait Action
     }
 
     /**
-     * @param string $name
-     * @param array  $arguments
+     * @param  string  $name
+     * @param  array  $arguments
      *
      * @return mixed
      */
