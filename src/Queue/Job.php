@@ -258,7 +258,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
 
     public function __get(string $name)
     {
-        return $this->p($name);
+        return $this->p()->get($name);
     }
 
     /**

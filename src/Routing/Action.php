@@ -176,6 +176,11 @@ trait Action
         return $this->invoke();
     }
 
+    public function __get(string $name)
+    {
+        return $this->p()->get($name);
+    }
+
     /**
      * @param string $name
      * @param array  $arguments
