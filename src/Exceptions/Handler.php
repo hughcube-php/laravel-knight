@@ -22,6 +22,7 @@ class Handler extends ExceptionHandler
     protected $dontReport = [
         HttpException::class,
         UserException::class,
+
         DataExceptionInterface::class,
         ResponseExceptionInterface::class,
     ];
