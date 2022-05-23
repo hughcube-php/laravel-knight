@@ -67,37 +67,22 @@ trait Action
     abstract protected function action();
 
     /**
-     * @param bool $must
-     *
-     * @throws AuthenticationException
-     *
      * @return int|string|null
      */
-    protected function getAuthId(bool $must = true)
+    protected function getAuthId()
     {
-        $id = Auth::id() ?: null;
-        if ($must && empty($id)) {
-            throw new AuthenticationException();
-        }
-
-        return $id;
+        return Auth::id() ?: null;
     }
 
     /**
-     * @param bool $must
-     *
-     * @throws AuthenticationException
-     *
-     * @return Authenticatable|null
+     * @return mixed
      */
-    protected function getAuthUser(bool $must = true): ?Authenticatable
+    protected function getAuthUser()
     {
-        $user = Auth::user();
-        if ($must && !$user instanceof Authenticatable) {
-            throw new AuthenticationException();
-        }
+        /** @var mixed $use */
+        $use = Auth::user();
 
-        return $user instanceof Authenticatable ? $user : null;
+        return $use;
     }
 
     protected function getActionStartDateTime(): Carbon
