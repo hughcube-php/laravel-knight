@@ -10,6 +10,7 @@ namespace HughCube\Laravel\Knight\Routing;
 
 use BadMethodCallException;
 use HughCube\Laravel\Knight\Http\LaravelRequest;
+use HughCube\Laravel\Knight\Support\Carbon;
 use HughCube\Laravel\Knight\Support\ParameterBag;
 use HughCube\Laravel\Knight\Traits\Container;
 use HughCube\Laravel\Knight\Traits\GetOrSet;
@@ -37,11 +38,11 @@ trait Action
     abstract protected function action();
 
     /**
-     * @param bool $must
-     *
-     * @throws AuthenticationException
+     * @param  bool  $must
      *
      * @return int|string|null
+     * @throws AuthenticationException
+     *
      */
     protected function getAuthId(bool $must = true)
     {
@@ -54,11 +55,11 @@ trait Action
     }
 
     /**
-     * @param bool $must
-     *
-     * @throws AuthenticationException
+     * @param  bool  $must
      *
      * @return Authenticatable|null
+     * @throws AuthenticationException
+     *
      */
     protected function getAuthUser(bool $must = true): ?Authenticatable
     {
@@ -70,9 +71,19 @@ trait Action
         return $user instanceof Authenticatable ? $user : null;
     }
 
+    protected function getActionStartDateTime(): Carbon
+    {
+        /** @var Carbon $dateTime */
+        $dateTime = $this->getOrSet(__METHOD__, function () {
+            return Carbon::now();
+        });
+
+        return $dateTime->clone();
+    }
+
     /**
-     * @param array $data
-     * @param int   $code
+     * @param  array  $data
+     * @param  int  $code
      *
      * @return JsonResponse
      *
@@ -85,25 +96,25 @@ trait Action
     }
 
     /**
-     * @param array $data
-     * @param int   $code
+     * @param  array  $data
+     * @param  int  $code
      *
      * @return Response
      */
     protected function asResponse(array $data = [], int $code = 200): Response
     {
         return new JsonResponse([
-            'code'    => $code,
+            'code' => $code,
             'message' => 'ok',
-            'data'    => $data,
+            'data' => $data,
         ]);
     }
 
     /**
-     * @throws
-     *
      * @return Request|LaravelRequest
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     protected function getRequest(): Request
     {
@@ -137,10 +148,10 @@ trait Action
     }
 
     /**
-     * @throws
-     *
      * @return mixed
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function invoke()
     {
@@ -148,6 +159,9 @@ trait Action
         // In Octane, the state of the controller is not reset
         $this->parameterBag = null;
         $this->getIHKCStore()->clear();
+
+        // Log the time of entry in the action logic
+        $this->getActionStartDateTime();
 
         $this->loadParameters();
 
@@ -163,8 +177,8 @@ trait Action
     }
 
     /**
-     * @param string $name
-     * @param array  $arguments
+     * @param  string  $name
+     * @param  array  $arguments
      *
      * @return mixed
      */
