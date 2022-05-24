@@ -16,8 +16,6 @@ use HughCube\Laravel\Knight\Traits\Container;
 use HughCube\Laravel\Knight\Traits\GetOrSet;
 use HughCube\Laravel\Knight\Traits\ParameterBag as ParameterBagTrait;
 use HughCube\Laravel\Knight\Traits\Validation;
-use Illuminate\Auth\AuthenticationException;
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,31 +31,6 @@ trait Action
     use Validation;
     use ParameterBagTrait;
     use Container;
-
-    /**
-     * @throws ReflectionException
-     *
-     * @return $this
-     */
-    protected function initializers()
-    {
-        $reflection = new ReflectionClass($this);
-        $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED);
-
-        foreach ($methods as $method) {
-            if (!Str::startsWith($method->getName(), 'initialize')) {
-                continue;
-            }
-
-            if ($method->getName() === __FUNCTION__) {
-                continue;
-            }
-
-            $method->invoke($this);
-        }
-
-        return $this;
-    }
 
     /**
      * action.
@@ -96,8 +69,8 @@ trait Action
     }
 
     /**
-     * @param array $data
-     * @param int   $code
+     * @param  array  $data
+     * @param  int  $code
      *
      * @return JsonResponse
      *
@@ -110,25 +83,25 @@ trait Action
     }
 
     /**
-     * @param array $data
-     * @param int   $code
+     * @param  array  $data
+     * @param  int  $code
      *
      * @return Response
      */
     protected function asResponse(array $data = [], int $code = 200): Response
     {
         return new JsonResponse([
-            'code'    => $code,
+            'code' => $code,
             'message' => 'ok',
-            'data'    => $data,
+            'data' => $data,
         ]);
     }
 
     /**
-     * @throws
-     *
      * @return Request|LaravelRequest
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     protected function getRequest(): Request
     {
@@ -162,24 +135,49 @@ trait Action
     }
 
     /**
-     * @throws
-     *
      * @return mixed
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function invoke()
     {
         // Reset the status on each request
         // In Octane, the state of the controller is not reset
-        $this->parameterBag = null;
-        $this->getIHKCStore()->clear();
+        $this->clearActionStatus();
 
         // Log the time of entry in the action logic
         $this->getActionStartDateTime();
 
+        // Collect all validated parameters
         $this->loadParameters();
 
-        return $this->initializers()->action();
+        $reflection = new ReflectionClass($this);
+        $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED);
+
+        // Run all onActioning* methods before action
+        foreach ($methods as $method) {
+            if (Str::startsWith($method->getName(), 'onActioning')) {
+                $method->invoke($this);
+            }
+        }
+
+        $response = $this->action();
+
+        // Run all onActioned* methods after the action
+        foreach ($methods as $method) {
+            if (Str::startsWith($method->getName(), 'onActioned')) {
+                $method->invoke($this);
+            }
+        }
+
+        return $response;
+    }
+
+    protected function clearActionStatus()
+    {
+        $this->parameterBag = null;
+        $this->getIHKCStore()->clear();
     }
 
     /**
@@ -196,8 +194,8 @@ trait Action
     }
 
     /**
-     * @param string $name
-     * @param array  $arguments
+     * @param  string  $name
+     * @param  array  $arguments
      *
      * @return mixed
      */

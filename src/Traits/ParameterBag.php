@@ -18,7 +18,7 @@ trait ParameterBag
     private $parameterBag = null;
 
     /**
-     * @return mixed
+     * @return void
      */
     abstract protected function loadParameters();
 
