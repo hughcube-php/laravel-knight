@@ -36,6 +36,7 @@ class ServiceProvider extends IlluminateServiceProvider
 {
     /**
      * Register the provider.
+     *
      * @throws ReflectionException
      */
     public function register()
