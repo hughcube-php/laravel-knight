@@ -57,7 +57,7 @@ trait Action
         return $use;
     }
 
-    protected function getActionStartDateTime(): Carbon
+    protected function getActionStartedAt(): Carbon
     {
         /** @var Carbon $dateTime */
         $dateTime = $this->getOrSet(__METHOD__, function () {
@@ -146,7 +146,7 @@ trait Action
         $this->clearActionStatus();
 
         // Log the time of entry in the action logic
-        $this->getActionStartDateTime();
+        $this->getActionStartedAt();
 
         // Collect all validated parameters
         $this->loadParameters();
@@ -169,6 +169,9 @@ trait Action
                 $method->invoke($this);
             }
         }
+
+        // Clean up the state once the action is complete
+        $this->clearActionStatus();
 
         return $response;
     }
