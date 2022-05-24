@@ -78,7 +78,7 @@ class KRTest extends Command
      *
      * @return object
      */
-    protected function makeInstance(): object
+    protected function makeInstance()
     {
         $class = $this->option('class');
 

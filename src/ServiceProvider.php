@@ -16,6 +16,7 @@ use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use HughCube\Laravel\Knight\Http\Actions\PingAction;
 use HughCube\Laravel\Knight\Http\Actions\RequestLogAction;
 use HughCube\Laravel\Knight\Http\Actions\RequestShowAction;
+use HughCube\Laravel\Knight\Mixin\Support\StrMixin;
 use HughCube\Laravel\Knight\OPcache\Actions\ScriptsAction as OPcacheScriptsAction;
 use HughCube\Laravel\Knight\OPcache\Actions\StatesAction as OPcacheStatesAction;
 use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand as OPcacheCompileFilesCommand;
@@ -24,7 +25,9 @@ use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
+use Illuminate\Support\Str;
 use Laravel\Lumen\Application as LumenApplication;
+use ReflectionException;
 
 /**
  * @property LaravelApplication|LumenApplication $app
@@ -33,9 +36,11 @@ class ServiceProvider extends IlluminateServiceProvider
 {
     /**
      * Register the provider.
+     * @throws ReflectionException
      */
     public function register()
     {
+        Str::mixin(new StrMixin());
     }
 
     /**

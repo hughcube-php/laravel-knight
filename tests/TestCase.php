@@ -124,7 +124,7 @@ class TestCase extends OrchestraTestCase
      *
      * @return mixed
      */
-    protected static function getProperty(object $object, string $name)
+    protected static function getProperty($object, string $name)
     {
         $class = new ReflectionClass($object);
 
@@ -141,7 +141,7 @@ class TestCase extends OrchestraTestCase
      *
      * @throws ReflectionException
      */
-    protected static function setProperty(object $object, string $name, $value)
+    protected static function setProperty($object, string $name, $value)
     {
         $class = new ReflectionClass($object);
 
