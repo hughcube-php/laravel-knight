@@ -123,7 +123,7 @@ class Handler extends ExceptionHandler
      *
      * @return array the array representation of the exception.
      */
-    protected function convertExceptionToArray(Throwable $e): array
+    protected function convertExceptionToArray($e): array
     {
         $array = [
             'name'        => get_class($e),
