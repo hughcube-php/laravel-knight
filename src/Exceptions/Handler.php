@@ -78,7 +78,7 @@ class Handler extends ExceptionHandler
      *
      * @return Response
      */
-    public function render($request, \Exception $e)
+    public function render($request, Throwable $e): Response
     {
         $e = method_exists($this, 'mapException') ? $this->mapException($e) : $e;
         $e = $this->prepareException($e);
@@ -115,11 +115,11 @@ class Handler extends ExceptionHandler
     /**
      * Converts an exception into an array.
      *
-     * @param \Exception $e
+     * @param Throwable $e
      *
      * @return array the array representation of the exception.
      */
-    protected function convertExceptionToArray(\Exception $e): array
+    protected function convertExceptionToArray(Throwable $e): array
     {
         $array = [
             'name'        => get_class($e),
