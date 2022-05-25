@@ -7,6 +7,8 @@ use HughCube\Laravel\Knight\Database\Eloquent\Builder;
 use HughCube\Laravel\Knight\Support\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection as IlluminateCollection;
 use Illuminate\Support\Str;
 use Psr\SimpleCache\CacheInterface;
 use Traversable;
@@ -28,8 +30,8 @@ trait Model
     private $isFromCache = false;
 
     /**
-     * @param DateTimeInterface|int|float|string|null $date
-     * @param string|null                             $format
+     * @param  DateTimeInterface|int|float|string|null  $date
+     * @param  string|null  $format
      *
      * @return Carbon|null
      */
@@ -41,8 +43,8 @@ trait Model
     }
 
     /**
-     * @param DateTimeInterface|int|float|null $dateTime
-     * @param string                           $format
+     * @param  DateTimeInterface|int|float|null  $dateTime
+     * @param  string  $format
      *
      * @return string|null
      */
@@ -53,17 +55,29 @@ trait Model
         return $dateTime instanceof DateTimeInterface ? $dateTime->format($format) : null;
     }
 
-    public function getCreatedAtAttribute($date): ?Carbon
+    /**
+     * @param mixed $date
+     * @return mixed
+     */
+    public function getCreatedAtAttribute($date)
     {
         return $this->toDateTime($date);
     }
 
-    public function getUpdatedAtAttribute($date): ?Carbon
+    /**
+     * @param mixed $date
+     * @return mixed
+     */
+    public function getUpdatedAtAttribute($date)
     {
         return $this->toDateTime($date);
     }
 
-    public function getDeletedAtAttribute($date): ?Carbon
+    /**
+     * @param mixed $date
+     * @return mixed
+     */
+    public function getDeletedAtAttribute($date)
     {
         return $this->toDateTime($date);
     }
@@ -86,6 +100,12 @@ trait Model
     public function formatDeleteAt(string $format = 'Y-m-d H:i:s'): ?string
     {
         return $this->formatDateColumn($this->getDeletedAtColumn(), $format);
+    }
+
+    public function getSetColumnCollection($name, $separator = ',', $filter = null): IlluminateCollection
+    {
+        $values = Arr::wrap(explode($separator, $this->{$name}));
+        return IlluminateCollection::make($values)->filter($filter)->unique();
     }
 
     /**
@@ -114,7 +134,7 @@ trait Model
     /**
      * Create a new Eloquent query builder for the model.
      *
-     * @param \Illuminate\Database\Query\Builder $query
+     * @param  \Illuminate\Database\Query\Builder  $query
      *
      * @return Builder
      */
@@ -188,7 +208,7 @@ trait Model
     }
 
     /**
-     * @param mixed $id
+     * @param  mixed  $id
      *
      * @return null|static
      */
@@ -198,7 +218,7 @@ trait Model
     }
 
     /**
-     * @param array|Arrayable|Traversable $ids
+     * @param  array|Arrayable|Traversable  $ids
      *
      * @return Collection
      */
@@ -210,7 +230,7 @@ trait Model
     /**
      * Is a primary key value.
      *
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return bool
      */
