@@ -17,11 +17,15 @@ use Throwable;
 class Handler extends ExceptionHandler
 {
     /**
-     * @inheritdoc
+     * @var array<integer, string>
+     * @phpstan-ignore-next-line
      */
     protected $dontReport = [
         HttpException::class,
         UserException::class,
+
+        DataExceptionInterface::class,
+        ResponseExceptionInterface::class,
     ];
 
     /**
