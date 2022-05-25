@@ -65,7 +65,7 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * @param  Throwable  $e
+     * @param Throwable $e
      *
      * @return null|array
      */
@@ -75,12 +75,12 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * @param  Request  $request
-     * @param  \Exception|Throwable  $e
+     * @param Request              $request
+     * @param \Exception|Throwable $e
      *
-     * @return Response
      * @throws Throwable
      *
+     * @return Response
      */
     public function render($request, $e): Response
     {
@@ -119,18 +119,18 @@ class Handler extends ExceptionHandler
     /**
      * Converts an exception into an array.
      *
-     * @param  Throwable|\Exception  $e
+     * @param Throwable|\Exception $e
      *
      * @return array the array representation of the exception.
      */
     protected function convertExceptionToArray(Throwable $e): array
     {
         $array = [
-            'name' => get_class($e),
-            'message' => $e->getMessage(),
-            'code' => $e->getCode(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
+            'name'        => get_class($e),
+            'message'     => $e->getMessage(),
+            'code'        => $e->getCode(),
+            'file'        => $e->getFile(),
+            'line'        => $e->getLine(),
             'stack-trace' => explode("\n", $e->getTraceAsString()),
         ];
 
@@ -146,7 +146,7 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * @param  array|Response|string  $results
+     * @param array|Response|string $results
      *
      * @return Response
      */
