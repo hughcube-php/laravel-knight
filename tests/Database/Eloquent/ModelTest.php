@@ -9,6 +9,7 @@
 namespace HughCube\Laravel\Knight\Tests\Database\Eloquent;
 
 use Exception;
+use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
 use HughCube\Laravel\Knight\Support\Carbon;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Cache\Events\CacheHit;
@@ -21,7 +22,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
-use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
 
 class ModelTest extends TestCase
 {
