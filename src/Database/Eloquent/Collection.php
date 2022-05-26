@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/5/26
- * Time: 11:28
+ * Time: 11:28.
  */
 
 namespace HughCube\Laravel\Knight\Database\Eloquent;
