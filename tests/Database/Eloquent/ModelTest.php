@@ -21,6 +21,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
 
 class ModelTest extends TestCase
 {
@@ -556,5 +557,15 @@ class ModelTest extends TestCase
         $this->assertTrue(Str::endsWith($user->nickname, $keyword));
         $queryUser = User::query()->whereRightLike('nickname', $keyword)->first();
         $this->assertSame($user->id, $queryUser->id);
+    }
+
+    public function testQueryCollection()
+    {
+        $this->resetTable();
+
+        $users = User::query()->limit(10)->get();
+
+        $this->assertInstanceOf(KnightCollection::class, $users);
+        $this->assertInstanceOf(KnightCollection::class, User::findByIds($users->pluck('id')));
     }
 }

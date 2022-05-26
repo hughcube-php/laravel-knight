@@ -4,9 +4,9 @@ namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
 use DateTimeInterface;
 use HughCube\Laravel\Knight\Database\Eloquent\Builder;
+use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
 use HughCube\Laravel\Knight\Support\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection as IlluminateCollection;
 use Illuminate\Support\Str;
@@ -30,8 +30,8 @@ trait Model
     private $isFromCache = false;
 
     /**
-     * @param DateTimeInterface|int|float|string|null $date
-     * @param string|null                             $format
+     * @param  DateTimeInterface|int|float|string|null  $date
+     * @param  string|null  $format
      *
      * @return Carbon|null
      */
@@ -43,8 +43,8 @@ trait Model
     }
 
     /**
-     * @param DateTimeInterface|int|float|null $dateTime
-     * @param string                           $format
+     * @param  DateTimeInterface|int|float|null  $dateTime
+     * @param  string  $format
      *
      * @return string|null
      */
@@ -56,7 +56,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return mixed
      */
@@ -66,7 +66,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return mixed
      */
@@ -76,7 +76,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return mixed
      */
@@ -109,7 +109,7 @@ trait Model
     {
         $values = Arr::wrap(explode($separator, $this->{$name}));
 
-        return IlluminateCollection::make($values)->filter($filter)->unique();
+        return IlluminateCollection::make($values)->filter($filter)->unique()->values();
     }
 
     /**
@@ -138,7 +138,7 @@ trait Model
     /**
      * Create a new Eloquent query builder for the model.
      *
-     * @param \Illuminate\Database\Query\Builder $query
+     * @param  \Illuminate\Database\Query\Builder  $query
      *
      * @return Builder
      */
@@ -212,7 +212,7 @@ trait Model
     }
 
     /**
-     * @param mixed $id
+     * @param  mixed  $id
      *
      * @return null|static
      */
@@ -222,11 +222,11 @@ trait Model
     }
 
     /**
-     * @param array|Arrayable|Traversable $ids
+     * @param  array|Arrayable|Traversable  $ids
      *
-     * @return Collection
+     * @return KnightCollection
      */
-    public static function findByIds($ids): Collection
+    public static function findByIds($ids): KnightCollection
     {
         return static::query()->findByPks($ids);
     }
@@ -234,7 +234,7 @@ trait Model
     /**
      * Is a primary key value.
      *
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return bool
      */
@@ -282,5 +282,14 @@ trait Model
     public function ifAvailableReturnSelf()
     {
         return $this->ifReturnSelf($this->isAvailable());
+    }
+
+    /**
+     * @inheritDoc
+     * @return KnightCollection
+     */
+    public function newCollection(array $models = []): KnightCollection
+    {
+        return new KnightCollection($models);
     }
 }
