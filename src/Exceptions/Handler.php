@@ -65,32 +65,45 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * @param Throwable $e
+     * @param  Throwable  $e
      *
      * @return null|array
+     *
+     * @deprecated
      */
     protected function convertExceptionToResponseData($e): ?array
     {
         return null;
     }
 
+    protected function convertExceptionToResults($e): ?array
+    {
+        if (method_exists($this, 'convertExceptionToResponseData')) {
+            return $this->convertExceptionToResponseData($e);
+        }
+
+        return null;
+    }
+
     /**
-     * @param Request              $request
-     * @param \Exception|Throwable $e
+     * @param  Request  $request
+     * @param  \Exception|Throwable  $e
      *
+     * @return mixed
      * @throws Throwable
      *
-     * @return Response
      */
-    public function render($request, $e): Response
+    public function render($request, $e)
     {
         $e = method_exists($this, 'mapException') ? $this->mapException($e) : $e;
         $e = $this->prepareException($e);
 
-        if (!empty($data = $this->convertExceptionToResponseData($e))) {
+        if ($e instanceof ResponseExceptionInterface) {
+            return $e->getResponse();
+        }
+
+        if (!empty($data = $this->convertExceptionToResults($e)) && is_array($data)) {
             $results = $data;
-        } elseif ($e instanceof ResponseExceptionInterface) {
-            $results = $e->getResponse();
         } elseif ($e instanceof DataExceptionInterface) {
             $results = ['code' => $e->getCode(), 'message' => $e->getMessage(), 'data' => $e->getData()];
         } elseif ($e instanceof AuthenticationException) {
@@ -119,18 +132,18 @@ class Handler extends ExceptionHandler
     /**
      * Converts an exception into an array.
      *
-     * @param Throwable|\Exception $e
+     * @param  Throwable|\Exception  $e
      *
      * @return array the array representation of the exception.
      */
     protected function convertExceptionToArray($e): array
     {
         $array = [
-            'name'        => get_class($e),
-            'message'     => $e->getMessage(),
-            'code'        => $e->getCode(),
-            'file'        => $e->getFile(),
-            'line'        => $e->getLine(),
+            'name' => get_class($e),
+            'message' => $e->getMessage(),
+            'code' => $e->getCode(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
             'stack-trace' => explode("\n", $e->getTraceAsString()),
         ];
 
@@ -146,7 +159,7 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * @param array|Response|string $results
+     * @param  array|Response|string  $results
      *
      * @return Response
      */
