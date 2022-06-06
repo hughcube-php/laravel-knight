@@ -45,6 +45,7 @@ class Collection extends \Illuminate\Database\Eloquent\Collection
         }
 
         $dictionary = Arr::only($this->getDictionary(), $keys);
+
         return static::make(array_values($dictionary));
     }
 

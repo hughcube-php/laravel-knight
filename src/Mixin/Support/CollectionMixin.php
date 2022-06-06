@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/6/6
- * Time: 18:57
+ * Time: 18:57.
  */
 
 namespace HughCube\Laravel\Knight\Mixin\Support;
@@ -24,6 +24,7 @@ class CollectionMixin
                     return true;
                 }
             }
+
             return false;
         };
     }
@@ -44,6 +45,7 @@ class CollectionMixin
                     return false;
                 }
             }
+
             return false;
         };
     }
