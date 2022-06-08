@@ -12,8 +12,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection as IlluminateCollection;
 
 /**
- * @method bool hasByCallable(callable $key)
- * @method bool isIndexed(bool $consecutive = true)
+ * @method bool       hasByCallable(callable $key)
+ * @method bool       isIndexed(bool $consecutive = true)
  * @method Collection filterWithStop(callable $stop)
  */
 class Collection extends \Illuminate\Database\Eloquent\Collection
