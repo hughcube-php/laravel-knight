@@ -45,6 +45,7 @@ class CollectionMixin
                     return false;
                 }
             }
+
             return true;
         };
     }
@@ -53,9 +54,11 @@ class CollectionMixin
     {
         return function (callable $stop) {
             $stopState = false;
+
             return $this->filter(function ($item) use (&$stopState, $stop) {
                 $preStopState = $stopState;
                 $stopState = $stopState || $stop($item);
+
                 return $preStopState;
             });
         };
