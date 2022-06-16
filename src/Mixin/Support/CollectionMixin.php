@@ -40,7 +40,7 @@ class CollectionMixin
                 return $this->keys()->toArray() === range(0, $this->count() - 1);
             }
 
-            foreach ($this->getIterator() as $index => $value) {
+            foreach ($this->all() as $index => $value) {
                 if (!is_int($index)) {
                     return false;
                 }
@@ -54,11 +54,9 @@ class CollectionMixin
     {
         return function (callable $stop) {
             $stopState = false;
-
             return $this->filter(function ($item) use (&$stopState, $stop) {
                 $preStopState = $stopState;
                 $stopState = $stopState || $stop($item);
-
                 return $preStopState;
             });
         };

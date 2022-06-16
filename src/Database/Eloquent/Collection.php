@@ -8,6 +8,7 @@
 
 namespace HughCube\Laravel\Knight\Database\Eloquent;
 
+use HughCube\Laravel\Knight\Mixin\Support\CollectionMixin;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection as IlluminateCollection;
 
@@ -15,6 +16,8 @@ use Illuminate\Support\Collection as IlluminateCollection;
  * @method bool       hasByCallable(callable $key)
  * @method bool       isIndexed(bool $consecutive = true)
  * @method Collection filterWithStop(callable $stop)
+ *
+ * @see CollectionMixin
  */
 class Collection extends \Illuminate\Database\Eloquent\Collection
 {
