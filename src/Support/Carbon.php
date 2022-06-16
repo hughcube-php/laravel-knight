@@ -143,6 +143,10 @@ class Carbon extends \Illuminate\Support\Carbon
      */
     public static function tryParse($time = null, $tz = null): ?Carbon
     {
+        if(empty($time)){
+            return null;
+        }
+
         try {
             $date = static::parse($time, $tz);
         } catch (Throwable $exception) {
