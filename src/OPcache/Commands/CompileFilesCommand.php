@@ -143,7 +143,7 @@ class CompileFilesCommand extends Command
         $finder = Finder::create()
             ->in([
                 base_path('app/'),
-                #base_path('bootstrap/'),
+                base_path('bootstrap/'),
                 #base_path('config/'),
                 #base_path('public/'),
                 #base_path('routes/'),
