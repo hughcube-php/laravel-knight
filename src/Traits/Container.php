@@ -12,6 +12,7 @@ use Illuminate\Config\Repository;
 use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Queue\QueueManager;
+use Illuminate\Events\Dispatcher as EventsDispatcher;
 
 trait Container
 {
@@ -31,6 +32,16 @@ trait Container
     protected function getDispatcher(): Dispatcher
     {
         return $this->getContainer()->make(Dispatcher::class);
+    }
+
+    /**
+     * @return EventsDispatcher
+     * @phpstan-ignore-next-line
+     * @throws
+     */
+    protected function getEventsDispatcher(): EventsDispatcher
+    {
+        return $this->getContainer()->make(EventsDispatcher::class);
     }
 
     /**
