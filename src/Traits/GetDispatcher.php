@@ -10,13 +10,16 @@ namespace HughCube\Laravel\Knight\Traits;
 
 use Illuminate\Contracts\Events\Dispatcher;
 
+/**
+ * @deprecated
+ * @see Container
+ */
 trait GetDispatcher
 {
     /**
-     * @throws
-     *
      * @return Dispatcher
      * @phpstan-ignore-next-line
+     * @throws
      */
     protected function getDispatcher(): Dispatcher
     {

@@ -11,7 +11,6 @@ namespace HughCube\Laravel\Knight\Traits;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Contracts\Bus\Dispatcher;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Queue\QueueManager;
 
 trait Container
@@ -26,7 +25,8 @@ trait Container
 
     /**
      * @return Dispatcher
-     * @throws BindingResolutionException
+     * @phpstan-ignore-next-line
+     * @throws
      */
     protected function getDispatcher(): Dispatcher
     {
