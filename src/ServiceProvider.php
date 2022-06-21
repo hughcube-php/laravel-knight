@@ -59,10 +59,9 @@ class ServiceProvider extends IlluminateServiceProvider
             $this->app->configure('knight');
         }
 
-        $this->commands([Config::class]);
-        $this->commands([Environment::class]);
-        $this->commands([PhpIniFile::class]);
-        $this->commands([KRTest::class]);
+        if ($this->app->runningInConsole()) {
+            $this->commands([Config::class, Environment::class, PhpIniFile::class, KRTest::class]);
+        }
 
         $this->bootOPcache();
         $this->bootRequest();
@@ -73,7 +72,9 @@ class ServiceProvider extends IlluminateServiceProvider
 
     protected function bootOPcache()
     {
-        $this->commands([OPcacheCompileFilesCommand::class]);
+        if ($this->app->runningInConsole()) {
+            $this->commands([OPcacheCompileFilesCommand::class]);
+        }
 
         $prefix = config('knight.opcache.route_prefix', false);
         if (!$this->app->routesAreCached() && false !== $prefix) {

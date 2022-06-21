@@ -9,6 +9,7 @@
 namespace HughCube\Laravel\Knight\Queue;
 
 use BadMethodCallException;
+use HughCube\Laravel\Knight\Contracts\Queue\FromFlowJob;
 use HughCube\Laravel\Knight\Support\ParameterBag;
 use HughCube\Laravel\Knight\Traits\Container;
 use HughCube\Laravel\Knight\Traits\GetOrSet;
@@ -33,7 +34,7 @@ use Illuminate\Support\Str;
  * @method static PendingDispatch|Fluent|static dispatchIf($boolean, ...$arguments)
  * @method static PendingDispatch|Fluent|static dispatchUnless($boolean, ...$arguments)
  */
-abstract class Job implements ShouldQueue, StaticInstanceInterface
+abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 {
     use Dispatchable;
     use InteractsWithQueue;
@@ -60,6 +61,11 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
      * @var string|int|null
      */
     protected $pid = null;
+
+    /**
+     * @var null|FlowJobDescribe
+     */
+    protected $flowJobDescribe = null;
 
     /**
      * Create a new job instance.
@@ -111,7 +117,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param int $flags
+     * @param  int  $flags
      *
      * @return string
      */
@@ -137,7 +143,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param int $flags
+     * @param  int  $flags
      *
      * @return string
      */
@@ -159,7 +165,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param string|int|null $pid
+     * @param  string|int|null  $pid
      *
      * @return $this
      */
@@ -171,7 +177,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param object|null $job
+     * @param  object|null  $job
      *
      * @return string
      *
@@ -191,7 +197,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param array|string|null $channel
+     * @param  array|string|null  $channel
      *
      * @return $this
      */
@@ -203,9 +209,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param mixed  $level
-     * @param string $message
-     * @param array  $context
+     * @param  mixed  $level
+     * @param  string  $message
+     * @param  array  $context
      *
      * @return void
      */
@@ -216,9 +222,19 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
         Log::channel($this->getLogChannel())->log($level, $message, $context);
     }
 
+    public function setFlowJobDescribe(FlowJobDescribe $describe)
+    {
+        $this->flowJobDescribe = $describe;
+    }
+
+    public function isDelayDeleteFlowJob(): bool
+    {
+        return false;
+    }
+
     /**
-     * @param string $key
-     * @param null   $default
+     * @param  string  $key
+     * @param  null  $default
      *
      * @return mixed
      *
@@ -230,7 +246,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param mixed $key
+     * @param  mixed  $key
      *
      * @return bool
      *
@@ -242,8 +258,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param string $key
-     * @param mixed  $value
+     * @param  string  $key
+     * @param  mixed  $value
      *
      * @return $this
      *
@@ -257,8 +273,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface
     }
 
     /**
-     * @param string $name
-     * @param array  $arguments
+     * @param  string  $name
+     * @param  array  $arguments
      *
      * @return false|mixed
      */
