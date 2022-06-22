@@ -11,8 +11,8 @@ namespace HughCube\Laravel\Knight\Traits;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Contracts\Bus\Dispatcher;
-use Illuminate\Queue\QueueManager;
 use Illuminate\Events\Dispatcher as EventsDispatcher;
+use Illuminate\Queue\QueueManager;
 
 trait Container
 {
@@ -25,9 +25,10 @@ trait Container
     }
 
     /**
+     * @throws
+     *
      * @return Dispatcher
      * @phpstan-ignore-next-line
-     * @throws
      */
     protected function getDispatcher(): Dispatcher
     {
@@ -35,9 +36,10 @@ trait Container
     }
 
     /**
+     * @throws
+     *
      * @return EventsDispatcher
      * @phpstan-ignore-next-line
-     * @throws
      */
     protected function getEventsDispatcher(): EventsDispatcher
     {
@@ -45,9 +47,10 @@ trait Container
     }
 
     /**
+     * @throws
+     *
      * @return QueueManager
      * @phpstan-ignore-next-line
-     * @throws
      */
     protected function getQueueManager(): QueueManager
     {
@@ -55,10 +58,10 @@ trait Container
     }
 
     /**
-     * @return Repository
-     * @phpstan-ignore-next-line
      * @throws
      *
+     * @return Repository
+     * @phpstan-ignore-next-line
      */
     protected function getContainerConfig(): Repository
     {
