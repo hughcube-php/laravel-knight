@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/6/21
- * Time: 22:14
+ * Time: 22:14.
  */
 
 namespace HughCube\Laravel\Knight\Queue;
@@ -29,7 +29,6 @@ class FlowJobDescribe
         $this->id = $id;
     }
 
-
     public function getConnection(): Queue
     {
         return $this->getQueueManager()->connection($this->connection);
@@ -41,6 +40,7 @@ class FlowJobDescribe
         if ($connection instanceof DatabaseQueue) {
             return $connection;
         }
+
         return null;
     }
 

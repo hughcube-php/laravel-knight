@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/6/21
- * Time: 22:06
+ * Time: 22:06.
  */
 
 namespace HughCube\Laravel\Knight\Queue\Jobs;
@@ -22,15 +22,14 @@ class QueueFlowJob extends Job
     {
         return [
             'from_connection' => ['required', 'string'],
-            'from_queue' => ['string', 'min:1', 'nullable'],
+            'from_queue'      => ['string', 'min:1', 'nullable'],
 
             'to_connection' => ['required', 'string'],
-            'to_queue' => ['string', 'min:1', 'nullable'],
+            'to_queue'      => ['string', 'min:1', 'nullable'],
 
-            'max_time' => ['integer', 'min:1', 'nullable']
+            'max_time' => ['integer', 'min:1', 'nullable'],
         ];
     }
-
 
     /**
      * @throws BindingResolutionException
@@ -79,6 +78,7 @@ class QueueFlowJob extends Job
         }
 
         $connection = $this->getQueueManager()->connection($this->p('to_connection'));
+
         return $connection->push($job, '', $this->p('to_queue'));
     }
 
