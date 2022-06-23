@@ -15,9 +15,10 @@
         "hughcube/purl": "*",
         "hughcube/base": "*",
         "hughcube/htree": "*",
+        "hughcube/guzzle-http": "*",
         "hughcube/static-instance": "*",
         "hughcube/laravel-validation": "*",
-        "hughcube/guzzle-http": "*"
+        "hughcube/laravel-service-support": "*"
     },
     "require-dev": {
         "jenssegers/agent": "*",
