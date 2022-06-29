@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/6/29
- * Time: 16:54
+ * Time: 16:54.
  */
 
 namespace HughCube\Laravel\Knight\Http\Middleware;
@@ -17,6 +17,7 @@ class CheckForAnyAbility extends \Laravel\Sanctum\Http\Middleware\CheckForAnyAbi
         if (!$request->user() || !$request->user()->currentAccessToken()) {
             return $next($request);
         }
+
         return parent::handle($request, $next, $abilities);
     }
 }
