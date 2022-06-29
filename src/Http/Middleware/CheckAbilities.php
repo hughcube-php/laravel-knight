@@ -18,6 +18,6 @@ class CheckAbilities extends \Laravel\Sanctum\Http\Middleware\CheckAbilities
             return $next($request);
         }
 
-        return parent::handle($request, $next, $abilities);
+        return parent::handle($request, $next, ...$abilities);
     }
 }

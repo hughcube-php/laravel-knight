@@ -18,6 +18,6 @@ class CheckForAnyAbility extends \Laravel\Sanctum\Http\Middleware\CheckForAnyAbi
             return $next($request);
         }
 
-        return parent::handle($request, $next, $abilities);
+        return parent::handle($request, $next, ...$abilities);
     }
 }
