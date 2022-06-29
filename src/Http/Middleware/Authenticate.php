@@ -8,24 +8,40 @@
 
 namespace HughCube\Laravel\Knight\Http\Middleware;
 
+use Closure;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 use Illuminate\Http\Request;
 
 class Authenticate extends Middleware
 {
+    protected $optional = null;
+
     /**
-     * Get the path the user should be redirected to when they are not authenticated.
-     *
-     * @param Request $request
-     *
-     * @return string|null
+     * @inheritDoc
      */
-    protected function redirectTo($request): ?string
+    public function handle($request, Closure $next, ...$guards)
     {
-        if (!$request->expectsJson()) {
-            return route('login');
+        $exception = null;
+        try {
+            $this->authenticate($request, $guards);
+        } catch (AuthenticationException $exception) {
         }
 
-        return null;
+        if ($exception instanceof AuthenticationException && !$this->isOptional($request)) {
+            throw $exception;
+        }
+
+        return $next($request);
+    }
+
+    protected function isOptional(Request $request): bool
+    {
+        return $request->is($this->getOptional()) || $request->fullUrlIs($this->getOptional());
+    }
+
+    protected function getOptional()
+    {
+        return ($this->optional ?: config('authenticate.optional')) ?: [];
     }
 }
