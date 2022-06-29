@@ -21,13 +21,14 @@
         "hughcube/laravel-service-support": "*"
     },
     "require-dev": {
-        "jenssegers/agent": "*",
-        "laravel/framework": "*",
-        "laravel/lumen-framework": "*",
-        "squizlabs/php_codesniffer": "*",
+        "laravel/sanctum": "*",
         "phpstan/phpstan": "*",
+        "jenssegers/agent": "*",
+        "ext-zend-opcache": "*",
+        "laravel/framework": "*",
         "orchestra/testbench": "*",
-        "ext-zend-opcache": "*"
+        "laravel/lumen-framework": "*",
+        "squizlabs/php_codesniffer": "*"
     },
     "autoload": {
         "files": [
