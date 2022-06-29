@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/6/29
- * Time: 16:27
+ * Time: 16:27.
  */
 
 namespace HughCube\Laravel\Knight\Http\Middleware;
@@ -18,7 +18,7 @@ class TrustProxies extends Middleware
      *
      * @var array|string|null
      */
-    protected $proxies = "*";
+    protected $proxies = '*';
 
     /**
      * The headers that should be used to detect proxies.
