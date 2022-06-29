@@ -35,7 +35,7 @@ class HttpsGuard
     /**
      * Create a new middleware instance.
      *
-     * @param Container $app
+     * @param  Container  $app
      *
      * @return void
      */
@@ -45,15 +45,19 @@ class HttpsGuard
     }
 
     /**
-     * @param Request     $request
-     * @param callable    $next
-     * @param int         $status
-     * @param string|null $hsts
+     * @param  Request  $request
+     * @param  callable  $next
+     * @param  int  $status
+     * @param  string|null  $hsts
      *
      * @return Response
      */
-    public function handle(Request $request, callable $next, int $status = 301, ?string $hsts = null): Response
-    {
+    public function handle(
+        Request $request,
+        callable $next,
+        int $status = 301,
+        ?string $hsts = 'max-age=31536000'
+    ): Response {
         if (!$request->isSecure()
             && $this->isHostRequest($request)
             && $this->isSecureApplicationUrl()
@@ -78,7 +82,7 @@ class HttpsGuard
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return bool
      */
