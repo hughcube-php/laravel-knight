@@ -19,7 +19,10 @@ class Version
     {
         $length = $length ?: 3;
 
-        return Collection::make(explode('.', $version) ?: [])
+        /** @var array|false $results */
+        $results = explode('.', $version);
+
+        return Collection::make($results ?: [])
             ->pad($length, '0')
             ->splice(0, $length)
             ->implode('.');
