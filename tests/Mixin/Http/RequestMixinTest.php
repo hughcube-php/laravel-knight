@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/6/30
- * Time: 16:50
+ * Time: 16:50.
  */
 
 namespace HughCube\Laravel\Knight\Tests\Mixin\Http;
@@ -51,7 +51,7 @@ class RequestMixinTest extends TestCase
     public function testIsEqClientVersion()
     {
         $request = Request::capture();
-        Request::macro('getClientVersion', function (){
+        Request::macro('getClientVersion', function () {
             return '1.0.0';
         });
         $this->assertTrue($request->isEqClientVersion('1', 1));
@@ -67,7 +67,7 @@ class RequestMixinTest extends TestCase
     public function testIsLtClientApiVersion()
     {
         $request = Request::capture();
-        Request::macro('getClientVersion', function (){
+        Request::macro('getClientVersion', function () {
             return '2.2.2';
         });
         $this->assertTrue($request->isLtClientVersion('2', true));
@@ -75,7 +75,6 @@ class RequestMixinTest extends TestCase
 
         $this->assertTrue($request->isLtClientVersion('2.2', true));
         $this->assertTrue($request->isLtClientVersion('2.1'));
-
 
         $this->assertTrue($request->isLtClientVersion('2.2.2', true));
         $this->assertTrue($request->isLtClientVersion('2.2.1'));
@@ -91,7 +90,7 @@ class RequestMixinTest extends TestCase
     public function testIsLtClientVersion()
     {
         $request = Request::capture();
-        Request::macro('getClientVersion', function (){
+        Request::macro('getClientVersion', function () {
             return '2.2.2';
         });
         $this->assertTrue($request->isGtClientVersion('3', true));
@@ -99,7 +98,6 @@ class RequestMixinTest extends TestCase
 
         $this->assertTrue($request->isGtClientVersion('3.2', true));
         $this->assertTrue($request->isGtClientVersion('3.1'));
-
 
         $this->assertTrue($request->isGtClientVersion('3.2.2', true));
         $this->assertTrue($request->isGtClientVersion('3.2.1'));

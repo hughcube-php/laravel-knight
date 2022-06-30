@@ -67,8 +67,8 @@ trait Action
     }
 
     /**
-     * @param  array  $data
-     * @param  int  $code
+     * @param array $data
+     * @param int   $code
      *
      * @return JsonResponse
      *
@@ -81,25 +81,25 @@ trait Action
     }
 
     /**
-     * @param  array  $data
-     * @param  int  $code
+     * @param array $data
+     * @param int   $code
      *
      * @return Response
      */
     protected function asResponse(array $data = [], int $code = 200): Response
     {
         return new JsonResponse([
-            'code' => $code,
+            'code'    => $code,
             'message' => 'ok',
-            'data' => $data,
+            'data'    => $data,
         ]);
     }
 
     /**
-     * @return Request
-     * @phpstan-ignore-next-line
      * @throws
      *
+     * @return Request
+     * @phpstan-ignore-next-line
      */
     protected function getRequest(): Request
     {
@@ -133,10 +133,10 @@ trait Action
     }
 
     /**
-     * @return mixed
-     * @phpstan-ignore-next-line
      * @throws
      *
+     * @return mixed
+     * @phpstan-ignore-next-line
      */
     public function invoke()
     {
@@ -195,8 +195,8 @@ trait Action
     }
 
     /**
-     * @param  string  $name
-     * @param  array  $arguments
+     * @param string $name
+     * @param array  $arguments
      *
      * @return mixed
      */

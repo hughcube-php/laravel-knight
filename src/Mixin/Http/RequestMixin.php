@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/6/30
- * Time: 16:07
+ * Time: 16:07.
  */
 
 namespace HughCube\Laravel\Knight\Mixin\Http;
@@ -15,7 +15,9 @@ use Jenssegers\Agent\Agent;
 
 /**
  * @mixin Request
+ *
  * @method null|string getClientVersion()
+ *
  * @property null|Agent $userAgentDetect
  */
 class RequestMixin
@@ -29,6 +31,7 @@ class RequestMixin
             if (!property_exists($this, 'userAgentDetect') || !$this->userAgentDetect instanceof Agent) {
                 $this->userAgentDetect = new Agent($this->headers->all(), $this->userAgent());
             }
+
             return $this->userAgentDetect;
         };
     }
