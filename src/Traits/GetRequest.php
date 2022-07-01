@@ -10,11 +10,12 @@ namespace HughCube\Laravel\Knight\Traits;
 
 use HughCube\Laravel\Knight\Ide\Http\Request as IdeRequest;
 use Illuminate\Http\Request;
+use Laravel\Lumen\Http\Request as LumenRequest;
 
 trait GetRequest
 {
     /**
-     * @return null|Request|IdeRequest|\Request
+     * @return null|Request|IdeRequest|\Request|LumenRequest
      */
     public function getRequest(): Request
     {

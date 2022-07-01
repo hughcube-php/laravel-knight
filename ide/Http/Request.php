@@ -55,7 +55,7 @@ class Request
     /**
      * @see RequestMixin::isEqClientVersion()
      */
-    protected function isEqClientVersion(string $version, ?int $length = null): bool
+    public function isEqClientVersion(string $version, ?int $length = null): bool
     {
         return false;
     }
@@ -63,7 +63,7 @@ class Request
     /**
      * @see RequestMixin::isLtClientVersion()
      */
-    protected function isLtClientVersion(string $version, bool $contain = false, ?int $length = null): bool
+    public function isLtClientVersion(string $version, bool $contain = false, ?int $length = null): bool
     {
         return false;
     }
@@ -71,7 +71,7 @@ class Request
     /**
      * @see RequestMixin::isGtClientVersion()
      */
-    protected function isGtClientVersion(string $version, bool $contain = false, ?int $length = null): bool
+    public function isGtClientVersion(string $version, bool $contain = false, ?int $length = null): bool
     {
         return false;
     }

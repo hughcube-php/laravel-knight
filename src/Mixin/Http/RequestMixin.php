@@ -61,7 +61,7 @@ class RequestMixin
      *
      * 1.0(client) == 1.0 => true
      */
-    protected function isEqClientVersion(): Closure
+    public function isEqClientVersion(): Closure
     {
         return function (string $version, ?int $length = null): bool {
             return Version::compare('=', $this->getClientVersion(), $version, $length);
@@ -73,7 +73,7 @@ class RequestMixin
      *
      * 2.0(client) > 1.0 => true
      */
-    protected function isLtClientVersion(): Closure
+    public function isLtClientVersion(): Closure
     {
         return function (string $version, bool $contain = false, ?int $length = null): bool {
             return Version::compare(($contain ? '>=' : '>'), $this->getClientVersion(), $version, $length);
@@ -85,7 +85,7 @@ class RequestMixin
      *
      * 1.0(client) < 2.0 => true
      */
-    protected function isGtClientVersion(): Closure
+    public function isGtClientVersion(): Closure
     {
         return function (string $version, bool $contain = false, ?int $length = null): bool {
             return Version::compare(($contain ? '<=' : '<'), $this->getClientVersion(), $version, $length);

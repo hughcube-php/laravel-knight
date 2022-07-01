@@ -39,7 +39,7 @@ class Collection
      *
      * @see CollectionMixin::filterWithStop()
      */
-    protected function filterWithStop(callable $stop): Collection
+    public function filterWithStop(callable $stop): Collection
     {
         return $this;
     }

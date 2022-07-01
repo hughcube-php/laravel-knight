@@ -50,7 +50,7 @@ class CollectionMixin
         };
     }
 
-    protected function filterWithStop(): Closure
+    public function filterWithStop(): Closure
     {
         return function (callable $stop) {
             $stopState = false;
