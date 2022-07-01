@@ -77,4 +77,17 @@ class Collection extends \Illuminate\Database\Eloquent\Collection
 
         return static::make($items);
     }
+
+    /**
+     * @param  bool|mixed  $when
+     * @param  callable  $callable
+     * @return static
+     */
+    public function whenFilter($when, callable $callable): Collection
+    {
+        if ($when) {
+            return $this->filter($callable);
+        }
+        return $this;
+    }
 }
