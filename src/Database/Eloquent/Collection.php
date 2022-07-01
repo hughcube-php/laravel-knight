@@ -79,8 +79,9 @@ class Collection extends \Illuminate\Database\Eloquent\Collection
     }
 
     /**
-     * @param  bool|mixed  $when
-     * @param  callable  $callable
+     * @param bool|mixed $when
+     * @param callable   $callable
+     *
      * @return static
      */
     public function whenFilter($when, callable $callable): Collection
@@ -88,6 +89,7 @@ class Collection extends \Illuminate\Database\Eloquent\Collection
         if ($when) {
             return $this->filter($callable);
         }
+
         return $this;
     }
 }
