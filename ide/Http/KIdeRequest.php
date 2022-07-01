@@ -9,16 +9,18 @@
 namespace HughCube\Laravel\Knight\Ide\Http;
 
 use HughCube\Laravel\Knight\Mixin\Http\RequestMixin;
+use Illuminate\Http\Request as IlluminateRequest;
 use Jenssegers\Agent\Agent;
+use Laravel\Lumen\Http\Request as LumenRequest;
 
 /**
- * @mixin \Laravel\Lumen\Http\Request
- * @mixin \Illuminate\Http\Request
+ * @mixin LumenRequest
+ * @mixin IlluminateRequest
  *
  * @see RequestMixin
  * @deprecated 只是一个帮助类, 不要使用
  */
-class Request
+class KIdeRequest
 {
     /**
      * @see RequestMixin::getClientVersion()

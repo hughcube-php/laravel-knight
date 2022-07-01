@@ -8,7 +8,7 @@
 
 namespace HughCube\Laravel\Knight\Database\Eloquent;
 
-use HughCube\Laravel\Knight\Ide\Support\Collection as IdeHelpCollection;
+use HughCube\Laravel\Knight\Ide\Support\KIdeCollection;
 use HughCube\Laravel\Knight\Mixin\Support\CollectionMixin;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection as IlluminateCollection;
@@ -19,7 +19,7 @@ use Illuminate\Support\Collection as IlluminateCollection;
  * @method Collection filterWithStop(callable $stop)
  *
  * @see CollectionMixin
- * @mixin IdeHelpCollection
+ * @mixin KIdeCollection
  */
 class Collection extends \Illuminate\Database\Eloquent\Collection
 {
@@ -81,8 +81,8 @@ class Collection extends \Illuminate\Database\Eloquent\Collection
     }
 
     /**
-     * @param bool|mixed $when
-     * @param callable   $callable
+     * @param  bool|mixed  $when
+     * @param  callable  $callable
      *
      * @return static
      */

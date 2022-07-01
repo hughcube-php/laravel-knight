@@ -9,14 +9,15 @@
 namespace HughCube\Laravel\Knight\Ide\Support;
 
 use HughCube\Laravel\Knight\Mixin\Support\CollectionMixin;
+use Illuminate\Support\Collection;
 
 /**
- * @mixin \Illuminate\Support\Collection
+ * @mixin Collection
  *
  * @deprecated 只是一个帮助类, 不要使用
  * @see CollectionMixin
  */
-class Collection
+class KIdeCollection
 {
     /**
      * @see CollectionMixin::hasByCallable()
@@ -39,7 +40,7 @@ class Collection
      *
      * @see CollectionMixin::filterWithStop()
      */
-    public function filterWithStop(callable $stop): Collection
+    public function filterWithStop(callable $stop): KIdeCollection
     {
         return $this;
     }
