@@ -66,6 +66,6 @@ trait GetMobile
      */
     protected function invalidMobileResponse()
     {
-        throw new MobileInvalidException('手机号码错误!');
+        throw new MobileInvalidException('手机号码不正确!');
     }
 }

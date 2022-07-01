@@ -2,6 +2,8 @@
 
 namespace HughCube\Laravel\Knight\Exceptions;
 
+use HughCube\Laravel\EasySms\Exceptions\MobileInvalidException as EasySmsMobileInvalidException;
+use HughCube\Laravel\EasySms\Exceptions\ThrottleRequestsException as EasySmsThrottleRequestsException;
 use HughCube\Laravel\Knight\Exceptions\Contracts\DataExceptionInterface;
 use HughCube\Laravel\Knight\Exceptions\Contracts\ResponseExceptionInterface;
 use Illuminate\Auth\AuthenticationException;
@@ -65,7 +67,7 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * @param Throwable $e
+     * @param  Throwable  $e
      *
      * @return null|array
      *
@@ -86,12 +88,12 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * @param Request              $request
-     * @param \Exception|Throwable $e
-     *
-     * @throws Throwable
+     * @param  Request  $request
+     * @param  \Exception|Throwable  $e
      *
      * @return mixed
+     * @throws Throwable
+     *
      */
     public function render($request, $e)
     {
@@ -118,6 +120,10 @@ class Handler extends ExceptionHandler
             $results = ['code' => $e->getCode(), 'message' => $e->getMessage()];
         } elseif ($e instanceof Exception) {
             $results = ['code' => 500, 'message' => $e->getMessage()];
+        } elseif ($e instanceof EasySmsMobileInvalidException) {
+            $results = ['code' => $e->getCode(), 'message' => '手机号码不正确!'];
+        } elseif ($e instanceof EasySmsThrottleRequestsException) {
+            $results = ['code' => $e->getCode(), 'message' => '短信发送太频繁了, 请稍后再试!'];
         } else {
             $results = ['code' => 500, 'message' => '服务器繁忙, 请稍后再试!'];
         }
@@ -134,18 +140,18 @@ class Handler extends ExceptionHandler
     /**
      * Converts an exception into an array.
      *
-     * @param Throwable|\Exception $e
+     * @param  Throwable|\Exception  $e
      *
      * @return array the array representation of the exception.
      */
     protected function convertExceptionToArray($e): array
     {
         $array = [
-            'name'        => get_class($e),
-            'message'     => $e->getMessage(),
-            'code'        => $e->getCode(),
-            'file'        => $e->getFile(),
-            'line'        => $e->getLine(),
+            'name' => get_class($e),
+            'message' => $e->getMessage(),
+            'code' => $e->getCode(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
             'stack-trace' => explode("\n", $e->getTraceAsString()),
         ];
 
@@ -161,7 +167,7 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * @param array|Response|string $results
+     * @param  array|Response|string  $results
      *
      * @return Response
      */
