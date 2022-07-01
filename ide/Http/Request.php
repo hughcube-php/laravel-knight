@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/7/1
- * Time: 23:43
+ * Time: 23:43.
  */
 
 namespace HughCube\Laravel\Knight\Ide\Http;
@@ -14,6 +14,7 @@ use Jenssegers\Agent\Agent;
 /**
  * @mixin \Laravel\Lumen\Http\Request
  * @mixin \Illuminate\Http\Request
+ *
  * @see RequestMixin
  * @deprecated 只是一个帮助类, 不要使用
  */
