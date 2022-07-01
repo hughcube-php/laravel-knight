@@ -81,8 +81,8 @@ class Collection extends \Illuminate\Database\Eloquent\Collection
     }
 
     /**
-     * @param  bool|mixed  $when
-     * @param  callable  $callable
+     * @param bool|mixed $when
+     * @param callable   $callable
      *
      * @return static
      */
