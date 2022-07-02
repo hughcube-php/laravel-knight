@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/7/2
- * Time: 21:34
+ * Time: 21:34.
  */
 
 namespace HughCube\Laravel\Knight\Tests\Mixin\Support;
@@ -27,7 +27,6 @@ class CollectionMixin extends TestCase
             return 10 === $item;
         }));
     }
-
 
     public function testIsIndexed()
     {
@@ -67,7 +66,6 @@ class CollectionMixin extends TestCase
         })->values()->toArray());
     }
 
-
     public function testPluckAndMergeSetColumn()
     {
         /** @var KIdeCollection $collection */
@@ -84,7 +82,7 @@ class CollectionMixin extends TestCase
     }
 
     /**
-     * 收集指定数组keys, 组合成一个新的collection
+     * 收集指定数组keys, 组合成一个新的collection.
      */
     public function testOnlyArrayKeys()
     {
@@ -93,7 +91,6 @@ class CollectionMixin extends TestCase
 
         $this->assertSame(['a' => 2, 'b' => 3], $collection->onlyArrayKeys(['a', 'b', 'c', '$'])->toArray());
     }
-
 
     public function testOnlyColumnValues()
     {

@@ -10,6 +10,7 @@ namespace HughCube\Laravel\Knight\Routing;
 
 /**
  * @mixin Action
+ *
  * @deprecated 已经废弃, 使用mixin在Request实现
  * @see RequestMixin
  */

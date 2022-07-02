@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/7/2
- * Time: 00:17
+ * Time: 00:17.
  */
 
 namespace HughCube\Laravel\Knight\Traits;
