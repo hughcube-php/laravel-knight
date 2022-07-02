@@ -44,4 +44,44 @@ class KIdeCollection
     {
         return $this;
     }
+
+    /**
+     * @return $this
+     *
+     * @see CollectionMixin::pluckAndMergeSetColumn()
+     */
+    public function pluckAndMergeSetColumn($name, $separator = ',', $filter = null): KIdeCollection
+    {
+        return $this;
+    }
+
+    /**
+     * @return $this
+     *
+     * @see CollectionMixin::onlyArrayKeys()
+     */
+    public function onlyArrayKeys($keys = []): KIdeCollection
+    {
+        return $this;
+    }
+
+    /**
+     * @return $this
+     *
+     * @see CollectionMixin::onlyColumnValues()
+     */
+    public function onlyColumnValues($values, $name = null, bool $strict = false): KIdeCollection
+    {
+        return $this;
+    }
+
+    /**
+     * @return $this
+     *
+     * @see CollectionMixin::whenFilter()
+     */
+    public function whenFilter($when, callable $callable): KIdeCollection
+    {
+        return $this;
+    }
 }
