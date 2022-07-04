@@ -12,10 +12,6 @@ use HughCube\Laravel\Knight\Ide\Support\KIdeCollection;
 use HughCube\Laravel\Knight\Mixin\Support\CollectionMixin;
 
 /**
- * @method bool       hasByCallable(callable $key)
- * @method bool       isIndexed(bool $consecutive = true)
- * @method Collection filterWithStop(callable $stop)
- *
  * @see CollectionMixin
  * @mixin KIdeCollection
  */

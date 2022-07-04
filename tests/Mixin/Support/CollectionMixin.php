@@ -55,14 +55,42 @@ class CollectionMixin extends TestCase
     {
         /** @var KIdeCollection $collection */
         $collection = Collection::make([1, 2, 3, 4, 5]);
-        $this->assertSame([3, 4, 5], $collection->filterWithStop(function ($item) {
-            return $item === 3;
-        })->values()->toArray());
+        $this->assertSame(
+            [3, 4, 5],
+            $collection
+                ->filterWithStop(function ($item) {
+                    return $item === 3;
+                }, true)
+                ->values()
+                ->toArray()
+        );
 
         /** @var KIdeCollection $collection */
         $collection = Collection::make([1, 2, 3, 4, 5]);
-        $this->assertSame([], $collection->filterWithStop(function ($item) {
-            return $item === 0;
+        $this->assertSame(
+            [],
+            $collection
+                ->filterWithStop(function ($item) {
+                    return $item === 0;
+                }, true)
+                ->values()
+                ->toArray()
+        );
+
+        $this->assertSame([5, 6, 7], Collection::make([1, 2, 3, 4, 5, 6, 7])->filterWithStop(function ($item) {
+            return 4 === $item;
+        })->values()->toArray());
+
+        $this->assertSame([6, 7], Collection::make([1, 2, 3, 4, 5, 6, 7])->filterWithStop(function ($item) {
+            return 5 === $item;
+        })->values()->toArray());
+
+        $this->assertSame([7], Collection::make([1, 2, 3, 4, 5, 6, 7])->filterWithStop(function ($item) {
+            return 6 === $item;
+        })->values()->toArray());
+
+        $this->assertSame([], Collection::make([1, 2, 3, 4, 5, 6, 7])->filterWithStop(function ($item) {
+            return 7 === $item;
         })->values()->toArray());
     }
 

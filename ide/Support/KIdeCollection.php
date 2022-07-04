@@ -40,7 +40,7 @@ class KIdeCollection
      *
      * @see CollectionMixin::filterWithStop()
      */
-    public function filterWithStop(callable $stop): KIdeCollection
+    public function filterWithStop(callable $stop, $withStopItem = false): KIdeCollection
     {
         return $this;
     }
@@ -81,6 +81,26 @@ class KIdeCollection
      * @see CollectionMixin::whenFilter()
      */
     public function whenFilter($when, callable $callable): KIdeCollection
+    {
+        return $this;
+    }
+
+    /**
+     * @return $this
+     *
+     * @see CollectionMixin::mapInt()
+     */
+    public function mapInt(): KIdeCollection
+    {
+        return $this;
+    }
+
+    /**
+     * @return $this
+     *
+     * @see CollectionMixin::mapString()
+     */
+    public function mapString(): KIdeCollection
     {
         return $this;
     }

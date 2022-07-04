@@ -58,15 +58,19 @@ class CollectionMixin
     }
 
     /**
-     * 过滤元素直到满足$stop(含stop的值).
+     * 过滤元素直到满足$stop.
      */
     public function filterWithStop(): Closure
     {
-        return function (callable $stop) {
+        return function (callable $stop, $withStopItem = false) {
             $stopState = false;
 
-            return $this->filter(function ($item) use (&$stopState, $stop) {
-                return $stopState = $stopState || $stop($item);
+            return $this->filter(function ($item) use (&$stopState, $stop, $withStopItem) {
+
+                $preStopState = $stopState;
+                $stopState = $stopState || $stop($item);
+
+                return $preStopState || ($withStopItem && $stopState);
             });
         };
     }
@@ -143,6 +147,30 @@ class CollectionMixin
             }
 
             return $this->make($this->getIterator());
+        };
+    }
+
+    /**
+     * map int.
+     */
+    public function mapInt(): Closure
+    {
+        return function () {
+            return $this->map(function ($item) {
+                return intval($item);
+            });
+        };
+    }
+
+    /**
+     * map string
+     */
+    public function mapString(): Closure
+    {
+        return function () {
+            return $this->map(function ($item) {
+                return strval($item);
+            });
         };
     }
 }
