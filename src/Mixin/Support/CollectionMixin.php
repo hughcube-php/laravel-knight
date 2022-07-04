@@ -66,7 +66,6 @@ class CollectionMixin
             $stopState = false;
 
             return $this->filter(function ($item) use (&$stopState, $stop, $withStopItem) {
-
                 $preStopState = $stopState;
                 $stopState = $stopState || $stop($item);
 
@@ -163,7 +162,7 @@ class CollectionMixin
     }
 
     /**
-     * map string
+     * map string.
      */
     public function mapString(): Closure
     {
