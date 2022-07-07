@@ -8,7 +8,7 @@ if (!extension_loaded('Zend OPcache')) {
 }
 
 
-if(class_exists(OpCacheDataModel::class)){
+if(!class_exists(OpCacheDataModel::class)){
     class OpCacheDataModel
     {
         private $_configuration;
