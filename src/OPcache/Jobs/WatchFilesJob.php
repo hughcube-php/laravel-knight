@@ -54,7 +54,7 @@ class WatchFilesJob extends Job
 
     protected function getUrl(): string
     {
-        $url = $this->p()->get('url', 'knight_opcache_scripts');
+        $url = $this->p()->get('url', 'knight.opcache.scripts');
         if (PUrl::isUrlString($url)) {
             return $url;
         }

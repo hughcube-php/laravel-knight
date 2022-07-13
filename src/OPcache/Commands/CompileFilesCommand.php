@@ -33,7 +33,7 @@ class CompileFilesCommand extends Command
      * @inheritdoc
      */
     protected $signature = 'opcache:compile-files
-                            {--with_remote_cached_scripts=knight_opcache_scripts }
+                            {--with_remote_cached_scripts=knight.opcache.scripts }
                             {--with_app_files : Whether to include app files }
                             {--with_composer_files : Whether to include composer class files }';
 
