@@ -9,6 +9,7 @@
 namespace HughCube\Laravel\Knight\Support;
 
 use ArrayIterator;
+use HughCube\Base\Base;
 
 class ParameterBag
 {
@@ -23,7 +24,7 @@ class ParameterBag
     }
 
     /**
-     * @param array $parameters
+     * @param  array  $parameters
      *
      * @return $this
      */
@@ -45,7 +46,7 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
+     * @param  string|int  $key
      *
      * @return bool
      */
@@ -65,8 +66,8 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param mixed      $default
+     * @param  string|int  $key
+     * @param  mixed  $default
      *
      * @return mixed
      */
@@ -76,8 +77,8 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param mixed      $value
+     * @param  string|int  $key
+     * @param  mixed  $value
      *
      * @return $this
      */
@@ -89,8 +90,8 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param mixed      $value
+     * @param  string|int  $key
+     * @param  mixed  $value
      *
      * @return $this
      */
@@ -104,7 +105,7 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
+     * @param  string|int  $key
      *
      * @return $this
      */
@@ -118,10 +119,10 @@ class ParameterBag
     }
 
     /**
-     * @param bool           $when
-     * @param int|string     $key
-     * @param callable       $callable
-     * @param callable|mixed $default
+     * @param  bool  $when
+     * @param  int|string  $key
+     * @param  callable  $callable
+     * @param  callable|mixed  $default
      *
      * @return mixed
      */
@@ -136,9 +137,9 @@ class ParameterBag
     }
 
     /**
-     * @param string|int     $key
-     * @param callable       $callable
-     * @param callable|mixed $default
+     * @param  string|int  $key
+     * @param  callable  $callable
+     * @param  callable|mixed  $default
      *
      * @return mixed
      */
@@ -148,9 +149,9 @@ class ParameterBag
     }
 
     /**
-     * @param string|int     $key
-     * @param callable       $callable
-     * @param callable|mixed $default
+     * @param  string|int  $key
+     * @param  callable  $callable
+     * @param  callable|mixed  $default
      *
      * @return mixed
      */
@@ -160,9 +161,9 @@ class ParameterBag
     }
 
     /**
-     * @param string|int     $key
-     * @param callable       $callable
-     * @param callable|mixed $default
+     * @param  string|int  $key
+     * @param  callable  $callable
+     * @param  callable|mixed  $default
      *
      * @return mixed
      */
@@ -182,12 +183,12 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param mixed      $default
+     * @param  string|int  $key
+     * @param  mixed  $default
      *
-     * @return null|bool
+     * @return bool
      */
-    public function getBoolean($key, $default = false): ?bool
+    public function getBoolean($key, $default = false): bool
     {
         $value = $this->get($key);
 
@@ -203,12 +204,12 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param mixed      $default
+     * @param  string|int  $key
+     * @param  mixed  $default
      *
-     * @return null|int
+     * @return int
      */
-    public function getInt($key, $default = 0): ?int
+    public function getInt($key, $default = 0): int
     {
         $value = $this->get($key);
 
@@ -224,12 +225,12 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param mixed      $default
+     * @param  string|int  $key
+     * @param  mixed  $default
      *
-     * @return null|float
+     * @return float
      */
-    public function getFloat($key, $default = 0): ?float
+    public function getFloat($key, $default = 0): float
     {
         $value = $this->get($key);
 
@@ -247,12 +248,12 @@ class ParameterBag
     /**
      * 获取一个由数字和字母组成的参数.
      *
-     * @param string|int $key
-     * @param string     $default
+     * @param  string|int  $key
+     * @param  string  $default
      *
-     * @return null|string
+     * @return string
      */
-    public function getAlpha($key, string $default = ''): ?string
+    public function getAlpha($key, string $default = ''): string
     {
         $value = $this->get($key);
 
@@ -262,12 +263,12 @@ class ParameterBag
     /**
      * 获取一个由数字和字母组成的参数.
      *
-     * @param string|int $key
-     * @param string     $default
+     * @param  string|int  $key
+     * @param  string  $default
      *
-     * @return null|string
+     * @return string
      */
-    public function getAlnum($key, string $default = ''): ?string
+    public function getAlnum($key, string $default = ''): string
     {
         $value = $this->get($key);
 
@@ -275,12 +276,12 @@ class ParameterBag
     }
 
     /**
-     * @param string|int $key
-     * @param string     $default
+     * @param  string|int  $key
+     * @param  string  $default
      *
-     * @return null|string
+     * @return string
      */
-    public function getDigits($key, string $default = '0'): ?string
+    public function getDigits($key, string $default = '0'): string
     {
         $value = $this->get($key);
         if (is_numeric($value) && ctype_digit(strval($value))) {
@@ -288,5 +289,53 @@ class ParameterBag
         }
 
         return $default;
+    }
+
+    /**
+     * @param  string|int  $key
+     * @param  string  $default
+     * @return string
+     */
+    public function getString($key, string $default = ''): string
+    {
+        $value = $this->get($key);
+
+        if (null === $value) {
+            return $default;
+        }
+
+        if (is_string($value)) {
+            return $value;
+        }
+
+        if (is_numeric($value) && ctype_digit(strval($value))) {
+            return Base::toString($value);
+        }
+
+        if (is_bool($value)) {
+            return strval(intval($value));
+        }
+
+        if (is_scalar($value)) {
+            return strval($value);
+        }
+
+        if (is_object($value) && method_exists($value, '__toString')) {
+            return $value->__toString();
+        }
+
+        return $default;
+    }
+
+    /**
+     * @param  string|int  $key
+     * @param  array  $default
+     * @return array
+     */
+    public function getArray($key, array $default = []): array
+    {
+        $value = $this->get($key);
+
+        return is_array($value) ? $value : $default;
     }
 }
