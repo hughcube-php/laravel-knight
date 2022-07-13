@@ -7,8 +7,7 @@ if (!extension_loaded('Zend OPcache')) {
     require 'data-sample.php';
 }
 
-
-if(!class_exists(OpCacheDataModel::class)){
+if (!class_exists(OpCacheDataModel::class)) {
     class OpCacheDataModel
     {
         private $_configuration;
@@ -49,9 +48,9 @@ if(!class_exists(OpCacheDataModel::class)){
                         }
                         if ($k === 'current_wasted_percentage' || $k === 'opcache_hit_rate') {
                             $v = number_format(
-                                    $v,
-                                    2
-                                ).'%';
+                                $v,
+                                2
+                            ).'%';
                         }
                         if ($k === 'blacklist_miss_ratio') {
                             $v = number_format($v, 2).'%';
