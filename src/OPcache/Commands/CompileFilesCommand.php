@@ -33,7 +33,7 @@ class CompileFilesCommand extends Command
      * @inheritdoc
      */
     protected $signature = 'opcache:compile-files
-                            {--with_remote_cached_scripts=knight.opcache.scripts }
+                            {--with_remote_cached_scripts }
                             {--with_app_files : Whether to include app files }
                             {--with_composer_files : Whether to include composer class files }';
 
@@ -43,11 +43,11 @@ class CompileFilesCommand extends Command
     protected $description = 'opcache compile file';
 
     /**
-     * @param Schedule $schedule
-     *
-     * @throws Exception
+     * @param  Schedule  $schedule
      *
      * @return void
+     * @throws Exception
+     *
      */
     public function handle(Schedule $schedule)
     {
@@ -93,9 +93,9 @@ class CompileFilesCommand extends Command
     }
 
     /**
+     * @return array
      * @throws Exception
      *
-     * @return array
      */
     protected function getFiles(): array
     {
@@ -170,6 +170,11 @@ class CompileFilesCommand extends Command
             return [];
         }
 
+        /** @phpstan-ignore-next-line  */
+        if (true === $url || '1' === $url || 1 === $url) {
+            $url = 'knight.opcache.scripts';
+        }
+
         if (!PUrl::isUrlString($url) && Route::has($url)) {
             $url = route($url);
         }
@@ -183,7 +188,8 @@ class CompileFilesCommand extends Command
 
         try {
             $response = $this->getHttpClient()->post($url, [
-                RequestOptions::TIMEOUT => 10.0, RequestOptions::HTTP_ERRORS => false,
+                RequestOptions::TIMEOUT => 10.0,
+                RequestOptions::HTTP_ERRORS => false,
             ]);
             $states = json_decode($response->getBody()->getContents(), true);
 
