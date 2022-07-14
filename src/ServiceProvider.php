@@ -13,6 +13,7 @@ use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\KRTest;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
+use HughCube\Laravel\Knight\Http\Actions\PhpInfoAction;
 use HughCube\Laravel\Knight\Http\Actions\PingAction;
 use HughCube\Laravel\Knight\Http\Actions\RequestLogAction;
 use HughCube\Laravel\Knight\Http\Actions\RequestShowAction;
@@ -69,6 +70,7 @@ class ServiceProvider extends IlluminateServiceProvider
         $this->bootOPcache();
         $this->bootRequest();
         $this->bootPing();
+        $this->bootPhpInfo();
 
         $this->registerRefreshModelCacheEvent();
     }
@@ -84,6 +86,16 @@ class ServiceProvider extends IlluminateServiceProvider
             Route::group(['prefix' => $prefix], function () {
                 Route::any('/opcache/scripts', OPcacheScriptsAction::class)->name('knight.opcache.scripts');
                 Route::any('/opcache/states', OPcacheStatesAction::class)->name('knight.opcache.states');
+            });
+        }
+    }
+
+    protected function bootPhpInfo()
+    {
+        $prefix = config('knight.phpinfo.route_prefix', false);
+        if (!$this->app->routesAreCached() && false !== $prefix) {
+            Route::group(['prefix' => $prefix], function () {
+                Route::any('/phpinfo', PhpInfoAction::class)->name('knight.phpinfo');
             });
         }
     }
