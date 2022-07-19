@@ -82,6 +82,7 @@ class ServiceProvider extends IlluminateServiceProvider
         if (null === $this->routesAreCached) {
             $this->routesAreCached = $this->app->routesAreCached();
         }
+
         return $this->routesAreCached;
     }
 
