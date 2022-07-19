@@ -39,6 +39,8 @@ use ReflectionException;
  */
 class ServiceProvider extends IlluminateServiceProvider
 {
+    protected $routesAreCached = null;
+
     /**
      * Register the provider.
      *
@@ -75,14 +77,21 @@ class ServiceProvider extends IlluminateServiceProvider
         $this->registerRefreshModelCacheEvent();
     }
 
+    protected function hasRoutesCache(): bool
+    {
+        if (null === $this->routesAreCached) {
+            $this->routesAreCached = $this->app->routesAreCached();
+        }
+        return $this->routesAreCached;
+    }
+
     protected function bootOPcache()
     {
         if ($this->app->runningInConsole()) {
             $this->commands([OPcacheCompileFilesCommand::class]);
         }
 
-        $prefix = config('knight.opcache.route_prefix', false);
-        if (!$this->app->routesAreCached() && false !== $prefix) {
+        if (!$this->hasRoutesCache() && false !== ($prefix = config('knight.opcache.route_prefix', false))) {
             Route::group(['prefix' => $prefix], function () {
                 Route::any('/opcache/scripts', OPcacheScriptsAction::class)->name('knight.opcache.scripts');
                 Route::any('/opcache/states', OPcacheStatesAction::class)->name('knight.opcache.states');
@@ -90,25 +99,9 @@ class ServiceProvider extends IlluminateServiceProvider
         }
     }
 
-    protected function bootPhpInfo()
-    {
-        $prefix = config('knight.phpinfo.route_prefix', false);
-        if (!$this->app->routesAreCached() && false !== $prefix) {
-            Route::group(['prefix' => $prefix], function () {
-                Route::any('/phpinfo', PhpInfoAction::class)->name('knight.phpinfo');
-            });
-        }
-    }
-
-    /**
-     * Define the Sanctum routes.
-     *
-     * @return void
-     */
     protected function bootRequest()
     {
-        $prefix = config('knight.request.route_prefix', false);
-        if (!$this->app->routesAreCached() && false !== $prefix) {
+        if (!$this->hasRoutesCache() && false !== ($prefix = config('knight.request.route_prefix', false))) {
             Route::group(['prefix' => $prefix], function () {
                 Route::any('/request/log', RequestLogAction::class)->name('knight.request.log');
                 Route::any('/request/show', RequestShowAction::class)->name('knight.request.show');
@@ -116,17 +109,20 @@ class ServiceProvider extends IlluminateServiceProvider
         }
     }
 
-    /**
-     * Define the Sanctum routes.
-     *
-     * @return void
-     */
     protected function bootPing()
     {
-        $prefix = config('knight.request.route_prefix', '');
-        if (!$this->app->routesAreCached() && false !== $prefix) {
+        if (!$this->hasRoutesCache() && false !== ($prefix = config('knight.ping.route_prefix', false))) {
             Route::group(['prefix' => $prefix], function () {
                 Route::any('/ping', PingAction::class)->name('knight.ping');
+            });
+        }
+    }
+
+    protected function bootPhpInfo()
+    {
+        if (!$this->hasRoutesCache() && false !== ($prefix = config('knight.phpinfo.route_prefix', false))) {
+            Route::group(['prefix' => $prefix], function () {
+                Route::any('/phpinfo', PhpInfoAction::class)->name('knight.phpinfo');
             });
         }
     }

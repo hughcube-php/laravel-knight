@@ -1,9 +1,7 @@
 <?php
 
-use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand;
-
 return [
-    'ping' => [
+    'opcache' => [
         'route_prefix' => false,
     ],
 
@@ -11,10 +9,11 @@ return [
         'route_prefix' => false,
     ],
 
-    'opcache' => [
-        'commands' => [
-            CompileFilesCommand::class,
-        ],
+    'ping' => [
+        'route_prefix' => false,
+    ],
+
+    'phpinfo' => [
         'route_prefix' => false,
     ],
 ];
