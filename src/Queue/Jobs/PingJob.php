@@ -85,7 +85,7 @@ class PingJob extends Job
 
     protected function getUrl(): string
     {
-        $url = $this->p()->get('url', 'knight_ping');
+        $url = $this->p()->get('url', 'knight.ping');
         if (is_string($url) && PUrl::isUrlString($url)) {
             return $url;
         }

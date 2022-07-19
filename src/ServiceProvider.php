@@ -58,13 +58,6 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     public function boot()
     {
-        $source = realpath(dirname(__DIR__).'/config/knight.php');
-        if ($this->app instanceof LaravelApplication && $this->app->runningInConsole()) {
-            $this->publishes([$source => config_path('knight.php')]);
-        } elseif ($this->app instanceof LumenApplication) {
-            $this->app->configure('knight');
-        }
-
         if ($this->app->runningInConsole()) {
             $this->commands([Config::class, Environment::class, PhpIniFile::class, KRTest::class]);
         }
@@ -112,7 +105,7 @@ class ServiceProvider extends IlluminateServiceProvider
 
     protected function bootPing()
     {
-        if (!$this->hasRoutesCache() && false !== ($prefix = config('knight.ping.route_prefix', false))) {
+        if (!$this->hasRoutesCache() && false !== ($prefix = config('knight.ping.route_prefix'))) {
             Route::group(['prefix' => $prefix], function () {
                 Route::any('/ping', PingAction::class)->name('knight.ping');
             });

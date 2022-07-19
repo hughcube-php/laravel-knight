@@ -10,7 +10,7 @@ return [
     ],
 
     'ping' => [
-        'route_prefix' => false,
+        'route_prefix' => null,
     ],
 
     'phpinfo' => [
