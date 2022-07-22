@@ -9,7 +9,6 @@
 namespace HughCube\Laravel\Knight\Tests\Support;
 
 use HughCube\Laravel\Knight\Support\Json;
-use HughCube\Laravel\Knight\Support\Version;
 use HughCube\Laravel\Knight\Tests\TestCase;
 
 class JsonTest extends TestCase
@@ -32,7 +31,7 @@ class JsonTest extends TestCase
     public function testDecodeObject()
     {
         $this->assertNull(Json::decodeObject('[]'));
-        $this->assertTrue( Json::decodeObject('{}') instanceof \stdClass);
+        $this->assertTrue(Json::decodeObject('{}') instanceof \stdClass);
         $this->assertSame(null, Json::decodeObject(''));
     }
 }
