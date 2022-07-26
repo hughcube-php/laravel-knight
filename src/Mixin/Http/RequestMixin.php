@@ -11,6 +11,7 @@ namespace HughCube\Laravel\Knight\Mixin\Http;
 use Closure;
 use HughCube\Laravel\Knight\Support\Version;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Jenssegers\Agent\Agent;
 
 /**
@@ -53,6 +54,16 @@ class RequestMixin
     {
         return function (): bool {
             return true == $this->isWeChat() && str_contains($this->userAgent(), 'miniProgram');
+        };
+    }
+
+    /**
+     * 判断是否在postmen.
+     */
+    public function isPostmen(): Closure
+    {
+        return function (): bool {
+            return Str::startsWith($this->userAgent(), 'PostmanRuntime');
         };
     }
 
