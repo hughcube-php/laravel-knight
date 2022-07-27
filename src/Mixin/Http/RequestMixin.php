@@ -30,7 +30,7 @@ class RequestMixin
     public function getClientVersion(): Closure
     {
         return function (): ?string {
-            return $this->headers->get(sprintf('%s-Version', $this->getClientHeaderPrefix()));
+            return $this->headers->get(sprintf('%sVersion', $this->getClientHeaderPrefix()));
         };
     }
 
@@ -40,7 +40,7 @@ class RequestMixin
     public function getClientNonce(): Closure
     {
         return function (): ?string {
-            return $this->headers->get(sprintf('%s-Nonce', $this->getClientHeaderPrefix()));
+            return $this->headers->get(sprintf('%sNonce', $this->getClientHeaderPrefix()));
         };
     }
 
@@ -50,7 +50,7 @@ class RequestMixin
     public function getClientSignature(): Closure
     {
         return function (): ?string {
-            return $this->headers->get(sprintf('%s-Signature', $this->getClientHeaderPrefix()));
+            return $this->headers->get(sprintf('%sSignature', $this->getClientHeaderPrefix()));
         };
     }
 
