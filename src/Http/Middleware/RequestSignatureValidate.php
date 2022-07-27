@@ -63,7 +63,7 @@ class RequestSignatureValidate
         /** @var Request|KIdeRequest $request */
 
         /** @var null|GetUserLoginAccessSecret $user */
-        $user = $request->getUser();
+        $user = $request->user();
 
         $string = sprintf(
             "%s\n%s\n%s\n%s\n%s\n%s",
