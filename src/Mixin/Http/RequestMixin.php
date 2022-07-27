@@ -62,7 +62,7 @@ class RequestMixin
         return function (): HeaderBag {
             $headers = [];
             foreach ($this->headers as $name => $values) {
-                if (Str::startsWith($name, $this->getClientHeaderPrefix())) {
+                if (Str::startsWith(strtolower($name), strtolower($this->getClientHeaderPrefix()))) {
                     $headers[$name] = $values;
                 }
             }
