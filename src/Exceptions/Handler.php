@@ -108,10 +108,10 @@ class Handler extends ExceptionHandler
             $results = $data;
         } elseif ($e instanceof ValidateSignatureException) {
             $results = ['code' => 400, 'message' => '签名验证失败!'];
-        } elseif ($e instanceof AuthenticationException) {
-            $results = ['code' => 401, 'message' => '请先登录!'];
         } elseif ($e instanceof ValidatePinCodeException) {
             $results = ['code' => $e->getCode() ?: 400, 'message' => '请输入正确的验证码!'];
+        } elseif ($e instanceof AuthenticationException) {
+            $results = ['code' => 401, 'message' => '请先登录!'];
         } elseif ($e instanceof ValidationException) {
             $results = ['code' => $e->status, 'message' => '非法请求!', 'errors' => $e->errors()];
         } elseif ($e instanceof DataExceptionInterface) {
