@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/7/27
- * Time: 21:44
+ * Time: 21:44.
  */
 
 namespace HughCube\Laravel\Knight\Http\Middleware;
@@ -24,11 +24,12 @@ class RequestSignatureValidate
     /**
      * Handle an incoming request.
      *
-     * @param  Request  $request
-     * @param  Closure  $next
+     * @param Request $request
+     * @param Closure $next
+     *
+     * @throws ValidateSignatureException
      *
      * @return Response
-     * @throws ValidateSignatureException
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -66,36 +67,30 @@ class RequestSignatureValidate
 
         $string = sprintf(
             "%s\n%s\n%s\n%s\n%s\n%s",
-            /**  */
-            /**  */
+
             /** HTTP METHOD */
             strtoupper($request->getMethod()),
-            /**  */
-            /**  */
+
             /** HTTP DATE */
             $request->getDate() ?: '',
-            /**  */
-            /**  */
+
             /** HTTP CONTENT TYPE */
             $request->headers->get('CONTENT_TYPE', ''),
-            /**  */
-            /**  */
+
             /** HTTP CLIENT HEADERS */
             Collection::make($request->getClientHeaders()->all())
                 ->forget([
-                    strtolower(sprintf('%sSignature', $request->getClientHeaderPrefix()))
+                    strtolower(sprintf('%sSignature', $request->getClientHeaderPrefix())),
                 ])
                 ->sortKeys()
                 ->map(function ($value, $key) {
                     return sprintf('%s=%s', $key, implode(',', Arr::wrap($value)));
                 })
                 ->implode('&'),
-            /**  */
-            /**  */
+
             /** HTTP CONTENT */
             $request->getContent(),
-            /**  */
-            /**  */
+
             /** USER ACCESS SECRET */
             $user instanceof GetUserLoginAccessSecret ? $user->getUserLoginAccessSecret() : ''
         );
