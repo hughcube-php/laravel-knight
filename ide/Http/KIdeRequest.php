@@ -40,7 +40,7 @@ class KIdeRequest
     }
 
     /**
-     * 获取客户端的随机字符串.
+     * @see RequestMixin::getClientNonce()
      */
     public function getClientNonce(): ?string
     {
@@ -48,7 +48,15 @@ class KIdeRequest
     }
 
     /**
-     * 获取客户端的所有请求头.
+     * @see RequestMixin::getClientSignature()
+     */
+    public function getClientSignature(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * @see RequestMixin::getClientHeaders()
      */
     public function getClientHeaders(): HeaderBag
     {
@@ -56,7 +64,7 @@ class KIdeRequest
     }
 
     /**
-     * 获取客户端日期
+     * @see RequestMixin::getDate()
      */
     public function getDate(): ?string
     {

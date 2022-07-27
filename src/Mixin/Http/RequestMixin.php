@@ -45,6 +45,16 @@ class RequestMixin
     }
 
     /**
+     * 获取客户端的签名字符串.
+     */
+    public function getClientSignature(): Closure
+    {
+        return function (): ?string {
+            return $this->headers->get(sprintf('%s-Signature', $this->getClientHeaderPrefix()));
+        };
+    }
+
+    /**
      * 获取客户端的所有请求头.
      */
     public function getClientHeaders(): Closure
