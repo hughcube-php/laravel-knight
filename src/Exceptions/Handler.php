@@ -67,7 +67,7 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * @param Throwable $e
+     * @param  Throwable  $e
      *
      * @return null|array
      *
@@ -88,12 +88,12 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * @param Request              $request
-     * @param \Exception|Throwable $e
-     *
-     * @throws Throwable
+     * @param  Request  $request
+     * @param  \Exception|Throwable  $e
      *
      * @return mixed
+     * @throws Throwable
+     *
      */
     public function render($request, $e)
     {
@@ -106,6 +106,8 @@ class Handler extends ExceptionHandler
 
         if (!empty($data = $this->convertExceptionToResults($e)) && is_array($data)) {
             $results = $data;
+        } elseif ($e instanceof ValidateSignatureException) {
+            $results = ['code' => 400, 'message' => '签名验证失败!'];
         } elseif ($e instanceof AuthenticationException) {
             $results = ['code' => 401, 'message' => '请先登录!'];
         } elseif ($e instanceof ValidatePinCodeException) {
@@ -140,18 +142,18 @@ class Handler extends ExceptionHandler
     /**
      * Converts an exception into an array.
      *
-     * @param Throwable|\Exception $e
+     * @param  Throwable|\Exception  $e
      *
      * @return array the array representation of the exception.
      */
     protected function convertExceptionToArray($e): array
     {
         $array = [
-            'name'        => get_class($e),
-            'message'     => $e->getMessage(),
-            'code'        => $e->getCode(),
-            'file'        => $e->getFile(),
-            'line'        => $e->getLine(),
+            'name' => get_class($e),
+            'message' => $e->getMessage(),
+            'code' => $e->getCode(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
             'stack-trace' => explode("\n", $e->getTraceAsString()),
         ];
 
@@ -167,7 +169,7 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * @param array|Response|string $results
+     * @param  array|Response|string  $results
      *
      * @return Response
      */
