@@ -12,6 +12,7 @@ use HughCube\Laravel\Knight\Mixin\Http\RequestMixin;
 use Illuminate\Http\Request as IlluminateRequest;
 use Jenssegers\Agent\Agent;
 use Laravel\Lumen\Http\Request as LumenRequest;
+use Symfony\Component\HttpFoundation\HeaderBag;
 
 /**
  * @mixin LumenRequest
@@ -23,9 +24,41 @@ use Laravel\Lumen\Http\Request as LumenRequest;
 class KIdeRequest
 {
     /**
+     * @see RequestMixin::getClientHeaderPrefix()
+     */
+    public function getClientHeaderPrefix(): string
+    {
+        return '';
+    }
+
+    /**
      * @see RequestMixin::getClientVersion()
      */
     public function getClientVersion(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * 获取客户端的随机字符串
+     */
+    public function getClientNonce(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * 获取客户端的所有请求头
+     */
+    public function getClientHeaders(): HeaderBag
+    {
+        return new HeaderBag([]);
+    }
+
+    /**
+     * 获取客户端日期
+     */
+    public function getDate(): ?string
     {
         return null;
     }

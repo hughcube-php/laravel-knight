@@ -13,16 +13,63 @@ use HughCube\Laravel\Knight\Support\Version;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Jenssegers\Agent\Agent;
+use Symfony\Component\HttpFoundation\HeaderBag;
 
 /**
  * @mixin Request
  *
- * @method null|string getClientVersion()
+ * @method null|string getClientHeaderPrefix()
  *
  * @property null|Agent $userAgentDetect
  */
 class RequestMixin
 {
+    /**
+     * 获取客户端版本
+     */
+    public function getClientVersion(): Closure
+    {
+        return function (): ?string {
+            return $this->headers->get(sprintf('%s-Version', $this->getClientHeaderPrefix()));
+        };
+    }
+
+    /**
+     * 获取客户端的随机字符串
+     */
+    public function getClientNonce(): Closure
+    {
+        return function (): ?string {
+            return $this->headers->get(sprintf('%s-Nonce', $this->getClientHeaderPrefix()));
+        };
+    }
+
+    /**
+     * 获取客户端的所有请求头
+     */
+    public function getClientHeaders(): Closure
+    {
+        return function (): HeaderBag {
+            $headers = [];
+            foreach ($this->headers as $name => $values) {
+                if (Str::startsWith($name, $this->getClientHeaderPrefix())) {
+                    $headers[$name] = $values;
+                }
+            }
+            return new HeaderBag($headers);
+        };
+    }
+
+    /**
+     * 获取客户端日期
+     */
+    public function getDate(): Closure
+    {
+        return function (): ?string {
+            return $this->headers->get('Date');
+        };
+    }
+
     /**
      * 获取agent检测.
      */

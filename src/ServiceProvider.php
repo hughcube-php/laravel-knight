@@ -48,9 +48,9 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     public function register()
     {
-        Str::mixin(new StrMixin());
-        Collection::mixin(new CollectionMixin());
-        Request::mixin(new RequestMixin());
+        Str::mixin(new StrMixin(), false);
+        Collection::mixin(new CollectionMixin(), false);
+        Request::mixin(new RequestMixin(), false);
     }
 
     /**
