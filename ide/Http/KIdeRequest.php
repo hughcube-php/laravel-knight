@@ -40,7 +40,7 @@ class KIdeRequest
     }
 
     /**
-     * 获取客户端的随机字符串
+     * 获取客户端的随机字符串.
      */
     public function getClientNonce(): ?string
     {
@@ -48,7 +48,7 @@ class KIdeRequest
     }
 
     /**
-     * 获取客户端的所有请求头
+     * 获取客户端的所有请求头.
      */
     public function getClientHeaders(): HeaderBag
     {

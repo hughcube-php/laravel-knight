@@ -25,7 +25,7 @@ use Symfony\Component\HttpFoundation\HeaderBag;
 class RequestMixin
 {
     /**
-     * 获取客户端版本
+     * 获取客户端版本.
      */
     public function getClientVersion(): Closure
     {
@@ -35,7 +35,7 @@ class RequestMixin
     }
 
     /**
-     * 获取客户端的随机字符串
+     * 获取客户端的随机字符串.
      */
     public function getClientNonce(): Closure
     {
@@ -45,7 +45,7 @@ class RequestMixin
     }
 
     /**
-     * 获取客户端的所有请求头
+     * 获取客户端的所有请求头.
      */
     public function getClientHeaders(): Closure
     {
@@ -56,6 +56,7 @@ class RequestMixin
                     $headers[$name] = $values;
                 }
             }
+
             return new HeaderBag($headers);
         };
     }
