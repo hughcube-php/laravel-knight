@@ -66,10 +66,13 @@ class RequestSignatureValidate
         $user = $request->user();
 
         $string = sprintf(
-            "%s\n%s\n%s\n%s\n%s\n%s",
+            "%s\n%s\n%s\n%s\n%s\n%s\n%s",
 
             /** HTTP METHOD */
             strtoupper($request->getMethod()),
+
+            /** HTTP URL */
+            $request->getRequestUri(),
 
             /** HTTP DATE */
             $request->getDate() ?: '',
