@@ -67,19 +67,14 @@ class RequestSignatureValidate
 
         $string = sprintf(
             "%s\n%s\n%s\n%s\n%s\n%s\n%s",
-
             /** HTTP METHOD */
             strtoupper($request->getMethod()),
-
             /** HTTP URL */
             $request->getRequestUri(),
-
             /** HTTP DATE */
             $request->getDate() ?: '',
-
             /** HTTP CONTENT TYPE */
             $request->headers->get('CONTENT_TYPE', ''),
-
             /** HTTP CLIENT HEADERS */
             Collection::make($request->getClientHeaders()->all())
                 ->forget([
@@ -90,10 +85,8 @@ class RequestSignatureValidate
                     return sprintf('%s=%s', $key, implode(',', Arr::wrap($value)));
                 })
                 ->implode('&'),
-
             /** HTTP CONTENT */
             $request->getContent(),
-
             /** USER ACCESS SECRET */
             $user instanceof GetUserLoginAccessSecret ? $user->getUserLoginAccessSecret() : ''
         );
