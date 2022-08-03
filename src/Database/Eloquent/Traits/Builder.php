@@ -355,38 +355,4 @@ trait Builder
     {
         return $this->orWhere($column, 'LIKE', "%$value");
     }
-
-    /**
-     * Add a "where JSON contains" clause to the query.
-     *
-     * @param  string  $column
-     * @param  mixed  $value
-     * @param  string  $boolean
-     * @param  bool  $not
-     * @return static
-     */
-    public function whereJsonOverlaps(string $column, $value, string $boolean = 'and', bool $not = false)
-    {
-        $type = 'JsonOverlaps';
-
-        $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
-
-        if (! $value instanceof Expression) {
-            $this->addBinding($this->grammar->prepareBindingForJsonContains($value));
-        }
-
-        return $this;
-    }
-
-    /**
-     * Add a "where JSON contains" clause to the query.
-     *
-     * @param  string  $column
-     * @param  mixed  $value
-     * @return static
-     */
-    public function orWhereJsonOverlaps(string $column, $value)
-    {
-        return $this->whereJsonOverlaps($column, $value, 'or');
-    }
 }
