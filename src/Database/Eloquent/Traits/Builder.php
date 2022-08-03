@@ -10,12 +10,12 @@ namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
 use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
+use HughCube\Laravel\Knight\Ide\Database\Query\KIdeBuilder;
 use Illuminate\Cache\NullStore;
 use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
-use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\CacheInterface;
@@ -29,6 +29,7 @@ use Traversable;
  * @method KnightCollection get()
  *
  * @mixin \Illuminate\Database\Eloquent\Builder
+ * @mixin KIdeBuilder
  */
 trait Builder
 {
@@ -98,7 +99,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return bool
      */
@@ -108,7 +109,7 @@ trait Builder
     }
 
     /**
-     * @param array $columns
+     * @param  array  $columns
      *
      * @return string
      */
@@ -129,7 +130,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $pk
+     * @param  mixed  $pk
      *
      * @return Model|null
      */
@@ -139,7 +140,7 @@ trait Builder
     }
 
     /**
-     * @param array|Arrayable|Traversable $pks
+     * @param  array|Arrayable|Traversable  $pks
      *
      * @return KnightCollection
      */
@@ -167,7 +168,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $id
+     * @param  mixed  $id
      *
      * @return mixed
      */
@@ -179,12 +180,12 @@ trait Builder
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
-     *
-     * @throws
+     * @param  array|Arrayable|Traversable  $ids  必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
      * @return KnightCollection
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function findUniqueRows($ids): KnightCollection
     {
@@ -261,7 +262,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return static
      */
@@ -275,10 +276,10 @@ trait Builder
     }
 
     /**
-     * @throws
-     *
      * @return bool
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function refreshRowCache(): bool
     {
@@ -291,8 +292,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -302,8 +303,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -313,8 +314,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -324,8 +325,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -335,8 +336,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -346,8 +347,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
