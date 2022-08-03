@@ -15,6 +15,7 @@ use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\CacheInterface;
@@ -353,5 +354,39 @@ trait Builder
     public function orWhereRightLike(string $column, string $value)
     {
         return $this->orWhere($column, 'LIKE', "%$value");
+    }
+
+    /**
+     * Add a "where JSON contains" clause to the query.
+     *
+     * @param  string  $column
+     * @param  mixed  $value
+     * @param  string  $boolean
+     * @param  bool  $not
+     * @return static
+     */
+    public function whereJsonOverlaps(string $column, $value, string $boolean = 'and', bool $not = false)
+    {
+        $type = 'JsonOverlaps';
+
+        $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+
+        if (! $value instanceof Expression) {
+            $this->addBinding($this->grammar->prepareBindingForJsonContains($value));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Add a "where JSON contains" clause to the query.
+     *
+     * @param  string  $column
+     * @param  mixed  $value
+     * @return static
+     */
+    public function orWhereJsonOverlaps(string $column, $value)
+    {
+        return $this->whereJsonOverlaps($column, $value, 'or');
     }
 }
