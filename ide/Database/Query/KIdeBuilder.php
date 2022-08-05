@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/8/3
- * Time: 15:12
+ * Time: 15:12.
  */
 
 namespace HughCube\Laravel\Knight\Ide\Database\Query;
@@ -19,6 +19,7 @@ class KIdeBuilder
 {
     /**
      * @return null|Builder|KnightBuilder
+     *
      * @see BuilderMixin::whereJsonOverlaps()
      */
     public function whereJsonOverlaps($column, $value, $boolean = 'and', $not = false)
@@ -28,6 +29,7 @@ class KIdeBuilder
 
     /**
      * @return null|Builder|KnightBuilder
+     *
      * @see BuilderMixin::orWhereJsonOverlaps()
      */
     public function orWhereJsonOverlaps($column, $value)
