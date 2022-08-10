@@ -99,7 +99,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return bool
      */
@@ -109,7 +109,7 @@ trait Builder
     }
 
     /**
-     * @param array $columns
+     * @param  array  $columns
      *
      * @return string
      */
@@ -130,7 +130,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $pk
+     * @param  mixed  $pk
      *
      * @return Model|null
      */
@@ -140,35 +140,41 @@ trait Builder
     }
 
     /**
-     * @param array|Arrayable|Traversable $pks
+     * @param  array|Arrayable|Traversable  $pks
      *
      * @return KnightCollection
      */
     public function findByPks($pks): KnightCollection
     {
-        $collection = Collection::make($pks)
-            ->filter(function ($value) {
+        return static::findByOneUniqueColumnValues(
+            $this->getModel()->getKeyName(),
+            Collection::make($pks)->filter(function ($value) {
                 return $this->getModel()->isMatchPk($value);
             })
-            ->map(function ($value) {
-                return [$this->getModel()->getKeyName() => $value];
-            });
+        );
+    }
 
-        $rows = $this->findUniqueRows($collection->toArray())->keyBy($this->getModel()->getKeyName());
+
+    public function findByOneUniqueColumnValues($column, $values): KnightCollection
+    {
+        $collection = Collection::make($values)->map(function ($value) use ($column) {
+            return [$column => $value];
+        });
+
+        $rows = $this->findUniqueRows($collection->toArray())->keyBy($column);
 
         $collection = $this->getModel()->newCollection([]);
-        foreach ($pks as $pk) {
-            $row = $rows->get($pk);
+        foreach ($values as $value) {
+            $row = $rows->get($value);
             if ($row instanceof IlluminateModel) {
-                $collection->put($pk, $row);
+                $collection->put($value, $row);
             }
         }
-
         return $collection;
     }
 
     /**
-     * @param mixed $id
+     * @param  mixed  $id
      *
      * @return mixed
      */
@@ -180,12 +186,12 @@ trait Builder
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
-     *
-     * @throws
+     * @param  array|Arrayable|Traversable  $ids  必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
      * @return KnightCollection
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function findUniqueRows($ids): KnightCollection
     {
@@ -262,7 +268,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return static
      */
@@ -276,10 +282,10 @@ trait Builder
     }
 
     /**
-     * @throws
-     *
      * @return bool
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function refreshRowCache(): bool
     {
@@ -292,8 +298,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -303,8 +309,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -314,8 +320,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -325,8 +331,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -336,8 +342,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -347,8 +353,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */

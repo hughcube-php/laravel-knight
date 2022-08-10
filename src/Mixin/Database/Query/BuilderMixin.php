@@ -34,6 +34,7 @@ class BuilderMixin
     public function orWhereJsonOverlaps(): Closure
     {
         return function ($column, $value) {
+            /** @phpstan-ignore-next-line  */
             return $this->whereJsonOverlaps($column, $value, 'or');
         };
     }
