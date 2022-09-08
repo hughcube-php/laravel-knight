@@ -20,7 +20,7 @@ class StrMixin
                 return $subject;
             }
 
-            $position = strrpos($subject, (string) $search);
+            $position = strrpos($subject, (string)$search);
 
             if ($position === false) {
                 return $subject;
@@ -44,6 +44,13 @@ class StrMixin
             }
 
             return Str::substr($subject, 0, $pos);
+        };
+    }
+
+    public function getMobilePattern(): Closure
+    {
+        return function () {
+            return '/^(13[0-9]|14[0-9]|15[0-9]|16[0-9]|17[0-9]|18[0-9]|19[0-9])\d{8}$/';
         };
     }
 }
