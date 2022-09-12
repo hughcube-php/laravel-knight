@@ -20,7 +20,7 @@ class StrMixin
                 return $subject;
             }
 
-            $position = strrpos($subject, (string)$search);
+            $position = strrpos($subject, (string) $search);
 
             if ($position === false) {
                 return $subject;
