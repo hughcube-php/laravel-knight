@@ -53,4 +53,20 @@ class StrMixin
             return '/^(13[0-9]|14[0-9]|15[0-9]|16[0-9]|17[0-9]|18[0-9]|19[0-9])\d{8}$/';
         };
     }
+
+    protected function checkMobile(): Closure
+    {
+        return function ($mobile, $iddCode = null): bool {
+            if (!is_string($mobile) && !ctype_digit(strval($mobile))) {
+                return false;
+            }
+
+            if (86 == $iddCode || null == $iddCode) {
+                /** @phpstan-ignore-next-line */
+                return false != preg_match(Str::getMobilePattern(), $mobile);
+            }
+
+            return true;
+        };
+    }
 }
