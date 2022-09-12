@@ -45,7 +45,7 @@ trait GetMobile
             return false;
         }
 
-        if(86 == $iddCode || null == $iddCode){
+        if (86 == $iddCode || null == $iddCode) {
             return false != preg_match(Str::getMobilePattern(), $mobile);
         }
 
