@@ -5,6 +5,7 @@ namespace HughCube\Laravel\Knight\Queue\Jobs;
 use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\Support\Carbon;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\Finder;
 
@@ -18,8 +19,8 @@ class CleanFilesJob extends Job
         return [
             'items' => ['array'],
 
-            'items.*.dir'      => ['required'],
-            'items.*.pattern'  => ['nullable'],
+            'items.*.dir' => ['required'],
+            'items.*.pattern' => ['nullable'],
             'items.*.max_days' => ['required', 'integer', 'min:0'],
         ];
     }
@@ -33,11 +34,18 @@ class CleanFilesJob extends Job
 
     protected function cleanFiles($job)
     {
-        $dirs = Arr::wrap($job['dir']);
+        $dirs = Collection::wrap($job['dir']);
         $patterns = Arr::wrap($job['pattern'] ?? '*');
         $maxDays = $job['max_days'] ?: 30;
 
-        $files = Finder::create()->in($dirs)->name($patterns)->files();
+        $files = Finder::create()
+            ->in(
+                $dirs->filter(function ($dir) {
+                    return File::exists($dir);
+                })->all()
+            )
+            ->name($patterns)
+            ->files();
 
         $count = 0;
         foreach ($files as $file) {
