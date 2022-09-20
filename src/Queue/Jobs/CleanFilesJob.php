@@ -4,7 +4,6 @@ namespace HughCube\Laravel\Knight\Queue\Jobs;
 
 use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\Support\Carbon;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\Finder;
@@ -19,8 +18,8 @@ class CleanFilesJob extends Job
         return [
             'items' => ['array'],
 
-            'items.*.dir'      => ['required'],
-            'items.*.pattern'  => ['nullable'],
+            'items.*.dir' => ['required'],
+            'items.*.pattern' => ['nullable'],
             'items.*.max_days' => ['required', 'integer', 'min:0'],
         ];
     }
@@ -34,18 +33,19 @@ class CleanFilesJob extends Job
 
     protected function cleanFiles($job)
     {
-        $dirs = Collection::wrap($job['dir']);
-        $patterns = Arr::wrap($job['pattern'] ?? '*');
+        $dirs = Collection::wrap($job['dir'])->filter();
+        $patterns = Collection::wrap($job['pattern'] ?? '*')->filter();
         $maxDays = $job['max_days'] ?: 30;
 
-        $files = Finder::create()
-            ->in(
-                $dirs->filter(function ($dir) {
-                    return File::exists($dir);
-                })->all()
-            )
-            ->name($patterns)
-            ->files();
+        /** @var Collection $existDirs */
+        $existDirs = $dirs->filter(function ($dir) {
+            return File::exists($dir);
+        })->values();
+
+        $files = [];
+        if ($existDirs->isNotEmpty()) {
+            $files = Finder::create()->in($existDirs->all())->name($patterns->all())->files();
+        }
 
         $count = 0;
         foreach ($files as $file) {
@@ -61,8 +61,8 @@ class CleanFilesJob extends Job
         $this->info(sprintf(
             'Delete %s files in directory "%s" that match "%s".',
             $count,
-            implode(',', $dirs->all()),
-            implode(',', $patterns)
+            $dirs->implode(','),
+            $patterns->implode(',')
         ));
     }
 }
