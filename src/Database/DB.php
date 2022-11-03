@@ -16,12 +16,13 @@ class DB extends \Illuminate\Support\Facades\DB
     /**
      * @throws Throwable
      */
-    public static function retryOnQueryException(callable $callable, $count = 3, $microseconds = null)
+    public static function retryOnQueryException(callable $callable, $count = 2, $microseconds = null)
     {
         $results = null;
         $exception = null;
 
         for ($i = 1; $i <= $count; $i++) {
+            $exception = null;
             try {
                 $results = $callable();
                 break;
