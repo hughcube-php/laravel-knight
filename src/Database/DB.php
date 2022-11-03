@@ -24,6 +24,7 @@ class DB extends \Illuminate\Support\Facades\DB
         for ($i = 1; $i <= $count; $i++) {
             try {
                 $results = $callable();
+                break;
             } catch (QueryException $exception) {
                 usleep(($microseconds ?: random_int(100000, 1000000)));
             }
