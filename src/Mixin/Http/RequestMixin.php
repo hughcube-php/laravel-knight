@@ -25,6 +25,18 @@ use Symfony\Component\HttpFoundation\HeaderBag;
 class RequestMixin
 {
     /**
+     * 获取客户端Header信息.
+     */
+    public function getIHKCClientHeader(): Closure
+    {
+        return function ($name): ?string {
+            return $this->headers->get(
+                sprintf('%s%s', $this->getClientHeaderPrefix(), $name)
+            );
+        };
+    }
+
+    /**
      * 获取客户端版本.
      */
     public function getClientVersion(): Closure
