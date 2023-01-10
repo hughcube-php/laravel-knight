@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/11/3
- * Time: 13:33
+ * Time: 13:33.
  */
 
 namespace HughCube\Laravel\Knight\Database;
@@ -23,6 +23,7 @@ class DB extends \Illuminate\Support\Facades\DB
 
         for ($i = 1; $i <= $count; $i++) {
             $exception = null;
+
             try {
                 $results = $callable();
                 break;
