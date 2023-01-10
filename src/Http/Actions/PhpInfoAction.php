@@ -19,6 +19,7 @@ class PhpInfoAction extends Controller
         $output = ob_get_contents();
         ob_end_clean();
 
+        /** @phpstan-ignore-next-line */
         if (false === $results) {
             return 'The phpinfo call failed!';
         }

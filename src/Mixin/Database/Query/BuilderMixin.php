@@ -21,9 +21,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false) {
             $type = 'JsonOverlaps';
+
+            /** @phpstan-ignore-next-line */
             $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
 
             if (!$value instanceof Expression) {
+                /** @phpstan-ignore-next-line */
                 $this->addBinding($this->grammar->prepareBindingForJsonContains($value));
             }
 

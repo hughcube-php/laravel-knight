@@ -99,6 +99,7 @@ class RequestMixin
     public function getUserAgentDetect(): Closure
     {
         return function (): Agent {
+            /** @phpstan-ignore-next-line */
             if (!property_exists($this, 'userAgentDetect') || !$this->userAgentDetect instanceof Agent) {
                 $this->userAgentDetect = new Agent($this->headers->all(), $this->userAgent());
             }

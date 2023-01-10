@@ -6,6 +6,7 @@ parameters:
     inferPrivatePropertyTypeFromConstructor: true
     ignoreErrors:
         - '#Method HughCube\\Laravel\\Knight\\Database\\Eloquent\\.*should return.*#'
+        - '#Access to an undefined property HughCube\\Laravel\\Knight\\Mixin\\Http\\RequestMixin.*#'
         - '#.*lass HughCube\\Laravel\\EasySms\\Exceptions.*#'
         -
             message: '#.*#'
