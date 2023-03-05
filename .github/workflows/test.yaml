@@ -10,7 +10,7 @@ jobs:
       matrix:
         system: [ ubuntu-latest, windows-latest, macOS-latest ]
         php: [ 7.2, 7.3, 7.4, 8.0, 8.1, 8.2 ]
-        laravel: [8, 9]
+        laravel: [8, 9, 10]
     name: PHP ${{ matrix.php }} Laravel ${{ matrix.laravel }} Test on ${{ matrix.system }}
     steps:
       - name: Checkout

@@ -14,6 +14,6 @@ class KRTestTest extends TestCase
 {
     public function testRun()
     {
-        $this->artisan('krtest', ['--class' => KRTest::class])->assertExitCode(0);
+        $this->artisan('krtest', ['--class' => KR::class])->assertExitCode(0);
     }
 }
