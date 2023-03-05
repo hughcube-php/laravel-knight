@@ -27,7 +27,6 @@
         "ext-zend-opcache": "*",
         "laravel/framework": "*",
         "orchestra/testbench": "*",
-        "laravel/lumen-framework": "*",
         "squizlabs/php_codesniffer": "*"
     },
     "autoload": {
