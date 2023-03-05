@@ -8,9 +8,9 @@ jobs:
     strategy:
       max-parallel: 15
       matrix:
-        system: [ ubuntu-latest, macOS-latest ]
+        system: [ ubuntu-latest, macOS-latest, windows-latest]
         php: [ 7.2, 7.3, 7.4, 8.0, 8.1, 8.2 ]
-        laravel: [8, 9, 10]
+        laravel: [7, 8, 9, 10]
     name: PHP ${{ matrix.php }} Laravel ${{ matrix.laravel }} Test on ${{ matrix.system }}
     steps:
       - name: Checkout
