@@ -26,6 +26,7 @@
         "jenssegers/agent": "*",
         "ext-zend-opcache": "*",
         "laravel/framework": "*",
+        "laravel/lumen-framework": "*",
         "orchestra/testbench": "*",
         "squizlabs/php_codesniffer": "*"
     },
