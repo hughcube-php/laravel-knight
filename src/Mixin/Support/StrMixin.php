@@ -20,7 +20,7 @@ class StrMixin
                 return $subject;
             }
 
-            $position = strrpos($subject, (string) $search);
+            $position = strrpos($subject, (string)$search);
 
             if ($position === false) {
                 return $subject;
@@ -67,6 +67,20 @@ class StrMixin
             }
 
             return true;
+        };
+    }
+
+    protected function maskMobile(): Closure
+    {
+        return function ($string): string {
+            return substr_replace($string, '****', 3, 4);
+        };
+    }
+
+    protected function maskChinaIdCode(): Closure
+    {
+        return function ($string): string {
+            return substr_replace($string, '********', 6, 8);
         };
     }
 }
