@@ -190,7 +190,7 @@ class StrMixin
     protected function isWhitespace(): Closure
     {
         return function ($string): bool {
-            return ctype_cntrl($string);;
+            return ctype_cntrl($string);
         };
     }
 
@@ -227,7 +227,8 @@ class StrMixin
     protected function isTel(): Closure
     {
         return function ($string): bool {
-            return 0 < preg_match('/^((\(\d{2,3}\))|(\d{3}\-))?(\(0\d{2,3}\)|0\d{2,3}-)?[1-9]\d{6,7}(\-\d{1,4})?$/', $string);
+            $pattern = '/^((\(\d{2,3}\))|(\d{3}\-))?(\(0\d{2,3}\)|0\d{2,3}-)?[1-9]\d{6,7}(\-\d{1,4})?$/';
+            return 0 < preg_match($pattern, $string);
         };
     }
 
