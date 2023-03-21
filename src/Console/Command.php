@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2023/3/21
- * Time: 13:25
+ * Time: 13:25.
  */
 
 namespace HughCube\Laravel\Knight\Console;
@@ -19,6 +19,7 @@ class Command extends \Illuminate\Console\Command
         if (!empty($value)) {
             return $value;
         }
+
         return $this->ask($question, $default);
     }
 
@@ -36,6 +37,7 @@ class Command extends \Illuminate\Console\Command
             /** @phpstan-ignore-next-line */
             return Str::isTrue($value);
         }
+
         return $this->confirm($question, $default);
     }
 }
