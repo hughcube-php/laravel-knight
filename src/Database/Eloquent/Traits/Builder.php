@@ -118,7 +118,7 @@ trait Builder
         $cacheKey = [];
         foreach ($columns as $name => $value) {
             $name = is_numeric($name) ? $this->getModel()->getKeyName() : $name;
-            $cacheKey[strval($name)] = (strval($value));
+            $cacheKey[strval($name)] = strval($value);
         }
 
         ksort($cacheKey);
@@ -191,6 +191,7 @@ trait Builder
      * @throws
      *
      * @return KnightCollection
+     *
      * @phpstan-ignore-next-line
      */
     public function findUniqueRows($ids): KnightCollection
@@ -285,6 +286,7 @@ trait Builder
      * @throws
      *
      * @return bool
+     *
      * @phpstan-ignore-next-line
      */
     public function refreshRowCache(): bool

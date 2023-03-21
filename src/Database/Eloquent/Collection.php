@@ -13,6 +13,7 @@ use HughCube\Laravel\Knight\Mixin\Support\CollectionMixin;
 
 /**
  * @see CollectionMixin
+ *
  * @mixin KIdeCollection
  */
 class Collection extends \Illuminate\Database\Eloquent\Collection

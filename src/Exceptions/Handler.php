@@ -20,6 +20,7 @@ class Handler extends ExceptionHandler
 {
     /**
      * @var array<integer, string>
+     *
      * @phpstan-ignore-next-line
      */
     protected $dontReport = [

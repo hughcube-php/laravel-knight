@@ -20,6 +20,7 @@ trait GetDispatcher
      * @throws
      *
      * @return Dispatcher
+     *
      * @phpstan-ignore-next-line
      */
     protected function getDispatcher(): Dispatcher

@@ -20,7 +20,7 @@ class StrMixin
                 return $subject;
             }
 
-            $position = strrpos($subject, (string)$search);
+            $position = strrpos($subject, (string) $search);
 
             if ($position === false) {
                 return $subject;
@@ -92,7 +92,7 @@ class StrMixin
     }
 
     /**
-     * 判断一个字符串的编码是否为UTF-8
+     * 判断一个字符串的编码是否为UTF-8.
      */
     protected function isUtf8(): Closure
     {
@@ -125,7 +125,7 @@ class StrMixin
     }
 
     /**
-     * 判断一个字符串是否为八进制字符
+     * 判断一个字符串是否为八进制字符.
      */
     protected function isOctal(): Closure
     {
@@ -135,7 +135,7 @@ class StrMixin
     }
 
     /**
-     * 判断一个字符串是否为二进制字符
+     * 判断一个字符串是否为二进制字符.
      */
     protected function isBinary(): Closure
     {
@@ -145,7 +145,7 @@ class StrMixin
     }
 
     /**
-     * 判断一个字符串是否为十六进制字符
+     * 判断一个字符串是否为十六进制字符.
      */
     protected function isHex(): Closure
     {
@@ -155,7 +155,7 @@ class StrMixin
     }
 
     /**
-     * 判断一个字符串是否是数字和字母组成
+     * 判断一个字符串是否是数字和字母组成.
      */
     protected function isAlnum(): Closure
     {
@@ -165,7 +165,7 @@ class StrMixin
     }
 
     /**
-     * 判断一个字符串是否是字母组成
+     * 判断一个字符串是否是字母组成.
      */
     protected function isAlpha(): Closure
     {
@@ -175,7 +175,7 @@ class StrMixin
     }
 
     /**
-     * 判断一个字符串是否是符合的命名规则
+     * 判断一个字符串是否是符合的命名规则.
      */
     protected function isNaming(): Closure
     {
@@ -185,7 +185,7 @@ class StrMixin
     }
 
     /**
-     * 判断一个字符串是否为空白符,空格制表符回车等都被视作为空白符,类是\n\r\t;
+     * 判断一个字符串是否为空白符,空格制表符回车等都被视作为空白符,类是\n\r\t;.
      */
     protected function isWhitespace(): Closure
     {
@@ -195,7 +195,7 @@ class StrMixin
     }
 
     /**
-     * 判断是否为整数
+     * 判断是否为整数.
      */
     protected function isDigit(): Closure
     {
@@ -205,7 +205,7 @@ class StrMixin
     }
 
     /**
-     * 判断是否是一个合法的邮箱
+     * 判断是否是一个合法的邮箱.
      */
     protected function isEmail(): Closure
     {
@@ -222,12 +222,13 @@ class StrMixin
     }
 
     /**
-     * 判断是否是一个合法的固定电话号码;
+     * 判断是否是一个合法的固定电话号码;.
      */
     protected function isTel(): Closure
     {
         return function ($string): bool {
             $pattern = '/^((\(\d{2,3}\))|(\d{3}\-))?(\(0\d{2,3}\)|0\d{2,3}-)?[1-9]\d{6,7}(\-\d{1,4})?$/';
+
             return 0 < preg_match($pattern, $string);
         };
     }
@@ -263,7 +264,7 @@ class StrMixin
     }
 
     /**
-     * 判断是否是内网ip
+     * 判断是否是内网ip.
      */
     protected function isPrivateIp(): Closure
     {
@@ -274,7 +275,7 @@ class StrMixin
     }
 
     /**
-     * 判断是否是外网ip
+     * 判断是否是外网ip.
      */
     protected function isPublicIp(): Closure
     {
@@ -287,7 +288,6 @@ class StrMixin
     protected function isUrl(): Closure
     {
         return function ($string, bool $checkAccess = false): bool {
-
             if (false === filter_var($string, FILTER_VALIDATE_URL)) {
                 return false;
             }
@@ -301,7 +301,7 @@ class StrMixin
     }
 
     /**
-     * 是否合法的端口
+     * 是否合法的端口.
      */
     protected function isPort(): Closure
     {
@@ -332,7 +332,7 @@ class StrMixin
     }
 
     /**
-     * 判断是否中文名字
+     * 判断是否中文名字.
      */
     protected function isChineseName(): Closure
     {
@@ -342,7 +342,7 @@ class StrMixin
     }
 
     /**
-     * 是否含有中文
+     * 是否含有中文.
      */
     protected function hasChinese(): Closure
     {
@@ -352,7 +352,7 @@ class StrMixin
     }
 
     /**
-     * 是否中文
+     * 是否中文.
      */
     protected function isChinese(): Closure
     {
@@ -386,12 +386,11 @@ class StrMixin
     }
 
     /**
-     * 函数msubstr,实现中文截取字符串;
+     * 函数msubstr,实现中文截取字符串;.
      */
     protected function msubstr(): Closure
     {
         return function ($str, $start = 0, $length = null, $suffix = '...', $charset = 'utf-8'): string {
-
             $length = null === $length ? strlen($length) : $length;
             $charLen = in_array($charset, ['utf-8', 'UTF8']) ? 3 : 2;
 
@@ -413,7 +412,7 @@ class StrMixin
                 // @codingStandardsIgnoreEnd
 
                 preg_match_all($re[$charset], $str, $match);
-                $slice = join("", array_slice($match[0], $start, $length));
+                $slice = join('', array_slice($match[0], $start, $length));
             }
 
             return $slice.$suffix;
@@ -421,7 +420,7 @@ class StrMixin
     }
 
     /**
-     * 统计单词数
+     * 统计单词数.
      */
     protected function countWords(): Closure
     {
@@ -431,7 +430,7 @@ class StrMixin
     }
 
     /**
-     * 获取指定位置的字符, 不能支持负数位置
+     * 获取指定位置的字符, 不能支持负数位置.
      */
     protected function offsetGet(): Closure
     {
@@ -445,7 +444,7 @@ class StrMixin
     }
 
     /**
-     * 过滤不完整的UTF8字符，UTF8的合法字符范围为：
+     * 过滤不完整的UTF8字符，UTF8的合法字符范围为：.
      *
      * 一字节字符：0x00-0x7F
      * 二字节字符：0xC0-0xDF 0x80-0xBF
@@ -456,9 +455,9 @@ class StrMixin
     {
         return function ($string): string {
             // @codingStandardsIgnoreStart
-            $string = preg_replace("/[\\xC0-\\xDF](?=[\\x00-\\x7F\\xC0-\\xDF\\xE0-\\xEF\\xF0-\\xF7]|$)/", '', $string);
-            $string = preg_replace("/[\\xE0-\\xEF][\\x80-\\xBF]{0,1}(?=[\\x00-\\x7F\\xC0-\\xDF\\xE0-\\xEF\\xF0-\\xF7]|$)/", '', $string);
-            $string = preg_replace("/[\\xF0-\\xF7][\\x80-\\xBF]{0,2}(?=[\\x00-\\x7F\\xC0-\\xDF\\xE0-\\xEF\\xF0-\\xF7]|$)/", '', $string);
+            $string = preg_replace('/[\\xC0-\\xDF](?=[\\x00-\\x7F\\xC0-\\xDF\\xE0-\\xEF\\xF0-\\xF7]|$)/', '', $string);
+            $string = preg_replace('/[\\xE0-\\xEF][\\x80-\\xBF]{0,1}(?=[\\x00-\\x7F\\xC0-\\xDF\\xE0-\\xEF\\xF0-\\xF7]|$)/', '', $string);
+            $string = preg_replace('/[\\xF0-\\xF7][\\x80-\\xBF]{0,2}(?=[\\x00-\\x7F\\xC0-\\xDF\\xE0-\\xEF\\xF0-\\xF7]|$)/', '', $string);
             // @codingStandardsIgnoreEnd
 
             return strval($string);
@@ -476,31 +475,31 @@ class StrMixin
     {
         return function (string $a, string $b, ?string $operator = null, ?int $compareDepth = null): int {
             /**
-             * 分割成数组
+             * 分割成数组.
              */
-            $a = explode(".", $a);
-            $b = explode(".", $b);
+            $a = explode('.', $a);
+            $b = explode('.', $b);
 
             /**
-             * 确定最大比较的深度
+             * 确定最大比较的深度.
              */
             $maxDepth = max(count($a), count($b));
             $maxDepth = (null != $compareDepth && $maxDepth > $compareDepth) ? $compareDepth : $maxDepth;
 
             /**
-             * 补全长度, 防止 1.0.1 < 1.0.1.0 的情况
+             * 补全长度, 防止 1.0.1 < 1.0.1.0 的情况.
              */
             $a = array_pad($a, $maxDepth, '0');
             $b = array_pad($b, $maxDepth, '0');
 
             /**
-             * 截取长度, 只比较指定深度
+             * 截取长度, 只比较指定深度.
              */
             $a = array_slice($a, 0, $maxDepth);
             $b = array_slice($b, 0, $maxDepth);
 
             /**
-             * 重新拼接成字符串
+             * 重新拼接成字符串.
              */
             $a = implode('.', $a);
             $b = implode('.', $b);

@@ -157,7 +157,7 @@ class RequestMixin
     public function isLtClientVersion(): Closure
     {
         return function (string $version, bool $contain = false, ?int $length = null): bool {
-            return Version::compare(($contain ? '>=' : '>'), $this->getClientVersion(), $version, $length);
+            return Version::compare($contain ? '>=' : '>', $this->getClientVersion(), $version, $length);
         };
     }
 
@@ -169,7 +169,7 @@ class RequestMixin
     public function isGtClientVersion(): Closure
     {
         return function (string $version, bool $contain = false, ?int $length = null): bool {
-            return Version::compare(($contain ? '<=' : '<'), $this->getClientVersion(), $version, $length);
+            return Version::compare($contain ? '<=' : '<', $this->getClientVersion(), $version, $length);
         };
     }
 }

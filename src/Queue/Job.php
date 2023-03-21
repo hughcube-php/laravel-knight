@@ -30,7 +30,7 @@ use Illuminate\Support\Fluent;
 use Illuminate\Support\Str;
 
 /**
- * @method static PendingDispatch|static dispatch(...$arguments)
+ * @method static PendingDispatch|static        dispatch(...$arguments)
  * @method static PendingDispatch|Fluent|static dispatchIf($boolean, ...$arguments)
  * @method static PendingDispatch|Fluent|static dispatchUnless($boolean, ...$arguments)
  */
@@ -97,6 +97,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
      * @inheritDoc
      *
      * @throws
+     *
      * @phpstan-ignore-next-line
      */
     protected function loadParameters()
@@ -185,7 +186,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
      */
     protected function getName(object $job = null): string
     {
-        return Str::afterLast(get_class(($job ?? $this)), '\\');
+        return Str::afterLast(get_class($job ?? $this), '\\');
     }
 
     /**

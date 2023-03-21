@@ -1,7 +1,6 @@
 <?php
 
 if (!function_exists('log_path')) {
-
     /**
      * Get the path to the log folder.
      *

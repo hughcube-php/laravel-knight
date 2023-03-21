@@ -31,7 +31,7 @@ class Carbon extends \Illuminate\Support\Carbon
         return sprintf(
             '%s.%s',
             $this->getTimestamp(),
-            (($this->getPreciseTimestamp() % static::MICROSECONDS_PER_SECOND) ?: '0')
+            ($this->getPreciseTimestamp() % static::MICROSECONDS_PER_SECOND) ?: '0'
         );
     }
 

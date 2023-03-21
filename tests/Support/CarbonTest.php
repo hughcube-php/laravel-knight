@@ -22,7 +22,7 @@ class CarbonTest extends TestCase
             CarbonInterface::MOCK_DATETIME_FORMAT,
         ];
         foreach ($dateFormats as $dateFormat) {
-            $date = date($dateFormat, ($timestamp = time()));
+            $date = date($dateFormat, $timestamp = time());
             $dateTime = Carbon::fromDate($date, $dateFormat);
 
             $this->assertInstanceOf(BaseCarbon::class, $dateTime);
