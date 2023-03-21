@@ -97,11 +97,12 @@ class CollectionMixin
     public function onlyArrayKeys(): Closure
     {
         return function ($keys = []) {
-            $keys = $keys ?? [];
-
+            $keys = $this->wrap($keys);
             $collection = $this->make();
+
             foreach ($this->getIterator() as $key => $item) {
-                if (in_array($key, $keys)) {
+                /** @phpstan-ignore-next-line */
+                if ($keys->hasValue($key)) {
                     $collection->put($key, $item);
                 }
             }
@@ -116,7 +117,10 @@ class CollectionMixin
     public function onlyColumnValues(): Closure
     {
         return function ($values, $name = null, bool $strict = false) {
+
             $collection = $this->make();
+            $values = $this->wrap($values);
+
             foreach ($this->getIterator() as $key => $item) {
 
                 /** 之所以每次计算$column, 因为可能存在不同model在同一个collection */
@@ -126,7 +130,8 @@ class CollectionMixin
                     $column = $name;
                 }
 
-                if (in_array($item[$column], $values, $strict)) {
+                /** @phpstan-ignore-next-line */
+                if ($values->hasValue($item[$column], $strict)) {
                     $collection->put($key, $item);
                 }
             }
@@ -146,6 +151,23 @@ class CollectionMixin
             }
 
             return $this->make($this->getIterator());
+        };
+    }
+
+    public function hasValue(): Closure
+    {
+        return function ($needle, $strict = false) {
+
+            foreach ($this->getIterator() as $value) {
+                if ($strict && $value === $needle) {
+                    return true;
+                }
+
+                if (!$strict && $value == $needle) {
+                    return true;
+                }
+            }
+            return false;
         };
     }
 
