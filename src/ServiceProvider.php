@@ -24,6 +24,7 @@ use HughCube\Laravel\Knight\Mixin\Support\CollectionMixin;
 use HughCube\Laravel\Knight\Mixin\Support\StrMixin;
 use HughCube\Laravel\Knight\OPcache\Actions\ScriptsAction as OPcacheScriptsAction;
 use HughCube\Laravel\Knight\OPcache\Actions\StatesAction as OPcacheStatesAction;
+use HughCube\Laravel\Knight\OPcache\Commands\ClearCliCacheCommand as OPcacheClearCliCacheCommand;
 use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand as OPcacheCompileFilesCommand;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
@@ -90,7 +91,10 @@ class ServiceProvider extends IlluminateServiceProvider
     protected function bootOPcache()
     {
         if ($this->app->runningInConsole()) {
-            $this->commands([OPcacheCompileFilesCommand::class]);
+            $this->commands([
+                OPcacheCompileFilesCommand::class,
+                OPcacheClearCliCacheCommand::class,
+            ]);
         }
 
         if (!$this->hasRoutesCache() && false !== ($prefix = config('knight.opcache.route_prefix', false))) {

@@ -21,10 +21,10 @@
         "hughcube/laravel-service-support": "*"
     },
     "require-dev": {
+        "ext-zend-opcache": "*",
         "laravel/sanctum": "*",
         "phpstan/phpstan": "*",
         "jenssegers/agent": "*",
-        "ext-zend-opcache": "*",
         "laravel/framework": "*",
         "laravel/lumen-framework": "*",
         "orchestra/testbench": "*",
