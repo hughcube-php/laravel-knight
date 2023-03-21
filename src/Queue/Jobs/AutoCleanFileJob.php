@@ -53,7 +53,7 @@ class AutoCleanFileJob extends Job
 
     protected function getMaxDays(): int
     {
-        return intval(($this->p()->get('max_days') ?: 30));
+        return intval($this->p()->get('max_days') ?: 30);
     }
 
     /**

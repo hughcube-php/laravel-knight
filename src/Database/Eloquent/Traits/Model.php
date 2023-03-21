@@ -174,11 +174,12 @@ trait Model
 
     /**
      * @throws
+     *
      * @phpstan-ignore-next-line
      */
     public function getCacheTtl(int $duration = null): int
     {
-        return null === $duration ? random_int((5 * 24 * 3600), (7 * 24 * 3600)) : $duration;
+        return null === $duration ? random_int(5 * 24 * 3600, 7 * 24 * 3600) : $duration;
     }
 
     public function isFromCache(): bool

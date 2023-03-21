@@ -37,6 +37,6 @@ class Config extends Command
     {
         $key = $this->argument('key');
 
-        VarDumper::dump(config((empty($key) ? null : $key)));
+        VarDumper::dump(config(empty($key) ? null : $key));
     }
 }

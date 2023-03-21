@@ -113,7 +113,7 @@ class TestCase extends OrchestraTestCase
         $method = $class->getMethod($method);
         $method->setAccessible(true);
 
-        return $method->invokeArgs((is_object($object) ? $object : null), $args);
+        return $method->invokeArgs(is_object($object) ? $object : null, $args);
     }
 
     /**

@@ -96,6 +96,6 @@ trait MultipleHandler
             return null;
         }
 
-        return [$method->name, intval(($sort ?: 0))];
+        return [$method->name, intval($sort ?: 0)];
     }
 }

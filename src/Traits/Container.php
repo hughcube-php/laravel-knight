@@ -28,6 +28,7 @@ trait Container
      * @throws
      *
      * @return Dispatcher
+     *
      * @phpstan-ignore-next-line
      */
     protected function getDispatcher(): Dispatcher
@@ -39,6 +40,7 @@ trait Container
      * @throws
      *
      * @return EventsDispatcher
+     *
      * @phpstan-ignore-next-line
      */
     protected function getEventsDispatcher(): EventsDispatcher
@@ -50,6 +52,7 @@ trait Container
      * @throws
      *
      * @return QueueManager
+     *
      * @phpstan-ignore-next-line
      */
     protected function getQueueManager(): QueueManager
@@ -61,6 +64,7 @@ trait Container
      * @throws
      *
      * @return Repository
+     *
      * @phpstan-ignore-next-line
      */
     protected function getContainerConfig(): Repository

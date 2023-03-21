@@ -117,12 +117,10 @@ class CollectionMixin
     public function onlyColumnValues(): Closure
     {
         return function ($values, $name = null, bool $strict = false) {
-
             $collection = $this->make();
             $values = $this->wrap($values);
 
             foreach ($this->getIterator() as $key => $item) {
-
                 /** 之所以每次计算$column, 因为可能存在不同model在同一个collection */
                 if (null === $name && is_object($item) && method_exists($item, 'getKeyName')) {
                     $column = $item->getKeyName();
@@ -157,7 +155,6 @@ class CollectionMixin
     public function hasValue(): Closure
     {
         return function ($needle, $strict = false) {
-
             foreach ($this->getIterator() as $value) {
                 if ($strict && $value === $needle) {
                     return true;
@@ -167,6 +164,7 @@ class CollectionMixin
                     return true;
                 }
             }
+
             return false;
         };
     }

@@ -13,6 +13,7 @@ use Psr\Log\LogLevel;
 
 /**
  * @deprecated If the entire package is upgraded to 8.0, it needs to be removed
+ *
  * @mixin LoggerTrait
  */
 trait Logger

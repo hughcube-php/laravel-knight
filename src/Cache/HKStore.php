@@ -146,7 +146,7 @@ class HKStore
             return $this->get($key);
         }
 
-        $this->set($key, ($value = $callable()), $ttl);
+        $this->set($key, $value = $callable(), $ttl);
 
         return $value;
     }

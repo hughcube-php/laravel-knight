@@ -100,6 +100,7 @@ trait Action
      * @throws
      *
      * @return Request|\Request|KIdeRequest
+     *
      * @phpstan-ignore-next-line
      */
     protected function getRequest(): Request
@@ -111,6 +112,7 @@ trait Action
      * @inheritDoc
      *
      * @throws
+     *
      * @phpstan-ignore-next-line
      */
     protected function loadParameters()
@@ -137,6 +139,7 @@ trait Action
      * @throws
      *
      * @return mixed
+     *
      * @phpstan-ignore-next-line
      */
     public function invoke()

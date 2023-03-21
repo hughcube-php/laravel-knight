@@ -42,7 +42,7 @@ class Downloader implements StaticInstanceInterface
             substr(md5($url), 0, 2),
             substr(md5(microtime()), 0, 2),
             md5($url),
-            ($extension ? ".{$extension}" : '')
+            $extension ? ".{$extension}" : ''
         ));
     }
 

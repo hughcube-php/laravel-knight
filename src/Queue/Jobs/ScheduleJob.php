@@ -119,7 +119,7 @@ class ScheduleJob extends Job
         $id = $this->getDispatcher()->dispatch($this->prepareJob($job));
 
         $name = Str::afterLast(get_class($job), '\\');
-        $this->info(sprintf('job: %s, id:%s, delays:%sms', $name, (is_scalar($id) ? $id : ''), $this->getDelays()));
+        $this->info(sprintf('job: %s, id:%s, delays:%sms', $name, is_scalar($id) ? $id : '', $this->getDelays()));
     }
 
     /**
@@ -131,7 +131,7 @@ class ScheduleJob extends Job
     protected function pushJobIfDue(string $expression, $job)
     {
         if ($this->isDue($expression)) {
-            $this->pushJob((is_callable($job) ? $job() : $job));
+            $this->pushJob(is_callable($job) ? $job() : $job);
         }
     }
 
@@ -154,7 +154,7 @@ class ScheduleJob extends Job
     protected function fireJobIfDue(string $expression, $job)
     {
         if ($this->isDue($expression)) {
-            $this->fireJob((is_callable($job) ? $job() : $job));
+            $this->fireJob(is_callable($job) ? $job() : $job);
         }
     }
 }

@@ -52,7 +52,7 @@ class TrustIps
      */
     public function handle(Request $request, callable $next, $trustIps = null): Response
     {
-        if (!$this->isTrustIp($request->ip(), ($trustIps ?? $this->trustIps))) {
+        if (!$this->isTrustIp($request->ip(), $trustIps ?? $this->trustIps)) {
             throw new AuthorizationException('An untrusted IP address!');
         }
 
