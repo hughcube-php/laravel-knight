@@ -405,7 +405,10 @@ class StrMixin
             } elseif (function_exists('iconv_substr')) {
                 $slice = iconv_substr($str, $start, $length, $charset);
             } else {
+                // @codingStandardsIgnoreStart
                 $re['utf-8'] = "/[\x01-\x7f]|[\xc2-\xdf][\x80-\xbf]|[\xe0-\xef][\x80-\xbf]{2}|[\xf0-\xff][\x80-\xbf]{3}/";
+                // @codingStandardsIgnoreEnd
+
                 $re['gb2312'] = "/[\x01-\x7f]|[\xb0-\xf7][\xa0-\xfe]/";
                 $re['gbk'] = "/[\x01-\x7f]|[\x81-\xfe][\x40-\xfe]/";
                 $re['big5'] = "/[\x01-\x7f]|[\x81-\xfe]([\x40-\x7e]|\xa1-\xfe])/";
@@ -452,9 +455,11 @@ class StrMixin
     protected function filterPartialUTF8(): Closure
     {
         return function ($string): string {
+            // @codingStandardsIgnoreStart
             $string = preg_replace("/[\\xC0-\\xDF](?=[\\x00-\\x7F\\xC0-\\xDF\\xE0-\\xEF\\xF0-\\xF7]|$)/", '', $string);
             $string = preg_replace("/[\\xE0-\\xEF][\\x80-\\xBF]{0,1}(?=[\\x00-\\x7F\\xC0-\\xDF\\xE0-\\xEF\\xF0-\\xF7]|$)/", '', $string);
             $string = preg_replace("/[\\xF0-\\xF7][\\x80-\\xBF]{0,2}(?=[\\x00-\\x7F\\xC0-\\xDF\\xE0-\\xEF\\xF0-\\xF7]|$)/", '', $string);
+            // @codingStandardsIgnoreEnd
 
             return strval($string);
         };
