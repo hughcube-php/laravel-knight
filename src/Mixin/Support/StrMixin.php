@@ -20,7 +20,7 @@ class StrMixin
                 return $subject;
             }
 
-            $position = strrpos($subject, (string)$search);
+            $position = strrpos($subject, (string) $search);
 
             if ($position === false) {
                 return $subject;
@@ -511,9 +511,8 @@ class StrMixin
     protected function mbSplit(): Closure
     {
         return function (string $string, int $length = 1, ?string $encoding = null): array {
-
             $strlen = mb_strlen($string);
-            $encoding = $encoding ?? "UTF-8";
+            $encoding = $encoding ?? 'UTF-8';
 
             $array = [];
             while ($strlen > 0) {

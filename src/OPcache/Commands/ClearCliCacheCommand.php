@@ -26,21 +26,23 @@ class ClearCliCacheCommand extends Command
     protected $description = 'clear opcache cli';
 
     /**
-     * @param  Schedule  $schedule
+     * @param Schedule $schedule
      *
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function handle(Schedule $schedule)
     {
         if (!extension_loaded('Zend OPcache')) {
             $this->error('You do not have the Zend OPcache extension loaded, sample data is being shown instead.');
+
             return;
         }
 
         if (false === opcache_get_status()) {
             $this->warn('OPcache is not enabled.');
+
             return;
         }
 
