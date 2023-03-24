@@ -22,4 +22,11 @@ class StrMixin extends TestCase
     {
         $this->assertSame('110225********6127', Str::maskChinaIdCode('110225196403026127'));
     }
+
+    public function testMbSplit()
+    {
+        $this->assertSame(['一', '个', '萝', '卜', '1', '个', 'k', 'e', 'n', 'g'], Str::mbSplit('一个萝卜1个keng'));
+
+        $this->assertSame(['2个', '萝卜', '2个', 'ke', 'ng', ','], Str::mbSplit('2个萝卜2个keng,', 2));
+    }
 }

@@ -20,7 +20,7 @@ class StrMixin
                 return $subject;
             }
 
-            $position = strrpos($subject, (string) $search);
+            $position = strrpos($subject, (string)$search);
 
             if ($position === false) {
                 return $subject;
@@ -505,6 +505,24 @@ class StrMixin
             $b = implode('.', $b);
 
             return null === $operator ? version_compare($a, $b) : version_compare($a, $b, $operator);
+        };
+    }
+
+    protected function mbSplit(): Closure
+    {
+        return function (string $string, int $length = 1, ?string $encoding = null): array {
+
+            $strlen = mb_strlen($string);
+            $encoding = $encoding ?? "UTF-8";
+
+            $array = [];
+            while ($strlen > 0) {
+                $array[] = mb_substr($string, 0, $length, $encoding);
+                $string = mb_substr($string, $length, $strlen, $encoding);
+                $strlen = mb_strlen($string);
+            }
+
+            return $array;
         };
     }
 }
