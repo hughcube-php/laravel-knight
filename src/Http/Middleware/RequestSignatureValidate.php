@@ -24,12 +24,12 @@ class RequestSignatureValidate
     /**
      * Handle an incoming request.
      *
-     * @param Request $request
-     * @param Closure $next
-     *
-     * @throws ValidateSignatureException
+     * @param  Request  $request
+     * @param  Closure  $next
      *
      * @return Response
+     * @throws ValidateSignatureException
+     *
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -38,6 +38,12 @@ class RequestSignatureValidate
         }
 
         throw new ValidateSignatureException();
+    }
+
+    protected function parseRequestDate($request)
+    {
+        /** @var Request|KIdeRequest $request */
+        return $request->getClientDate() ?: $request->getDate() ?: null;
     }
 
     protected function validate(Request $request): bool
@@ -72,7 +78,7 @@ class RequestSignatureValidate
             /** HTTP URL */
             $request->getRequestUri(),
             /** HTTP DATE */
-            $request->getDate() ?: '',
+            $this->parseRequestDate($request) ?: '',
             /** HTTP CONTENT TYPE */
             $request->headers->get('CONTENT_TYPE', ''),
             /** HTTP CLIENT HEADERS */
