@@ -72,6 +72,14 @@ class KIdeRequest
     }
 
     /**
+     * @see RequestMixin::getClientDate()
+     */
+    public function getClientDate(): ?string
+    {
+        return null;
+    }
+
+    /**
      * @see RequestMixin::getUserAgentDetect()
      */
     public function getUserAgentDetect(): Agent

@@ -58,7 +58,7 @@ trait Model
     /**
      * @param mixed $date
      *
-     * @return mixed
+     * @return null|Carbon
      */
     public function getCreatedAtAttribute($date)
     {
@@ -68,7 +68,7 @@ trait Model
     /**
      * @param mixed $date
      *
-     * @return mixed
+     * @return null|Carbon
      */
     public function getUpdatedAtAttribute($date)
     {
@@ -78,7 +78,7 @@ trait Model
     /**
      * @param mixed $date
      *
-     * @return mixed
+     * @return null|Carbon
      */
     public function getDeletedAtAttribute($date)
     {
@@ -225,7 +225,7 @@ trait Model
     /**
      * @param array|Arrayable|Traversable $ids
      *
-     * @return KnightCollection
+     * @return KnightCollection<int, static>|array<int, static>
      */
     public static function findByIds($ids): KnightCollection
     {

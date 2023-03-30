@@ -11,6 +11,8 @@ namespace HughCube\Laravel\Knight\Mixin\Http;
 use Closure;
 use HughCube\Laravel\Knight\Support\Version;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Jenssegers\Agent\Agent;
 use Symfony\Component\HttpFoundation\HeaderBag;
@@ -24,18 +26,6 @@ use Symfony\Component\HttpFoundation\HeaderBag;
  */
 class RequestMixin
 {
-    /**
-     * 获取客户端Header信息.
-     */
-    public function getIHKCClientHeader(): Closure
-    {
-        return function ($name): ?string {
-            return $this->headers->get(
-                sprintf('%s%s', $this->getClientHeaderPrefix(), $name)
-            );
-        };
-    }
-
     /**
      * 获取客户端版本.
      */
@@ -90,6 +80,13 @@ class RequestMixin
     {
         return function (): ?string {
             return $this->headers->get('Date');
+        };
+    }
+
+    public function getClientDate(): Closure
+    {
+        return function (): ?string {
+            return $this->headers->get(sprintf('%sDate', $this->getClientHeaderPrefix()));
         };
     }
 

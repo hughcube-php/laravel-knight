@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 
 class Command extends \Illuminate\Console\Command
 {
-    protected function getOrAskOption($name, $question, $default = null): mixed
+    protected function getOrAskOption($name, $question, $default = null)
     {
         $value = $this->option($name);
         if (!empty($value)) {
@@ -27,7 +27,7 @@ class Command extends \Illuminate\Console\Command
     {
         $ids = $this->getOrAskOption($name, $question, $default);
 
-        return Collection::wrap(explode(',', $ids))->unique()->filter()->values();
+        return Collection::wrap(explode(',', $ids))->values();
     }
 
     protected function getOrAskBoolOption($name, $question, $default = false): bool
