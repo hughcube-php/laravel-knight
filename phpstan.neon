@@ -12,3 +12,7 @@ parameters:
             message: '#.*#'
             paths:
                 - src/OPcache/Views/opcache.php
+        -
+            message: '#.*PHPDoc tag @return with type array.*Collection.*#'
+            paths:
+                - src/Database/Eloquent/Traits/Model.php
