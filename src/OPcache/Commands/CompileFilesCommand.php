@@ -43,11 +43,11 @@ class CompileFilesCommand extends Command
     protected $description = 'opcache compile file';
 
     /**
-     * @param Schedule $schedule
-     *
-     * @throws Exception
+     * @param  Schedule  $schedule
      *
      * @return void
+     * @throws Exception
+     *
      */
     public function handle(Schedule $schedule)
     {
@@ -93,9 +93,9 @@ class CompileFilesCommand extends Command
     }
 
     /**
+     * @return array
      * @throws Exception
      *
-     * @return array
      */
     protected function getFiles(): array
     {
@@ -161,16 +161,13 @@ class CompileFilesCommand extends Command
         return $files;
     }
 
-    /**
-     * @return array
-     */
     protected function getProdFiles(): array
     {
         if (empty($url = $this->option('with_remote_cached_scripts'))) {
             return [];
         }
 
-        /** @phpstan-ignore-next-line  */
+        /** @phpstan-ignore-next-line */
         if (true === $url || '1' === $url || 1 === $url) {
             $url = 'knight.opcache.scripts';
         }
@@ -181,14 +178,14 @@ class CompileFilesCommand extends Command
 
         if (!PUrl::isUrlString($url)) {
             $message = 'Description Failed to run the opcache:compile-files command, ';
-            Log::warning($message.'Remote interface URL cannot be found!');
+            Log::info($message.'Remote interface URL cannot be found!');
 
             return [];
         }
 
         try {
             $response = $this->getHttpClient()->post($url, [
-                RequestOptions::TIMEOUT     => 10.0,
+                RequestOptions::TIMEOUT => 10.0,
                 RequestOptions::HTTP_ERRORS => false,
             ]);
             $states = json_decode($response->getBody()->getContents(), true);
