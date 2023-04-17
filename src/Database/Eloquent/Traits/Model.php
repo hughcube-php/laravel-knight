@@ -294,4 +294,9 @@ trait Model
     {
         return new KnightCollection($models);
     }
+
+    public static function isAvailableModel($model): bool
+    {
+        return $model instanceof self && $model->isAvailable();
+    }
 }
