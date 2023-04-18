@@ -11,8 +11,8 @@ namespace HughCube\Laravel\Knight\Traits;
 trait BuildUniqueKey
 {
     /**
-     * @param mixed    $data
-     * @param int|null $length
+     * @param  mixed  $data
+     * @param  int|null  $length
      *
      * @return string
      */
@@ -24,5 +24,10 @@ trait BuildUniqueKey
         $hash = sprintf('%s%s', $crc32, md5($string));
 
         return null === $length ? $hash : substr($hash, 0, $length);
+    }
+
+    protected static function buildUniqueCacheKey(string $prefix, $data, ?int $length = null): string
+    {
+        return sprintf('%s_%s', $prefix, static::buildUniqueKey($data, $length));
     }
 }
