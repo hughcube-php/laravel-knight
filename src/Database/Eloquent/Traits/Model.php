@@ -31,7 +31,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|string|null $date
-     * @param string|null                             $format
+     * @param string|null $format
      *
      * @return Carbon|null
      */
@@ -44,7 +44,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|null $dateTime
-     * @param string                           $format
+     * @param string $format
      *
      * @return string|null
      */
@@ -283,6 +283,20 @@ trait Model
     public function ifAvailableReturnSelf()
     {
         return $this->ifReturnSelf($this->isAvailable());
+    }
+
+    /**
+     * @return static
+     */
+    public function clone(callable $callable = null)
+    {
+        $model = clone $this;
+
+        if (is_callable($callable)) {
+            $callable($model);
+        }
+
+        return $model;
     }
 
     /**
