@@ -11,8 +11,6 @@ namespace HughCube\Laravel\Knight\Mixin\Http;
 use Closure;
 use HughCube\Laravel\Knight\Support\Version;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Jenssegers\Agent\Agent;
 use Symfony\Component\HttpFoundation\HeaderBag;
