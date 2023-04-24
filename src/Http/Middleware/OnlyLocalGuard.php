@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2022/8/31
- * Time: 18:21
+ * Time: 18:21.
  */
 
 namespace HughCube\Laravel\Knight\Http\Middleware;
@@ -21,7 +21,7 @@ class OnlyLocalGuard
     protected function allowIps(): array
     {
         $ips = [
-            '127.0.0.1'
+            '127.0.0.1',
         ];
 
         if ($this->isContainerLocalEnv()) {
