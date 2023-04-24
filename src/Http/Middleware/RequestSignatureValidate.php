@@ -24,12 +24,12 @@ class RequestSignatureValidate
     /**
      * Handle an incoming request.
      *
-     * @param  Request  $request
-     * @param  Closure  $next
+     * @param Request $request
+     * @param Closure $next
      *
-     * @return Response
      * @throws ValidateSignatureException
      *
+     * @return Response
      */
     public function handle(Request $request, Closure $next): Response
     {
