@@ -5,6 +5,7 @@ namespace HughCube\Laravel\Knight\Queue\Jobs;
 use Carbon\Carbon;
 use Cron\CronExpression;
 use HughCube\Laravel\Knight\Queue\Job;
+use HughCube\Laravel\Knight\Traits\Container;
 use HughCube\Laravel\Knight\Traits\MultipleHandler;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Support\Str;
@@ -16,6 +17,7 @@ use Throwable;
 class ScheduleJob extends Job
 {
     use MultipleHandler;
+    use Container;
 
     /**
      * @var Carbon
@@ -23,9 +25,9 @@ class ScheduleJob extends Job
     private $jobStartedAt = null;
 
     /**
+     * @return void
      * @throws Throwable
      *
-     * @return void
      */
     protected function action(): void
     {
@@ -68,9 +70,9 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param string|array      $name
+     * @param string|array $name
      * @param string|array|null $in
-     * @param string|null       $basePath
+     * @param string|null $basePath
      *
      * @return array<integer, object>
      */
@@ -123,7 +125,7 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param string              $expression
+     * @param string $expression
      * @param callable|Job|object $job
      *
      * @return void
@@ -142,11 +144,11 @@ class ScheduleJob extends Job
      */
     protected function fireJob($job)
     {
-        return $this->getDispatcher()->dispatchNow($this->prepareJob($job));
+        return $this->getDispatcher()->dispatchSync($this->prepareJob($job));
     }
 
     /**
-     * @param string              $expression
+     * @param string $expression
      * @param callable|Job|object $job
      *
      * @return void
@@ -155,6 +157,27 @@ class ScheduleJob extends Job
     {
         if ($this->isDue($expression)) {
             $this->fireJob(is_callable($job) ? $job() : $job);
+        }
+    }
+
+    /**
+     * @return void
+     * @throws Throwable
+     */
+    protected function tryFireJobIfDue(string $expression, $job, $reportException = true)
+    {
+        if (!$this->isDue($expression)) {
+            return;
+        }
+
+        try {
+            $this->fireJob(is_callable($job) ? $job() : $job);
+        } catch (Throwable $exception) {
+            if ($reportException) {
+                $this->getExceptionHandler()->report($exception);
+            } else {
+                throw $exception;
+            }
         }
     }
 }

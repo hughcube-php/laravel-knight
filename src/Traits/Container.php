@@ -11,6 +11,7 @@ namespace HughCube\Laravel\Knight\Traits;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Contracts\Bus\Dispatcher;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Events\Dispatcher as EventsDispatcher;
 use Illuminate\Queue\QueueManager;
 
@@ -25,11 +26,10 @@ trait Container
     }
 
     /**
+     * @return Dispatcher
+     * @phpstan-ignore-next-line
      * @throws
      *
-     * @return Dispatcher
-     *
-     * @phpstan-ignore-next-line
      */
     protected function getDispatcher(): Dispatcher
     {
@@ -37,11 +37,10 @@ trait Container
     }
 
     /**
+     * @return EventsDispatcher
+     * @phpstan-ignore-next-line
      * @throws
      *
-     * @return EventsDispatcher
-     *
-     * @phpstan-ignore-next-line
      */
     protected function getEventsDispatcher(): EventsDispatcher
     {
@@ -49,11 +48,10 @@ trait Container
     }
 
     /**
+     * @return QueueManager
+     * @phpstan-ignore-next-line
      * @throws
      *
-     * @return QueueManager
-     *
-     * @phpstan-ignore-next-line
      */
     protected function getQueueManager(): QueueManager
     {
@@ -61,11 +59,20 @@ trait Container
     }
 
     /**
+     * @return ExceptionHandler
+     * @phpstan-ignore-next-line
+     * @throws
+     */
+    protected function getExceptionHandler(): ExceptionHandler
+    {
+        return $this->getContainer()->make(ExceptionHandler::class);
+    }
+
+    /**
+     * @return Repository
+     * @phpstan-ignore-next-line
      * @throws
      *
-     * @return Repository
-     *
-     * @phpstan-ignore-next-line
      */
     protected function getContainerConfig(): Repository
     {
