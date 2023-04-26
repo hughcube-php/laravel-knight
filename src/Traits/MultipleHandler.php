@@ -25,9 +25,9 @@ trait MultipleHandler
      * @param bool $tryException
      * @param bool $logException
      *
+     * @return array
      * @throws Throwable
      *
-     * @return array
      */
     protected function triggerHandlers(bool $tryException = false, bool $logException = true): array
     {
@@ -75,7 +75,7 @@ trait MultipleHandler
             }
             $handlers[$handler[0]] = $handler[1];
         }
-        asort($handlers);
+        asort($handlers, SORT_NUMERIC);
 
         return array_keys($handlers);
     }
@@ -96,6 +96,6 @@ trait MultipleHandler
             return null;
         }
 
-        return [$method->name, intval($sort ?: 0)];
+        return [$method->name, ($sort ?: '0')];
     }
 }
