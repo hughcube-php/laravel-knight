@@ -150,7 +150,7 @@ class ScheduleJob extends Job
 
         $name = Str::afterLast(get_class($job), '\\');
         $this->info(sprintf('fire job success, job: %s, duration: %sms, delays:%sms',
-            $name, $end->diffInRealMilliseconds($start), $this->getDelays()
+            $name, $start->diffInRealMilliseconds($end), $this->getDelays()
         ));
 
         return $result;
