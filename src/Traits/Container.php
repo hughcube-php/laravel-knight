@@ -26,10 +26,11 @@ trait Container
     }
 
     /**
-     * @return Dispatcher
-     * @phpstan-ignore-next-line
      * @throws
      *
+     * @return Dispatcher
+     *
+     * @phpstan-ignore-next-line
      */
     protected function getDispatcher(): Dispatcher
     {
@@ -37,10 +38,11 @@ trait Container
     }
 
     /**
-     * @return EventsDispatcher
-     * @phpstan-ignore-next-line
      * @throws
      *
+     * @return EventsDispatcher
+     *
+     * @phpstan-ignore-next-line
      */
     protected function getEventsDispatcher(): EventsDispatcher
     {
@@ -48,10 +50,11 @@ trait Container
     }
 
     /**
-     * @return QueueManager
-     * @phpstan-ignore-next-line
      * @throws
      *
+     * @return QueueManager
+     *
+     * @phpstan-ignore-next-line
      */
     protected function getQueueManager(): QueueManager
     {
@@ -59,9 +62,11 @@ trait Container
     }
 
     /**
-     * @return ExceptionHandler
-     * @phpstan-ignore-next-line
      * @throws
+     *
+     * @return ExceptionHandler
+     *
+     * @phpstan-ignore-next-line
      */
     protected function getExceptionHandler(): ExceptionHandler
     {
@@ -69,10 +74,11 @@ trait Container
     }
 
     /**
-     * @return Repository
-     * @phpstan-ignore-next-line
      * @throws
      *
+     * @return Repository
+     *
+     * @phpstan-ignore-next-line
      */
     protected function getContainerConfig(): Repository
     {
