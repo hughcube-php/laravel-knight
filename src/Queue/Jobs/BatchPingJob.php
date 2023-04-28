@@ -23,9 +23,9 @@ class BatchPingJob extends Job
         return [
             'jobs' => ['array', 'min:1'],
 
-            'jobs.*.url' => ['string', 'nullable'],
-            'jobs.*.method' => ['string', 'nullable'],
-            'jobs.*.timeout' => ['integer', 'nullable'],
+            'jobs.*.url'             => ['string', 'nullable'],
+            'jobs.*.method'          => ['string', 'nullable'],
+            'jobs.*.timeout'         => ['integer', 'nullable'],
             'jobs.*.allow_redirects' => ['integer', 'nullable'],
         ];
     }
@@ -41,9 +41,9 @@ class BatchPingJob extends Job
         /** 组建请求 */
         foreach ($this->p('jobs', []) as $index => $job) {
             $requests[$index] = [
-                'url' => $this->parseUrl($job['url'] ?? 'knight.ping'),
-                'method' => strtoupper($job['method'] ?? null ?: 'GET'),
-                'timeout' => $job['timeout'] ?? null ?: 2,
+                'url'             => $this->parseUrl($job['url'] ?? 'knight.ping'),
+                'method'          => strtoupper($job['method'] ?? null ?: 'GET'),
+                'timeout'         => $job['timeout'] ?? null ?: 2,
                 'allow_redirects' => $this->parseAllowRedirects($job['allow_redirects'] ?? null ?: 0),
             ];
         }
@@ -52,8 +52,8 @@ class BatchPingJob extends Job
         $start = microtime(true);
         foreach ($requests as $index => $request) {
             $responses[$index] = $this->getHttpClient()->requestLazy($request['method'], $request['url'], [
-                RequestOptions::HTTP_ERRORS => false,
-                RequestOptions::TIMEOUT => $request['timeout'],
+                RequestOptions::HTTP_ERRORS     => false,
+                RequestOptions::TIMEOUT         => $request['timeout'],
                 RequestOptions::ALLOW_REDIRECTS => $request['allow_redirects'],
             ]);
         }
@@ -109,9 +109,9 @@ class BatchPingJob extends Job
         }
 
         return [
-            'max' => $redirects,
-            'strict' => true,
-            'referer' => true,
+            'max'       => $redirects,
+            'strict'    => true,
+            'referer'   => true,
             'protocols' => ['https', 'http'],
         ];
     }
