@@ -10,16 +10,16 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 /**
  * Class PersonalAccessToken.
  *
- * @property int               $id
- * @property string            $tokenable_type
- * @property int               $tokenable_id
- * @property string            $name
- * @property string            $token
+ * @property int $id
+ * @property string $tokenable_type
+ * @property int $tokenable_id
+ * @property string $name
+ * @property string $token
  * @property string|array|null $abilities
- * @property Carbon|null       $last_used_at
- * @property Carbon|null       $expires_at
- * @property Carbon|null       $created_at
- * @property Carbon|null       $updated_at
+ * @property Carbon|null $last_used_at
+ * @property Carbon|null $expires_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  *
  * @method static static findById($id)
  */
@@ -38,6 +38,27 @@ class PersonalAccessToken extends \Laravel\Sanctum\PersonalAccessToken
     public static function getExpiresIn(): int
     {
         return 365 * 24 * 3600;
+    }
+
+    public function isValidAccessToken(bool $isValid = true): bool
+    {
+        if (!$this->last_used_at instanceof Carbon) {
+            return true;
+        }
+        return $this->last_used_at->gt(Carbon::now()->subSeconds($this->getExpiresIn()));
+    }
+
+    public function getAccessSecret(): ?string
+    {
+        return ($this->abilities["access_secret"] ?? null) ?: null;
+    }
+
+    /**
+     * token对应的source
+     */
+    public function getSource(): ?string
+    {
+        return ($this->abilities["source"] ?? null) ?: null;
     }
 
     /**
