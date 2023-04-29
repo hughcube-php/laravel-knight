@@ -31,7 +31,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|string|null $date
-     * @param string|null                             $format
+     * @param string|null $format
      *
      * @return Carbon|null
      */
@@ -44,7 +44,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|null $dateTime
-     * @param string                           $format
+     * @param string $format
      *
      * @return string|null
      */
@@ -155,6 +155,16 @@ trait Model
     public static function availableQuery(): Builder
     {
         return static::query()->whereDeletedAtColumn();
+    }
+
+    public static function sortAvailableQuery(): Builder
+    {
+        return static::availableQuery()->orderByDesc('sort')->orderByDesc('id');
+    }
+
+    public static function sortQuery(): Builder
+    {
+        return static::query()->orderByDesc('sort')->orderByDesc('id');
     }
 
     public function getCache(): ?CacheInterface
@@ -312,5 +322,10 @@ trait Model
     public static function isAvailableModel($model): bool
     {
         return $model instanceof self && $model->isAvailable();
+    }
+
+    public function genDefaultSort(): int
+    {
+        return Carbon::now()->getTimestamp() - 1660899108;
     }
 }

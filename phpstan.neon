@@ -11,6 +11,7 @@ parameters:
         - '#.*lass HughCube\\Laravel\\EasySms\\Exceptions.*#'
         - '#Method HughCube\\Laravel\\Knight\\Sanctum\\PersonalAccessToken::findById.*should return.*#'
         - '#.*method HughCube\\Laravel\\Knight\\Sanctum\\PersonalAccessToken::tokenable.* should be.*#'
+        - '#.*Method HughCube\\Laravel\\Knight\\Sanctum\\PersonalAccessToken::sort.* should return.*#'
         -
             message: '#.*#'
             paths:
