@@ -9,6 +9,7 @@
 namespace HughCube\Laravel\Knight\Queue;
 
 use BadMethodCallException;
+use Carbon\Carbon;
 use HughCube\Laravel\Knight\Contracts\Queue\FromFlowJob;
 use HughCube\Laravel\Knight\Support\ParameterBag;
 use HughCube\Laravel\Knight\Traits\Container;
@@ -68,6 +69,11 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     protected $flowJobDescribe = null;
 
     /**
+     * @var Carbon
+     */
+    private $jobStartedAt = null;
+
+    /**
      * Create a new job instance.
      *
      * @return void
@@ -79,11 +85,28 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     public function handle(): void
     {
+        $this->jobStartedAt = Carbon::now();
         $this->loadParameters();
         $this->action();
     }
 
     abstract protected function action(): void;
+
+    protected function getJobStartedAt(): Carbon
+    {
+        if (!$this->jobStartedAt instanceof Carbon) {
+            $this->jobStartedAt = Carbon::now();
+        }
+        return $this->jobStartedAt;
+    }
+
+    /**
+     * @return int
+     */
+    protected function getDelays(): int
+    {
+        return $this->getJobStartedAt()->diffInRealMilliseconds(Carbon::now());
+    }
 
     /**
      * @return array
@@ -212,11 +235,10 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     public function log($level, string $message, array $context = [])
     {
         $message = sprintf(
-            '[%s:%s] [%s:%s] %s',
-            gethostname(),
-            getmypid(),
-            $this->getName(),
-            $this->getPid(),
+            '[%sms] [%s:%s %s:%s] %s',
+            $this->getDelays(),
+            gethostname(), getmypid(),
+            $this->getName(), $this->getPid(),
             $message
         );
 

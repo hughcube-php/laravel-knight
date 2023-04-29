@@ -20,41 +20,18 @@ class ScheduleJob extends Job
     use Container;
 
     /**
-     * @var Carbon
-     */
-    private $jobStartedAt = null;
-
-    /**
      * @throws Throwable
      *
      * @return void
      */
     protected function action(): void
     {
-        $this->jobStartedAt = Carbon::now();
         $this->triggerHandlers(true);
     }
 
     protected function isStopHandlerResults($results, Throwable $exception = null): bool
     {
         return false;
-    }
-
-    protected function getJobStartedAt(): Carbon
-    {
-        if (!$this->jobStartedAt instanceof Carbon) {
-            $this->jobStartedAt = Carbon::now();
-        }
-
-        return $this->jobStartedAt;
-    }
-
-    /**
-     * @return int
-     */
-    protected function getDelays(): int
-    {
-        return $this->getJobStartedAt()->diffInRealMilliseconds(Carbon::now());
     }
 
     /**
