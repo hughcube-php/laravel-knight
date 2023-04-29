@@ -9,6 +9,8 @@ parameters:
         - '#Call to an undefined static method Illuminate\\Support\\Str::isPrivateIp.*#'
         - '#Access to an undefined property HughCube\\Laravel\\Knight\\Mixin\\Http\\RequestMixin.*#'
         - '#.*lass HughCube\\Laravel\\EasySms\\Exceptions.*#'
+        - '#Method HughCube\\Laravel\\Knight\\Sanctum\\PersonalAccessToken::findById.*should return.*#'
+        - '#.*method HughCube\\Laravel\\Knight\\Sanctum\\PersonalAccessToken::tokenable.* should be.*#'
         -
             message: '#.*#'
             paths:

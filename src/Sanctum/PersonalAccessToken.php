@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
  * @property Carbon|null $expires_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ *
+ * @method static static findById($id)
  */
 class PersonalAccessToken extends \Laravel\Sanctum\PersonalAccessToken
 {
@@ -33,7 +35,10 @@ class PersonalAccessToken extends \Laravel\Sanctum\PersonalAccessToken
         ];
     }
 
-    public static function findToken($token)
+    /**
+     * @return static|null
+     */
+    public static function findToken($token): ?PersonalAccessToken
     {
         if (!str_contains($token, '|')) {
             $token = static::query()->findUniqueRow(['token' => hash('sha256', $token)]);
@@ -42,8 +47,8 @@ class PersonalAccessToken extends \Laravel\Sanctum\PersonalAccessToken
 
         [$id, $token] = explode('|', $token, 2);
         $instance = static::findById($id);
-        if ($instance instanceof self) {
-            return hash_equals($instance->token, hash('sha256', $token)) ? $instance : null;
+        if ($instance instanceof self && hash_equals($instance->token, hash('sha256', $token))) {
+            return $instance;
         }
 
         return null;
