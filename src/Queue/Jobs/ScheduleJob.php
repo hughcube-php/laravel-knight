@@ -124,7 +124,7 @@ class ScheduleJob extends Job
         $this->info(sprintf(
             'push job success, job: %s, id:%s, delays:%sms',
             $name,
-            (is_scalar($id) ? $id : ''),
+            is_scalar($id) ? $id : '',
             $this->getDelays()
         ));
     }

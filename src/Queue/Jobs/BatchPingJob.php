@@ -31,9 +31,9 @@ class BatchPingJob extends Job
 
             'jobs' => ['array', 'min:1'],
 
-            'jobs.*.url' => ['string', 'nullable'],
-            'jobs.*.method' => ['string', 'nullable'],
-            'jobs.*.timeout' => ['integer', 'nullable'],
+            'jobs.*.url'             => ['string', 'nullable'],
+            'jobs.*.method'          => ['string', 'nullable'],
+            'jobs.*.timeout'         => ['integer', 'nullable'],
             'jobs.*.allow_redirects' => ['integer', 'nullable'],
         ];
     }
@@ -46,9 +46,9 @@ class BatchPingJob extends Job
         $requests = [];
         foreach ($this->p('jobs', []) as $index => $job) {
             $requests[$index] = [
-                'url' => $this->parseUrl($job['url'] ?? 'knight.ping'),
-                'method' => strtoupper($job['method'] ?? null ?: 'GET'),
-                'timeout' => $job['timeout'] ?? null ?: 2,
+                'url'             => $this->parseUrl($job['url'] ?? 'knight.ping'),
+                'method'          => strtoupper($job['method'] ?? null ?: 'GET'),
+                'timeout'         => $job['timeout'] ?? null ?: 2,
                 'allow_redirects' => $this->parseAllowRedirects($job['allow_redirects'] ?? null ?: 0),
             ];
         }
@@ -56,18 +56,16 @@ class BatchPingJob extends Job
         $start = Carbon::now();
         $pool = new Pool(new Client(), $this->makeRequests($requests), [
             'concurrency' => $this->p('concurrency') ?: 5,
-            'fulfilled' => function (Response $response, $index) use ($requests, $start) {
+            'fulfilled'   => function (Response $response, $index) use ($requests, $start) {
                 $url = $requests[$index]['url'];
                 $method = $requests[$index]['method'];
                 $duration = Carbon::now()->diffInMilliseconds($start);
                 $this->logResponse($method, $url, $duration, $response);
             },
             'rejected' => function ($reason, $index) use ($requests, $start) {
-
                 $url = $requests[$index]['url'];
                 $method = $requests[$index]['method'];
                 $duration = Carbon::now()->diffInMilliseconds($start);
-
 
                 if (is_object($reason) && method_exists($reason, 'getResponse')) {
                     $this->logResponse($method, $url, $duration, $reason->getResponse());
@@ -120,8 +118,8 @@ class BatchPingJob extends Job
     {
         foreach ($requests as $request) {
             yield new Request($request['method'], $request['url'], [
-                RequestOptions::HTTP_ERRORS => false,
-                RequestOptions::TIMEOUT => $request['timeout'],
+                RequestOptions::HTTP_ERRORS     => false,
+                RequestOptions::TIMEOUT         => $request['timeout'],
                 RequestOptions::ALLOW_REDIRECTS => $request['allow_redirects'],
             ]);
         }
@@ -163,9 +161,9 @@ class BatchPingJob extends Job
         }
 
         return [
-            'max' => $redirects,
-            'strict' => true,
-            'referer' => true,
+            'max'       => $redirects,
+            'strict'    => true,
+            'referer'   => true,
             'protocols' => ['https', 'http'],
         ];
     }
