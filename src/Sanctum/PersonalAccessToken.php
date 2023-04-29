@@ -10,16 +10,16 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 /**
  * Class PersonalAccessToken.
  *
- * @property int               $id
- * @property string            $tokenable_type
- * @property int               $tokenable_id
- * @property string            $name
- * @property string            $token
+ * @property int $id
+ * @property string $tokenable_type
+ * @property int $tokenable_id
+ * @property string $name
+ * @property string $token
  * @property string|array|null $abilities
- * @property Carbon|null       $last_used_at
- * @property Carbon|null       $expires_at
- * @property Carbon|null       $created_at
- * @property Carbon|null       $updated_at
+ * @property Carbon|null $last_used_at
+ * @property Carbon|null $expires_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  *
  * @method static static findById($id)
  */
@@ -33,6 +33,11 @@ class PersonalAccessToken extends \Laravel\Sanctum\PersonalAccessToken
             [$this->getKeyName() => $this->getKey()],
             ['token' => $this->token],
         ];
+    }
+
+    public static function getExpiresIn(): int
+    {
+        return 365 * 24 * 3600;
     }
 
     /**
