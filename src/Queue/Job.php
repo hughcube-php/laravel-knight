@@ -177,13 +177,6 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
         return $this;
     }
 
-    /**
-     * @param object|null $job
-     *
-     * @return string
-     *
-     * @deprecated
-     */
     protected function getName(object $job = null): string
     {
         return Str::afterLast(get_class($job ?? $this), '\\');
@@ -210,16 +203,23 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param mixed  $level
+     * @param mixed $level
      * @param string $message
-     * @param array  $context
+     * @param array $context
      *
      * @return void
      */
     public function log($level, string $message, array $context = [])
     {
-        $name = Str::afterLast(get_class($this), '\\');
-        $message = sprintf('[%s-%s] %s', $name, $this->getPid(), $message);
+        $message = sprintf(
+            '[%s:%s] [%s:%s] %s',
+            gethostname(),
+            getmypid(),
+            $this->getName(),
+            $this->getPid(),
+            $message
+        );
+
         Log::channel($this->getLogChannel())->log($level, $message, $context);
     }
 
@@ -235,7 +235,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     /**
      * @param string $key
-     * @param null   $default
+     * @param null $default
      *
      * @return mixed
      *
@@ -260,7 +260,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     /**
      * @param string $key
-     * @param mixed  $value
+     * @param mixed $value
      *
      * @return $this
      *
@@ -275,7 +275,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     /**
      * @param string $name
-     * @param array  $arguments
+     * @param array $arguments
      *
      * @return false|mixed
      */
