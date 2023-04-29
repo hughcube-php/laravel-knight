@@ -121,7 +121,12 @@ class ScheduleJob extends Job
         $id = $this->getDispatcher()->dispatch($this->prepareJob($job));
 
         $name = Str::afterLast(get_class($job), '\\');
-        $this->info(sprintf('push job success, job: %s, id:%s, delays:%sms', $name, is_scalar($id) ? $id : '', $this->getDelays()));
+        $this->info(sprintf(
+            'push job success, job: %s, id:%s, delays:%sms',
+            $name,
+            (is_scalar($id) ? $id : ''),
+            $this->getDelays()
+        ));
     }
 
     /**

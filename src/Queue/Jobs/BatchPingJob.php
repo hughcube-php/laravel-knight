@@ -71,13 +71,26 @@ class BatchPingJob extends Job
 
                 if (is_object($reason) && method_exists($reason, 'getResponse')) {
                     $this->logResponse($method, $url, $duration, $reason->getResponse());
-                }//
-                /** @var Throwable $reason */
-                elseif ($reason instanceof Throwable) {
-                    $this->info(sprintf('%sms [%s] [%s] %s %s exception: %s', $duration, null, null, $method, $url, $reason->getMessage()));
-                }//
-                else {
-                    $this->info(sprintf('%sms [%s] [%s] %s %s reject: %s', $duration, null, null, $method, $url, get_debug_type($reason)));
+                } elseif ($reason instanceof Throwable) {
+                    $this->info(sprintf(
+                        '%sms [%s] [%s] %s %s exception: %s',
+                        $duration,
+                        null,
+                        null,
+                        $method,
+                        $url,
+                        $reason->getMessage()
+                    ));
+                } else {
+                    $this->info(sprintf(
+                        '%sms [%s] [%s] %s %s reject: %s',
+                        $duration,
+                        null,
+                        null,
+                        $method,
+                        $url,
+                        get_debug_type($reason)
+                    ));
                 }
             },
         ]);
@@ -90,7 +103,14 @@ class BatchPingJob extends Job
         $statusCode = $response->getStatusCode();
         $requestId = $this->parseRequestId($response);
 
-        $this->info(sprintf('%sms [%s] [%s] %s %s', $duration, $requestId, $statusCode, $method, $url));
+        $this->info(sprintf(
+            '%sms [%s] [%s] %s %s',
+            $duration,
+            $requestId,
+            $statusCode,
+            $method,
+            $url
+        ));
     }
 
     /**
