@@ -2,7 +2,12 @@
 
 namespace HughCube\Laravel\Knight\Queue\Jobs;
 
+use Carbon\Carbon;
 use Exception;
+use Generator;
+use GuzzleHttp\Client;
+use GuzzleHttp\Pool;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
 use HughCube\GuzzleHttp\HttpClientTrait;
 use HughCube\Laravel\Knight\Queue\Job;
@@ -12,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Psr\Http\Message\ResponseInterface as Response;
+use Throwable;
 
 class BatchPingJob extends Job
 {
@@ -21,11 +27,13 @@ class BatchPingJob extends Job
     public function rules(): array
     {
         return [
+            'concurrency' => ['integer', 'nullable'],
+
             'jobs' => ['array', 'min:1'],
 
-            'jobs.*.url'             => ['string', 'nullable'],
-            'jobs.*.method'          => ['string', 'nullable'],
-            'jobs.*.timeout'         => ['integer', 'nullable'],
+            'jobs.*.url' => ['string', 'nullable'],
+            'jobs.*.method' => ['string', 'nullable'],
+            'jobs.*.timeout' => ['integer', 'nullable'],
             'jobs.*.allow_redirects' => ['integer', 'nullable'],
         ];
     }
@@ -36,40 +44,66 @@ class BatchPingJob extends Job
     protected function action(): void
     {
         $requests = [];
-        $responses = [];
-
-        /** 组建请求 */
         foreach ($this->p('jobs', []) as $index => $job) {
             $requests[$index] = [
-                'url'             => $this->parseUrl($job['url'] ?? 'knight.ping'),
-                'method'          => strtoupper($job['method'] ?? null ?: 'GET'),
-                'timeout'         => $job['timeout'] ?? null ?: 2,
+                'url' => $this->parseUrl($job['url'] ?? 'knight.ping'),
+                'method' => strtoupper($job['method'] ?? null ?: 'GET'),
+                'timeout' => $job['timeout'] ?? null ?: 2,
                 'allow_redirects' => $this->parseAllowRedirects($job['allow_redirects'] ?? null ?: 0),
             ];
         }
 
-        /** 发送请求 */
-        $start = microtime(true);
-        foreach ($requests as $index => $request) {
-            $responses[$index] = $this->getHttpClient()->requestLazy($request['method'], $request['url'], [
-                RequestOptions::HTTP_ERRORS     => false,
-                RequestOptions::TIMEOUT         => $request['timeout'],
+        $start = Carbon::now();
+        $pool = new Pool(new Client(), $this->makeRequests($requests), [
+            'concurrency' => $this->p('concurrency') ?: 5,
+            'fulfilled' => function (Response $response, $index) use ($requests, $start) {
+                $url = $requests[$index]['url'];
+                $method = $requests[$index]['method'];
+                $duration = Carbon::now()->diffInMilliseconds($start);
+                $this->logResponse($method, $url, $duration, $response);
+            },
+            'rejected' => function ($reason, $index) use ($requests, $start) {
+
+                $url = $requests[$index]['url'];
+                $method = $requests[$index]['method'];
+                $duration = Carbon::now()->diffInMilliseconds($start);
+
+
+                if (is_object($reason) && method_exists($reason, 'getResponse')) {
+                    $this->logResponse($method, $url, $duration, $reason->getResponse());
+                }//
+                /** @var Throwable $reason */
+                elseif ($reason instanceof Throwable) {
+                    $this->info(sprintf('%sms [%s] [%s] %s %s exception: %s', $duration, null, null, $method, $url, $reason->getMessage()));
+                }//
+                else {
+                    $this->info(sprintf('%sms [%s] [%s] %s %s reject: %s', $duration, null, null, $method, $url, get_debug_type($reason)));
+                }
+            },
+        ]);
+
+        $pool->promise()->wait();
+    }
+
+    protected function logResponse($method, $url, $duration, Response $response)
+    {
+        $statusCode = $response->getStatusCode();
+        $requestId = $this->parseRequestId($response);
+
+        $this->info(sprintf('%sms [%s] [%s] %s %s', $duration, $requestId, $statusCode, $method, $url));
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function makeRequests($requests): Generator
+    {
+        foreach ($requests as $request) {
+            yield new Request($request['method'], $request['url'], [
+                RequestOptions::HTTP_ERRORS => false,
+                RequestOptions::TIMEOUT => $request['timeout'],
                 RequestOptions::ALLOW_REDIRECTS => $request['allow_redirects'],
             ]);
-        }
-
-        /** 等待响应 */
-        foreach ($responses as $index => $response) {
-            $statusCode = $response->getStatusCode();
-            $requestId = $this->parseRequestId($response);
-
-            $end = microtime(true);
-
-            $url = $requests[$index]['url'];
-            $method = $requests[$index]['method'];
-            $duration = round(($end - $start) * 1000, 2);
-
-            $this->info(sprintf('%sms [%s] [%s] %s %s', $duration, $requestId, $statusCode, $method, $url));
         }
     }
 
@@ -109,9 +143,9 @@ class BatchPingJob extends Job
         }
 
         return [
-            'max'       => $redirects,
-            'strict'    => true,
-            'referer'   => true,
+            'max' => $redirects,
+            'strict' => true,
+            'referer' => true,
             'protocols' => ['https', 'http'],
         ];
     }

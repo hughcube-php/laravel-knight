@@ -154,6 +154,7 @@ class TestCase extends OrchestraTestCase
     protected function assertJob(Job $job)
     {
         $this->assertNoException(function () use ($job) {
+            $job->setLogChannel('stdout');
             $job->handle();
         });
     }

@@ -28,7 +28,8 @@
         "laravel/framework": "*",
         "laravel/lumen-framework": "*",
         "orchestra/testbench": "*",
-        "squizlabs/php_codesniffer": "*"
+        "squizlabs/php_codesniffer": "*",
+        "hughcube/laravel-wechat": "*"
     },
     "autoload": {
         "files": [
