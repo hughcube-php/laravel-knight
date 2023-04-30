@@ -12,9 +12,9 @@ class CacheTableGcJob extends Job
     public function rules(): array
     {
         return [
-            'connection' => ['string', 'nullable'],
+            'connection'  => ['string', 'nullable'],
             'cache_table' => ['nullable'],
-            'lock' => ['nullable'],
+            'lock'        => ['nullable'],
         ];
     }
 
@@ -41,6 +41,7 @@ class CacheTableGcJob extends Job
                 break;
             }
         }
+
         return $doneCount;
     }
 
@@ -52,12 +53,14 @@ class CacheTableGcJob extends Job
     protected function getCacheTable(): ?string
     {
         $table = $this->p('cache_table');
+
         return false === $table ? null : ($table ?: 'cache_locks');
     }
 
     protected function getLockTable(): ?string
     {
         $table = $this->p('lock_table');
+
         return false === $table ? null : ($table ?: 'cache_locks');
     }
 }
