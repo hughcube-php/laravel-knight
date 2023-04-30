@@ -97,6 +97,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
         if (!$this->jobStartedAt instanceof Carbon) {
             $this->jobStartedAt = Carbon::now();
         }
+
         return $this->jobStartedAt;
     }
 
@@ -229,9 +230,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param mixed $level
+     * @param mixed  $level
      * @param string $message
-     * @param array $context
+     * @param array  $context
      *
      * @return void
      */
@@ -240,7 +241,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
         $message = sprintf(
             '[%sms] [%s:%s] %s',
             $this->getDelays(),
-            $this->getName(), $this->getPid(),
+            $this->getName(),
+            $this->getPid(),
             $message
         );
 
@@ -259,7 +261,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     /**
      * @param string $key
-     * @param null $default
+     * @param null   $default
      *
      * @return mixed
      *
@@ -284,7 +286,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param mixed  $value
      *
      * @return $this
      *
@@ -299,7 +301,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     /**
      * @param string $name
-     * @param array $arguments
+     * @param array  $arguments
      *
      * @return false|mixed
      */
