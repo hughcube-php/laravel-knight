@@ -21,9 +21,9 @@ class PingJob extends Job
     public function rules(): array
     {
         return [
-            'url'             => ['string', 'nullable'],
-            'method'          => ['string', 'default:GET'],
-            'timeout'         => ['integer', 'default:2'],
+            'url' => ['string', 'nullable'],
+            'method' => ['string', 'default:GET'],
+            'timeout' => ['integer', 'default:2'],
             'allow_redirects' => ['integer', 'default:0'],
         ];
     }
@@ -44,8 +44,8 @@ class PingJob extends Job
 
         try {
             $response = $this->request($method, $url, [
-                RequestOptions::HTTP_ERRORS     => false,
-                RequestOptions::TIMEOUT         => $timeout,
+                RequestOptions::HTTP_ERRORS => false,
+                RequestOptions::TIMEOUT => $timeout,
                 RequestOptions::ALLOW_REDIRECTS => $this->getAllowRedirects(),
             ]);
         } catch (Throwable $exception) {
@@ -55,9 +55,17 @@ class PingJob extends Job
         $duration = round(($end - $start) * 1000, 2);
         $requestId = $this->getRequestId($response);
         $statusCode = $response instanceof Response ? $response->getStatusCode() : null;
-        $exception = $exception instanceof Throwable ? sprintf('exception:%s', $exception->getMessage()) : null;
+        $exception = $exception instanceof Throwable ? $exception->getMessage() : null;
 
-        $this->info(sprintf('%sms [%s] [%s] %s %s %s', $duration, $requestId, $statusCode, $method, $url, $exception));
+        $this->info(sprintf(
+            'method: %s, url: %s, status: %s, duration: %sms requestId: %s, exception: %s',
+            $method,
+            $url,
+            $statusCode,
+            $duration,
+            $requestId,
+            $exception
+        ));
     }
 
     /**
@@ -114,9 +122,9 @@ class PingJob extends Job
         }
 
         return [
-            'max'       => $redirects,
-            'strict'    => true,
-            'referer'   => true,
+            'max' => $redirects,
+            'strict' => true,
+            'referer' => true,
             'protocols' => ['https', 'http'],
         ];
     }
