@@ -182,9 +182,10 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     protected function getPid()
     {
         if (null === $this->pid) {
+            $hostname = base_convert(abs(crc32(gethostname())), 10, 36);
+            $pid = base_convert(getmypid(), 10, 36);
             $random = base_convert(abs(crc32(Str::random())), 10, 36);
-            $host = base_convert(abs(crc32(serialize([gethostname(), getmypid()]))), 10, 36);
-            $this->setPid(sprintf('%s-%s', $host, $random));
+            $this->setPid(sprintf('%s-%s-%s', $hostname, $pid, $random));
         }
 
         return $this->pid;
