@@ -162,12 +162,8 @@ class ScheduleJob extends Job
      */
     protected function tryFireJobIfDue(string $expression, $job, $reportException = true)
     {
-        if (!$this->isDue($expression)) {
-            return;
-        }
-
         try {
-            $this->fireJob(is_callable($job) ? $job() : $job);
+            $this->fireJobIfDue($expression, $job);
         } catch (Throwable $exception) {
             if ($reportException) {
                 $this->getExceptionHandler()->report($exception);
