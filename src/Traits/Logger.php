@@ -117,7 +117,6 @@ trait Logger
      */
     public function info(string $message, array $context = []): void
     {
-        echo $message, PHP_EOL;
         $this->log(LogLevel::INFO, $message, $context);
     }
 
