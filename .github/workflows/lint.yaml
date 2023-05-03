@@ -8,6 +8,9 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
+      - name: Setup PHP
+        uses: shivammathur/setup-php@master
+
       - name: System Setting
         run: |
           php -v
