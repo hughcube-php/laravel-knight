@@ -58,6 +58,9 @@
         "check-style": "phpcs -p --standard=PSR2 src/ -v",
         "fix-style": "phpcbf -p --standard=PSR2 src/ -v"
     },
+    "allow-plugins": {
+        "easywechat-composer/easywechat-composer": true
+    },
     "minimum-stability": "dev",
     "prefer-stable": true
 }
