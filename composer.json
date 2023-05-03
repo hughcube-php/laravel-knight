@@ -59,7 +59,7 @@
         "fix-style": "phpcbf -p --standard=PSR2 src/ -v"
     },
     "allow-plugins": {
-        "easywechat-composer/easywechat-composer": true
+        "easywechat-composer/easywechat-composer": false
     },
     "minimum-stability": "dev",
     "prefer-stable": true
