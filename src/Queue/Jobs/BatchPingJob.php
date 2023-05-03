@@ -67,9 +67,20 @@ class BatchPingJob extends Job
                 $method = $requests[$index]['method'];
                 $duration = Carbon::now()->diffInMilliseconds($start);
 
+                /** parse response */
+                $response = null;
                 if (is_object($reason) && method_exists($reason, 'getResponse')) {
+                    $response = $reason->getResponse();
+                }
+
+                /** log response */
+                if ($response instanceof Response) {
                     $this->logResponse($method, $url, $duration, $reason->getResponse());
-                } elseif ($reason instanceof Throwable) {
+                    return;
+                }
+
+                /** log Exception */
+                if ($reason instanceof Throwable) {
                     $this->info(sprintf(
                         'method: %s, url: %s, status: %s, duration: %sms requestId: %s, exception: %s',
                         $method,
@@ -79,17 +90,19 @@ class BatchPingJob extends Job
                         '',
                         $reason->getMessage()
                     ));
-                } else {
-                    $this->info(sprintf(
-                        'method: %s, url: %s, status: %s, duration: %sms requestId: %s, exception: %s',
-                        $method,
-                        $url,
-                        '',
-                        $duration,
-                        '',
-                        get_debug_type($reason)
-                    ));
+                    return;
                 }
+
+                /** log other */
+                $this->info(sprintf(
+                    'method: %s, url: %s, status: %s, duration: %sms requestId: %s, exception: %s',
+                    $method,
+                    $url,
+                    '',
+                    $duration,
+                    '',
+                    get_debug_type($reason)
+                ));
             },
         ]);
 
