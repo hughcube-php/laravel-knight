@@ -8,9 +8,11 @@
 
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
+use HughCube\Base\Base;
 use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use HughCube\Laravel\Knight\Ide\Database\Query\KIdeBuilder;
+use HughCube\Laravel\Knight\Support\Carbon;
 use Illuminate\Cache\NullStore;
 use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Support\Arrayable;
@@ -18,6 +20,7 @@ use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Psr\SimpleCache\CacheInterface;
 use Traversable;
 
@@ -124,9 +127,17 @@ trait Builder
         ksort($cacheKey);
         $cacheKey = json_encode($cacheKey);
 
-        $string = sprintf('%s:%s:%s', get_class($this->getModel()), $cacheKey, $this->getModel()->getCacheVersion());
+        $string = sprintf('%s:%s', get_class($this->getModel()), $cacheKey);
 
-        return sprintf('model:%s-%s', md5($string), crc32($string));
+        return sprintf(
+            '%s:%s-%s:%s:%s-%s',
+            $this->getModel()->getModelCachePrefix(),
+            Str::snake(Str::afterLast(get_class($this->getModel()), "\\")),
+            Base::conv(abs(crc32(get_class($this->getModel()))), '0123456789', '0123456789abcdefghijklmnopqrstuvwxyz'),
+            $this->getModel()->getCacheVersion(),
+            Base::conv(strtoupper(md5($string)), '0123456789abcdef', '0123456789abcdefghijklmnopqrstuvwxyz'),
+            Base::conv(abs(crc32($string)), '0123456789', '0123456789abcdefghijklmnopqrstuvwxyz')
+        );
     }
 
     /**
@@ -188,11 +199,11 @@ trait Builder
      *
      * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
-     * @throws
-     *
      * @return KnightCollection
      *
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function findUniqueRows($ids): KnightCollection
     {
@@ -283,11 +294,11 @@ trait Builder
     }
 
     /**
-     * @throws
-     *
      * @return bool
      *
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function refreshRowCache(): bool
     {

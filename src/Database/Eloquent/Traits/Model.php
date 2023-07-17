@@ -177,9 +177,14 @@ trait Model
         return null;
     }
 
+    public function getModelCachePrefix(): ?string
+    {
+        return 'm-v1';
+    }
+
     public function getCacheVersion(): ?string
     {
-        return 'v1.0.0';
+        return 'v1';
     }
 
     /**
