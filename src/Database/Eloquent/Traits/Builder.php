@@ -131,7 +131,7 @@ trait Builder
         return sprintf(
             '%s:%s-%s:%s:%s-%s',
             $this->getModel()->getModelCachePrefix(),
-            Str::snake(Str::afterLast(get_class($this->getModel()), "\\")),
+            Str::snake(Str::afterLast(get_class($this->getModel()), '\\')),
             Base::conv(abs(crc32(get_class($this->getModel()))), '0123456789', '0123456789abcdefghijklmnopqrstuvwxyz'),
             $this->getModel()->getCacheVersion(),
             Base::conv(strtoupper(md5($string)), '0123456789abcdef', '0123456789abcdefghijklmnopqrstuvwxyz'),
@@ -198,11 +198,11 @@ trait Builder
      *
      * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
+     * @throws
+     *
      * @return KnightCollection
      *
      * @phpstan-ignore-next-line
-     * @throws
-     *
      */
     public function findUniqueRows($ids): KnightCollection
     {
@@ -293,11 +293,11 @@ trait Builder
     }
 
     /**
+     * @throws
+     *
      * @return bool
      *
      * @phpstan-ignore-next-line
-     * @throws
-     *
      */
     public function refreshRowCache(): bool
     {
