@@ -12,7 +12,6 @@ use HughCube\Base\Base;
 use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use HughCube\Laravel\Knight\Ide\Database\Query\KIdeBuilder;
-use HughCube\Laravel\Knight\Support\Carbon;
 use Illuminate\Cache\NullStore;
 use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Support\Arrayable;
@@ -187,7 +186,7 @@ trait Builder
     /**
      * @param mixed $id
      *
-     * @return mixed
+     * @return Model|null
      */
     public function findUniqueRow($id)
     {

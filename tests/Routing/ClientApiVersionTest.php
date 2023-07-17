@@ -73,7 +73,7 @@ class ClientApiVersionTest extends TestCase
         $this->assertFalse($this->callMethod($instance, 'isGtClientApiVersion', ['0.0.1']));
     }
 
-    public function instanceDataProvider(): array
+    public static function instanceDataProvider(): array
     {
         return [
             [

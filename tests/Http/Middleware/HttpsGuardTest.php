@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 
 class HttpsGuardTest extends TestCase
 {
-    public function getCases(): array
+    public static function getCases(): array
     {
         $appUrls = [
             ['http://example.com', false],
@@ -63,7 +63,7 @@ class HttpsGuardTest extends TestCase
                             $requestServer = [];
                             $requestServer = array_merge($requestServer, $secureServer[0]);
                             $requestServer = array_merge($requestServer, ['HTTP_HOST' => $host[0]]);
-                            $request = $this->createRequest($requestServer, Str::random(), $method);
+                            $request = static::createRequest($requestServer, Str::random(), $method);
                             $cases[] = [$appUrl[0], $request, $bIs ? 301 : 200, $except[0]];
                         }
                     }
@@ -96,7 +96,7 @@ class HttpsGuardTest extends TestCase
         return $this->app->make(HttpsGuard::class);
     }
 
-    protected function createRequest(array $server = [], $uri = 'test', $method = 'GET'): Request
+    protected static function createRequest(array $server = [], $uri = 'test', $method = 'GET'): Request
     {
         $httpHost = Arr::get($server, 'HTTP_HOST', 'example.com');
 
