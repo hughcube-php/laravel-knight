@@ -35,8 +35,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer require "laravel/framework:^${{ matrix.laravel }}" --dev --no-update
-          composer update --prefer-dist --no-interaction --no-progress
+          trap "composer require laravel/framework:^${{ matrix.laravel }} --dev --no-update" INT PIPE QUIT TERM
+          trap "composer update --prefer-dist --no-interaction --no-progress" INT PIPE QUIT TERM
 
       - name: Run PHPUnit
         if: ${{ false == failure() }}
