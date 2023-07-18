@@ -133,11 +133,11 @@ trait Builder
      *
      * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
+     * @throws
+     *
      * @return KnightCollection
      *
      * @phpstan-ignore-next-line
-     * @throws
-     *
      */
     public function findUniqueRows($ids): KnightCollection
     {
@@ -219,6 +219,7 @@ trait Builder
 
     /**
      * @param mixed $value
+     *
      * @return static
      */
     public function whereDeletedAtColumn($value = null)
