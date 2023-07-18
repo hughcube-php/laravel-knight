@@ -40,7 +40,7 @@ class DownloaderTest extends TestCase
      */
     public function testTo()
     {
-        $url = 'https://www.baidu.com/';
+        $url = 'https://www.example.com/example.html';
 
         $file = Downloader::path($url);
         $this->assertSame($file, Downloader::instance()->to('get', $url, $file, [
@@ -55,7 +55,7 @@ class DownloaderTest extends TestCase
      */
     public function testGet()
     {
-        $url = 'https://www.baidu.com/';
+        $url = 'https://www.example.com/example.html';
         $file = Downloader::get($url);
         $this->assertFileExists($file);
         File::delete($file);
@@ -66,7 +66,7 @@ class DownloaderTest extends TestCase
      */
     public function testSave()
     {
-        $url = 'https://www.baidu.com/';
+        $url = 'https://www.example.com/example.html';
         $file = Downloader::save($url);
         $this->assertFileExists($file);
         File::delete($file);
