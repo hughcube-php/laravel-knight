@@ -69,8 +69,6 @@ class PersonalAccessToken extends \Laravel\Sanctum\PersonalAccessToken
     {
         if (!str_contains($token, '|')) {
             $token = static::query()->findUniqueRow(['token' => hash('sha256', $token)]);
-
-            /** @phpstan-ignore-next-line */
             return $token instanceof static ? $token : null;
         }
 

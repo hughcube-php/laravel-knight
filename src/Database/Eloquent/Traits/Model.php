@@ -33,7 +33,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|string|null $date
-     * @param string|null                             $format
+     * @param string|null $format
      *
      * @return Carbon|null
      */
@@ -46,7 +46,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|null $dateTime
-     * @param string                           $format
+     * @param string $format
      *
      * @return string|null
      */
@@ -137,11 +137,18 @@ trait Model
         return defined('static::DELETED_AT') ? constant('static::DELETED_AT') : 'deleted_at';
     }
 
+    public function genDefaultSort(): int
+    {
+        return Carbon::now()->getTimestamp() - 1660899108;
+    }
+
+    public static function genModelVersion(): int
+    {
+        return abs(crc32(serialize([Str::random(100), microtime()])));
+    }
+
     /**
-     * Create a new Eloquent query builder for the model.
-     *
-     * @param \Illuminate\Database\Query\Builder $query
-     *
+     * @param $query
      * @return Builder
      */
     public function newEloquentBuilder($query): Builder
@@ -159,14 +166,14 @@ trait Model
         return static::query()->whereDeletedAtColumn();
     }
 
-    public static function sortAvailableQuery(): Builder
-    {
-        return static::availableQuery()->orderByDesc('sort')->orderByDesc('id');
-    }
-
     public static function sortQuery(): Builder
     {
         return static::query()->orderByDesc('sort')->orderByDesc('id');
+    }
+
+    public static function sortAvailableQuery(): Builder
+    {
+        return static::availableQuery()->orderByDesc('sort')->orderByDesc('id');
     }
 
     public function getCache(): ?CacheInterface
@@ -189,12 +196,12 @@ trait Model
         return $value === $this->getCachePlaceholder() && $this->hasCachePlaceholder();
     }
 
-    public function getModelCachePrefix(): ?string
+    public function getModelCachePrefix(): string
     {
         return 'm-v1';
     }
 
-    public function getCacheVersion(): ?string
+    public function getCacheVersion(): string
     {
         return 'v1';
     }
@@ -269,6 +276,9 @@ trait Model
         return $this->newQuery()->getCache()->setMultiple($cacheKeys);
     }
 
+    /**
+     * make字段的缓存key
+     */
     public function makeColumnsCacheKey(array $columns): string
     {
         $cacheKey = [];
@@ -323,11 +333,6 @@ trait Model
     public static function isMatchPk($value): bool
     {
         return !empty($value);
-    }
-
-    public static function genModelVersion(): int
-    {
-        return abs(crc32(serialize([Str::random(100), microtime()])));
     }
 
     /**
@@ -393,10 +398,5 @@ trait Model
     public static function isAvailableModel($model): bool
     {
         return $model instanceof self && $model->isAvailable();
-    }
-
-    public function genDefaultSort(): int
-    {
-        return Carbon::now()->getTimestamp() - 1660899108;
     }
 }
