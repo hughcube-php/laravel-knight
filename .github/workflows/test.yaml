@@ -45,5 +45,3 @@ jobs:
         if: ${{ 'true' == env.has_deps }}
         run: |
           composer run-script test
-          curl -o ocular.phar https:scrutinizer-ci.com/ocular.phar
-          php ocular.phar code-coverage:upload --format=php-clover coverage.clover
