@@ -35,6 +35,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          set +e
           composer require laravel/framework:^${{ matrix.laravel }} --dev --no-update
           composer update --prefer-dist --no-interaction --no-progress
 
