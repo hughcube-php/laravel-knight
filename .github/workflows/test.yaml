@@ -34,16 +34,15 @@ jobs:
         run: composer validate
 
       - name: Install dependencies
-        id: install-deps
         run: |
-          echo "::set-output name=success::false"
+          echo "has_deps=false" >> "$GITHUB_ENV"
           composer require laravel/framework:^${{ matrix.laravel }} --dev --no-update
           composer update --prefer-dist --no-interaction --no-progress
-          echo "::set-output name=success::false"
+          echo "has_deps=true" >> "$GITHUB_ENV"
         continue-on-error: true
 
       - name: Run PHPUnit
-        if: steps.install-deps.outputs.success == 'true'
+        if: ${{ 'true' == env.has_deps }}
         run: |
           composer run-script test
           curl -o ocular.phar https:scrutinizer-ci.com/ocular.phar
