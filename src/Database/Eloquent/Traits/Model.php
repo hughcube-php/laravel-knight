@@ -3,11 +3,13 @@
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
 use DateTimeInterface;
+use HughCube\Base\Base;
 use HughCube\Laravel\Knight\Database\Eloquent\Builder;
 use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
 use HughCube\Laravel\Knight\Support\Carbon;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Collection as IlluminateCollection;
 use Illuminate\Support\Str;
 use Psr\SimpleCache\CacheInterface;
@@ -31,7 +33,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|string|null $date
-     * @param string|null                             $format
+     * @param string|null $format
      *
      * @return Carbon|null
      */
@@ -44,7 +46,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|null $dateTime
-     * @param string                           $format
+     * @param string $format
      *
      * @return string|null
      */
@@ -177,6 +179,16 @@ trait Model
         return null;
     }
 
+    public function hasCachePlaceholder(): bool
+    {
+        return null !== $this->getCachePlaceholder();
+    }
+
+    public function isCachePlaceholder($value): bool
+    {
+        return $value === $this->getCachePlaceholder() && $this->hasCachePlaceholder();
+    }
+
     public function getModelCachePrefix(): ?string
     {
         return 'm-v1';
@@ -220,11 +232,63 @@ trait Model
     }
 
     /**
-     * @return bool
+     * @deprecated static::deleteRowCache()
      */
     public function refreshRowCache(): bool
     {
-        return $this->newQuery()->refreshRowCache();
+        return $this->deleteRowCache();
+    }
+
+    /**
+     * @throws
+     * @phpstan-ignore-next-line
+     */
+    public function deleteRowCache(): bool
+    {
+        $cacheKeys = Collection::make($this->onChangeRefreshCacheKeys())
+            ->mapWithKeys(function ($id, $key) {
+                return [$key => $this->makeColumnsCacheKey($id)];
+            });
+
+        return $this->newQuery()->getCache()->deleteMultiple($cacheKeys->values());
+    }
+
+    /**
+     * @throws
+     * @phpstan-ignore-next-line
+     */
+    public function resetRowCache(): bool
+    {
+        $cacheKeys = Collection::make($this->onChangeRefreshCacheKeys())
+            ->mapWithKeys(function ($id, $key) {
+                return [$this->makeColumnsCacheKey($id) => $this];
+            });
+
+        return $this->newQuery()->getCache()->setMultiple($cacheKeys);
+    }
+
+    public function makeColumnsCacheKey(array $columns): string
+    {
+        $cacheKey = [];
+        foreach ($columns as $name => $value) {
+            $name = is_numeric($name) ? $this->getKeyName() : $name;
+            $cacheKey[strval($name)] = strval($value);
+        }
+
+        ksort($cacheKey);
+        $cacheKey = json_encode($cacheKey);
+
+        $string = sprintf('%s:%s', get_class($this), $cacheKey);
+
+        return sprintf(
+            '%s:%s-%s:%s:%s-%s',
+            $this->getModelCachePrefix(),
+            Str::snake(Str::afterLast(get_class($this), '\\')),
+            Base::conv(abs(crc32(get_class($this))), '0123456789', '0123456789abcdefghijklmnopqrstuvwxyz'),
+            $this->getCacheVersion(),
+            Base::conv(strtoupper(md5($string)), '0123456789abcdef', '0123456789abcdefghijklmnopqrstuvwxyz'),
+            Base::conv(abs(crc32($string)), '0123456789', '0123456789abcdefghijklmnopqrstuvwxyz')
+        );
     }
 
     /**

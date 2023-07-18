@@ -138,9 +138,9 @@ class ModelTest extends TestCase
     /**
      * @param int $count
      *
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     protected function createUsers(int $count = 1)
     {
@@ -181,9 +181,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testCacheOnCreate()
     {
@@ -216,12 +216,29 @@ class ModelTest extends TestCase
             $this->assertInstanceOf(User::class, $user);
             $this->assertTrue($user->isFromCache());
         });
+
+        /** hit */
+        $this->assertCacheHitCount(3, function () {
+            $user = User::findById(1);
+            $this->assertTrue($user->isFromCache());
+
+            $user->deleteRowCache();
+            $user = User::findById(1);
+            $this->assertFalse($user->isFromCache());
+
+            $user = User::query()->findUniqueRow(['nickname' => $user->nickname]);
+            $this->assertFalse($user->isFromCache());
+
+            $user->resetRowCache();
+            $user = User::findById(1);
+            User::query()->findUniqueRow(['nickname' => $user->nickname]);
+        });
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testCacheOnUpdate()
     {
@@ -257,9 +274,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testCacheOnForceDelete()
     {
@@ -285,9 +302,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testCacheOnDelete()
     {
@@ -343,9 +360,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testFindById()
     {
@@ -375,9 +392,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testFindByIds()
     {
@@ -466,9 +483,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testConversionDateTime()
     {
@@ -528,9 +545,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testQueryWhereLike()
     {
@@ -544,7 +561,7 @@ class ModelTest extends TestCase
         $queryUser = User::query()->whereLike('nickname', $keyword)->first();
         $this->assertSame($user->id, $queryUser->id);
 
-        $keyword = md5(random_bytes(1000)).$user->nickname;
+        $keyword = md5(random_bytes(1000)) . $user->nickname;
         $queryUser = User::query()->whereLike('nickname', $keyword)->first();
         $this->assertNull($queryUser);
 

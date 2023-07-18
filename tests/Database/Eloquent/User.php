@@ -70,4 +70,12 @@ class User extends Model
     {
         return md5(__METHOD__);
     }
+
+    public function onChangeRefreshCacheKeys(): array
+    {
+        return [
+            [$this->getKeyName() => $this->getKey()],
+            ['nickname' => $this->nickname],
+        ];
+    }
 }

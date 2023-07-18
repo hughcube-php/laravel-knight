@@ -8,7 +8,6 @@
 
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
-use HughCube\Base\Base;
 use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use HughCube\Laravel\Knight\Ide\Database\Query\KIdeBuilder;
@@ -19,7 +18,6 @@ use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 use Psr\SimpleCache\CacheInterface;
 use Traversable;
 
@@ -74,69 +72,6 @@ trait Builder
         }
 
         return $nullCache;
-    }
-
-    /**
-     * @return int
-     */
-    protected function getCacheTtl(): int
-    {
-        return $this->getModel()->getCacheTtl();
-    }
-
-    /**
-     * @return string|null
-     */
-    protected function getCachePlaceholder(): ?string
-    {
-        return $this->getModel()->getCachePlaceholder();
-    }
-
-    /**
-     * @return bool
-     */
-    protected function hasCachePlaceholder(): bool
-    {
-        return null !== $this->getCachePlaceholder();
-    }
-
-    /**
-     * @param mixed $value
-     *
-     * @return bool
-     */
-    protected function isCachePlaceholder($value): bool
-    {
-        return $value === $this->getCachePlaceholder() && $this->hasCachePlaceholder();
-    }
-
-    /**
-     * @param array $columns
-     *
-     * @return string
-     */
-    protected function makeColumnsCacheKey(array $columns): string
-    {
-        $cacheKey = [];
-        foreach ($columns as $name => $value) {
-            $name = is_numeric($name) ? $this->getModel()->getKeyName() : $name;
-            $cacheKey[strval($name)] = strval($value);
-        }
-
-        ksort($cacheKey);
-        $cacheKey = json_encode($cacheKey);
-
-        $string = sprintf('%s:%s', get_class($this->getModel()), $cacheKey);
-
-        return sprintf(
-            '%s:%s-%s:%s:%s-%s',
-            $this->getModel()->getModelCachePrefix(),
-            Str::snake(Str::afterLast(get_class($this->getModel()), '\\')),
-            Base::conv(abs(crc32(get_class($this->getModel()))), '0123456789', '0123456789abcdefghijklmnopqrstuvwxyz'),
-            $this->getModel()->getCacheVersion(),
-            Base::conv(strtoupper(md5($string)), '0123456789abcdef', '0123456789abcdefghijklmnopqrstuvwxyz'),
-            Base::conv(abs(crc32($string)), '0123456789', '0123456789abcdefghijklmnopqrstuvwxyz')
-        );
     }
 
     /**
@@ -198,11 +133,11 @@ trait Builder
      *
      * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
-     * @throws
-     *
      * @return KnightCollection
      *
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function findUniqueRows($ids): KnightCollection
     {
@@ -214,7 +149,7 @@ trait Builder
         }
 
         $cacheKeys = $ids->mapWithKeys(function ($id, $key) {
-            return [$key => $this->makeColumnsCacheKey($id)];
+            return [$key => $this->getModel()->makeColumnsCacheKey($id)];
         });
 
         /** 缓存读取 */
@@ -226,7 +161,9 @@ trait Builder
                     $fromCacheRows[$cacheKey]->setIsFromCache();
                 }
                 $rows->push($fromCacheRows[$cacheKey]);
-            } elseif (!isset($fromCacheRows[$cacheKey]) || !$this->isCachePlaceholder($fromCacheRows[$cacheKey])) {
+                /** @codingStandardsIgnoreStart */
+            } elseif (!isset($fromCacheRows[$cacheKey]) || !$this->getModel()->isCachePlaceholder($fromCacheRows[$cacheKey])) {
+                /** @codingStandardsIgnoreEnd */
                 $missIndexes->push($cacheKeyIndex);
             }
         }
@@ -254,7 +191,9 @@ trait Builder
             )
             ->limit($missIndexes->count())
             ->get()->keyBy(function (IlluminateModel $model) use ($condition) {
-                return $this->makeColumnsCacheKey(Arr::only($model->getAttributes(), $condition->keys()->toArray()));
+                return $this->getModel()->makeColumnsCacheKey(
+                    Arr::only($model->getAttributes(), $condition->keys()->toArray())
+                );
             });
 
         /** 把db的查询结果缓存起来 */
@@ -262,12 +201,12 @@ trait Builder
         foreach ($cacheKeys->only($missIndexes->toArray()) as $cacheKey) {
             if ($fromDbRows->has($cacheKey)) {
                 $cacheItems[$cacheKey] = $fromDbRows->get($cacheKey);
-            } elseif ($this->hasCachePlaceholder()) {
-                $cacheItems[$cacheKey] = $this->getCachePlaceholder();
+            } elseif ($this->getModel()->hasCachePlaceholder()) {
+                $cacheItems[$cacheKey] = $this->getModel()->getCachePlaceholder();
             }
         }
         if (!empty($cacheItems)) {
-            $this->getCache()->setMultiple($cacheItems, $this->getCacheTtl());
+            $this->getCache()->setMultiple($cacheItems, $this->getModel()->getCacheTtl());
         }
 
         /** 合并db的查询结果 */
@@ -280,7 +219,6 @@ trait Builder
 
     /**
      * @param mixed $value
-     *
      * @return static
      */
     public function whereDeletedAtColumn($value = null)
@@ -290,23 +228,6 @@ trait Builder
         }
 
         return $this->whereNull($this->getModel()->getDeletedAtColumn(), $value);
-    }
-
-    /**
-     * @throws
-     *
-     * @return bool
-     *
-     * @phpstan-ignore-next-line
-     */
-    public function refreshRowCache(): bool
-    {
-        $cacheKeys = Collection::make($this->getModel()->onChangeRefreshCacheKeys())
-            ->mapWithKeys(function ($id, $key) {
-                return [$key => $this->makeColumnsCacheKey($id)];
-            });
-
-        return $this->getCache()->deleteMultiple($cacheKeys->values()->toArray());
     }
 
     /**
