@@ -9,6 +9,7 @@
 namespace HughCube\Laravel\Knight\Tests\Support;
 
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\RequestOptions;
 use HughCube\Laravel\Knight\Support\Downloader;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use HughCube\StaticInstanceInterface;
@@ -42,7 +43,9 @@ class DownloaderTest extends TestCase
         $url = 'https://www.baidu.com/';
 
         $file = Downloader::path($url);
-        $this->assertSame($file, Downloader::instance()->to('get', $url, $file));
+        $this->assertSame($file, Downloader::instance()->to('get', $url, $file, [
+            RequestOptions::VERIFY => false
+        ]));
         $this->assertFileExists($file);
         File::delete($file);
     }
