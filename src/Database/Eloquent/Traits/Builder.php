@@ -77,7 +77,7 @@ trait Builder
     /**
      * @param mixed $pk
      *
-     * @return Model|null
+     * @return IlluminateModel|Model|mixed|null
      */
     public function findByPk($pk)
     {
@@ -121,7 +121,7 @@ trait Builder
     /**
      * @param mixed $id
      *
-     * @return Model|null
+     * @return IlluminateModel|Model|mixed|null
      */
     public function findUniqueRow($id)
     {
