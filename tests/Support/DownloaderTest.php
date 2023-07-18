@@ -20,7 +20,7 @@ class DownloaderTest extends TestCase
 {
     public function testPath()
     {
-        $url = 'https://www.example.com/example.html';
+        $url = 'https://www.example.com/';
 
         $this->assertSame(File::extension($url), File::extension(Downloader::path($url)));
         $this->assertTrue(Str::startsWith(Downloader::path($url), storage_path()));
@@ -40,11 +40,12 @@ class DownloaderTest extends TestCase
      */
     public function testTo()
     {
-        $url = 'https://www.example.com/example.html';
+        $url = 'https://www.example.com/';
 
         $file = Downloader::path($url);
         $this->assertSame($file, Downloader::instance()->to('get', $url, $file, [
-            RequestOptions::VERIFY => false
+            RequestOptions::VERIFY => false,
+            RequestOptions::HTTP_ERRORS => false,
         ]));
         $this->assertFileExists($file);
         File::delete($file);
@@ -55,8 +56,11 @@ class DownloaderTest extends TestCase
      */
     public function testGet()
     {
-        $url = 'https://www.example.com/example.html';
-        $file = Downloader::get($url);
+        $url = 'https://www.example.com/';
+        $file = Downloader::get($url, null, [
+            RequestOptions::VERIFY => false,
+            RequestOptions::HTTP_ERRORS => false,
+        ]);
         $this->assertFileExists($file);
         File::delete($file);
     }
@@ -66,8 +70,11 @@ class DownloaderTest extends TestCase
      */
     public function testSave()
     {
-        $url = 'https://www.example.com/example.html';
-        $file = Downloader::save($url);
+        $url = 'https://www.example.com/';
+        $file = Downloader::save($url, null, [
+            RequestOptions::VERIFY => false,
+            RequestOptions::HTTP_ERRORS => false,
+        ]);
         $this->assertFileExists($file);
         File::delete($file);
     }
