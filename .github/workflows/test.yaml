@@ -34,14 +34,17 @@ jobs:
         run: composer validate
 
       - name: Install dependencies
+        id: install-deps
         run: |
+          echo "::set-output name=success::false"
           composer require laravel/framework:^${{ matrix.laravel }} --dev --no-update
           composer update --prefer-dist --no-interaction --no-progress
+          echo "::set-output name=success::false"
         continue-on-error: true
 
       - name: Run PHPUnit
-        if: ${{ success() }}
+        if: steps.install-deps.outputs.success == 'true'
         run: |
           composer run-script test
-          curl -o ocular.phar https://scrutinizer-ci.com/ocular.phar
+          curl -o ocular.phar https:scrutinizer-ci.com/ocular.phar
           php ocular.phar code-coverage:upload --format=php-clover coverage.clover
