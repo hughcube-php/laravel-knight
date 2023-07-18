@@ -138,9 +138,9 @@ class ModelTest extends TestCase
     /**
      * @param int $count
      *
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     protected function createUsers(int $count = 1)
     {
@@ -181,9 +181,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testCacheOnCreate()
     {
@@ -236,9 +236,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testCacheOnUpdate()
     {
@@ -274,9 +274,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testCacheOnForceDelete()
     {
@@ -302,9 +302,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testCacheOnDelete()
     {
@@ -360,9 +360,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testFindById()
     {
@@ -392,9 +392,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testFindByIds()
     {
@@ -483,9 +483,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testConversionDateTime()
     {
@@ -545,9 +545,9 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function testQueryWhereLike()
     {
@@ -561,7 +561,7 @@ class ModelTest extends TestCase
         $queryUser = User::query()->whereLike('nickname', $keyword)->first();
         $this->assertSame($user->id, $queryUser->id);
 
-        $keyword = md5(random_bytes(1000)) . $user->nickname;
+        $keyword = md5(random_bytes(1000)).$user->nickname;
         $queryUser = User::query()->whereLike('nickname', $keyword)->first();
         $this->assertNull($queryUser);
 
