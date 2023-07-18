@@ -40,6 +40,7 @@ jobs:
         continue-on-error: true
 
       - name: Run PHPUnit
+        if: success()
         run: |
           composer run-script test
           curl -o ocular.phar https://scrutinizer-ci.com/ocular.phar
