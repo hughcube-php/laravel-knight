@@ -44,7 +44,7 @@ class DownloaderTest extends TestCase
 
         $file = Downloader::path($url);
         $this->assertSame($file, Downloader::instance()->to('get', $url, $file, [
-            RequestOptions::VERIFY => false,
+            RequestOptions::VERIFY      => false,
             RequestOptions::HTTP_ERRORS => false,
         ]));
         $this->assertFileExists($file);
@@ -58,7 +58,7 @@ class DownloaderTest extends TestCase
     {
         $url = 'https://www.example.com/';
         $file = Downloader::get($url, null, [
-            RequestOptions::VERIFY => false,
+            RequestOptions::VERIFY      => false,
             RequestOptions::HTTP_ERRORS => false,
         ]);
         $this->assertFileExists($file);
@@ -72,7 +72,7 @@ class DownloaderTest extends TestCase
     {
         $url = 'https://www.example.com/';
         $file = Downloader::save($url, null, [
-            RequestOptions::VERIFY => false,
+            RequestOptions::VERIFY      => false,
             RequestOptions::HTTP_ERRORS => false,
         ]);
         $this->assertFileExists($file);

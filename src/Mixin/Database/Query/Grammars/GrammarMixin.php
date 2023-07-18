@@ -31,7 +31,7 @@ class GrammarMixin
             $not = $where['not'] ? 'not ' : '';
 
             /** @phpstan-ignore-next-line */
-            return $not . $this->compileJsonOverlaps($where['column'], $this->parameter($where['value']));
+            return $not.$this->compileJsonOverlaps($where['column'], $this->parameter($where['value']));
         };
     }
 
@@ -41,7 +41,7 @@ class GrammarMixin
             /** @phpstan-ignore-next-line */
             [$field, $path] = $this->wrapJsonFieldAndPath($column);
 
-            return 'json_overlaps(' . $field . ', ' . $value . $path . ')';
+            return 'json_overlaps('.$field.', '.$value.$path.')';
         };
     }
 }

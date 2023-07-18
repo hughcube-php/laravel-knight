@@ -33,7 +33,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|string|null $date
-     * @param string|null $format
+     * @param string|null                             $format
      *
      * @return Carbon|null
      */
@@ -46,7 +46,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|null $dateTime
-     * @param string $format
+     * @param string                           $format
      *
      * @return string|null
      */
@@ -149,6 +149,7 @@ trait Model
 
     /**
      * @param $query
+     *
      * @return Builder
      */
     public function newEloquentBuilder($query): Builder
@@ -277,7 +278,7 @@ trait Model
     }
 
     /**
-     * make字段的缓存key
+     * make字段的缓存key.
      */
     public function makeColumnsCacheKey(array $columns): string
     {
