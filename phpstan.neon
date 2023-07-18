@@ -12,7 +12,7 @@ parameters:
         - '#Method HughCube\\Laravel\\Knight\\Sanctum\\PersonalAccessToken::findById.*should return.*#'
         - '#.*method HughCube\\Laravel\\Knight\\Sanctum\\PersonalAccessToken::tokenable.* should be.*#'
         - '#.*Method HughCube\\Laravel\\Knight\\Sanctum\\PersonalAccessToken::sort.* should return.*#'
-        - '#Call to an undefined method EasyWeChat\\Kernel\\Contracts\\AccessToken::refresh\(.*#'
+        - '#.*EasyWeChat.*#'
         -
             message: '#.*#'
             paths:

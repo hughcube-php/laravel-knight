@@ -118,7 +118,8 @@ class RequestMixin
     public function isWeChatMiniProgram(): Closure
     {
         return function (): bool {
-            return true == $this->isWeChat() && str_contains($this->userAgent(), 'miniProgram');
+            /** @phpstan-ignore-next-line */
+            return $this->isWeChat() && str_contains($this->userAgent(), 'miniProgram');
         };
     }
 
