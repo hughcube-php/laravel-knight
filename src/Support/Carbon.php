@@ -10,6 +10,8 @@ namespace HughCube\Laravel\Knight\Support;
 
 use DateTimeInterface;
 use DateTimeZone;
+use HughCube\Base\Base;
+use HughCube\CNNumber\CNNumber;
 use InvalidArgumentException;
 use Throwable;
 
@@ -37,7 +39,7 @@ class Carbon extends \Illuminate\Support\Carbon
 
     /**
      * @param DateTimeInterface|int|float|string $date
-     * @param string|null                        $format
+     * @param string|null $format
      *
      * @return static|null
      */
@@ -71,7 +73,7 @@ class Carbon extends \Illuminate\Support\Carbon
 
     /**
      * @param DateTimeInterface|int|float $value
-     * @param string                      $format
+     * @param string $format
      *
      * @return string|null
      */
@@ -83,7 +85,7 @@ class Carbon extends \Illuminate\Support\Carbon
     }
 
     /**
-     * @param mixed  $date
+     * @param mixed $date
      * @param string $format
      *
      * @return bool
@@ -107,7 +109,7 @@ class Carbon extends \Illuminate\Support\Carbon
 
     /**
      * @param string $date
-     * @param bool   $extended
+     * @param bool $extended
      *
      * @return static|false
      */
@@ -138,7 +140,7 @@ class Carbon extends \Illuminate\Support\Carbon
 
     /**
      * @param string|DateTimeInterface|null $time
-     * @param DateTimeZone|string|null      $tz
+     * @param DateTimeZone|string|null $tz
      *
      * @return Carbon|null
      */
@@ -155,5 +157,21 @@ class Carbon extends \Illuminate\Support\Carbon
         }
 
         return $date instanceof static ? $date : null;
+    }
+
+    public function toChineseDate(): string
+    {
+        return sprintf(
+            '%s年%s月%s日',
+            strtr(
+                Base::toString($this->year),
+                [
+                    '0' => '〇', '1' => '一', '2' => '二', '3' => '三', '4' => '四',
+                    '5' => '五', '6' => '六', '7' => '七', '8' => '八', '9' => '九'
+                ]
+            ),
+            CNNumber::toLower($this->month),
+            CNNumber::toLower($this->day)
+        );
     }
 }

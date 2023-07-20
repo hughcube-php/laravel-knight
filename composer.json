@@ -15,6 +15,7 @@
         "hughcube/purl": "*",
         "hughcube/base": "*",
         "hughcube/htree": "*",
+        "hughcube/cn-number": "*",
         "hughcube/guzzle-http": "*",
         "hughcube/static-instance": "*",
         "hughcube/laravel-validation": "*",
