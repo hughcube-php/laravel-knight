@@ -126,4 +126,12 @@ class KIdeRequest
     {
         return false;
     }
+
+    /**
+     * @see RequestMixin::getLastDirectory()
+     */
+    public function getLastDirectory(): ?string
+    {
+        return null;
+    }
 }

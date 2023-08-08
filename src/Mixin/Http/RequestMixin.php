@@ -168,4 +168,14 @@ class RequestMixin
             return Version::compare($contain ? '<=' : '<', $this->getClientVersion(), $version, $length);
         };
     }
+
+    /**
+     * 获取最后一级目录
+     */
+    public function getLastDirectory(): Closure
+    {
+        return function (): ?string {
+            return Str::afterLast(trim($this->getPathInfo()), '/') ?: null;
+        };
+    }
 }
