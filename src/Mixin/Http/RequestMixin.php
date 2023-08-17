@@ -170,7 +170,7 @@ class RequestMixin
     }
 
     /**
-     * 获取最后一级目录
+     * 获取最后一级目录.
      */
     public function getLastDirectory(): Closure
     {
