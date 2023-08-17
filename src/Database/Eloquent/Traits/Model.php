@@ -7,6 +7,7 @@ use HughCube\Base\Base;
 use HughCube\Laravel\Knight\Database\Eloquent\Builder;
 use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
 use HughCube\Laravel\Knight\Support\Carbon;
+use HughCube\Laravel\Knight\Support\Json;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -33,7 +34,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|string|null $date
-     * @param string|null                             $format
+     * @param string|null $format
      *
      * @return Carbon|null
      */
@@ -46,7 +47,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|null $dateTime
-     * @param string                           $format
+     * @param string $format
      *
      * @return string|null
      */
@@ -399,5 +400,26 @@ trait Model
     public static function isAvailableModel($model): bool
     {
         return $model instanceof self && $model->isAvailable();
+    }
+
+    protected function json2Array($value, $filter = false): array
+    {
+        $collection = Collection::make();
+
+        if (empty($value)) {
+            $collection = Collection::make();
+        } elseif (is_string($value)) {
+            $collection = Collection::make(Json::decodeArray($value));
+        } elseif (is_array($value)) {
+            $collection = Collection::make($value);
+        }
+
+        if (true === $filter) {
+            $collection = $collection->filter();
+        } elseif (false !== $filter) {
+            $collection = $collection->filter($filter);
+        }
+
+        return $collection->all();
     }
 }
