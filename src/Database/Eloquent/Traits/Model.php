@@ -33,8 +33,8 @@ trait Model
     private $isFromCache = false;
 
     /**
-     * @param DateTimeInterface|int|float|string|null $date
-     * @param string|null                             $format
+     * @param  DateTimeInterface|int|float|string|null  $date
+     * @param  string|null  $format
      *
      * @return Carbon|null
      */
@@ -46,8 +46,8 @@ trait Model
     }
 
     /**
-     * @param DateTimeInterface|int|float|null $dateTime
-     * @param string                           $format
+     * @param  DateTimeInterface|int|float|null  $dateTime
+     * @param  string  $format
      *
      * @return string|null
      */
@@ -59,7 +59,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return null|Carbon
      */
@@ -69,7 +69,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return null|Carbon
      */
@@ -79,7 +79,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return null|Carbon
      */
@@ -275,7 +275,7 @@ trait Model
                 return [$this->makeColumnsCacheKey($id) => $this];
             });
 
-        return $this->newQuery()->getCache()->setMultiple($cacheKeys);
+        return $this->newQuery()->getCache()->setMultiple($cacheKeys, $this->getCacheTtl());
     }
 
     /**
@@ -306,7 +306,7 @@ trait Model
     }
 
     /**
-     * @param mixed $id
+     * @param  mixed  $id
      *
      * @return null|static
      */
@@ -316,7 +316,7 @@ trait Model
     }
 
     /**
-     * @param array|Arrayable|Traversable $ids
+     * @param  array|Arrayable|Traversable  $ids
      *
      * @return KnightCollection<int, static>|array<int, static>
      */
@@ -328,7 +328,7 @@ trait Model
     /**
      * Is a primary key value.
      *
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return bool
      */

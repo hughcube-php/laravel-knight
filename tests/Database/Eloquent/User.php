@@ -66,6 +66,11 @@ class User extends Model
         return Cache::store('array');
     }
 
+    public function getCacheTtl(int $duration = null): int
+    {
+        return 10;
+    }
+
     public function getCachePlaceholder(): ?string
     {
         return md5(__METHOD__);

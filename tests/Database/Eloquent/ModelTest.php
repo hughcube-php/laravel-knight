@@ -204,9 +204,16 @@ class ModelTest extends TestCase
         $this->createUsers();
 
         /** miss */
-        $this->assertCacheMissedAndPutCount(1, function () {
+        $this->assertCacheMissedAndPutCount(2, function () {
             $user = User::findById(1);
             $this->assertInstanceOf(User::class, $user);
+            $this->assertFalse($user->isFromCache());
+
+            $user = User::findById(1);
+            $this->assertTrue($user->isFromCache());
+
+            sleep(11);
+            $user = User::findById(1);
             $this->assertFalse($user->isFromCache());
         });
 
@@ -230,8 +237,16 @@ class ModelTest extends TestCase
             $this->assertFalse($user->isFromCache());
 
             $user->resetRowCache();
+
             $user = User::findById(1);
-            User::query()->findUniqueRow(['nickname' => $user->nickname]);
+            $this->assertTrue($user->isFromCache());
+
+            $user = User::query()->findUniqueRow(['nickname' => $user->nickname]);
+            $this->assertTrue($user->isFromCache());
+
+            sleep(11);
+            $user = User::findById(1);
+            $this->assertFalse($user->isFromCache());
         });
     }
 
