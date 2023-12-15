@@ -300,7 +300,11 @@ trait Model
             Str::snake(Str::afterLast(get_class($this), '\\')),
             Base::conv(abs(crc32(get_class($this))), '0123456789', '0123456789abcdefghijklmnopqrstuvwxyz'),
             $this->getCacheVersion(),
-            Base::conv(strtoupper(md5($string)), '0123456789abcdef', '0123456789abcdefghijklmnopqrstuvwxyz'),
+            Base::conv(
+                ltrim(strtoupper(md5($string)), '0'),
+                '0123456789abcdef',
+                '0123456789abcdefghijklmnopqrstuvwxyz'
+            ),
             Base::conv(abs(crc32($string)), '0123456789', '0123456789abcdefghijklmnopqrstuvwxyz')
         );
     }
