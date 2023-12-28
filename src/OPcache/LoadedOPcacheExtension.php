@@ -18,9 +18,9 @@ trait LoadedOPcacheExtension
     protected function loadedOPcacheExtension()
     {
         if (!extension_loaded('Zend OPcache')) {
-            $message = 'You do not have the Zend OPcache extension loaded, sample data is being shown instead.';
-
-            throw new Exception($message);
+            throw new Exception(
+                'You do not have the Zend OPcache extension loaded, sample data is being shown instead.'
+            );
         }
     }
 }

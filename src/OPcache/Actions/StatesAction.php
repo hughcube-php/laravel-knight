@@ -9,9 +9,9 @@
 namespace HughCube\Laravel\Knight\OPcache\Actions;
 
 use Exception;
+use HughCube\Laravel\Knight\Exceptions\UserException;
 use HughCube\Laravel\Knight\OPcache\LoadedOPcacheExtension;
 use HughCube\Laravel\Knight\Routing\Controller;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Symfony\Component\HttpFoundation\Response;
 
 class StatesAction extends Controller
@@ -26,14 +26,21 @@ class StatesAction extends Controller
     }
 
     /**
-     * @return Response
-     * @throws BindingResolutionException
-     *
      * @throws Exception
      */
     protected function action(): Response
     {
-        $this->loadedOPcacheExtension();
+        if (!extension_loaded('Zend OPcache')) {
+            throw new UserException(
+                'You do not have the Zend OPcache extension loaded, sample data is being shown instead.'
+            );
+        }
+
+        if (false === opcache_get_status()) {
+            throw new UserException(
+                'Failed to obtain the status of Zend OPcache. Please check whether it is disabled.'
+            );
+        }
 
         if ($this->isAsJson()) {
             return $this->asResponse(opcache_get_status());
