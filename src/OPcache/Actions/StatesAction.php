@@ -26,10 +26,10 @@ class StatesAction extends Controller
     }
 
     /**
-     * @throws Exception
+     * @return Response
      * @throws BindingResolutionException
      *
-     * @return Response
+     * @throws Exception
      */
     protected function action(): Response
     {
@@ -39,7 +39,7 @@ class StatesAction extends Controller
             return $this->asResponse(opcache_get_status());
         }
 
-        return response($this->renderView(dirname(__DIR__).'/Views/opcache.php'));
+        return new Response($this->renderView(dirname(__DIR__).'/Views/opcache.php'));
     }
 
     protected function renderView($file)
