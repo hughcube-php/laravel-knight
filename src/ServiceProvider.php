@@ -73,8 +73,8 @@ class ServiceProvider extends IlluminateServiceProvider
 
         $this->bootOPcache();
         $this->bootRequest();
-        $this->bootPing();
         $this->bootPhpInfo();
+        $this->bootHealthCheck();
 
         $this->registerRefreshModelCacheEvent();
     }
@@ -115,11 +115,11 @@ class ServiceProvider extends IlluminateServiceProvider
         }
     }
 
-    protected function bootPing()
+    protected function bootHealthCheck()
     {
-        if (!$this->hasRoutesCache() && false !== ($prefix = config('knight.ping.route_prefix'))) {
+        if (!$this->hasRoutesCache() && false !== ($prefix = config('knight.healthcheck.route_prefix'))) {
             Route::group(['prefix' => $prefix], function () {
-                Route::any('/ping', PingAction::class)->name('knight.ping');
+                Route::any('/healthcheck', PingAction::class)->name('knight.healthcheck');
             });
         }
     }
