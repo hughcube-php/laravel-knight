@@ -12,18 +12,8 @@ use HughCube\Laravel\Knight\Routing\Controller;
 
 class PhpInfoAction extends Controller
 {
-    protected function action(): string
+    protected function action(): void
     {
-        ob_start();
-        $results = phpinfo();
-        $output = ob_get_contents();
-        ob_end_clean();
-
-        /** @phpstan-ignore-next-line */
-        if (false === $results) {
-            return 'The phpinfo call failed!';
-        }
-
-        return nl2br($output);
+        phpinfo();
     }
 }
