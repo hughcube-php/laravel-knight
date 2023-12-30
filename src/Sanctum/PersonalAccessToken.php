@@ -46,6 +46,10 @@ class PersonalAccessToken extends \Laravel\Sanctum\PersonalAccessToken
             return true;
         }
 
+        if (0 <= $this->getExpiresIn()) {
+            return true;
+        }
+
         return $this->last_used_at->gt(Carbon::now()->subSeconds($this->getExpiresIn()));
     }
 
