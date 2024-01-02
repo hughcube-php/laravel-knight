@@ -12,7 +12,7 @@ class PingDatabaseJob extends Job
     public function rules(): array
     {
         return [
-            'connection' => ['nullable', 'string']
+            'connection' => ['nullable', 'string'],
         ];
     }
 

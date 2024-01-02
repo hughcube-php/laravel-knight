@@ -2,7 +2,6 @@
 
 namespace HughCube\Laravel\Knight\Tests\Queue\Jobs;
 
-use HughCube\Laravel\Knight\Queue\Jobs\CleanFilesJob;
 use HughCube\Laravel\Knight\Queue\Jobs\PingDatabaseJob;
 use HughCube\Laravel\Knight\Tests\TestCase;
 
