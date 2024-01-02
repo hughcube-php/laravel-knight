@@ -19,10 +19,12 @@ class RequestShowAction extends Controller
     protected function action(): Response
     {
         return $this->asResponse([
-            'uri'     => $this->getRequest()->getUri(),
-            'https'   => $this->getRequest()->isSecure(),
-            'method'  => $this->getRequest()->getMethod(),
-            'host'    => $this->getRequest()->getHost(),
+            'uri' => $this->getRequest()->getUri(),
+            'https' => $this->getRequest()->isSecure(),
+            'method' => $this->getRequest()->getMethod(),
+            'host' => $this->getRequest()->getHost(),
+            'server' => $this->getRequest()->server->all(),
+            'env' => $_ENV,
             'headers' => $this->getRequest()->headers->all(),
             'content' => serialize($this->getRequest()->getContent()),
         ]);
