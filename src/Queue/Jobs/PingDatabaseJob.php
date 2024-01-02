@@ -24,9 +24,7 @@ class PingDatabaseJob extends Job
         $connection = DB::connection($this->p('connection'));
 
         $now = Carbon::now();
-        if ($this->p()->getBoolean('with_write_pod')) {
-            $connection->select('select 1', [], false);
-        }
+        $connection->select('select 1', [], false);
         $writePdoDuration = Carbon::now()->diffInMilliseconds($now);
 
         $readPdoDuration = null;
@@ -36,13 +34,11 @@ class PingDatabaseJob extends Job
             $readPdoDuration = Carbon::now()->diffInMilliseconds($now);
         }
 
-        $this->info($message = sprintf(
+        $this->info(sprintf(
             'connection: %s, write: %s, read: %s, 心跳成功',
             $connection->getName(),
             sprintf('%sms', $writePdoDuration),
             is_null($readPdoDuration) ? '-' : sprintf('%sms', $readPdoDuration)
         ));
-
-        var_dump($message);
     }
 }
