@@ -9,7 +9,6 @@
 namespace HughCube\Laravel\Knight\Traits;
 
 use Illuminate\Contracts\Debug\ExceptionHandler;
-use Illuminate\Support\Str;
 use ReflectionClass;
 use ReflectionMethod;
 use Throwable;
@@ -22,12 +21,12 @@ trait MultipleHandler
     }
 
     /**
-     * @param bool $tryException
-     * @param bool $logException
-     *
-     * @throws Throwable
+     * @param  bool  $tryException
+     * @param  bool  $logException
      *
      * @return array
+     * @throws Throwable
+     *
      */
     protected function triggerHandlers(bool $tryException = false, bool $logException = true): array
     {
@@ -81,21 +80,24 @@ trait MultipleHandler
     }
 
     /**
-     * @param ReflectionMethod $method
+     * @param  ReflectionMethod  $method
      *
      * @return null|array
      */
     protected function parseHandlerMethod(ReflectionMethod $method): ?array
     {
-        if (!Str::is('*handler*', strtolower($method->name))) {
+        $name = strtolower($method->name);
+        $position = strrpos($name, 'handler');
+
+        if (false === $position) {
             return null;
         }
 
-        $sort = Str::afterLast(strtolower($method->name), 'handler');
+        $sort = substr($name, $position + strlen('handler'));
         if ('' !== $sort && !ctype_digit($sort)) {
             return null;
         }
 
-        return [$method->name, $sort ?: '0'];
+        return [$method->name, intval($sort ?: '0')];
     }
 }
