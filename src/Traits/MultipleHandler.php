@@ -21,12 +21,12 @@ trait MultipleHandler
     }
 
     /**
-     * @param  bool  $tryException
-     * @param  bool  $logException
+     * @param bool $tryException
+     * @param bool $logException
      *
-     * @return array
      * @throws Throwable
      *
+     * @return array
      */
     protected function triggerHandlers(bool $tryException = false, bool $logException = true): array
     {
@@ -80,7 +80,7 @@ trait MultipleHandler
     }
 
     /**
-     * @param  ReflectionMethod  $method
+     * @param ReflectionMethod $method
      *
      * @return null|array
      */
