@@ -19,9 +19,6 @@ use HughCube\Laravel\Knight\Traits\Validation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use ReflectionClass;
-use ReflectionMethod;
 use Symfony\Component\HttpFoundation\Response;
 
 trait Action
@@ -68,8 +65,8 @@ trait Action
     }
 
     /**
-     * @param array $data
-     * @param int   $code
+     * @param  array  $data
+     * @param  int  $code
      *
      * @return JsonResponse
      *
@@ -82,26 +79,26 @@ trait Action
     }
 
     /**
-     * @param array $data
-     * @param int   $code
+     * @param  array  $data
+     * @param  int  $code
      *
      * @return Response
      */
     protected function asResponse(array $data = [], int $code = 200): Response
     {
         return new JsonResponse([
-            'code'    => $code,
+            'code' => $code,
             'message' => 'ok',
-            'data'    => $data,
+            'data' => $data,
         ]);
     }
 
     /**
-     * @throws
-     *
      * @return Request|\Request|KIdeRequest
      *
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     protected function getRequest(): Request
     {
@@ -136,11 +133,11 @@ trait Action
     }
 
     /**
-     * @throws
-     *
      * @return mixed
      *
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function invoke()
     {
@@ -154,29 +151,24 @@ trait Action
         // Collect all validated parameters
         $this->loadParameters();
 
-        $reflection = new ReflectionClass($this);
-        $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED);
-
-        // Run all onActioning* methods before action
-        foreach ($methods as $method) {
-            if (Str::startsWith($method->getName(), 'onActioning')) {
-                $method->invoke($this);
-            }
-        }
+        $this->beforeAction();
 
         $response = $this->action();
 
-        // Run all onActioned* methods after the action
-        foreach ($methods as $method) {
-            if (Str::startsWith($method->getName(), 'onActioned')) {
-                $method->invoke($this);
-            }
-        }
+        $this->afterAction();
 
         // Clean up the state once the action is complete
         $this->clearActionStatus();
 
         return $response;
+    }
+
+    protected function beforeAction()
+    {
+    }
+
+    protected function afterAction()
+    {
     }
 
     protected function clearActionStatus()
@@ -199,8 +191,8 @@ trait Action
     }
 
     /**
-     * @param string $name
-     * @param array  $arguments
+     * @param  string  $name
+     * @param  array  $arguments
      *
      * @return mixed
      */
