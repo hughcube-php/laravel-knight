@@ -26,6 +26,7 @@ use HughCube\Laravel\Knight\OPcache\Actions\ScriptsAction as OPcacheScriptsActio
 use HughCube\Laravel\Knight\OPcache\Actions\StatesAction as OPcacheStatesAction;
 use HughCube\Laravel\Knight\OPcache\Commands\ClearCliCacheCommand as OPcacheClearCliCacheCommand;
 use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand as OPcacheCompileFilesCommand;
+use Illuminate\Config\Repository;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Query\Builder;
@@ -97,7 +98,9 @@ class ServiceProvider extends IlluminateServiceProvider
             ]);
         }
 
-        if (!$this->hasRoutesCache() && false !== ($prefix = config('knight.opcache.route_prefix', false))) {
+        /** @var Repository $config */
+        $config = $this->app->make('config');
+        if (!$this->hasRoutesCache() && false !== ($prefix = $config->get('knight.opcache.route_prefix', false))) {
             Route::group(['prefix' => $prefix], function () {
                 Route::any('/opcache/scripts', OPcacheScriptsAction::class)->name('knight.opcache.scripts');
                 Route::any('/opcache/states', OPcacheStatesAction::class)->name('knight.opcache.states');
@@ -107,7 +110,9 @@ class ServiceProvider extends IlluminateServiceProvider
 
     protected function bootRequest()
     {
-        if (!$this->hasRoutesCache() && false !== ($prefix = config('knight.request.route_prefix', false))) {
+        /** @var Repository $config */
+        $config = $this->app->make('config');
+        if (!$this->hasRoutesCache() && false !== ($prefix = $config->get('knight.request.route_prefix', false))) {
             Route::group(['prefix' => $prefix], function () {
                 Route::any('/request/log', RequestLogAction::class)->name('knight.request.log');
                 Route::any('/request/show', RequestShowAction::class)->name('knight.request.show');
@@ -117,7 +122,9 @@ class ServiceProvider extends IlluminateServiceProvider
 
     protected function bootHealthCheck()
     {
-        if (!$this->hasRoutesCache() && false !== ($prefix = config('knight.healthcheck.route_prefix'))) {
+        /** @var Repository $config */
+        $config = $this->app->make('config');
+        if (!$this->hasRoutesCache() && false !== ($prefix = $config->get('knight.healthcheck.route_prefix'))) {
             Route::group(['prefix' => $prefix], function () {
                 Route::any('/healthcheck', PingAction::class)->name('knight.healthcheck');
             });
@@ -126,7 +133,9 @@ class ServiceProvider extends IlluminateServiceProvider
 
     protected function bootPhpInfo()
     {
-        if (!$this->hasRoutesCache() && false !== ($prefix = config('knight.phpinfo.route_prefix', false))) {
+        /** @var Repository $config */
+        $config = $this->app->make('config');
+        if (!$this->hasRoutesCache() && false !== ($prefix = $config->get('knight.phpinfo.route_prefix', false))) {
             Route::group(['prefix' => $prefix], function () {
                 Route::any('/phpinfo', PhpInfoAction::class)->name('knight.phpinfo');
             });
