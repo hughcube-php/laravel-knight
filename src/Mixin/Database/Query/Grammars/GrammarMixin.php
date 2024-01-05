@@ -20,7 +20,14 @@ class GrammarMixin
 {
     use SimpleMacroableBridge;
 
-    public function orWhereJsonOverlaps(): Closure
+    public static function getMacros(): array
+    {
+        return [
+            'orWhereJsonOverlaps', 'whereJsonOverlaps', 'compileJsonOverlaps'
+        ];
+    }
+
+    public static function orWhereJsonOverlaps(): Closure
     {
         return function ($column, $org, $tags) {
             /** @phpstan-ignore-next-line */
@@ -28,7 +35,7 @@ class GrammarMixin
         };
     }
 
-    public function whereJsonOverlaps(): Closure
+    public static function whereJsonOverlaps(): Closure
     {
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
@@ -38,7 +45,7 @@ class GrammarMixin
         };
     }
 
-    public function compileJsonOverlaps(): Closure
+    public static function compileJsonOverlaps(): Closure
     {
         return function ($column, $value) {
             /** @phpstan-ignore-next-line */

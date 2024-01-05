@@ -20,7 +20,14 @@ class BuilderMixin
 {
     use SimpleMacroableBridge;
 
-    public function whereJsonOverlaps(): Closure
+    public static function getMacros(): array
+    {
+        return [
+            'whereJsonOverlaps', 'orWhereJsonOverlaps'
+        ];
+    }
+
+    public static function whereJsonOverlaps(): Closure
     {
         return function ($column, $value, $boolean = 'and', $not = false) {
             $type = 'JsonOverlaps';
@@ -37,7 +44,7 @@ class BuilderMixin
         };
     }
 
-    public function orWhereJsonOverlaps(): Closure
+    public static function orWhereJsonOverlaps(): Closure
     {
         return function ($column, $value) {
             /** @phpstan-ignore-next-line */

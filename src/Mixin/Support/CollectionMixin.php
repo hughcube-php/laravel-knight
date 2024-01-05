@@ -20,10 +20,18 @@ class CollectionMixin
 {
     use SimpleMacroableBridge;
 
+    public static function getMacros(): array
+    {
+        return [
+            'hasByCallable', 'isIndexed', 'filterWithStop', 'pluckAndMergeSetColumn',
+            'onlyArrayKeys', 'onlyColumnValues', 'whenFilter', 'hasValue', 'mapInt', 'mapString'
+        ];
+    }
+
     /**
      * 根据回调方法检查是否存在指定元素.
      */
-    public function hasByCallable(): Closure
+    public static function hasByCallable(): Closure
     {
         return function (callable $key) {
             foreach ($this->getIterator() as $index => $item) {
@@ -39,9 +47,13 @@ class CollectionMixin
     /**
      * 是否是索引数组.
      */
-    public function isIndexed(): Closure
+    public static function isIndexed(): Closure
     {
         return function (bool $consecutive = true) {
+            /**
+             * @var Collection $this
+             * @phpstan-ignore-next-line
+             */
             if ($this->isEmpty()) {
                 return true;
             }
@@ -63,11 +75,10 @@ class CollectionMixin
     /**
      * 过滤元素直到满足$stop.
      */
-    public function filterWithStop(): Closure
+    public static function filterWithStop(): Closure
     {
         return function (callable $stop, $withStopItem = false) {
             $stopState = false;
-
             return $this->filter(function ($item) use (&$stopState, $stop, $withStopItem) {
                 $preStopState = $stopState;
                 $stopState = $stopState || $stop($item);
@@ -80,7 +91,7 @@ class CollectionMixin
     /**
      * pluck指定set(1,2,3,4)元素, 并且合并后在分割为Collection.
      */
-    public function pluckAndMergeSetColumn(): Closure
+    public static function pluckAndMergeSetColumn(): Closure
     {
         return function ($name, $separator = ',', $filter = null) {
             $string = $this->pluck($name)->implode($separator);
@@ -97,14 +108,13 @@ class CollectionMixin
     /**
      * 收集指定数组keys, 组合成一个新的collection.
      */
-    public function onlyArrayKeys(): Closure
+    public static function onlyArrayKeys(): Closure
     {
         return function ($keys = []) {
             $keys = $this->wrap($keys);
             $collection = $this->make();
 
             foreach ($this->getIterator() as $key => $item) {
-                /** @phpstan-ignore-next-line */
                 if ($keys->hasValue($key)) {
                     $collection->put($key, $item);
                 }
@@ -117,7 +127,7 @@ class CollectionMixin
     /**
      * 收集指定属性的指定值, 组合成一个新的collection.
      */
-    public function onlyColumnValues(): Closure
+    public static function onlyColumnValues(): Closure
     {
         return function ($values, $name = null, bool $strict = false) {
             $collection = $this->make();
@@ -131,7 +141,6 @@ class CollectionMixin
                     $column = $name;
                 }
 
-                /** @phpstan-ignore-next-line */
                 if ($values->hasValue($item[$column], $strict)) {
                     $collection->put($key, $item);
                 }
@@ -144,7 +153,7 @@ class CollectionMixin
     /**
      * 满足条件在执行过滤.
      */
-    public function whenFilter(): Closure
+    public static function whenFilter(): Closure
     {
         return function ($when, callable $callable) {
             if ($when) {
@@ -155,7 +164,8 @@ class CollectionMixin
         };
     }
 
-    public function hasValue(): Closure
+
+    public static function hasValue(): Closure
     {
         return function ($needle, $strict = false) {
             foreach ($this->getIterator() as $value) {
@@ -175,7 +185,7 @@ class CollectionMixin
     /**
      * map int.
      */
-    public function mapInt(): Closure
+    public static function mapInt(): Closure
     {
         return function () {
             return $this->map(function ($item) {
@@ -187,7 +197,7 @@ class CollectionMixin
     /**
      * map string.
      */
-    public function mapString(): Closure
+    public static function mapString(): Closure
     {
         return function () {
             return $this->map(function ($item) {

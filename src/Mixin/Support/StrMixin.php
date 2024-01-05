@@ -16,7 +16,19 @@ class StrMixin
 {
     use SimpleMacroableBridge;
 
-    public function afterLast(): Closure
+    protected static function getMacros(): array
+    {
+        return [
+            "afterLast", "beforeLast", "getMobilePattern", "checkMobile", "maskMobile",
+            "maskChinaIdCode", "splitWhitespace", "isUtf8", "isOctal", "isBinary",
+            "isHex", "isAlnum", "isAlpha", "isNaming", "isWhitespace", "isDigit", "isEmail",
+            "isTel", "isIp", "isIp4", "isIp6", "isPrivateIp", "isPublicIp", "isUrl", "isPort",
+            "isTrue", "isChineseName", "hasChinese", "isChinese", "convEncoding", "msubstr",
+            "countWords", "offsetGet", "filterPartialUTF8", "versionCompare", "mbSplit"
+        ];
+    }
+
+    public static function afterLast(): Closure
     {
         return function ($subject, $search) {
             if ($search === '') {
@@ -33,7 +45,7 @@ class StrMixin
         };
     }
 
-    public function beforeLast(): Closure
+    public static function beforeLast(): Closure
     {
         return function ($subject, $search) {
             if ($search === '') {
@@ -50,14 +62,14 @@ class StrMixin
         };
     }
 
-    public function getMobilePattern(): Closure
+    public static function getMobilePattern(): Closure
     {
         return function () {
             return '/^(13[0-9]|14[0-9]|15[0-9]|16[0-9]|17[0-9]|18[0-9]|19[0-9])\d{8}$/';
         };
     }
 
-    protected function checkMobile(): Closure
+    public static function checkMobile(): Closure
     {
         return function ($mobile, $iddCode = null): bool {
             if (!is_string($mobile) && !ctype_digit(strval($mobile))) {
@@ -73,21 +85,21 @@ class StrMixin
         };
     }
 
-    protected function maskMobile(): Closure
+    public static function maskMobile(): Closure
     {
         return function ($string): string {
             return substr_replace($string, '****', 3, 4);
         };
     }
 
-    protected function maskChinaIdCode(): Closure
+    public static function maskChinaIdCode(): Closure
     {
         return function ($string): string {
             return substr_replace($string, '********', 6, 8);
         };
     }
 
-    protected function splitWhitespace(): Closure
+    public static function splitWhitespace(): Closure
     {
         return function ($string): array {
             return preg_split('/\s+/', $string) ?: [];
@@ -97,7 +109,7 @@ class StrMixin
     /**
      * 判断一个字符串的编码是否为UTF-8.
      */
-    protected function isUtf8(): Closure
+    public static function isUtf8(): Closure
     {
         return function ($string): bool {
             if (null === $string) {
@@ -130,7 +142,7 @@ class StrMixin
     /**
      * 判断一个字符串是否为八进制字符.
      */
-    protected function isOctal(): Closure
+    public static function isOctal(): Closure
     {
         return function ($string): bool {
             return 0 < preg_match('/[^0-7]+/', $string);
@@ -140,7 +152,7 @@ class StrMixin
     /**
      * 判断一个字符串是否为二进制字符.
      */
-    protected function isBinary(): Closure
+    public static function isBinary(): Closure
     {
         return function ($string): bool {
             return 0 < preg_match('/[^01]+/', $string);
@@ -150,7 +162,7 @@ class StrMixin
     /**
      * 判断一个字符串是否为十六进制字符.
      */
-    protected function isHex(): Closure
+    public static function isHex(): Closure
     {
         return function ($string): bool {
             return 0 < preg_match('/[^0-9a-f]+/i', $string);
@@ -160,7 +172,7 @@ class StrMixin
     /**
      * 判断一个字符串是否是数字和字母组成.
      */
-    protected function isAlnum(): Closure
+    public static function isAlnum(): Closure
     {
         return function ($string): bool {
             return ctype_alnum($string);
@@ -170,7 +182,7 @@ class StrMixin
     /**
      * 判断一个字符串是否是字母组成.
      */
-    protected function isAlpha(): Closure
+    public static function isAlpha(): Closure
     {
         return function ($string): bool {
             return ctype_alpha($string);
@@ -180,7 +192,7 @@ class StrMixin
     /**
      * 判断一个字符串是否是符合的命名规则.
      */
-    protected function isNaming(): Closure
+    public static function isNaming(): Closure
     {
         return function ($string): bool {
             return 0 < preg_match('/^[a-z\_][a-z1-9\_]*/i', $string);
@@ -190,7 +202,7 @@ class StrMixin
     /**
      * 判断一个字符串是否为空白符,空格制表符回车等都被视作为空白符,类是\n\r\t;.
      */
-    protected function isWhitespace(): Closure
+    public static function isWhitespace(): Closure
     {
         return function ($string): bool {
             return ctype_cntrl($string);
@@ -200,7 +212,7 @@ class StrMixin
     /**
      * 判断是否为整数.
      */
-    protected function isDigit(): Closure
+    public static function isDigit(): Closure
     {
         return function ($string): bool {
             return is_numeric($string) && ctype_digit(strval($string));
@@ -210,7 +222,7 @@ class StrMixin
     /**
      * 判断是否是一个合法的邮箱.
      */
-    protected function isEmail(): Closure
+    public static function isEmail(): Closure
     {
         return function ($string, bool $isStrict = false): bool {
             $result = false !== filter_var($string, FILTER_VALIDATE_EMAIL);
@@ -227,7 +239,7 @@ class StrMixin
     /**
      * 判断是否是一个合法的固定电话号码;.
      */
-    protected function isTel(): Closure
+    public static function isTel(): Closure
     {
         return function ($string): bool {
             $pattern = '/^((\(\d{2,3}\))|(\d{3}\-))?(\(0\d{2,3}\)|0\d{2,3}-)?[1-9]\d{6,7}(\-\d{1,4})?$/';
@@ -239,7 +251,7 @@ class StrMixin
     /**
      * 判断是否为一个合法的IP地址
      */
-    protected function isIp(): Closure
+    public static function isIp(): Closure
     {
         return function ($string): bool {
             return false !== filter_var($string, FILTER_VALIDATE_IP);
@@ -249,7 +261,7 @@ class StrMixin
     /**
      * 判断是否为一个合法的IPv4地址
      */
-    protected function isIp4(): Closure
+    public static function isIp4(): Closure
     {
         return function ($string): bool {
             return false !== filter_var($string, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4);
@@ -259,7 +271,7 @@ class StrMixin
     /**
      * 判断是否为一个合法的IPv6地址
      */
-    protected function isIp6(): Closure
+    public static function isIp6(): Closure
     {
         return function ($string): bool {
             return false !== filter_var($string, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6);
@@ -269,7 +281,7 @@ class StrMixin
     /**
      * 判断是否是内网ip.
      */
-    protected function isPrivateIp(): Closure
+    public static function isPrivateIp(): Closure
     {
         return function ($string): bool {
             return false === filter_var($string, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE)
@@ -280,7 +292,7 @@ class StrMixin
     /**
      * 判断是否是外网ip.
      */
-    protected function isPublicIp(): Closure
+    public static function isPublicIp(): Closure
     {
         return function ($string): bool {
             /** @phpstan-ignore-next-line */
@@ -288,7 +300,7 @@ class StrMixin
         };
     }
 
-    protected function isUrl(): Closure
+    public static function isUrl(): Closure
     {
         return function ($string, bool $checkAccess = false): bool {
             if (false === filter_var($string, FILTER_VALIDATE_URL)) {
@@ -306,7 +318,7 @@ class StrMixin
     /**
      * 是否合法的端口.
      */
-    protected function isPort(): Closure
+    public static function isPort(): Closure
     {
         return function ($string): bool {
             return is_numeric($string)
@@ -319,7 +331,7 @@ class StrMixin
     /**
      * 判断是否是真值
      */
-    protected function isTrue(): Closure
+    public static function isTrue(): Closure
     {
         return function ($string): bool {
             if (is_bool($string) && $string) {
@@ -337,7 +349,7 @@ class StrMixin
     /**
      * 判断是否中文名字.
      */
-    protected function isChineseName(): Closure
+    public static function isChineseName(): Closure
     {
         return function ($string): bool {
             return 0 < preg_match('/^([\xe4-\xe9][\x80-\xbf]{2}){2,15}$/', $string);
@@ -347,7 +359,7 @@ class StrMixin
     /**
      * 是否含有中文.
      */
-    protected function hasChinese(): Closure
+    public static function hasChinese(): Closure
     {
         return function ($string): bool {
             return 0 < preg_match('/[\x{4e00}-\x{9fa5}]/u', $string);
@@ -357,7 +369,7 @@ class StrMixin
     /**
      * 是否中文.
      */
-    protected function isChinese(): Closure
+    public static function isChinese(): Closure
     {
         return function ($string): bool {
             return 0 < preg_match('/^[\x{4e00}-\x{9fa5}]+$/u', $string);
@@ -367,7 +379,7 @@ class StrMixin
     /**
      * 改变字符的编码
      */
-    protected function convEncoding(): Closure
+    public static function convEncoding(): Closure
     {
         return function ($contents, $from = 'gbk', $to = 'utf-8'): string {
             $from = strtoupper($from);
@@ -391,7 +403,7 @@ class StrMixin
     /**
      * 函数msubstr,实现中文截取字符串;.
      */
-    protected function msubstr(): Closure
+    public static function msubstr(): Closure
     {
         return function ($str, $start = 0, $length = null, $suffix = '...', $charset = 'utf-8'): string {
             $length = null === $length ? strlen($length) : $length;
@@ -425,7 +437,7 @@ class StrMixin
     /**
      * 统计单词数.
      */
-    protected function countWords(): Closure
+    public static function countWords(): Closure
     {
         return function ($string): int {
             return count(preg_split('/\s+/u', $string, null, PREG_SPLIT_NO_EMPTY));
@@ -435,7 +447,7 @@ class StrMixin
     /**
      * 获取指定位置的字符, 不能支持负数位置.
      */
-    protected function offsetGet(): Closure
+    public static function offsetGet(): Closure
     {
         /** @phpstan-ignore-next-line */
         return function ($string, $index): ?string {
@@ -454,7 +466,7 @@ class StrMixin
      * 三字节字符：0xE0-0xEF 0x80-0xBF 0x80-0xBF
      * 四字节字符：0xF0-0xF7 0x80-0xBF 0x80-0xBF 0x80-0xBF
      */
-    protected function filterPartialUTF8(): Closure
+    public static function filterPartialUTF8(): Closure
     {
         return function ($string): string {
             // @codingStandardsIgnoreStart
@@ -474,7 +486,7 @@ class StrMixin
      * 2: $b < $a
      * <、 lt、<=、 le、>、 gt、>=、 ge、==、 =、eq、 !=、<> 和 ne。
      */
-    protected function versionCompare(): Closure
+    public static function versionCompare(): Closure
     {
         return function (string $a, string $b, ?string $operator = null, ?int $compareDepth = null): int {
             /**
@@ -511,7 +523,7 @@ class StrMixin
         };
     }
 
-    protected function mbSplit(): Closure
+    public static function mbSplit(): Closure
     {
         return function (string $string, int $length = 1, ?string $encoding = null): array {
             $strlen = mb_strlen($string);

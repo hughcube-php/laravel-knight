@@ -27,10 +27,20 @@ class RequestMixin
 {
     use SimpleMacroableBridge;
 
+    public static function getMacros(): array
+    {
+        return [
+            'getClientVersion', 'getClientNonce', 'getClientSignature', 'getClientHeaders',
+            'getDate', 'getClientDate', 'getUserAgentDetect', 'isWeChat',
+            'isWeChatMiniProgram', 'isPostmen', 'isEqClientVersion',
+            'isLtClientVersion', 'isGtClientVersion', 'getLastDirectory'
+        ];
+    }
+
     /**
      * 获取客户端版本.
      */
-    public function getClientVersion(): Closure
+    public static function getClientVersion(): Closure
     {
         return function (): ?string {
             return $this->headers->get(sprintf('%sVersion', $this->getClientHeaderPrefix()));
@@ -40,7 +50,7 @@ class RequestMixin
     /**
      * 获取客户端的随机字符串.
      */
-    public function getClientNonce(): Closure
+    public static function getClientNonce(): Closure
     {
         return function (): ?string {
             return $this->headers->get(sprintf('%sNonce', $this->getClientHeaderPrefix()));
@@ -50,7 +60,7 @@ class RequestMixin
     /**
      * 获取客户端的签名字符串.
      */
-    public function getClientSignature(): Closure
+    public static function getClientSignature(): Closure
     {
         return function (): ?string {
             return $this->headers->get(sprintf('%sSignature', $this->getClientHeaderPrefix()));
@@ -60,7 +70,7 @@ class RequestMixin
     /**
      * 获取客户端的所有请求头.
      */
-    public function getClientHeaders(): Closure
+    public static function getClientHeaders(): Closure
     {
         return function (): HeaderBag {
             $headers = [];
@@ -77,14 +87,14 @@ class RequestMixin
     /**
      * 获取客户端日期
      */
-    public function getDate(): Closure
+    public static function getDate(): Closure
     {
         return function (): ?string {
             return $this->headers->get('Date');
         };
     }
 
-    public function getClientDate(): Closure
+    public static function getClientDate(): Closure
     {
         return function (): ?string {
             return $this->headers->get(sprintf('%sDate', $this->getClientHeaderPrefix()));
@@ -94,7 +104,7 @@ class RequestMixin
     /**
      * 获取agent检测.
      */
-    public function getUserAgentDetect(): Closure
+    public static function getUserAgentDetect(): Closure
     {
         return function (): Agent {
             if (!property_exists($this, 'userAgentDetect') || !$this->userAgentDetect instanceof Agent) {
@@ -108,7 +118,7 @@ class RequestMixin
     /**
      * 判断是否在微信客户端内.
      */
-    public function isWeChat(): Closure
+    public static function isWeChat(): Closure
     {
         return function (): bool {
             return str_contains($this->userAgent(), 'MicroMessenger');
@@ -118,7 +128,7 @@ class RequestMixin
     /**
      * 判断是否在微信客户端内.
      */
-    public function isWeChatMiniProgram(): Closure
+    public static function isWeChatMiniProgram(): Closure
     {
         return function (): bool {
             /** @phpstan-ignore-next-line */
@@ -129,7 +139,7 @@ class RequestMixin
     /**
      * 判断是否在postmen.
      */
-    public function isPostmen(): Closure
+    public static function isPostmen(): Closure
     {
         return function (): bool {
             return Str::startsWith($this->userAgent(), 'PostmanRuntime');
@@ -141,7 +151,7 @@ class RequestMixin
      *
      * 1.0(client) == 1.0 => true
      */
-    public function isEqClientVersion(): Closure
+    public static function isEqClientVersion(): Closure
     {
         return function (string $version, ?int $length = null): bool {
             return Version::compare('=', $this->getClientVersion(), $version, $length);
@@ -153,7 +163,7 @@ class RequestMixin
      *
      * 2.0(client) > 1.0 => true
      */
-    public function isLtClientVersion(): Closure
+    public static function isLtClientVersion(): Closure
     {
         return function (string $version, bool $contain = false, ?int $length = null): bool {
             return Version::compare($contain ? '>=' : '>', $this->getClientVersion(), $version, $length);
@@ -165,7 +175,7 @@ class RequestMixin
      *
      * 1.0(client) < 2.0 => true
      */
-    public function isGtClientVersion(): Closure
+    public static function isGtClientVersion(): Closure
     {
         return function (string $version, bool $contain = false, ?int $length = null): bool {
             return Version::compare($contain ? '<=' : '<', $this->getClientVersion(), $version, $length);
@@ -175,7 +185,7 @@ class RequestMixin
     /**
      * 获取最后一级目录.
      */
-    public function getLastDirectory(): Closure
+    public static function getLastDirectory(): Closure
     {
         return function (): ?string {
             return Str::afterLast(trim($this->getPathInfo()), '/') ?: null;

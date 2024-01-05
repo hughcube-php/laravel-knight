@@ -16,25 +16,17 @@ use ReflectionException;
  */
 trait SimpleMacroableBridge
 {
-    /**
-     * @param  class-string<Macroable>  $target
-     * @param  bool  $replace
-     * @return void
-     * @throws ReflectionException
-     */
-    public static function mixin(string $target, bool $replace = false)
+    public static function mixin(string $target, bool $replace = true)
     {
-        /** @phpstan-ignore-next-line */
-        $mixin = new static;
-
-        foreach (get_class_methods($mixin) as $method) {
-            if ($method == __FUNCTION__) {
-                break;
-            }
-
+        foreach (static::getMacros() as $method) {
             if ($replace || !$target::hasMacro($method)) {
-                $target::macro($method, $mixin->{$method}());
+                $target::macro($method, static::{$method}());
             }
         }
+    }
+
+    protected static function getMacros(): array
+    {
+        return [];
     }
 }
