@@ -9,7 +9,6 @@
 namespace HughCube\Laravel\Knight\Mixin\Database\Query\Grammars;
 
 use Closure;
-use HughCube\Laravel\Knight\Traits\SimpleMacroableBridge;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Grammars\Grammar;
 
@@ -18,16 +17,7 @@ use Illuminate\Database\Query\Grammars\Grammar;
  */
 class GrammarMixin
 {
-    use SimpleMacroableBridge;
-
-    public static function getMacros(): array
-    {
-        return [
-            'orWhereJsonOverlaps', 'whereJsonOverlaps', 'compileJsonOverlaps',
-        ];
-    }
-
-    public static function orWhereJsonOverlaps(): Closure
+    public function orWhereJsonOverlaps(): Closure
     {
         return function ($column, $org, $tags) {
             /** @phpstan-ignore-next-line */
@@ -35,7 +25,7 @@ class GrammarMixin
         };
     }
 
-    public static function whereJsonOverlaps(): Closure
+    public function whereJsonOverlaps(): Closure
     {
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
@@ -45,7 +35,7 @@ class GrammarMixin
         };
     }
 
-    public static function compileJsonOverlaps(): Closure
+    public function compileJsonOverlaps(): Closure
     {
         return function ($column, $value) {
             /** @phpstan-ignore-next-line */

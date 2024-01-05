@@ -6,7 +6,6 @@ parameters:
     inferPrivatePropertyTypeFromConstructor: true
     ignoreErrors:
         - '#Method HughCube\\Laravel\\Knight\\Database\\Eloquent\\.*should return.*#'
-        - '#Call to an undefined static method Illuminate\\Support\\Str::isPrivateIp.*#'
         - '#.*lass HughCube\\Laravel\\EasySms\\Exceptions.*#'
         - '#Method HughCube\\Laravel\\Knight\\Sanctum\\PersonalAccessToken::findById.*should return.*#'
         - '#.*method HughCube\\Laravel\\Knight\\Sanctum\\PersonalAccessToken::tokenable.* should be.*#'
@@ -20,9 +19,3 @@ parameters:
             message: '#.*PHPDoc tag @return with type array.*Collection.*#'
             paths:
                 - src/Database/Eloquent/Traits/Model.php
-        -
-            message: '#Undefined variable: \$this#'
-            paths:
-                - src/Mixin/Database/Query/BuilderMixin.php
-                - src/Mixin/Http/RequestMixin.php
-                - src/Mixin/Support/CollectionMixin.php

@@ -9,7 +9,6 @@
 namespace HughCube\Laravel\Knight\Mixin\Database\Query;
 
 use Closure;
-use HughCube\Laravel\Knight\Traits\SimpleMacroableBridge;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Expression;
 
@@ -18,16 +17,7 @@ use Illuminate\Database\Query\Expression;
  */
 class BuilderMixin
 {
-    use SimpleMacroableBridge;
-
-    public static function getMacros(): array
-    {
-        return [
-            'whereJsonOverlaps', 'orWhereJsonOverlaps',
-        ];
-    }
-
-    public static function whereJsonOverlaps(): Closure
+    public function whereJsonOverlaps(): Closure
     {
         return function ($column, $value, $boolean = 'and', $not = false) {
             $type = 'JsonOverlaps';
@@ -44,7 +34,7 @@ class BuilderMixin
         };
     }
 
-    public static function orWhereJsonOverlaps(): Closure
+    public function orWhereJsonOverlaps(): Closure
     {
         return function ($column, $value) {
             /** @phpstan-ignore-next-line */

@@ -10,7 +10,6 @@ namespace HughCube\Laravel\Knight\Mixin\Http;
 
 use Closure;
 use HughCube\Laravel\Knight\Support\Version;
-use HughCube\Laravel\Knight\Traits\SimpleMacroableBridge;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Jenssegers\Agent\Agent;
@@ -20,29 +19,17 @@ use Symfony\Component\HttpFoundation\HeaderBag;
  * @mixin Request
  *
  * @method null|string getClientHeaderPrefix()
- *
  * @property null|Agent $userAgentDetect
  */
 class RequestMixin
 {
-    use SimpleMacroableBridge;
-
-    public static function getMacros(): array
-    {
-        return [
-            'getClientVersion', 'getClientNonce', 'getClientSignature', 'getClientHeaders',
-            'getDate', 'getClientDate', 'getUserAgentDetect', 'isWeChat',
-            'isWeChatMiniProgram', 'isPostmen', 'isEqClientVersion',
-            'isLtClientVersion', 'isGtClientVersion', 'getLastDirectory',
-        ];
-    }
-
     /**
      * 获取客户端版本.
      */
-    public static function getClientVersion(): Closure
+    public function getClientVersion(): Closure
     {
         return function (): ?string {
+            /** @phpstan-ignore-next-line */
             return $this->headers->get(sprintf('%sVersion', $this->getClientHeaderPrefix()));
         };
     }
@@ -50,9 +37,10 @@ class RequestMixin
     /**
      * 获取客户端的随机字符串.
      */
-    public static function getClientNonce(): Closure
+    public function getClientNonce(): Closure
     {
         return function (): ?string {
+            /** @phpstan-ignore-next-line */
             return $this->headers->get(sprintf('%sNonce', $this->getClientHeaderPrefix()));
         };
     }
@@ -60,9 +48,10 @@ class RequestMixin
     /**
      * 获取客户端的签名字符串.
      */
-    public static function getClientSignature(): Closure
+    public function getClientSignature(): Closure
     {
         return function (): ?string {
+            /** @phpstan-ignore-next-line */
             return $this->headers->get(sprintf('%sSignature', $this->getClientHeaderPrefix()));
         };
     }
@@ -70,10 +59,12 @@ class RequestMixin
     /**
      * 获取客户端的所有请求头.
      */
-    public static function getClientHeaders(): Closure
+    public function getClientHeaders(): Closure
     {
         return function (): HeaderBag {
             $headers = [];
+
+            /** @phpstan-ignore-next-line */
             foreach ($this->headers as $name => $values) {
                 if (Str::startsWith(strtolower($name), strtolower($this->getClientHeaderPrefix()))) {
                     $headers[$name] = $values;
@@ -87,16 +78,18 @@ class RequestMixin
     /**
      * 获取客户端日期
      */
-    public static function getDate(): Closure
+    public function getDate(): Closure
     {
         return function (): ?string {
+            /** @phpstan-ignore-next-line */
             return $this->headers->get('Date');
         };
     }
 
-    public static function getClientDate(): Closure
+    public function getClientDate(): Closure
     {
         return function (): ?string {
+            /** @phpstan-ignore-next-line */
             return $this->headers->get(sprintf('%sDate', $this->getClientHeaderPrefix()));
         };
     }
@@ -104,10 +97,11 @@ class RequestMixin
     /**
      * 获取agent检测.
      */
-    public static function getUserAgentDetect(): Closure
+    public function getUserAgentDetect(): Closure
     {
         return function (): Agent {
             if (!property_exists($this, 'userAgentDetect') || !$this->userAgentDetect instanceof Agent) {
+                /** @phpstan-ignore-next-line */
                 $this->userAgentDetect = new Agent($this->headers->all(), $this->userAgent());
             }
 
@@ -118,7 +112,7 @@ class RequestMixin
     /**
      * 判断是否在微信客户端内.
      */
-    public static function isWeChat(): Closure
+    public function isWeChat(): Closure
     {
         return function (): bool {
             return str_contains($this->userAgent(), 'MicroMessenger');
@@ -128,7 +122,7 @@ class RequestMixin
     /**
      * 判断是否在微信客户端内.
      */
-    public static function isWeChatMiniProgram(): Closure
+    public function isWeChatMiniProgram(): Closure
     {
         return function (): bool {
             /** @phpstan-ignore-next-line */
@@ -139,7 +133,7 @@ class RequestMixin
     /**
      * 判断是否在postmen.
      */
-    public static function isPostmen(): Closure
+    public function isPostmen(): Closure
     {
         return function (): bool {
             return Str::startsWith($this->userAgent(), 'PostmanRuntime');
@@ -151,7 +145,7 @@ class RequestMixin
      *
      * 1.0(client) == 1.0 => true
      */
-    public static function isEqClientVersion(): Closure
+    public function isEqClientVersion(): Closure
     {
         return function (string $version, ?int $length = null): bool {
             return Version::compare('=', $this->getClientVersion(), $version, $length);
@@ -163,7 +157,7 @@ class RequestMixin
      *
      * 2.0(client) > 1.0 => true
      */
-    public static function isLtClientVersion(): Closure
+    public function isLtClientVersion(): Closure
     {
         return function (string $version, bool $contain = false, ?int $length = null): bool {
             return Version::compare($contain ? '>=' : '>', $this->getClientVersion(), $version, $length);
@@ -175,7 +169,7 @@ class RequestMixin
      *
      * 1.0(client) < 2.0 => true
      */
-    public static function isGtClientVersion(): Closure
+    public function isGtClientVersion(): Closure
     {
         return function (string $version, bool $contain = false, ?int $length = null): bool {
             return Version::compare($contain ? '<=' : '<', $this->getClientVersion(), $version, $length);
@@ -185,7 +179,7 @@ class RequestMixin
     /**
      * 获取最后一级目录.
      */
-    public static function getLastDirectory(): Closure
+    public function getLastDirectory(): Closure
     {
         return function (): ?string {
             return Str::afterLast(trim($this->getPathInfo()), '/') ?: null;

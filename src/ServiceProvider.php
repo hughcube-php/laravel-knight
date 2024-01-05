@@ -36,7 +36,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
-use Illuminate\Support\Str;
 use Laravel\Lumen\Application as LumenApplication;
 use ReflectionException;
 
@@ -54,13 +53,12 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     public function register()
     {
-        StrMixin::mixin(Str::class, false);
-        CollectionMixin::mixin(Collection::class, false);
-        RequestMixin::mixin(Request::class, false);
+        Collection::mixin(new CollectionMixin(), false);
+        Request::mixin(new RequestMixin(), false);
 
         /** 数据库 */
-        GrammarMixin::mixin(Grammar::class, false);
-        BuilderMixin::mixin(Builder::class, false);
+        Grammar::mixin(new GrammarMixin(), false);
+        Builder::mixin(new BuilderMixin(), false);
     }
 
     /**
