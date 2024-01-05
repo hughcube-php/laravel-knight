@@ -71,9 +71,8 @@ class CarbonMixin
         return function (): string {
             return sprintf(
                 '%s年%s月%s日',
-
                 strtr(
-                /** @phpstan-ignore-next-line */
+                    /** @phpstan-ignore-next-line */
                     Base::toString($this->year),
                     [
                         '0' => '〇', '1' => '一', '2' => '二', '3' => '三', '4' => '四',

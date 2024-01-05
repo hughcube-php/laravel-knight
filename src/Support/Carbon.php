@@ -17,6 +17,7 @@ use Throwable;
 
 /**
  * @method static static|false createFromFormat(string $format, string $time, string|DateTimeZone $timezone = null)
+ *
  * @deprecated
  */
 class Carbon extends \Illuminate\Support\Carbon

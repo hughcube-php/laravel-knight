@@ -23,7 +23,6 @@ use HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin;
 use HughCube\Laravel\Knight\Mixin\Http\RequestMixin;
 use HughCube\Laravel\Knight\Mixin\Support\CarbonMixin;
 use HughCube\Laravel\Knight\Mixin\Support\CollectionMixin;
-use HughCube\Laravel\Knight\Mixin\Support\StrMixin;
 use HughCube\Laravel\Knight\OPcache\Actions\ScriptsAction as OPcacheScriptsAction;
 use HughCube\Laravel\Knight\OPcache\Actions\StatesAction as OPcacheStatesAction;
 use HughCube\Laravel\Knight\OPcache\Commands\ClearCliCacheCommand as OPcacheClearCliCacheCommand;

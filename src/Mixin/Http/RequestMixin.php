@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\HeaderBag;
  * @mixin Request
  *
  * @method null|string getClientHeaderPrefix()
+ *
  * @property null|Agent $userAgentDetect
  */
 class RequestMixin
