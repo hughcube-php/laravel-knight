@@ -24,7 +24,7 @@ class CollectionMixin
     {
         return [
             'hasByCallable', 'isIndexed', 'filterWithStop', 'pluckAndMergeSetColumn',
-            'onlyArrayKeys', 'onlyColumnValues', 'whenFilter', 'hasValue', 'mapInt', 'mapString'
+            'onlyArrayKeys', 'onlyColumnValues', 'whenFilter', 'hasValue', 'mapInt', 'mapString',
         ];
     }
 
@@ -52,6 +52,7 @@ class CollectionMixin
         return function (bool $consecutive = true) {
             /**
              * @var Collection $this
+             *
              * @phpstan-ignore-next-line
              */
             if ($this->isEmpty()) {
@@ -79,6 +80,7 @@ class CollectionMixin
     {
         return function (callable $stop, $withStopItem = false) {
             $stopState = false;
+
             return $this->filter(function ($item) use (&$stopState, $stop, $withStopItem) {
                 $preStopState = $stopState;
                 $stopState = $stopState || $stop($item);
@@ -163,7 +165,6 @@ class CollectionMixin
             return $this->make($this->getIterator());
         };
     }
-
 
     public static function hasValue(): Closure
     {

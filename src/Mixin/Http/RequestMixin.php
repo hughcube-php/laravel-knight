@@ -33,7 +33,7 @@ class RequestMixin
             'getClientVersion', 'getClientNonce', 'getClientSignature', 'getClientHeaders',
             'getDate', 'getClientDate', 'getUserAgentDetect', 'isWeChat',
             'isWeChatMiniProgram', 'isPostmen', 'isEqClientVersion',
-            'isLtClientVersion', 'isGtClientVersion', 'getLastDirectory'
+            'isLtClientVersion', 'isGtClientVersion', 'getLastDirectory',
         ];
     }
 

@@ -9,7 +9,6 @@
 namespace HughCube\Laravel\Knight\Traits;
 
 use Illuminate\Support\Traits\Macroable;
-use ReflectionException;
 
 /**
  * @see Macroable
