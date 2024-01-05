@@ -19,12 +19,12 @@ class StrMixin
     protected static function getMacros(): array
     {
         return [
-            "afterLast", "beforeLast", "getMobilePattern", "checkMobile", "maskMobile",
-            "maskChinaIdCode", "splitWhitespace", "isUtf8", "isOctal", "isBinary",
-            "isHex", "isAlnum", "isAlpha", "isNaming", "isWhitespace", "isDigit", "isEmail",
-            "isTel", "isIp", "isIp4", "isIp6", "isPrivateIp", "isPublicIp", "isUrl", "isPort",
-            "isTrue", "isChineseName", "hasChinese", "isChinese", "convEncoding", "msubstr",
-            "countWords", "offsetGet", "filterPartialUTF8", "versionCompare", "mbSplit"
+            'afterLast', 'beforeLast', 'getMobilePattern', 'checkMobile', 'maskMobile',
+            'maskChinaIdCode', 'splitWhitespace', 'isUtf8', 'isOctal', 'isBinary',
+            'isHex', 'isAlnum', 'isAlpha', 'isNaming', 'isWhitespace', 'isDigit', 'isEmail',
+            'isTel', 'isIp', 'isIp4', 'isIp6', 'isPrivateIp', 'isPublicIp', 'isUrl', 'isPort',
+            'isTrue', 'isChineseName', 'hasChinese', 'isChinese', 'convEncoding', 'msubstr',
+            'countWords', 'offsetGet', 'filterPartialUTF8', 'versionCompare', 'mbSplit',
         ];
     }
 

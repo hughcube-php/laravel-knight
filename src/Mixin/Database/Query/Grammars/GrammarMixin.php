@@ -23,7 +23,7 @@ class GrammarMixin
     public static function getMacros(): array
     {
         return [
-            'orWhereJsonOverlaps', 'whereJsonOverlaps', 'compileJsonOverlaps'
+            'orWhereJsonOverlaps', 'whereJsonOverlaps', 'compileJsonOverlaps',
         ];
     }
 

@@ -23,7 +23,7 @@ class BuilderMixin
     public static function getMacros(): array
     {
         return [
-            'whereJsonOverlaps', 'orWhereJsonOverlaps'
+            'whereJsonOverlaps', 'orWhereJsonOverlaps',
         ];
     }
 
