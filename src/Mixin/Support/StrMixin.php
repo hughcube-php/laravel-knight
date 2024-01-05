@@ -9,10 +9,13 @@
 namespace HughCube\Laravel\Knight\Mixin\Support;
 
 use Closure;
+use HughCube\Laravel\Knight\Traits\SimpleMacroableBridge;
 use Illuminate\Support\Str;
 
 class StrMixin
 {
+    use SimpleMacroableBridge;
+
     public function afterLast(): Closure
     {
         return function ($subject, $search) {

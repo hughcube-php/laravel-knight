@@ -10,6 +10,7 @@ namespace HughCube\Laravel\Knight\Mixin\Http;
 
 use Closure;
 use HughCube\Laravel\Knight\Support\Version;
+use HughCube\Laravel\Knight\Traits\SimpleMacroableBridge;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Jenssegers\Agent\Agent;
@@ -24,6 +25,8 @@ use Symfony\Component\HttpFoundation\HeaderBag;
  */
 class RequestMixin
 {
+    use SimpleMacroableBridge;
+
     /**
      * 获取客户端版本.
      */

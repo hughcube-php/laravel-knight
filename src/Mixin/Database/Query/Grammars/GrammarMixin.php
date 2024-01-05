@@ -9,6 +9,7 @@
 namespace HughCube\Laravel\Knight\Mixin\Database\Query\Grammars;
 
 use Closure;
+use HughCube\Laravel\Knight\Traits\SimpleMacroableBridge;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Grammars\Grammar;
 
@@ -17,6 +18,8 @@ use Illuminate\Database\Query\Grammars\Grammar;
  */
 class GrammarMixin
 {
+    use SimpleMacroableBridge;
+
     public function orWhereJsonOverlaps(): Closure
     {
         return function ($column, $org, $tags) {

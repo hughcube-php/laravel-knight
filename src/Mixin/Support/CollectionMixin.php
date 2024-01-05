@@ -9,6 +9,7 @@
 namespace HughCube\Laravel\Knight\Mixin\Support;
 
 use Closure;
+use HughCube\Laravel\Knight\Traits\SimpleMacroableBridge;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
@@ -17,6 +18,8 @@ use Illuminate\Support\Collection;
  */
 class CollectionMixin
 {
+    use SimpleMacroableBridge;
+
     /**
      * 根据回调方法检查是否存在指定元素.
      */

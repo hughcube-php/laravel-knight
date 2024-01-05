@@ -54,13 +54,13 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     public function register()
     {
-        Str::mixin(new StrMixin(), false);
-        Collection::mixin(new CollectionMixin(), false);
-        Request::mixin(new RequestMixin(), false);
+        StrMixin::mixin(Str::class, false);
+        CollectionMixin::mixin(Collection::class, false);
+        RequestMixin::mixin(Request::class, false);
 
         /** 数据库 */
-        Grammar::mixin(new GrammarMixin(), false);
-        Builder::mixin(new BuilderMixin(), false);
+        GrammarMixin::mixin(Grammar::class, false);
+        BuilderMixin::mixin(Builder::class, false);
     }
 
     /**
