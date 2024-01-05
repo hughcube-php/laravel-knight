@@ -8,6 +8,7 @@
 
 namespace HughCube\Laravel\Knight;
 
+use Carbon\Carbon;
 use HughCube\Laravel\Knight\Console\Commands\Config;
 use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\KRTest;
@@ -20,6 +21,7 @@ use HughCube\Laravel\Knight\Http\Actions\RequestShowAction;
 use HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin;
 use HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin;
 use HughCube\Laravel\Knight\Mixin\Http\RequestMixin;
+use HughCube\Laravel\Knight\Mixin\Support\CarbonMixin;
 use HughCube\Laravel\Knight\Mixin\Support\CollectionMixin;
 use HughCube\Laravel\Knight\Mixin\Support\StrMixin;
 use HughCube\Laravel\Knight\OPcache\Actions\ScriptsAction as OPcacheScriptsAction;
@@ -59,6 +61,9 @@ class ServiceProvider extends IlluminateServiceProvider
         /** 数据库 */
         Grammar::mixin(new GrammarMixin(), false);
         Builder::mixin(new BuilderMixin(), false);
+
+        /** Carbon */
+        Carbon::mixin(new CarbonMixin());
     }
 
     /**

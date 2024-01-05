@@ -12,7 +12,7 @@ use HughCube\Laravel\Knight\Ide\Support\KIdeCollection;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Support\Collection;
 
-class CollectionMixin extends TestCase
+class CollectionMixinTest extends TestCase
 {
     public function testHasByCallable()
     {
