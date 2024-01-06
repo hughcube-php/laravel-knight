@@ -8,6 +8,7 @@
 
 namespace HughCube\Laravel\Knight\Mixin\Support;
 
+use Carbon\Carbon;
 use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
