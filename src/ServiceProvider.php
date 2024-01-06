@@ -10,6 +10,7 @@ namespace HughCube\Laravel\Knight;
 
 use Carbon\Carbon;
 use HughCube\Laravel\Knight\Console\Commands\Config;
+use HughCube\Laravel\Knight\Console\Commands\CreatePreload;
 use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\KRTest;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
@@ -71,7 +72,13 @@ class ServiceProvider extends IlluminateServiceProvider
     public function boot()
     {
         if ($this->app->runningInConsole()) {
-            $this->commands([Config::class, Environment::class, PhpIniFile::class, KRTest::class]);
+            $this->commands([
+                Config::class,
+                Environment::class,
+                PhpIniFile::class,
+                KRTest::class,
+                CreatePreload::class
+            ]);
         }
 
         $this->bootOPcache();
