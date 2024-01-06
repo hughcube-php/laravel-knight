@@ -43,7 +43,7 @@
         }
     },
     "bin": [
-        "bin/knight-preload"
+        "bin/knight"
     ],
     "autoload-dev": {
         "psr-4": {
