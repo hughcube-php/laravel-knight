@@ -77,7 +77,7 @@ class ServiceProvider extends IlluminateServiceProvider
                 Environment::class,
                 PhpIniFile::class,
                 KRTest::class,
-                CreatePreload::class
+                CreatePreload::class,
             ]);
         }
 

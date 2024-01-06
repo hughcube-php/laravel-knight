@@ -52,7 +52,7 @@ class CreatePreload extends Command
             : __DIR__.'/../../../resources/create_preload.php';
 
         return [
-            (new PhpExecutableFinder)->find(false),
+            (new PhpExecutableFinder())->find(false),
             $server,
         ];
     }
