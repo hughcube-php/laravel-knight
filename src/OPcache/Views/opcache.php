@@ -62,6 +62,8 @@ if (!class_exists(OpCacheDataModel::class)) {
                             $v = number_format($v);
                         }
 
+                        $v = is_scalar($v) ? $v : json_encode($v);
+
                         $rows[] = "<tr><th>$k</th><td>$v</td></tr>\n";
                     }
                     continue;
