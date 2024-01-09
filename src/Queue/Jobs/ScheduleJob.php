@@ -16,6 +16,8 @@ class ScheduleJob extends Job
 {
     use MultipleHandler;
 
+    private $scheduleJobCount = 0;
+
     /**
      * @return void
      * @throws Throwable
@@ -24,6 +26,15 @@ class ScheduleJob extends Job
     protected function action(): void
     {
         $this->triggerMultipleHandlers();
+
+        if (0 >= $this->scheduleJobCount) {
+            $this->info('No scheduled jobs are ready to run.');
+        }
+    }
+
+    protected function incrementScheduledJobCount(): int
+    {
+        return ++$this->scheduleJobCount;
     }
 
     /**
@@ -86,11 +97,14 @@ class ScheduleJob extends Job
 
         $name = Str::afterLast(get_class($job), '\\');
         $this->info(sprintf(
-            'push job success, job: %s, id:%s, delays:%sms',
+            '[%s] push job success, job: %s, id:%s, delays:%sms',
+            $this->incrementScheduledJobCount(),
             $name,
             is_scalar($id) ? $id : '',
             $this->getDelays()
         ));
+
+        return $id;
     }
 
     /**
@@ -119,7 +133,8 @@ class ScheduleJob extends Job
 
         $name = Str::afterLast(get_class($job), '\\');
         $this->info(sprintf(
-            'fire job success, job: %s, duration: %sms, delays:%sms',
+            '[%s] fire job success, job: %s, duration: %sms, delays:%sms',
+            $this->incrementScheduledJobCount(),
             $name,
             $start->diffInRealMilliseconds($end),
             $this->getDelays()
