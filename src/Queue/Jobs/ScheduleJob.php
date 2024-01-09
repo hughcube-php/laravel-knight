@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use Cron\CronExpression;
 use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\Traits\MultipleHandler;
-use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Support\Str;
 use ReflectionClass;
 use ReflectionException;
@@ -18,23 +17,19 @@ class ScheduleJob extends Job
     use MultipleHandler;
 
     /**
+     * @return void
      * @throws Throwable
      *
-     * @return void
      */
     protected function action(): void
     {
-        $results = $this->triggerMultipleHandlers();
-
-        if (empty($results)) {
-            $this->info('No job is triggered.');
-        }
+        $this->triggerMultipleHandlers();
     }
 
     /**
      * 判断是否可以运行.
      *
-     * @param string $expression
+     * @param  string  $expression
      *
      * @return bool
      */
@@ -44,9 +39,9 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param string|array      $name
-     * @param string|array|null $in
-     * @param string|null       $basePath
+     * @param  string|array  $name
+     * @param  string|array|null  $in
+     * @param  string|null  $basePath
      *
      * @return array<integer, object>
      */
@@ -80,11 +75,6 @@ class ScheduleJob extends Job
         return $jobs;
     }
 
-    protected function getDispatcher(): Dispatcher
-    {
-        return app(Dispatcher::class);
-    }
-
     protected function prepareJob($job)
     {
         return $job;
@@ -104,8 +94,8 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param string              $expression
-     * @param callable|Job|object $job
+     * @param  string  $expression
+     * @param  callable|Job|object  $job
      *
      * @return void
      */
@@ -117,7 +107,7 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param mixed $job
+     * @param  mixed  $job
      *
      * @return mixed
      */
@@ -139,8 +129,8 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param string              $expression
-     * @param callable|Job|object $job
+     * @param  string  $expression
+     * @param  callable|Job|object  $job
      *
      * @return void
      */
@@ -148,24 +138,6 @@ class ScheduleJob extends Job
     {
         if ($this->isDue($expression)) {
             $this->fireJob(is_callable($job) ? $job() : $job);
-        }
-    }
-
-    /**
-     * @throws Throwable
-     *
-     * @return void
-     */
-    protected function tryFireJobIfDue(string $expression, $job, $reportException = true)
-    {
-        try {
-            $this->fireJobIfDue($expression, $job);
-        } catch (Throwable $exception) {
-            if ($reportException) {
-                $this->getExceptionHandler()->report($exception);
-            } else {
-                throw $exception;
-            }
         }
     }
 }
