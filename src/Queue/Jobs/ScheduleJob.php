@@ -17,9 +17,9 @@ class ScheduleJob extends Job
     use MultipleHandler;
 
     /**
-     * @return void
      * @throws Throwable
      *
+     * @return void
      */
     protected function action(): void
     {
@@ -29,7 +29,7 @@ class ScheduleJob extends Job
     /**
      * 判断是否可以运行.
      *
-     * @param  string  $expression
+     * @param string $expression
      *
      * @return bool
      */
@@ -39,9 +39,9 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param  string|array  $name
-     * @param  string|array|null  $in
-     * @param  string|null  $basePath
+     * @param string|array      $name
+     * @param string|array|null $in
+     * @param string|null       $basePath
      *
      * @return array<integer, object>
      */
@@ -94,8 +94,8 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param  string  $expression
-     * @param  callable|Job|object  $job
+     * @param string              $expression
+     * @param callable|Job|object $job
      *
      * @return void
      */
@@ -107,7 +107,7 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param  mixed  $job
+     * @param mixed $job
      *
      * @return mixed
      */
@@ -129,8 +129,8 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param  string  $expression
-     * @param  callable|Job|object  $job
+     * @param string              $expression
+     * @param callable|Job|object $job
      *
      * @return void
      */
