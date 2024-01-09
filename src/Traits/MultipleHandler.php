@@ -103,11 +103,6 @@ trait MultipleHandler
             ->values();
     }
 
-    /**
-     * @param ReflectionMethod $method
-     *
-     * @return null|array
-     */
     private function parseMultipleHandlerMethod(ReflectionMethod $method): ?MultipleHandlerCallable
     {
         $name = strtolower($method->name);
