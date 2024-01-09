@@ -5,7 +5,6 @@ namespace HughCube\Laravel\Knight\Queue\Jobs;
 use Carbon\Carbon;
 use Cron\CronExpression;
 use HughCube\Laravel\Knight\Queue\Job;
-use HughCube\Laravel\Knight\Traits\Container;
 use HughCube\Laravel\Knight\Traits\MultipleHandler;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Support\Str;
@@ -17,28 +16,25 @@ use Throwable;
 class ScheduleJob extends Job
 {
     use MultipleHandler;
-    use Container;
 
     /**
+     * @return void
      * @throws Throwable
      *
-     * @return void
      */
     protected function action(): void
     {
-        $this->info('The scheduled task starts.');
-        $this->triggerHandlers(true);
-    }
+        $results = $this->triggerMultipleHandlers();
 
-    protected function isStopHandlerResults($results, Throwable $exception = null): bool
-    {
-        return false;
+        if (empty($results)) {
+            $this->info('No job is triggered.');
+        }
     }
 
     /**
      * 判断是否可以运行.
      *
-     * @param string $expression
+     * @param  string  $expression
      *
      * @return bool
      */
@@ -48,9 +44,9 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param string|array      $name
-     * @param string|array|null $in
-     * @param string|null       $basePath
+     * @param  string|array  $name
+     * @param  string|array|null  $in
+     * @param  string|null  $basePath
      *
      * @return array<integer, object>
      */
@@ -108,8 +104,8 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param string              $expression
-     * @param callable|Job|object $job
+     * @param  string  $expression
+     * @param  callable|Job|object  $job
      *
      * @return void
      */
@@ -121,7 +117,7 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param mixed $job
+     * @param  mixed  $job
      *
      * @return mixed
      */
@@ -143,8 +139,8 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param string              $expression
-     * @param callable|Job|object $job
+     * @param  string  $expression
+     * @param  callable|Job|object  $job
      *
      * @return void
      */
@@ -156,9 +152,9 @@ class ScheduleJob extends Job
     }
 
     /**
+     * @return void
      * @throws Throwable
      *
-     * @return void
      */
     protected function tryFireJobIfDue(string $expression, $job, $reportException = true)
     {

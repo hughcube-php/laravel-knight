@@ -8,50 +8,70 @@
 
 namespace HughCube\Laravel\Knight\Traits;
 
-use Illuminate\Contracts\Debug\ExceptionHandler;
+use HughCube\Laravel\Knight\Support\MultipleHandlerCallable;
+use Illuminate\Support\Collection;
 use ReflectionClass;
 use ReflectionMethod;
 use Throwable;
 
 trait MultipleHandler
 {
-    protected function isStopHandlerResults($results, Throwable $exception = null): bool
+    use Container;
+
+    protected function isStopMultipleHandlerResult($result, ?Throwable $exception = null): bool
     {
-        return null !== $results && !$exception instanceof Throwable;
+        //return null !== $result && !$exception instanceof Throwable;
+        return false;
     }
 
     /**
-     * @param bool $tryException
-     * @param bool $logException
-     *
      * @throws Throwable
-     *
-     * @return array
      */
-    protected function triggerHandlers(bool $tryException = false, bool $logException = true): array
+    protected function throwMultipleHandlerException(Throwable $exception): void
+    {
+        throw $exception;
+    }
+
+    /**
+     * @throws Throwable
+     */
+    protected function reportMultipleHandlerException(Throwable $exception): void
+    {
+        $this->getExceptionHandler()->report($exception);
+    }
+
+    protected function getSkipMultipleHandlers(): array
+    {
+        return [
+            /** @see static::getExceptionHandler() */
+            strtolower('getExceptionHandler')
+        ];
+    }
+
+    /**
+     * @throws Throwable
+     */
+    protected function triggerMultipleHandlers(bool $tryException = true): array
     {
         $results = [];
-        foreach ($this->getHandlers() as $handler) {
-            $result = $exception = null;
 
+        foreach ($this->getMultipleHandlers() as $handler) {
+            $result = $exception = null;
             try {
-                $result = $this->{$handler}();
+                $result = call_user_func($handler->callable);
             } catch (Throwable $exception) {
             }
             $results[] = ['handler' => $handler, 'result' => $result, 'exception' => $exception];
 
-            /** 抛出异常 */
-            if ($exception instanceof Throwable && !$tryException) {
-                throw $exception;
-            }
-
-            /** 记录异常 */
-            if ($exception instanceof Throwable && $logException) {
-                app(ExceptionHandler::class)->report($exception);
+            /** 记录异常或者抛出 */
+            if ($exception instanceof Throwable && $tryException) {
+                $this->reportMultipleHandlerException($exception);
+            } elseif ($exception instanceof Throwable) {
+                $this->throwMultipleHandlerException($exception);
             }
 
             /** 是否终止执行 */
-            if ($this->isStopHandlerResults($result, $exception)) {
+            if ($this->isStopMultipleHandlerResult($result, $exception)) {
                 break;
             }
         }
@@ -60,44 +80,50 @@ trait MultipleHandler
     }
 
     /**
-     * @return string[]
+     * @return Collection<int, MultipleHandlerCallable>
      */
-    protected function getHandlers(): array
+    protected function getMultipleHandlers(): Collection
     {
-        $handlers = [];
+        $handlers = Collection::empty();
 
         $reflection = new ReflectionClass($this);
         foreach ($reflection->getMethods() as $method) {
-            $handler = $this->parseHandlerMethod($method);
-            if (!is_array($handler) || !isset($handler[0], $handler[1])) {
+            $handler = $this->parseMultipleHandlerMethod($method);
+            if (!$handler instanceof MultipleHandlerCallable) {
                 continue;
             }
-            $handlers[$handler[0]] = $handler[1];
+            $handlers->add($handler);
         }
-        asort($handlers, SORT_NUMERIC);
 
-        return array_keys($handlers);
+        return $handlers
+            ->sortBy(function (MultipleHandlerCallable $handlerCallable) {
+                return $handlerCallable->sort;
+            })
+            ->values();
     }
 
     /**
-     * @param ReflectionMethod $method
+     * @param  ReflectionMethod  $method
      *
      * @return null|array
      */
-    protected function parseHandlerMethod(ReflectionMethod $method): ?array
+    private function parseMultipleHandlerMethod(ReflectionMethod $method): ?MultipleHandlerCallable
     {
         $name = strtolower($method->name);
-        $position = strrpos($name, 'handler');
+        if (in_array($name, $this->getSkipMultipleHandlers())) {
+            return null;
+        }
 
+        $position = strrpos($name, 'handler');
         if (false === $position) {
             return null;
         }
 
         $sort = substr($name, $position + strlen('handler'));
-        if ('' !== $sort && !ctype_digit($sort)) {
+        if ('' !== $sort && !ctype_digit(ltrim($sort, '0'))) {
             return null;
         }
 
-        return [$method->name, intval($sort ?: '0')];
+        return new MultipleHandlerCallable(intval($sort ?: '0'), [$this, $method->name]);
     }
 }
