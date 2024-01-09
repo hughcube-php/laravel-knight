@@ -44,7 +44,7 @@ trait MultipleHandler
     {
         return [
             /** @see static::getExceptionHandler() */
-            strtolower('getExceptionHandler')
+            strtolower('getExceptionHandler'),
         ];
     }
 
@@ -57,6 +57,7 @@ trait MultipleHandler
 
         foreach ($this->getMultipleHandlers() as $handler) {
             $result = $exception = null;
+
             try {
                 $result = call_user_func($handler->callable);
             } catch (Throwable $exception) {
@@ -103,7 +104,7 @@ trait MultipleHandler
     }
 
     /**
-     * @param  ReflectionMethod  $method
+     * @param ReflectionMethod $method
      *
      * @return null|array
      */

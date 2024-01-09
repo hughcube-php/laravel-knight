@@ -11,7 +11,7 @@ namespace HughCube\Laravel\Knight\Support;
 class MultipleHandlerCallable
 {
     /**
-     * @var integer
+     * @var int
      */
     public $sort;
 
