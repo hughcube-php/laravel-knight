@@ -8,6 +8,7 @@ $publicPath = getcwd();
 
 call_user_func(function () use ($publicPath) {
     ob_start();
+    $_SERVER['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'] ?? null ?: '127.0.0.1';
     require $publicPath.'/index.php';
     ob_clean();
 });
