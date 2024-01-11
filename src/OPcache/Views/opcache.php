@@ -62,7 +62,7 @@ if (!class_exists(OpCacheDataModel::class)) {
                             $v = number_format($v);
                         }
 
-                        $v = is_scalar($v) ? $v : json_encode($v);
+                        $v = is_scalar($v) ? $v : sprintf('resource: %s', get_debug_type($v));
 
                         $rows[] = "<tr><th>$k</th><td>$v</td></tr>\n";
                     }
