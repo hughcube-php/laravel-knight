@@ -19,6 +19,7 @@ use HughCube\Laravel\Knight\Http\Actions\PhpInfoAction;
 use HughCube\Laravel\Knight\Http\Actions\PingAction;
 use HughCube\Laravel\Knight\Http\Actions\RequestLogAction;
 use HughCube\Laravel\Knight\Http\Actions\RequestShowAction;
+use HughCube\Laravel\Knight\Mixin\Database\Eloquent\CollectionMixin as EloquentCollectionMixin;
 use HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin;
 use HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin;
 use HughCube\Laravel\Knight\Mixin\Http\RequestMixin;
@@ -30,6 +31,7 @@ use HughCube\Laravel\Knight\OPcache\Commands\ClearCliCacheCommand as OPcacheClea
 use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand as OPcacheCompileFilesCommand;
 use Illuminate\Config\Repository;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Grammars\Grammar;
@@ -61,6 +63,7 @@ class ServiceProvider extends IlluminateServiceProvider
         /** 数据库 */
         Grammar::mixin(new GrammarMixin(), false);
         Builder::mixin(new BuilderMixin(), false);
+        EloquentCollection::mixin(new EloquentCollectionMixin(), false);
 
         /** Carbon */
         Carbon::mixin(new CarbonMixin());
