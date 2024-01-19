@@ -20,7 +20,7 @@ class RotateFileJob extends Job
         return [
             'items' => ['array'],
 
-            'items.*.dir' => ['required'],
+            'items.*.dir'     => ['required'],
             'items.*.pattern' => ['nullable'],
 
             'items.*.date_format' => ['nullable', 'string'],
@@ -63,7 +63,7 @@ class RotateFileJob extends Job
                 File::dirname($file->getRealPath()),
                 $file->getFilenameWithoutExtension(),
                 Carbon::now()->format($dateFormat),
-                ($file->getExtension() ? sprintf('.%s', $file->getExtension()) : '')
+                $file->getExtension() ? sprintf('.%s', $file->getExtension()) : ''
             );
 
             $handle = $file->openFile('w+');
