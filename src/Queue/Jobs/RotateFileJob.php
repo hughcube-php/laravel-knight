@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\File;
 use SplFileObject;
 use Symfony\Component\Finder\Finder;
 
-class FileRotateJob extends Job
+class RotateFileJob extends Job
 {
     /**
      * @return array

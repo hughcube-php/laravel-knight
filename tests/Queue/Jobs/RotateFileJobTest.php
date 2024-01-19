@@ -2,12 +2,12 @@
 
 namespace HughCube\Laravel\Knight\Tests\Queue\Jobs;
 
-use HughCube\Laravel\Knight\Queue\Jobs\FileRotateJob;
+use HughCube\Laravel\Knight\Queue\Jobs\RotateFileJob;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
-class FileRotateJobTest extends TestCase
+class RotateFileJobTest extends TestCase
 {
     public function testRun()
     {
@@ -16,7 +16,7 @@ class FileRotateJobTest extends TestCase
         File::put($file, 'test');
 
         try {
-            $this->assertJob(FileRotateJob::new([
+            $this->assertJob(RotateFileJob::new([
                 'items' => [
                     [
                         'dir' => '/tmp/',

@@ -9,6 +9,14 @@ class CleanFilesJobTest extends TestCase
 {
     public function testRun()
     {
-        $this->assertJob(CleanFilesJob::new());
+        $this->assertJob(CleanFilesJob::new([
+            'items' => [
+                [
+                    'dir' => '/tmp/',
+                    'pattern' => '/^laravel.*-\d{4}-\d{2}-\d{2}\.log$/',
+                    'max_days' => 30,
+                ],
+            ],
+        ]));
     }
 }
