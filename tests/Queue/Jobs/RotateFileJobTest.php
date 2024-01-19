@@ -19,8 +19,8 @@ class RotateFileJobTest extends TestCase
             $this->assertJob(RotateFileJob::new([
                 'items' => [
                     [
-                        'dir' => '/tmp/',
-                        'pattern' => File::basename($file),
+                        'dir'         => '/tmp/',
+                        'pattern'     => File::basename($file),
                         'date_format' => date('Y-m-d'),
                     ],
                 ],
