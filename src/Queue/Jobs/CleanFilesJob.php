@@ -3,7 +3,7 @@
 namespace HughCube\Laravel\Knight\Queue\Jobs;
 
 use HughCube\Laravel\Knight\Queue\Job;
-use HughCube\Laravel\Knight\Support\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\Finder;
@@ -18,8 +18,8 @@ class CleanFilesJob extends Job
         return [
             'items' => ['array'],
 
-            'items.*.dir'      => ['required'],
-            'items.*.pattern'  => ['nullable'],
+            'items.*.dir' => ['required'],
+            'items.*.pattern' => ['nullable'],
             'items.*.max_days' => ['required', 'integer', 'min:0'],
         ];
     }
