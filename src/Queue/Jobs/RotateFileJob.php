@@ -89,8 +89,8 @@ class RotateFileJob extends Job
         $this->info(sprintf(
             'Rotate %s files in directory "%s" that match "%s", results: %s.',
             $results->count(),
-            $dirs->implode(','),
-            $patterns->implode(','),
+            $dirs->implode(', '),
+            $patterns->implode(', '),
             $results->map(function ($result) use ($dirs) {
                 if ($dirs->count() > 1) {
                     return sprintf('[%s => %s]', $result['path'], $result['date_path']);

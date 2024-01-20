@@ -61,8 +61,8 @@ class CleanFilesJob extends Job
         $this->info(sprintf(
             'Delete %s files in directory "%s" that match "%s".',
             $count,
-            $dirs->implode(','),
-            $patterns->implode(',')
+            $dirs->implode(', '),
+            $patterns->implode(', ')
         ));
     }
 }
