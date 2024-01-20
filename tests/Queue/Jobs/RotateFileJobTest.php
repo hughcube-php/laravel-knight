@@ -11,7 +11,7 @@ class RotateFileJobTest extends TestCase
 {
     public function testRun()
     {
-        $file = sprintf('/tmp/FileRotateJobTest-%s.log', md5(Str::random()));
+        $file = sprintf('/tmp/FileRotateJobTest-%s.log', md5(1));
 
         File::put($file, 'test');
 
@@ -26,7 +26,7 @@ class RotateFileJobTest extends TestCase
                 ],
             ]));
         } finally {
-            File::delete($file);
+            //File::delete($file);
         }
     }
 }

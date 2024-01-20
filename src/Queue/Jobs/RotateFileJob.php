@@ -7,8 +7,8 @@ use HughCube\Laravel\Knight\Queue\Job;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
-use SplFileObject;
 use Symfony\Component\Finder\Finder;
+use Throwable;
 
 class RotateFileJob extends Job
 {
@@ -20,7 +20,7 @@ class RotateFileJob extends Job
         return [
             'items' => ['array'],
 
-            'items.*.dir'     => ['required'],
+            'items.*.dir' => ['required'],
             'items.*.pattern' => ['nullable'],
 
             'items.*.date_format' => ['nullable', 'string'],
@@ -28,19 +28,19 @@ class RotateFileJob extends Job
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
     protected function action(): void
     {
         foreach ($this->p('items', []) as $item) {
-            $this->cleanFiles($item);
+            $this->rotateFiles($item);
         }
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
-    protected function cleanFiles($job)
+    protected function rotateFiles($job)
     {
         $dirs = Collection::wrap($job['dir'])->filter();
         $patterns = Collection::wrap($job['pattern'] ?? '*')->filter();
@@ -66,21 +66,38 @@ class RotateFileJob extends Job
                 $file->getExtension() ? sprintf('.%s', $file->getExtension()) : ''
             );
 
-            $handle = $file->openFile('w+');
-            if (!$handle instanceof SplFileObject) {
-                throw new Exception('Failed to open file!');
+            /** 打开文件 */
+            $handle = $dateHandle = null;
+            try {
+                $handle = fopen($file->getRealPath(), 'r+');
+                if (!is_resource($handle)) {
+                    throw new Exception('Failed to open file!');
+                }
+
+                $dateHandle = fopen($datePath, 'a');
+                if (!is_resource($dateHandle)) {
+                    throw new Exception('Failed to open date file!');
+                }
+            } catch (Throwable $exception) {
+                is_resource($handle) and fclose($handle);
+                is_resource($dateHandle) and fclose($dateHandle);
+                throw $exception;
             }
 
-            if (!$handle->flock(LOCK_EX)) {
-                throw new Exception('Failed to lock the file!');
-            }
+            /** 复制文件并且截断文件 */
+            try {
+                if (!flock($handle, LOCK_EX)) {
+                    throw new Exception('Failed to lock the file!');
+                }
 
-            if (!File::copy($file->getRealPath(), $datePath)) {
-                throw new Exception('Copy file failed!');
-            }
+                stream_copy_to_stream($handle, $dateHandle);
 
-            if (!$handle->ftruncate(0)) {
-                throw new Exception('Failed to clear file.');
+                ftruncate($handle, 0);
+
+                flock($handle, LOCK_UN);
+            } finally {
+                fclose($handle);
+                fclose($dateHandle);
             }
 
             $results = $results->add(['path' => $file->getRealPath(), 'date_path' => $datePath]);
