@@ -20,7 +20,7 @@ class RotateFileJob extends Job
         return [
             'items' => ['array'],
 
-            'items.*.dir' => ['required'],
+            'items.*.dir'     => ['required'],
             'items.*.pattern' => ['nullable'],
 
             'items.*.date_format' => ['nullable', 'string'],
@@ -68,6 +68,7 @@ class RotateFileJob extends Job
 
             /** 打开文件 */
             $handle = $dateHandle = null;
+
             try {
                 $handle = fopen($file->getRealPath(), 'r+');
                 if (!is_resource($handle)) {
@@ -81,6 +82,7 @@ class RotateFileJob extends Job
             } catch (Throwable $exception) {
                 is_resource($handle) and fclose($handle);
                 is_resource($dateHandle) and fclose($dateHandle);
+
                 throw $exception;
             }
 

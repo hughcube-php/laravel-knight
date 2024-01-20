@@ -5,7 +5,6 @@ namespace HughCube\Laravel\Knight\Tests\Queue\Jobs;
 use HughCube\Laravel\Knight\Queue\Jobs\RotateFileJob;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Str;
 
 class RotateFileJobTest extends TestCase
 {
