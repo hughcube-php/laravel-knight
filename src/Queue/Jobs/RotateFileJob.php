@@ -70,12 +70,12 @@ class RotateFileJob extends Job
             $handle = $dateHandle = null;
 
             try {
-                $handle = fopen($file->getRealPath(), 'r+');
+                $handle = fopen($file->getRealPath(), 'r+b');
                 if (!is_resource($handle)) {
                     throw new Exception('Failed to open file!');
                 }
 
-                $dateHandle = fopen($datePath, 'a');
+                $dateHandle = fopen($datePath, 'ab');
                 if (!is_resource($dateHandle)) {
                     throw new Exception('Failed to open date file!');
                 }
