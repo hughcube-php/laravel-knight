@@ -40,9 +40,9 @@ trait MultipleHandler
         $this->getExceptionHandler()->report($exception);
     }
 
-    protected function getSkipMultipleHandlers(): array
+    protected function isSkipMultipleHandler($name): bool
     {
-        return [];
+        return false;
     }
 
     /**
@@ -102,8 +102,9 @@ trait MultipleHandler
 
     private function parseMultipleHandlerMethod(ReflectionMethod $method): ?MultipleHandlerCallable
     {
-        if ($method->name == 'getExceptionHandler'
-            || in_array($method->name, $this->getSkipMultipleHandlers())
+        if (/**  */
+            in_array($method->name, ['getExceptionHandler', 'isSkipMultipleHandler'])
+            || $this->isSkipMultipleHandler($method->name)
         ) {
             return null;
         }
