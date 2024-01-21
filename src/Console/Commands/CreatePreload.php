@@ -30,7 +30,6 @@ class CreatePreload extends Command
     public function handle()
     {
         $process = new Process($this->serverCommand(), public_path());
-
         $process->mustRun(function ($type, $buffer) {
             if (Process::ERR === $type) {
                 echo 'ERR > '.$buffer;
@@ -45,10 +44,10 @@ class CreatePreload extends Command
      *
      * @return array
      */
-    protected function serverCommand()
+    protected function serverCommand(): array
     {
-        $server = file_exists(public_path('create_preload.php'))
-            ? public_path('create_preload.php')
+        $server = file_exists(base_path('create_preload.php'))
+            ? base_path('create_preload.php')
             : __DIR__.'/../../../resources/create_preload.php';
 
         return [

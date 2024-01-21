@@ -42,10 +42,7 @@ trait MultipleHandler
 
     protected function getSkipMultipleHandlers(): array
     {
-        return [
-            /** @see static::getExceptionHandler() */
-            strtolower('getExceptionHandler'),
-        ];
+        return [];
     }
 
     /**
@@ -93,7 +90,7 @@ trait MultipleHandler
             if (!$handler instanceof MultipleHandlerCallable) {
                 continue;
             }
-            $handlers->add($handler);
+            $handlers = $handlers->add($handler);
         }
 
         return $handlers
@@ -105,17 +102,18 @@ trait MultipleHandler
 
     private function parseMultipleHandlerMethod(ReflectionMethod $method): ?MultipleHandlerCallable
     {
-        $name = strtolower($method->name);
-        if (in_array($name, $this->getSkipMultipleHandlers())) {
+        if ($method->name == 'getExceptionHandler'
+            || in_array($method->name, $this->getSkipMultipleHandlers())
+        ) {
             return null;
         }
 
-        $position = strrpos($name, 'handler');
+        $position = strrpos($method->name, 'Handler');
         if (false === $position) {
             return null;
         }
 
-        $sort = substr($name, $position + strlen('handler'));
+        $sort = substr($method->name, $position + strlen('Handler'));
         if ('' !== $sort && !ctype_digit(ltrim($sort, '0'))) {
             return null;
         }

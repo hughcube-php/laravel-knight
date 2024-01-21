@@ -48,8 +48,8 @@ class MultipleHandlerTest extends TestCase
 
         $this->assertSame(
             Collection::make($this->callMethod($job, 'getMultipleHandlers'))
-                ->map(function (MultipleHandlerCallable $handlerCallable) {
-                    return $handlerCallable->callable[1];
+                ->map(function (MultipleHandlerCallable $handler) {
+                    return $handler->callable[1];
                 })
                 ->values()
                 ->toArray(),
