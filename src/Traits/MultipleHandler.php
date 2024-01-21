@@ -103,6 +103,7 @@ trait MultipleHandler
     private function parseMultipleHandlerMethod(ReflectionMethod $method): ?MultipleHandlerCallable
     {
         if (
+            /** 跳过预定义方法 */
             in_array($method->name, ['getExceptionHandler', 'isSkipMultipleHandler'])
             || $this->isSkipMultipleHandler($method->name)
         ) {
