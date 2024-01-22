@@ -40,7 +40,7 @@ trait MultipleHandler
         $this->getExceptionHandler()->report($exception);
     }
 
-    protected function isSkipMultipleHandler($name): bool
+    protected function isSkipMultipleHandlerMethod(ReflectionMethod $method): bool
     {
         return false;
     }
@@ -102,21 +102,17 @@ trait MultipleHandler
 
     private function parseMultipleHandlerMethod(ReflectionMethod $method): ?MultipleHandlerCallable
     {
-        if (
-            /** 跳过预定义方法 */
-            in_array($method->name, ['getExceptionHandler', 'isSkipMultipleHandler'])
-            || $this->isSkipMultipleHandler($method->name)
-        ) {
-            return null;
-        }
-
         $position = strrpos($method->name, 'Handler');
         if (false === $position) {
             return null;
         }
 
+        if ('getExceptionHandler' === $method->name || $this->isSkipMultipleHandlerMethod($method)) {
+            return null;
+        }
+
         $sort = substr($method->name, $position + strlen('Handler'));
-        if ('' !== $sort && !ctype_digit(ltrim($sort, '0'))) {
+        if ('' !== $sort && !ctype_digit($sort)) {
             return null;
         }
 
