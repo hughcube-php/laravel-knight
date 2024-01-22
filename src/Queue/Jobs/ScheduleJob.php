@@ -93,14 +93,17 @@ class ScheduleJob extends Job
 
     protected function pushJob($job)
     {
+        $start = Carbon::now();
         $id = $this->getDispatcher()->dispatch($this->prepareJob($job));
+        $end = Carbon::now();
 
         $name = Str::afterLast(get_class($job), '\\');
         $this->info(sprintf(
-            '[%s] push job success, job: %s, id:%s, delays:%sms',
+            '[%s] push job success, job: %s, id:%s, duration: %sms, delays:%sms',
             $this->incrementScheduledJobCount(),
             $name,
             is_scalar($id) ? $id : '',
+            $start->diffInRealMilliseconds($end),
             $this->getDelays()
         ));
 
