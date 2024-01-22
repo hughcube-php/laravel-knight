@@ -45,7 +45,11 @@ trait MultipleHandler
     }
 
     /**
-     * @return Collection<int, array<int, ReflectionMethod|Throwable|mixed>>
+     * @return Collection<int, array{
+     *     method: ReflectionMethod,
+     *     result: mixed,
+     *     exception: Throwable|null
+     * }>
      * @throws Throwable
      */
     protected function triggerMultipleHandlers(bool $tryException = true): Collection
@@ -77,14 +81,14 @@ trait MultipleHandler
     }
 
     /**
-     * @return Collection<int, ReflectionMethod>
+     * @return array<int, ReflectionMethod>
      */
-    protected function getMultipleHandlers(): Collection
+    protected function getMultipleHandlers(): array
     {
-        $handlers = Collection::empty();
+        $handlers = [];
 
         $reflection = new ReflectionClass($this);
-        foreach ($reflection->getMethods() as $method) {
+        foreach ($reflection->getMethods(ReflectionMethod::IS_PROTECTED | ReflectionMethod::IS_PROTECTED) as $method) {
 
             /** 方法名必须包含Handler, 区分大小写 */
             $position = strrpos($method->name, 'Handler');
@@ -103,11 +107,17 @@ trait MultipleHandler
                 continue;
             }
 
-            $handlers = $handlers->add(['method' => $method, 'sort' => intval($sort)]);
+            $handlers[] = ['method' => $method, 'sort' => intval($sort)];
         }
 
-        return $handlers->sortBy(function ($handler) {
-            return $handler['sort'];
-        })->pluck('method');
+        /** 排序 */
+        usort($handlers, function ($a, $b) {
+            return $a['sort'] <=> $b['sort'];
+        });
+
+        /** 返回所有的method对象 */
+        return array_values(array_map(function ($handler) {
+            return $handler['method'];
+        }, $handlers));
     }
 }
