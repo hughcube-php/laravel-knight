@@ -8,7 +8,6 @@
 
 namespace HughCube\Laravel\Knight\Traits;
 
-use HughCube\Laravel\Knight\Support\MultipleHandlerCallable;
 use Illuminate\Support\Collection;
 use ReflectionClass;
 use ReflectionMethod;
@@ -46,20 +45,20 @@ trait MultipleHandler
     }
 
     /**
+     * @return Collection<int, array<int, ReflectionMethod|Throwable|mixed>>
      * @throws Throwable
      */
-    protected function triggerMultipleHandlers(bool $tryException = true): array
+    protected function triggerMultipleHandlers(bool $tryException = true): Collection
     {
-        $results = [];
+        $results = Collection::empty();
 
-        foreach ($this->getMultipleHandlers() as $handler) {
+        foreach ($this->getMultipleHandlers() as $method) {
             $result = $exception = null;
-
             try {
-                $result = call_user_func($handler->callable);
+                $result = $this->{$method->name}();
             } catch (Throwable $exception) {
             }
-            $results[] = ['handler' => $handler, 'result' => $result, 'exception' => $exception];
+            $results->add(['method' => $method, 'result' => $result, 'exception' => $exception]);
 
             /** 记录异常或者抛出 */
             if ($exception instanceof Throwable && $tryException) {
@@ -78,7 +77,7 @@ trait MultipleHandler
     }
 
     /**
-     * @return Collection<int, MultipleHandlerCallable>
+     * @return Collection<int, ReflectionMethod>
      */
     protected function getMultipleHandlers(): Collection
     {
@@ -86,36 +85,29 @@ trait MultipleHandler
 
         $reflection = new ReflectionClass($this);
         foreach ($reflection->getMethods() as $method) {
-            $handler = $this->parseMultipleHandlerMethod($method);
-            if (!$handler instanceof MultipleHandlerCallable) {
+
+            /** 方法名必须包含Handler, 区分大小写 */
+            $position = strrpos($method->name, 'Handler');
+            if (false === $position) {
                 continue;
             }
-            $handlers = $handlers->add($handler);
+
+            /** 跳过指定方法不执行 */
+            if ('getExceptionHandler' === $method->name || $this->isSkipMultipleHandlerMethod($method)) {
+                continue;
+            }
+
+            /** 获取sort属性 */
+            $sort = substr($method->name, $position + strlen('Handler'));
+            if ('' !== $sort && !ctype_digit($sort)) {
+                continue;
+            }
+
+            $handlers = $handlers->add(['method' => $method, 'sort' => intval($sort)]);
         }
 
-        return $handlers
-            ->sortBy(function (MultipleHandlerCallable $handlerCallable) {
-                return $handlerCallable->sort;
-            })
-            ->values();
-    }
-
-    private function parseMultipleHandlerMethod(ReflectionMethod $method): ?MultipleHandlerCallable
-    {
-        $position = strrpos($method->name, 'Handler');
-        if (false === $position) {
-            return null;
-        }
-
-        if ('getExceptionHandler' === $method->name || $this->isSkipMultipleHandlerMethod($method)) {
-            return null;
-        }
-
-        $sort = substr($method->name, $position + strlen('Handler'));
-        if ('' !== $sort && !ctype_digit($sort)) {
-            return null;
-        }
-
-        return new MultipleHandlerCallable(intval($sort ?: '0'), [$this, $method->name]);
+        return $handlers->sortBy(function ($handler) {
+            return $handler['sort'];
+        })->pluck('method');
     }
 }

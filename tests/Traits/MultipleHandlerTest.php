@@ -8,10 +8,10 @@
 
 namespace HughCube\Laravel\Knight\Tests\Traits;
 
-use HughCube\Laravel\Knight\Support\MultipleHandlerCallable;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use HughCube\Laravel\Knight\Traits\MultipleHandler;
 use Illuminate\Support\Collection;
+use ReflectionMethod;
 
 class MultipleHandlerTest extends TestCase
 {
@@ -48,8 +48,8 @@ class MultipleHandlerTest extends TestCase
 
         $this->assertSame(
             Collection::make($this->callMethod($job, 'getMultipleHandlers'))
-                ->map(function (MultipleHandlerCallable $handler) {
-                    return $handler->callable[1];
+                ->map(function (ReflectionMethod $method) {
+                    return $method->name;
                 })
                 ->values()
                 ->toArray(),
