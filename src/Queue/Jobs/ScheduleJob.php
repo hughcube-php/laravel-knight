@@ -2,7 +2,6 @@
 
 namespace HughCube\Laravel\Knight\Queue\Jobs;
 
-use Carbon\Carbon;
 use Cron\CronExpression;
 use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\Traits\MultipleHandler;
@@ -19,9 +18,9 @@ class ScheduleJob extends Job
     private $scheduleJobCount = 0;
 
     /**
+     * @return void
      * @throws Throwable
      *
-     * @return void
      */
     protected function action(): void
     {
@@ -39,10 +38,6 @@ class ScheduleJob extends Job
 
     /**
      * 判断是否可以运行.
-     *
-     * @param string $expression
-     *
-     * @return bool
      */
     protected function isDue(string $expression): bool
     {
@@ -50,9 +45,9 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param string|array      $name
-     * @param string|array|null $in
-     * @param string|null       $basePath
+     * @param  string|array  $name
+     * @param  string|array|null  $in
+     * @param  string|null  $basePath
      *
      * @return array<integer, object>
      */
@@ -93,16 +88,16 @@ class ScheduleJob extends Job
 
     protected function pushJob($job)
     {
-        $start = Carbon::now();
+        $start = microtime(true);
         $id = $this->getDispatcher()->dispatch($this->prepareJob($job));
-        $end = Carbon::now();
+        $end = microtime(true);
 
         $this->info(sprintf(
             '[%s] push job success, job: %s, id: %s, duration: %sms, delays: %sms',
             $this->incrementScheduledJobCount(),
             Str::afterLast(get_class($job), '\\'),
             is_scalar($id) ? $id : '',
-            $start->diffInRealMilliseconds($end),
+            round(($end - $start) /1000, 2),
             $this->getDelays()
         ));
 
@@ -110,8 +105,8 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param string              $expression
-     * @param callable|Job|object $job
+     * @param  string  $expression
+     * @param  callable|Job|object  $job
      *
      * @return void
      */
@@ -123,21 +118,21 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param mixed $job
+     * @param  mixed  $job
      *
      * @return mixed
      */
     protected function fireJob($job)
     {
-        $start = Carbon::now();
+        $start = microtime(true);
         $result = $this->getDispatcher()->dispatchSync($this->prepareJob($job));
-        $end = Carbon::now();
+        $end = microtime(true);
 
         $this->info(sprintf(
             '[%s] fire job success, job: %s, duration: %sms, delays: %sms',
             $this->incrementScheduledJobCount(),
             Str::afterLast(get_class($job), '\\'),
-            $start->diffInRealMilliseconds($end),
+            round(($end - $start) /1000, 2),
             $this->getDelays()
         ));
 
@@ -145,8 +140,8 @@ class ScheduleJob extends Job
     }
 
     /**
-     * @param string              $expression
-     * @param callable|Job|object $job
+     * @param  string  $expression
+     * @param  callable|Job|object  $job
      *
      * @return void
      */
