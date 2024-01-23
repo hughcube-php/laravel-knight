@@ -45,13 +45,13 @@ trait MultipleHandler
     }
 
     /**
+     * @throws Throwable
+     *
      * @return Collection<int, array{
      *     method: ReflectionMethod,
      *     result: mixed,
      *     exception: Throwable|null
      * }>
-     * @throws Throwable
-     *
      */
     protected function triggerMultipleHandlers(bool $tryException = true): Collection
     {
@@ -91,7 +91,6 @@ trait MultipleHandler
 
         $reflection = new ReflectionClass($this);
         foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED) as $method) {
-
             /** 方法名必须包含Handler, 不区分大小写 */
             $position = strripos($method->name, 'Handler');
             if (false === $position) {
