@@ -46,7 +46,7 @@ class ScheduleJob extends Job
      */
     protected function isDue(string $expression): bool
     {
-        return (new CronExpression($expression))->isDue($this->getJobStartedAt()->toDateTimeString());
+        return (new CronExpression($expression))->isDue($this->getJobStartedAt());
     }
 
     /**
