@@ -101,17 +101,11 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
         return $this->jobStartedAt;
     }
 
-    /**
-     * @return int
-     */
-    protected function getDelays(): int
+    protected function getDelays(): float
     {
-        return $this->getJobStartedAt()->diffInRealMilliseconds(Carbon::now());
+        return round((($this->getJobStartedAt()->getPreciseTimestamp() / 1000000) - microtime(true)) * 1000, 2);
     }
 
-    /**
-     * @return array
-     */
     public function getData(): array
     {
         return $this->data;
@@ -119,9 +113,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     /**
      * @inheritDoc
-     *
      * @throws
-     *
      * @phpstan-ignore-next-line
      */
     protected function loadParameters()
@@ -133,54 +125,33 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
         $this->parameterBag = new ParameterBag($this->validate($this->getData()));
     }
 
-    /**
-     * @return string
-     */
     protected function getSerializeData(): string
     {
         return base64_encode(serialize($this->data));
     }
 
-    /**
-     * @param int $flags
-     *
-     * @return string
-     */
     protected function getJsonData(int $flags = JSON_UNESCAPED_UNICODE): string
     {
         return json_encode($this->data, $flags);
     }
 
-    /**
-     * @return array
-     */
     protected function getValidData(): array
     {
         return $this->p()->all();
     }
 
-    /**
-     * @return string
-     */
     protected function getSerializeValidData(): string
     {
         return base64_encode(serialize($this->getValidData()));
     }
 
-    /**
-     * @param int $flags
-     *
-     * @return string
-     */
     protected function getJsonValidData(int $flags = JSON_UNESCAPED_UNICODE): string
     {
         return json_encode($this->getValidData(), $flags);
     }
 
-    /**
-     * @return string|int
-     */
-    protected function getPid()
+
+    protected function getPid(): string
     {
         if (null === $this->pid) {
             $hostname = base_convert(abs(crc32(gethostname())), 10, 36);
@@ -193,11 +164,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param string|int|null $pid
-     *
      * @return $this
      */
-    public function setPid($pid)
+    public function setPid(string $pid)
     {
         $this->pid = $pid;
 
@@ -218,7 +187,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param array|string|null $channel
+     * @param  array|string|null  $channel
      *
      * @return $this
      */
@@ -230,9 +199,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param mixed  $level
-     * @param string $message
-     * @param array  $context
+     * @param  mixed  $level
+     * @param  string  $message
+     * @param  array  $context
      *
      * @return void
      */
@@ -260,11 +229,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param string $key
-     * @param null   $default
-     *
+     * @param  string  $key
+     * @param  null  $default
      * @return mixed
-     *
      * @deprecated Will be removed in a future version.
      */
     protected function get(string $key, $default = null)
@@ -273,10 +240,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param mixed $key
-     *
+     * @param  mixed  $key
      * @return bool
-     *
      * @deprecated Will be removed in a future version.
      */
     protected function has($key): bool
@@ -285,11 +250,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param string $key
-     * @param mixed  $value
-     *
+     * @param  string  $key
+     * @param  mixed  $value
      * @return $this
-     *
      * @deprecated Will be removed in a future version.
      */
     protected function set(string $key, $value)
@@ -300,9 +263,6 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param string $name
-     * @param array  $arguments
-     *
      * @return false|mixed
      */
     public function __call(string $name, array $arguments)

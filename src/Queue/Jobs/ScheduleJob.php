@@ -97,7 +97,7 @@ class ScheduleJob extends Job
             $this->incrementScheduledJobCount(),
             Str::afterLast(get_class($job), '\\'),
             is_scalar($id) ? $id : '',
-            round(($end - $start) /1000, 2),
+            round(($end - $start) * 1000, 2),
             $this->getDelays()
         ));
 
@@ -132,7 +132,7 @@ class ScheduleJob extends Job
             '[%s] fire job success, job: %s, duration: %sms, delays: %sms',
             $this->incrementScheduledJobCount(),
             Str::afterLast(get_class($job), '\\'),
-            round(($end - $start) /1000, 2),
+            round(($end - $start) * 1000, 2),
             $this->getDelays()
         ));
 
