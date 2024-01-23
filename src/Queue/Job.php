@@ -210,8 +210,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     {
         $message = sprintf(
             '[%s] [%s] [%.2fms] %s',
-            $this->getPid(),
             $this->getName(),
+            $this->getPid(),
             $this->getDelays(),
             $message
         );
