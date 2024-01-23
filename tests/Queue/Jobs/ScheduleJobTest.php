@@ -17,13 +17,11 @@ class ScheduleJobTest extends TestCase
 
     public function testIsDue()
     {
-        $job = new class extends ScheduleJob {
-
+        $job = new class() extends ScheduleJob {
             protected function testHandler()
             {
                 $this->isDue('* * * * *');
             }
-
         };
 
         $this->assertJob($job);
