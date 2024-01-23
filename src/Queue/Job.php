@@ -103,7 +103,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     protected function getDelays(): float
     {
-        return round((($this->getJobStartedAt()->getPreciseTimestamp() / 1000000) - microtime(true)) * 1000, 2);
+        return round((microtime(true) - ($this->getJobStartedAt()->getPreciseTimestamp() / 1000000)) * 1000, 2);
     }
 
     public function getData(): array
@@ -188,7 +188,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param array|string|null $channel
+     * @param  array|string|null  $channel
      *
      * @return $this
      */
@@ -200,16 +200,16 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param mixed  $level
-     * @param string $message
-     * @param array  $context
+     * @param  mixed  $level
+     * @param  string  $message
+     * @param  array  $context
      *
      * @return void
      */
     public function log($level, string $message, array $context = [])
     {
         $message = sprintf(
-            '[%sms] [%s:%s] %s',
+            '[%.2fms] [%s:%s] %s',
             $this->getDelays(),
             $this->getName(),
             $this->getPid(),
@@ -230,8 +230,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param string $key
-     * @param null   $default
+     * @param  string  $key
+     * @param  null  $default
      *
      * @return mixed
      *
@@ -243,7 +243,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param mixed $key
+     * @param  mixed  $key
      *
      * @return bool
      *
@@ -255,8 +255,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param string $key
-     * @param mixed  $value
+     * @param  string  $key
+     * @param  mixed  $value
      *
      * @return $this
      *

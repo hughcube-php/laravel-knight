@@ -93,7 +93,7 @@ class ScheduleJob extends Job
         $end = microtime(true);
 
         $this->info(sprintf(
-            '[%s] push job success, job: %s, id: %s, duration: %sms, delays: %sms',
+            '[%s] push job success, job: %s, id: %s, duration: %.2fms, delays: %.2fms',
             $this->incrementScheduledJobCount(),
             Str::afterLast(get_class($job), '\\'),
             is_scalar($id) ? $id : '',
@@ -129,7 +129,7 @@ class ScheduleJob extends Job
         $end = microtime(true);
 
         $this->info(sprintf(
-            '[%s] fire job success, job: %s, duration: %sms, delays: %sms',
+            '[%s] fire job success, job: %s, duration: %.2fms, delays: %.2fms',
             $this->incrementScheduledJobCount(),
             Str::afterLast(get_class($job), '\\'),
             round(($end - $start) * 1000, 2),
