@@ -21,9 +21,9 @@ class WatchFilesJob extends Job
     public function rules(): array
     {
         return [
-            'url' => ['string', 'nullable'],
+            'url'         => ['string', 'nullable'],
             'use_app_url' => ['boolean', 'default:1'],
-            'timeout' => ['integer', 'default:30'],
+            'timeout'     => ['integer', 'default:30'],
         ];
     }
 
@@ -52,7 +52,7 @@ class WatchFilesJob extends Job
 
         try {
             $response = $this->getHttpClient()->get($url, [
-                RequestOptions::TIMEOUT => floatval($this->p()->get('timeout')),
+                RequestOptions::TIMEOUT         => floatval($this->p()->get('timeout')),
                 RequestOptions::ALLOW_REDIRECTS => ['max' => 5, 'referer' => true, 'track_redirects' => true],
             ]);
             $results = json_decode($response->getBody()->getContents(), true);
@@ -64,11 +64,8 @@ class WatchFilesJob extends Job
 
         $this->info(sprintf(
             'watch OPcache files, count: %s, status: %s, url: %s',
-
-                $results['data']['count'] ?? null ?: 0,
-
+            $results['data']['count'] ?? null ?: 0,
             $response->getStatusCode(),
-
             Collection::make()
                 ->merge([$url->toString()])
                 ->merge($response->getHeaders()['X-Guzzle-Redirect-History'] ?? [] ?: [])
