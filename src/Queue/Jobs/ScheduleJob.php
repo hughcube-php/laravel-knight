@@ -89,7 +89,9 @@ class ScheduleJob extends Job
     protected function pushJob($job)
     {
         $start = microtime(true);
-        $id = $this->getDispatcher()->dispatch($this->prepareJob($job));
+        $id = $this->getDispatcher()->dispatch($this->prepareJob(
+            is_callable($job) ? $job() : $job
+        ));
         $end = microtime(true);
 
         $this->info(sprintf(
@@ -113,7 +115,7 @@ class ScheduleJob extends Job
     protected function pushJobIfDue(string $expression, $job)
     {
         if ($this->isDue($expression)) {
-            $this->pushJob(is_callable($job) ? $job() : $job);
+            $this->pushJob($job);
         }
     }
 
@@ -125,7 +127,9 @@ class ScheduleJob extends Job
     protected function fireJob($job)
     {
         $start = microtime(true);
-        $result = $this->getDispatcher()->dispatchSync($this->prepareJob($job));
+        $result = $this->getDispatcher()->dispatchSync($this->prepareJob(
+            is_callable($job) ? $job() : $job
+        ));
         $end = microtime(true);
 
         $this->info(sprintf(
@@ -148,7 +152,7 @@ class ScheduleJob extends Job
     protected function fireJobIfDue(string $expression, $job)
     {
         if ($this->isDue($expression)) {
-            $this->fireJob(is_callable($job) ? $job() : $job);
+            $this->fireJob($job);
         }
     }
 }
