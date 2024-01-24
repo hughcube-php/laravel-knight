@@ -5,20 +5,23 @@ namespace HughCube\Laravel\Knight\OPcache\Jobs;
 use GuzzleHttp\RequestOptions;
 use HughCube\GuzzleHttp\HttpClientTrait;
 use HughCube\Laravel\Knight\Queue\Job;
+use HughCube\Laravel\Knight\Support\Str;
+use HughCube\Laravel\Knight\Traits\Container;
 use HughCube\PUrl\Url as PUrl;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Throwable;
 
 class WatchFilesJob extends Job
 {
+    use Container;
     use HttpClientTrait;
 
     public function rules(): array
     {
         return [
-            'url'     => ['string', 'nullable'],
+            'url' => ['string', 'nullable'],
+            'use_app_url' => ['boolean', 'default:1'],
             'timeout' => ['integer', 'default:30'],
         ];
     }
@@ -29,40 +32,47 @@ class WatchFilesJob extends Job
     protected function action(): void
     {
         $url = $this->getUrl();
-        if (!PUrl::isUrlString($url)) {
+        if (!$url instanceof PUrl) {
             $this->warning('Remote interface URL cannot be found!');
-
             return;
         }
 
+        /** 替换域名为 app.url */
+        if ($this->p('use_app_url') && !Str::isIp($url->getHost())) {
+            $appUrl = $this->getContainerConfig()->get('app.url');
+            if (!empty($host = parse_url($appUrl, PHP_URL_HOST))) {
+                $url = $url->withHost($host);
+            }
+        }
+
         try {
-            $response = $this->getHttpClient()->get($this->getUrl(), [
+            $response = $this->getHttpClient()->get($url, [
                 RequestOptions::TIMEOUT => floatval($this->p()->get('timeout')),
+                RequestOptions::ALLOW_REDIRECTS => ['max' => 5, 'referer' => true, 'track_redirects' => true],
             ]);
             $results = json_decode($response->getBody()->getContents(), true);
         } catch (Throwable $exception) {
             $this->warning(sprintf('http error: %s!', $exception->getMessage()));
-
             return;
         }
 
-        /** debug log */
-        $count = Arr::get($results, 'data.count', 0);
-        $message = 'watch OPcache files, count: %s, status: %s, url: %s';
-        $this->info(sprintf($message, $count, $response->getStatusCode(), $url));
+        $this->info(sprintf(
+            'watch OPcache files, count: %s, status: %s, url: %s',
+            $results['data']['count'] ?? null ?: 0,
+            $response->getStatusCode(),
+            $url->toString()
+        ));
     }
 
-    protected function getUrl(): string
+    protected function getUrl(): ?PUrl
     {
         $url = $this->p()->get('url', 'knight.opcache.scripts');
         if (PUrl::isUrlString($url)) {
             return $url;
         }
 
-        if (Route::has($url)) {
-            return route($url);
-        }
-
-        return URL::to($url);
+        return PUrl::parse(
+            Route::has($url) ? URL::route($url) : URL::to($url)
+        );
     }
 }
