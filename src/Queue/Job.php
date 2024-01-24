@@ -209,10 +209,10 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     public function log($level, string $message, array $context = [])
     {
         $message = sprintf(
-            '[%.2fms] [%s:%s] %s',
-            $this->getDelays(),
+            '%s [%s] [%.2fms] %s',
             $this->getName(),
             $this->getPid(),
+            $this->getDelays(),
             $message
         );
 
