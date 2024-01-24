@@ -40,11 +40,12 @@ class WatchFilesJob extends Job
         }
 
         /** 替换域名为 app.url */
-        if ($this->p('use_app_url') && !Str::isIp($url->getHost())) {
+        if ($this->p('use_app_url')
+            && (Str::isIp($url->getHost()) || $url->matchHost('localhost') || $url->matchHost('127.0.0.1'))
+        ) {
             $appUrl = PUrl::parse($this->getContainerConfig()->get('app.url'));
             if ($appUrl instanceof PUrl) {
-                $url = $url
-                    ->withHost($appUrl->getHost())
+                $url = $url->withHost($appUrl->getHost())
                     ->withPort($appUrl->getPort())
                     ->withScheme($appUrl->getScheme());
             }
