@@ -39,9 +39,12 @@ class WatchFilesJob extends Job
 
         /** 替换域名为 app.url */
         if ($this->p('use_app_url') && !Str::isIp($url->getHost())) {
-            $appUrl = $this->getContainerConfig()->get('app.url');
-            if (!empty($host = parse_url($appUrl, PHP_URL_HOST))) {
-                $url = $url->withHost($host);
+            $appUrl = PUrl::parse($this->getContainerConfig()->get('app.url'));
+            if ($appUrl instanceof PUrl) {
+                $url = $url
+                    ->withHost($appUrl->getHost())
+                    ->withPort($appUrl->getPort())
+                    ->withScheme($appUrl->getScheme());
             }
         }
 
@@ -58,7 +61,7 @@ class WatchFilesJob extends Job
 
         $this->info(sprintf(
             'watch OPcache files, count: %s, status: %s, url: %s',
-            $results['data']['count'] ?? null ?: 0,
+                $results['data']['count'] ?? null ?: 0,
             $response->getStatusCode(),
             $url->toString()
         ));
