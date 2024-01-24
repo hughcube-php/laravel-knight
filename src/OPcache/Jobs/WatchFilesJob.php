@@ -8,6 +8,7 @@ use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\Support\Str;
 use HughCube\Laravel\Knight\Traits\Container;
 use HughCube\PUrl\Url as PUrl;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Throwable;
@@ -20,9 +21,9 @@ class WatchFilesJob extends Job
     public function rules(): array
     {
         return [
-            'url'         => ['string', 'nullable'],
+            'url' => ['string', 'nullable'],
             'use_app_url' => ['boolean', 'default:1'],
-            'timeout'     => ['integer', 'default:30'],
+            'timeout' => ['integer', 'default:30'],
         ];
     }
 
@@ -51,7 +52,7 @@ class WatchFilesJob extends Job
 
         try {
             $response = $this->getHttpClient()->get($url, [
-                RequestOptions::TIMEOUT         => floatval($this->p()->get('timeout')),
+                RequestOptions::TIMEOUT => floatval($this->p()->get('timeout')),
                 RequestOptions::ALLOW_REDIRECTS => ['max' => 5, 'referer' => true, 'track_redirects' => true],
             ]);
             $results = json_decode($response->getBody()->getContents(), true);
@@ -63,9 +64,15 @@ class WatchFilesJob extends Job
 
         $this->info(sprintf(
             'watch OPcache files, count: %s, status: %s, url: %s',
+
                 $results['data']['count'] ?? null ?: 0,
+
             $response->getStatusCode(),
-            $url->toString()
+
+            Collection::make()
+                ->merge([$url->toString()])
+                ->merge($response->getHeaders()['X-Guzzle-Redirect-History'] ?? [] ?: [])
+                ->implode(', ')
         ));
     }
 
