@@ -22,23 +22,6 @@ use Throwable;
  */
 class Carbon extends \Illuminate\Support\Carbon
 {
-    public function getTimestampAsFloat(): float
-    {
-        return $this->getPreciseTimestamp() / static::MICROSECONDS_PER_SECOND;
-    }
-
-    /**
-     * Mainly used for BC Math extensions.
-     */
-    public function getTimestampAsString(): string
-    {
-        return sprintf(
-            '%s.%s',
-            $this->getTimestamp(),
-            ($this->getPreciseTimestamp() % static::MICROSECONDS_PER_SECOND) ?: '0'
-        );
-    }
-
     /**
      * @param DateTimeInterface|int|float|string $date
      * @param string|null                        $format
@@ -138,42 +121,5 @@ class Carbon extends \Illuminate\Support\Carbon
     public function toRfc3339ExtendedString(): string
     {
         return $this->toRfc3339String(true);
-    }
-
-    /**
-     * @param string|DateTimeInterface|null $time
-     * @param DateTimeZone|string|null      $tz
-     *
-     * @return Carbon|null
-     */
-    public static function tryParse($time = null, $tz = null): ?Carbon
-    {
-        if (empty($time)) {
-            return null;
-        }
-
-        try {
-            $date = static::parse($time, $tz);
-        } catch (Throwable $exception) {
-            $date = false;
-        }
-
-        return $date instanceof static ? $date : null;
-    }
-
-    public function toChineseDate(): string
-    {
-        return sprintf(
-            '%s年%s月%s日',
-            strtr(
-                Base::toString($this->year),
-                [
-                    '0' => '〇', '1' => '一', '2' => '二', '3' => '三', '4' => '四',
-                    '5' => '五', '6' => '六', '7' => '七', '8' => '八', '9' => '九',
-                ]
-            ),
-            CNNumber::toLower($this->month),
-            CNNumber::toLower($this->day)
-        );
     }
 }
