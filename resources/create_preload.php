@@ -2,11 +2,14 @@
 
 use Illuminate\Support\Collection;
 
-$classes = get_declared_classes();
+
+$excludes = [];
 
 $publicPath = getcwd();
 
-/** web server */
+$classes = get_declared_classes();
+
+/** index.php */
 call_user_func(function () use ($publicPath) {
     ob_start();
     $_SERVER['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'] ?? null ?: '127.0.0.1';
@@ -15,15 +18,20 @@ call_user_func(function () use ($publicPath) {
 });
 
 /** composer classmap */
-call_user_func(function () use ($publicPath) {
+call_user_func(function () use ($publicPath, &$excludes) {
     $classmap = require $publicPath.'/../vendor/composer/autoload_classmap.php';
     foreach ($classmap as $class => $file) {
-        class_exists($class);
+        try {
+            class_exists($class, true);
+        } catch (\Throwable $exception) {
+            $excludes[] = $class;
+        }
     }
 });
 
 $loads = Collection::make(get_declared_classes())
     ->diff($classes)
+    ->diff($excludes)
     ->values()
     ->map(function ($class) {
         return sprintf("class_exists('%s');", $class);
