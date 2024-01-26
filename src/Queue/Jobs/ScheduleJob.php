@@ -88,16 +88,16 @@ class ScheduleJob extends Job
 
     protected function pushJob($job)
     {
+        $job = $this->prepareJob(is_callable($job) ? $job() : $job);
+
         $start = microtime(true);
-        $id = $this->getDispatcher()->dispatch($this->prepareJob(
-            is_callable($job) ? $job() : $job
-        ));
+        $id = $this->getDispatcher()->dispatch($job);
         $end = microtime(true);
 
         $this->info(sprintf(
             '[%s] push job success, job: %s, id: %s, duration: %.2fms, delays: %.2fms',
             $this->incrementScheduledJobCount(),
-            Str::afterLast(get_class($job), '\\'),
+            $this->getName($job),
             is_scalar($id) ? $id : '',
             round(($end - $start) * 1000, 2),
             $this->getDelays()
@@ -126,16 +126,16 @@ class ScheduleJob extends Job
      */
     protected function fireJob($job)
     {
+        $job = $this->prepareJob(is_callable($job) ? $job() : $job);
+
         $start = microtime(true);
-        $result = $this->getDispatcher()->dispatchSync($this->prepareJob(
-            is_callable($job) ? $job() : $job
-        ));
+        $result = $this->getDispatcher()->dispatchSync($job);
         $end = microtime(true);
 
         $this->info(sprintf(
             '[%s] fire job success, job: %s, duration: %.2fms, delays: %.2fms',
             $this->incrementScheduledJobCount(),
-            Str::afterLast(get_class($job), '\\'),
+            $this->getName($job),
             round(($end - $start) * 1000, 2),
             $this->getDelays()
         ));
