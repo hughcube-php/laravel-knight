@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Collection;
 
-
 $excludes = [];
 
 $publicPath = getcwd();
