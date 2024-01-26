@@ -5,6 +5,7 @@ namespace HughCube\Laravel\Knight\Queue\Jobs;
 use Cron\CronExpression;
 use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\Traits\MultipleHandler;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use ReflectionClass;
 use ReflectionException;
@@ -90,16 +91,16 @@ class ScheduleJob extends Job
     {
         $job = $this->prepareJob(is_callable($job) ? $job() : $job);
 
-        $start = microtime(true);
+        $start = Carbon::now();
         $id = $this->getDispatcher()->dispatch($job);
-        $end = microtime(true);
+        $end = Carbon::now();
 
         $this->info(sprintf(
             '[%s] push job success, job: %s, id: %s, duration: %.2fms, delays: %.2fms',
             $this->incrementScheduledJobCount(),
             $this->getName($job),
             is_scalar($id) ? $id : '',
-            round(($end - $start) * 1000, 2),
+            round($end->diffInMicroseconds($start) / 1000, 2),
             $this->getDelays()
         ));
 
@@ -128,15 +129,15 @@ class ScheduleJob extends Job
     {
         $job = $this->prepareJob(is_callable($job) ? $job() : $job);
 
-        $start = microtime(true);
+        $start = Carbon::now();
         $result = $this->getDispatcher()->dispatchSync($job);
-        $end = microtime(true);
+        $end = Carbon::now();
 
         $this->info(sprintf(
             '[%s] fire job success, job: %s, duration: %.2fms, delays: %.2fms',
             $this->incrementScheduledJobCount(),
             $this->getName($job),
-            round(($end - $start) * 1000, 2),
+            round($end->diffInMicroseconds($start) / 1000, 2),
             $this->getDelays()
         ));
 
