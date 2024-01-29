@@ -36,7 +36,7 @@ class PingDatabaseJob extends Job
             'connection: %s, write => %s, read => %s, 心跳成功',
             $connection->getName(),
             $writeResultMessage,
-            ($readResultMessage ?? '-')
+            $readResultMessage ?? '-'
         ));
     }
 
@@ -45,6 +45,7 @@ class PingDatabaseJob extends Job
         if ('mysql' === $connection->getDriverName()) {
             return 'SELECT CONNECTION_ID()';
         }
+
         return 'SELECT 1';
     }
 
