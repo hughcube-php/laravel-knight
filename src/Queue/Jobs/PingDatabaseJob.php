@@ -33,7 +33,7 @@ class PingDatabaseJob extends Job
         }
 
         $this->info(sprintf(
-            'connection: %s, write => %s, read => %s, 心跳成功',
+            'connection: %s, write => ( %s ), read => ( %s ), 心跳成功',
             $connection->getName(),
             $writeResultMessage,
             ($readResultMessage ?? '-')
@@ -56,6 +56,6 @@ class PingDatabaseJob extends Job
         $result = Collection::wrap((array) $connection->selectOne($sql, [], $useReadPdo))->first();
         $duration = Carbon::now()->diffInMilliseconds($now);
 
-        return sprintf('(result: %s, duration: %sms)', $result, $duration);
+        return sprintf('result: %s, duration: %sms', $result, $duration);
     }
 }
