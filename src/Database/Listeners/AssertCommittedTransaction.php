@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2024/1/31
- * Time: 11:46
+ * Time: 11:46.
  */
 
 namespace HughCube\Laravel\Knight\Database\Listeners;
@@ -19,8 +19,9 @@ class AssertCommittedTransaction
     use Container;
 
     /**
-     * @return void
      * @throws BindingResolutionException
+     *
+     * @return void
      */
     public function handle($event)
     {
@@ -32,8 +33,9 @@ class AssertCommittedTransaction
     }
 
     /**
-     * @return array<string, Connection>
      * @throws BindingResolutionException
+     *
+     * @return array<string, Connection>
      */
     protected function getConnections(): array
     {
