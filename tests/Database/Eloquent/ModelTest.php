@@ -10,7 +10,6 @@ namespace HughCube\Laravel\Knight\Tests\Database\Eloquent;
 
 use Exception;
 use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
-use HughCube\Laravel\Knight\Support\Carbon;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Cache\Events\CacheHit;
 use Illuminate\Cache\Events\CacheMissed;
@@ -18,6 +17,7 @@ use Illuminate\Cache\Events\KeyForgotten;
 use Illuminate\Cache\Events\KeyWritten;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -136,11 +136,11 @@ class ModelTest extends TestCase
     }
 
     /**
-     * @param int $count
-     *
-     * @throws Exception
+     * @param  int  $count
      *
      * @return void
+     * @throws Exception
+     *
      */
     protected function createUsers(int $count = 1)
     {
@@ -181,9 +181,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testCacheOnCreate()
     {
@@ -251,9 +251,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testCacheOnUpdate()
     {
@@ -289,9 +289,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testCacheOnForceDelete()
     {
@@ -317,9 +317,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testCacheOnDelete()
     {
@@ -375,9 +375,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testFindById()
     {
@@ -407,9 +407,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testFindByIds()
     {
@@ -498,9 +498,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testConversionDateTime()
     {
@@ -560,9 +560,9 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function testQueryWhereLike()
     {

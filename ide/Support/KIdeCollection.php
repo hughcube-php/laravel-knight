@@ -104,4 +104,13 @@ class KIdeCollection
     {
         return $this;
     }
+
+    /**
+     * @return static
+     * @see CollectionMixin::explode()
+     */
+    public static function explode(): KIdeCollection
+    {
+        return new KIdeCollection();
+    }
 }

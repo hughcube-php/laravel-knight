@@ -3,8 +3,8 @@
 namespace HughCube\Laravel\Knight\Queue\Jobs;
 
 use HughCube\Laravel\Knight\Queue\Job;
-use HughCube\Laravel\Knight\Support\Carbon;
 use Illuminate\Database\Connection;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class CacheTableGcJob extends Job
@@ -12,9 +12,9 @@ class CacheTableGcJob extends Job
     public function rules(): array
     {
         return [
-            'connection'  => ['string', 'nullable'],
+            'connection' => ['string', 'nullable'],
             'cache_table' => ['nullable'],
-            'lock'        => ['nullable'],
+            'lock' => ['nullable'],
         ];
     }
 

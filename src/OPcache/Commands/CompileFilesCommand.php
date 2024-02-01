@@ -13,10 +13,10 @@ use Exception;
 use GuzzleHttp\RequestOptions;
 use HughCube\GuzzleHttp\HttpClientTrait;
 use HughCube\Laravel\Knight\OPcache\LoadedOPcacheExtension;
-use HughCube\Laravel\Knight\Support\Carbon;
 use HughCube\PUrl\Url as PUrl;
 use Illuminate\Console\Command;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
@@ -43,11 +43,11 @@ class CompileFilesCommand extends Command
     protected $description = 'opcache compile file';
 
     /**
-     * @param Schedule $schedule
-     *
-     * @throws Exception
+     * @param  Schedule  $schedule
      *
      * @return void
+     * @throws Exception
+     *
      */
     public function handle(Schedule $schedule)
     {
@@ -72,6 +72,7 @@ class CompileFilesCommand extends Command
         $this->info(sprintf(
             'opcache compile file count: %s, duration: %ss',
             count($scripts),
+            /** @phpstan-ignore-next-line */
             $end->getTimestampAsFloat() - $start->getTimestampAsFloat()
         ));
     }
@@ -93,9 +94,9 @@ class CompileFilesCommand extends Command
     }
 
     /**
+     * @return array
      * @throws Exception
      *
-     * @return array
      */
     protected function getFiles(): array
     {
@@ -185,7 +186,7 @@ class CompileFilesCommand extends Command
 
         try {
             $response = $this->getHttpClient()->post($url, [
-                RequestOptions::TIMEOUT     => 10.0,
+                RequestOptions::TIMEOUT => 10.0,
                 RequestOptions::HTTP_ERRORS => false,
             ]);
             $states = json_decode($response->getBody()->getContents(), true);

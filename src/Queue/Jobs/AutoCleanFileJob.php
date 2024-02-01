@@ -3,7 +3,7 @@
 namespace HughCube\Laravel\Knight\Queue\Jobs;
 
 use HughCube\Laravel\Knight\Queue\Job;
-use HughCube\Laravel\Knight\Support\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\Finder;
 
@@ -19,8 +19,8 @@ class AutoCleanFileJob extends Job
     protected function rules(): array
     {
         return [
-            'dir'      => ['required'],
-            'pattern'  => ['nullable'],
+            'dir' => ['required'],
+            'pattern' => ['nullable'],
             'max_days' => ['integer', 'min:0'],
         ];
     }

@@ -3,7 +3,7 @@
 namespace HughCube\Laravel\Knight\Sanctum\Jobs;
 
 use HughCube\Laravel\Knight\Sanctum\PersonalAccessToken;
-use HughCube\Laravel\Knight\Support\Carbon;
+use Illuminate\Support\Carbon;
 
 class PersonalAccessTokenGcJob extends \HughCube\Laravel\Knight\Queue\Job
 {

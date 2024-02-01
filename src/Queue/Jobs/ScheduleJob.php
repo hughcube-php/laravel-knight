@@ -96,7 +96,7 @@ class ScheduleJob extends Job
         $end = Carbon::now();
 
         $this->info(sprintf(
-            '[%s] push job success, job: %s, id: %s, duration: %.2fms, delays: %.2fms',
+            '[%s] push job: %s, id: %s, duration: %.2fms, delays: %.2fms',
             $this->incrementScheduledJobCount(),
             $this->getName($job),
             is_scalar($id) ? $id : '',
@@ -134,7 +134,7 @@ class ScheduleJob extends Job
         $end = Carbon::now();
 
         $this->info(sprintf(
-            '[%s] fire job success, job: %s, duration: %.2fms, delays: %.2fms',
+            '[%s] fire job: %s, duration: %.2fms, delays: %.2fms',
             $this->incrementScheduledJobCount(),
             $this->getName($job),
             round($end->diffInMicroseconds($start) / 1000, 2),

@@ -10,7 +10,6 @@ namespace HughCube\Laravel\Knight\Routing;
 
 use BadMethodCallException;
 use HughCube\Laravel\Knight\Ide\Http\KIdeRequest;
-use HughCube\Laravel\Knight\Support\Carbon;
 use HughCube\Laravel\Knight\Support\ParameterBag;
 use HughCube\Laravel\Knight\Traits\Container;
 use HughCube\Laravel\Knight\Traits\GetOrSet;
@@ -18,6 +17,7 @@ use HughCube\Laravel\Knight\Traits\ParameterBag as ParameterBagTrait;
 use HughCube\Laravel\Knight\Traits\Validation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -29,115 +29,19 @@ trait Action
     use Container;
 
     /**
-     * action.
-     *
      * @return mixed
      */
-    abstract protected function action();
-
-    /**
-     * @return int|string|null
-     */
-    protected function getAuthId()
+    public function __invoke()
     {
-        return Auth::id() ?: null;
+        return $this->invoke();
     }
 
     /**
      * @return mixed
-     */
-    protected function getAuthUser()
-    {
-        /** @var mixed $use */
-        $use = Auth::user();
-
-        return $use;
-    }
-
-    protected function getActionStartedAt(): Carbon
-    {
-        /** @var Carbon $dateTime */
-        $dateTime = $this->getOrSet(__METHOD__, function () {
-            return Carbon::now();
-        });
-
-        return $dateTime->clone();
-    }
-
-    /**
-     * @param array $data
-     * @param int   $code
-     *
-     * @return JsonResponse
-     *
-     * @deprecated It's a name change
-     */
-    protected function asJson(array $data = [], int $code = 200): JsonResponse
-    {
-        /** @phpstan-ignore-next-line */
-        return $this->asResponse($data, $code);
-    }
-
-    /**
-     * @param array $data
-     * @param int   $code
-     *
-     * @return Response
-     */
-    protected function asResponse(array $data = [], int $code = 200): Response
-    {
-        return new JsonResponse([
-            'code'    => $code,
-            'message' => 'ok',
-            'data'    => $data,
-        ]);
-    }
-
-    /**
-     * @throws
-     *
-     * @return Request|\Request|KIdeRequest
      *
      * @phpstan-ignore-next-line
-     */
-    protected function getRequest(): Request
-    {
-        return $this->getContainer()->make('request');
-    }
-
-    /**
-     * @inheritDoc
-     *
      * @throws
      *
-     * @phpstan-ignore-next-line
-     */
-    protected function loadParameters()
-    {
-        if ($this->parameterBag instanceof ParameterBag) {
-            return;
-        }
-
-        $validData = $this->validate($this->getRequest()->all());
-        $this->parameterBag = new ParameterBag($validData);
-    }
-
-    /**
-     * @return ParameterBag
-     *
-     * @deprecated Will be removed in a future version.
-     */
-    protected function getParameter(): ParameterBag
-    {
-        return $this->p();
-    }
-
-    /**
-     * @throws
-     *
-     * @return mixed
-     *
-     * @phpstan-ignore-next-line
      */
     public function invoke()
     {
@@ -163,26 +67,64 @@ trait Action
         return $response;
     }
 
-    protected function beforeAction()
-    {
-    }
-
-    protected function afterAction()
-    {
-    }
-
     protected function clearActionStatus()
     {
         $this->parameterBag = null;
         $this->getIHKCStore()->clear();
     }
 
+    protected function getActionStartedAt(): Carbon
+    {
+        /** @var Carbon $dateTime */
+        $dateTime = $this->getOrSet(__METHOD__, function () {
+            return Carbon::now();
+        });
+
+        return $dateTime->clone();
+    }
+
     /**
+     * @inheritDoc
+     *
+     * @throws
+     *
+     * @phpstan-ignore-next-line
+     */
+    protected function loadParameters()
+    {
+        if ($this->parameterBag instanceof ParameterBag) {
+            return;
+        }
+
+        $validData = $this->validate($this->getRequest()->all());
+        $this->parameterBag = new ParameterBag($validData);
+    }
+
+    /**
+     * @return Request|\Request|KIdeRequest
+     *
+     * @phpstan-ignore-next-line
+     * @throws
+     *
+     */
+    protected function getRequest(): Request
+    {
+        return $this->getContainer()->make('request');
+    }
+
+    protected function beforeAction()
+    {
+    }
+
+    /**
+     * action.
+     *
      * @return mixed
      */
-    public function __invoke()
+    abstract protected function action();
+
+    protected function afterAction()
     {
-        return $this->invoke();
     }
 
     public function __get(string $name)
@@ -191,8 +133,8 @@ trait Action
     }
 
     /**
-     * @param string $name
-     * @param array  $arguments
+     * @param  string  $name
+     * @param  array  $arguments
      *
      * @return mixed
      */
@@ -203,5 +145,63 @@ trait Action
         }
 
         throw new BadMethodCallException("No such method exists: {$name}");
+    }
+
+    /**
+     * @return int|string|null
+     */
+    protected function getAuthId()
+    {
+        return Auth::id() ?: null;
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getAuthUser()
+    {
+        /** @var mixed $use */
+        $use = Auth::user();
+
+        return $use;
+    }
+
+    /**
+     * @param  array  $data
+     * @param  int  $code
+     *
+     * @return JsonResponse
+     *
+     * @deprecated It's a name change
+     */
+    protected function asJson(array $data = [], int $code = 200): JsonResponse
+    {
+        /** @phpstan-ignore-next-line */
+        return $this->asResponse($data, $code);
+    }
+
+    /**
+     * @param  array  $data
+     * @param  int  $code
+     *
+     * @return Response
+     */
+    protected function asResponse(array $data = [], int $code = 200): Response
+    {
+        return new JsonResponse([
+            'code' => $code,
+            'message' => 'ok',
+            'data' => $data,
+        ]);
+    }
+
+    /**
+     * @return ParameterBag
+     *
+     * @deprecated Will be removed in a future version.
+     */
+    protected function getParameter(): ParameterBag
+    {
+        return $this->p();
     }
 }

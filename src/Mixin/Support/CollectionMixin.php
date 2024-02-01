@@ -192,4 +192,14 @@ class CollectionMixin
             });
         };
     }
+
+    /**
+     * explode
+     */
+    public function explode(): Closure
+    {
+        return function (string $separator, string $string, int $limit = PHP_INT_MAX) {
+            return static::make(explode($separator, $string, $limit) ?: []);
+        };
+    }
 }

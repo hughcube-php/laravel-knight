@@ -6,10 +6,10 @@ use DateTimeInterface;
 use HughCube\Base\Base;
 use HughCube\Laravel\Knight\Database\Eloquent\Builder;
 use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
-use HughCube\Laravel\Knight\Support\Carbon;
 use HughCube\Laravel\Knight\Support\Json;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Collection as IlluminateCollection;
 use Illuminate\Support\Str;
@@ -33,8 +33,8 @@ trait Model
     private $isFromCache = false;
 
     /**
-     * @param DateTimeInterface|int|float|string|null $date
-     * @param string|null                             $format
+     * @param  DateTimeInterface|int|float|string|null  $date
+     * @param  string|null  $format
      *
      * @return Carbon|null
      */
@@ -42,12 +42,20 @@ trait Model
     {
         $format = $format ?? $this->getDateFormat();
 
-        return Carbon::fromDate($date, $format);
+        if (empty($date)) {
+            return null;
+        }
+
+        if (empty($format)) {
+            return Carbon::tryParse($format, $date);
+        }
+
+        return Carbon::createFromFormat($format, $date) ?: null;
     }
 
     /**
-     * @param DateTimeInterface|int|float|null $dateTime
-     * @param string                           $format
+     * @param  DateTimeInterface|int|float|null  $dateTime
+     * @param  string  $format
      *
      * @return string|null
      */
@@ -59,7 +67,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return null|Carbon
      */
@@ -69,7 +77,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return null|Carbon
      */
@@ -79,7 +87,7 @@ trait Model
     }
 
     /**
-     * @param mixed $date
+     * @param  mixed  $date
      *
      * @return null|Carbon
      */
@@ -310,7 +318,7 @@ trait Model
     }
 
     /**
-     * @param mixed $id
+     * @param  mixed  $id
      *
      * @return null|static
      */
@@ -320,7 +328,7 @@ trait Model
     }
 
     /**
-     * @param array|Arrayable|Traversable $ids
+     * @param  array|Arrayable|Traversable  $ids
      *
      * @return KnightCollection<int, static>|array<int, static>
      */
@@ -332,7 +340,7 @@ trait Model
     /**
      * Is a primary key value.
      *
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return bool
      */

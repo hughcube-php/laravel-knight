@@ -2,14 +2,19 @@
 
 namespace Carbon;
 
+use HughCube\Laravel\Knight\Mixin\Support\CarbonMixin;
 use Illuminate\Support\Carbon as IlluminateCarbon;
 
 /**
  * @mixin IlluminateCarbon
+ * @see CarbonMixin
  */
 class Carbon
 {
-    public static function tryParse(): ?IlluminateCarbon
+    /**
+     * @see CarbonMixin::tryParse()
+     */
+    public static function tryParse($date = null, $tz = null): ?IlluminateCarbon
     {
         return null;
     }
