@@ -130,12 +130,14 @@ trait Action
     }
 
     /**
+     * @param string $name
+     * @param array $arguments
      * @return mixed
      */
-    public function __call(string $name, array $arguments)
+    public function __call($name, $arguments)
     {
         if (method_exists($this->p(), $name)) {
-            return call_user_func_array([$this->p(), $name], $arguments);
+            return $this->p()->{$name}(...$arguments);
         }
 
         throw new BadMethodCallException("No such method exists: {$name}");
