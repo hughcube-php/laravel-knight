@@ -107,6 +107,7 @@ class KIdeCollection
 
     /**
      * @return static
+     *
      * @see CollectionMixin::explode()
      */
     public static function explode(): KIdeCollection

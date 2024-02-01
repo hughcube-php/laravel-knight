@@ -19,8 +19,8 @@ class AutoCleanFileJob extends Job
     protected function rules(): array
     {
         return [
-            'dir' => ['required'],
-            'pattern' => ['nullable'],
+            'dir'      => ['required'],
+            'pattern'  => ['nullable'],
             'max_days' => ['integer', 'min:0'],
         ];
     }
