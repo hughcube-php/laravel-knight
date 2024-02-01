@@ -175,8 +175,8 @@ class ServiceProvider extends IlluminateServiceProvider
         $dispatcher->listen($events, function ($event, $models) {
             /** @var Model $model */
             foreach ($models as $model) {
-                if (method_exists($model, 'refreshRowCache')) {
-                    $model->refreshRowCache();
+                if (method_exists($model, 'deleteRowCache')) {
+                    $model->deleteRowCache();
                 }
             }
         });

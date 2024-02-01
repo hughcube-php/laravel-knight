@@ -20,9 +20,7 @@ class OnlyLocalGuard
 
     protected function allowIps(): array
     {
-        $ips = [
-            '127.0.0.1',
-        ];
+        $ips = ['127.0.0.1'];
 
         if ($this->isContainerLocalEnv()) {
             $ips[] = '0.0.0.0/0';

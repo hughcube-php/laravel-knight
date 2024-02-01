@@ -16,9 +16,14 @@ trait GetRequest
 {
     /**
      * @return Request|IdeRequest|\Request|LumenRequest
+     * @throws
      */
     public function getRequest(): Request
     {
-        return request();
+        /** @see Container */
+        if (method_exists($this, 'getContainer')) {
+            return $this->getContainer()->make('request');
+        }
+        return app()->make('request');
     }
 }

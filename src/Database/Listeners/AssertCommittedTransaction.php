@@ -19,23 +19,26 @@ class AssertCommittedTransaction
     use Container;
 
     /**
+     * @return void
      * @throws BindingResolutionException
      *
-     * @return void
      */
     public function handle($event)
     {
-        foreach ($this->getConnections() as $name => $connection) {
+        foreach ($this->getConnections() as $connection) {
             if (method_exists($connection, 'transactionLevel') && $connection->transactionLevel() > 0) {
-                throw new NotCloseTransactionException(sprintf("Connection '%s' transaction is not closed!", $name));
+                throw new NotCloseTransactionException(
+                    $connection,
+                    sprintf("Connection '%s' transaction is not closed!", $connection->getName())
+                );
             }
         }
     }
 
     /**
+     * @return array<string, Connection>
      * @throws BindingResolutionException
      *
-     * @return array<string, Connection>
      */
     protected function getConnections(): array
     {

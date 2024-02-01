@@ -10,7 +10,7 @@ namespace HughCube\Laravel\Knight\Routing;
 
 use HughCube\Laravel\Knight\Exceptions\MobileEmptyException;
 use HughCube\Laravel\Knight\Exceptions\MobileInvalidException;
-use Illuminate\Support\Str;
+use HughCube\Laravel\Knight\Support\Str;
 
 /**
  * @mixin Action
@@ -41,15 +41,7 @@ trait GetMobile
      */
     protected function checkMobile($mobile, $iddCode = null): bool
     {
-        if (!is_string($mobile) && !ctype_digit(strval($mobile))) {
-            return false;
-        }
-
-        if (86 == $iddCode || null == $iddCode) {
-            return false != preg_match(Str::getMobilePattern(), $mobile);
-        }
-
-        return true;
+        return Str::checkMobile($mobile, $iddCode);
     }
 
     /**

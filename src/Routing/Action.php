@@ -37,11 +37,11 @@ trait Action
     }
 
     /**
-     * @throws
-     *
      * @return mixed
      *
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function invoke()
     {
@@ -60,9 +60,6 @@ trait Action
         $response = $this->action();
 
         $this->afterAction();
-
-        // Clean up the state once the action is complete
-        $this->clearActionStatus();
 
         return $response;
     }
@@ -101,11 +98,11 @@ trait Action
     }
 
     /**
-     * @throws
-     *
      * @return Request|\Request|KIdeRequest
      *
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     protected function getRequest(): Request
     {
@@ -133,12 +130,9 @@ trait Action
     }
 
     /**
-     * @param string $name
-     * @param array  $arguments
-     *
      * @return mixed
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments)
     {
         if (method_exists($this->p(), $name)) {
             return call_user_func_array([$this->p(), $name], $arguments);
@@ -167,11 +161,6 @@ trait Action
     }
 
     /**
-     * @param array $data
-     * @param int   $code
-     *
-     * @return JsonResponse
-     *
      * @deprecated It's a name change
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
@@ -180,18 +169,12 @@ trait Action
         return $this->asResponse($data, $code);
     }
 
-    /**
-     * @param array $data
-     * @param int   $code
-     *
-     * @return Response
-     */
     protected function asResponse(array $data = [], int $code = 200): Response
     {
         return new JsonResponse([
-            'code'    => $code,
+            'code' => $code,
             'message' => 'ok',
-            'data'    => $data,
+            'data' => $data,
         ]);
     }
 

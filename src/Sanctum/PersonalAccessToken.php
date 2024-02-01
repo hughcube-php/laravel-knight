@@ -9,16 +9,16 @@ use Illuminate\Support\Carbon;
 /**
  * Class PersonalAccessToken.
  *
- * @property int               $id
- * @property string            $tokenable_type
- * @property int               $tokenable_id
- * @property string            $name
- * @property string            $token
+ * @property int $id
+ * @property string $tokenable_type
+ * @property int $tokenable_id
+ * @property string $name
+ * @property string $token
  * @property string|array|null $abilities
- * @property Carbon|null       $last_used_at
- * @property Carbon|null       $expires_at
- * @property Carbon|null       $created_at
- * @property Carbon|null       $updated_at
+ * @property Carbon|null $last_used_at
+ * @property Carbon|null $expires_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  *
  * @method static static findById($id)
  */
@@ -101,10 +101,9 @@ class PersonalAccessToken extends \Laravel\Sanctum\PersonalAccessToken
 
         /**
          * 在app的api情况下, 如果只是修改last_used_at属性, 24个小时内只操作一次
-         *
          * @phpstan-ignore-next-line
          */
-        $originalLastUsedAt = Carbon::tryParse($this->getOriginal('last_used_at'));
+        $originalLastUsedAt = Carbon::tryParse($this->last_used_at);
 
         return 1 === count($dirty)
             && isset($dirty['last_used_at'])

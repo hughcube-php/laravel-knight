@@ -112,6 +112,6 @@ class Downloader implements StaticInstanceInterface
      */
     public static function __callStatic(string $method, array $args)
     {
-        return call_user_func_array([static::instance(), $method], $args);
+        return static::instance()->{$method}(...$args);
     }
 }
