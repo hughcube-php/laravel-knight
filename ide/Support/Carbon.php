@@ -7,6 +7,7 @@ use Illuminate\Support\Carbon as IlluminateCarbon;
 
 /**
  * @mixin IlluminateCarbon
+ *
  * @see CarbonMixin
  */
 class Carbon

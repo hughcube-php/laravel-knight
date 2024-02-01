@@ -43,11 +43,11 @@ class CompileFilesCommand extends Command
     protected $description = 'opcache compile file';
 
     /**
-     * @param  Schedule  $schedule
+     * @param Schedule $schedule
      *
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function handle(Schedule $schedule)
     {
@@ -94,9 +94,9 @@ class CompileFilesCommand extends Command
     }
 
     /**
-     * @return array
      * @throws Exception
      *
+     * @return array
      */
     protected function getFiles(): array
     {
@@ -186,7 +186,7 @@ class CompileFilesCommand extends Command
 
         try {
             $response = $this->getHttpClient()->post($url, [
-                RequestOptions::TIMEOUT => 10.0,
+                RequestOptions::TIMEOUT     => 10.0,
                 RequestOptions::HTTP_ERRORS => false,
             ]);
             $states = json_decode($response->getBody()->getContents(), true);

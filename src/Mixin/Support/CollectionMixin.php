@@ -194,7 +194,7 @@ class CollectionMixin
     }
 
     /**
-     * explode
+     * explode.
      */
     public function explode(): Closure
     {
