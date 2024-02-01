@@ -47,6 +47,7 @@ trait Model
         }
 
         if (empty($format)) {
+            /** @phpstan-ignore-next-line  */
             return Carbon::tryParse($format, $date);
         }
 
