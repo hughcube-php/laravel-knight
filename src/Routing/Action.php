@@ -37,11 +37,11 @@ trait Action
     }
 
     /**
+     * @throws
+     *
      * @return mixed
      *
      * @phpstan-ignore-next-line
-     * @throws
-     *
      */
     public function invoke()
     {
@@ -98,11 +98,11 @@ trait Action
     }
 
     /**
+     * @throws
+     *
      * @return Request|\Request|KIdeRequest
      *
      * @phpstan-ignore-next-line
-     * @throws
-     *
      */
     protected function getRequest(): Request
     {
@@ -172,9 +172,9 @@ trait Action
     protected function asResponse(array $data = [], int $code = 200): Response
     {
         return new JsonResponse([
-            'code' => $code,
+            'code'    => $code,
             'message' => 'ok',
-            'data' => $data,
+            'data'    => $data,
         ]);
     }
 

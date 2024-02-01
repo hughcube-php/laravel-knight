@@ -15,8 +15,9 @@ use Laravel\Lumen\Http\Request as LumenRequest;
 trait GetRequest
 {
     /**
-     * @return Request|IdeRequest|\Request|LumenRequest
      * @throws
+     *
+     * @return Request|IdeRequest|\Request|LumenRequest
      */
     public function getRequest(): Request
     {
@@ -24,6 +25,7 @@ trait GetRequest
         if (method_exists($this, 'getContainer')) {
             return $this->getContainer()->make('request');
         }
+
         return app()->make('request');
     }
 }

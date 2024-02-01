@@ -10,7 +10,6 @@ namespace HughCube\Laravel\Knight\Http\Middleware;
 
 use Closure;
 use HughCube\Laravel\Knight\Support\Str;
-use HughCube\Laravel\Knight\Traits\Container;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
