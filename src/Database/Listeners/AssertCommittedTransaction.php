@@ -19,9 +19,9 @@ class AssertCommittedTransaction
     use Container;
 
     /**
-     * @return void
      * @throws BindingResolutionException
      *
+     * @return void
      */
     public function handle($event)
     {
@@ -36,9 +36,9 @@ class AssertCommittedTransaction
     }
 
     /**
-     * @return array<string, Connection>
      * @throws BindingResolutionException
      *
+     * @return array<string, Connection>
      */
     protected function getConnections(): array
     {
