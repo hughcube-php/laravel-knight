@@ -131,7 +131,8 @@ trait Action
 
     /**
      * @param string $name
-     * @param array $arguments
+     * @param array  $arguments
+     *
      * @return mixed
      */
     public function __call($name, $arguments)
