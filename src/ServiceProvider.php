@@ -22,7 +22,6 @@ use HughCube\Laravel\Knight\Http\Actions\RequestShowAction;
 use HughCube\Laravel\Knight\Mixin\Database\Eloquent\CollectionMixin as EloquentCollectionMixin;
 use HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin;
 use HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin;
-use HughCube\Laravel\Knight\Mixin\Http\RequestMixin;
 use HughCube\Laravel\Knight\Mixin\Support\CarbonMixin;
 use HughCube\Laravel\Knight\Mixin\Support\CollectionMixin;
 use HughCube\Laravel\Knight\OPcache\Actions\ScriptsAction as OPcacheScriptsAction;
@@ -36,7 +35,6 @@ use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Grammars\Grammar;
 use Illuminate\Foundation\Application as LaravelApplication;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
@@ -48,7 +46,7 @@ use ReflectionException;
  */
 class ServiceProvider extends IlluminateServiceProvider
 {
-    protected $routesAreCached = null;
+    protected ?bool $routesAreCached = null;
 
     /**
      * Register the provider.
@@ -58,7 +56,6 @@ class ServiceProvider extends IlluminateServiceProvider
     public function register()
     {
         Collection::mixin(new CollectionMixin(), false);
-        Request::mixin(new RequestMixin(), false);
 
         /** 数据库 */
         Grammar::mixin(new GrammarMixin(), false);
@@ -94,11 +91,7 @@ class ServiceProvider extends IlluminateServiceProvider
 
     protected function hasRoutesCache(): bool
     {
-        if (null === $this->routesAreCached) {
-            $this->routesAreCached = $this->app->routesAreCached();
-        }
-
-        return $this->routesAreCached;
+        return $this->routesAreCached ??= $this->app->routesAreCached();
     }
 
     protected function bootOPcache()

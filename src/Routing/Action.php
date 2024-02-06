@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
+use HughCube\Laravel\Knight\Http\Request as KnightRequest;
 
 trait Action
 {
@@ -93,14 +94,15 @@ trait Action
             return;
         }
 
-        $validData = $this->validate($this->getRequest()->all());
-        $this->parameterBag = new ParameterBag($validData);
+        $this->parameterBag = new ParameterBag(
+            $this->validate($this->getRequest()->all())
+        );
     }
 
     /**
      * @throws
      *
-     * @return Request|\Request|KIdeRequest
+     * @return Request|\Request|KIdeRequest|KnightRequest
      *
      * @phpstan-ignore-next-line
      */
@@ -163,7 +165,8 @@ trait Action
     }
 
     /**
-     * @deprecated It's a name change
+     * @deprecated It's a name change.
+     * @see static::asResponse()
      */
     protected function asJson(array $data = [], int $code = 200): JsonResponse
     {

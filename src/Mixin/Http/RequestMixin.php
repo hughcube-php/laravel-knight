@@ -9,6 +9,7 @@
 namespace HughCube\Laravel\Knight\Mixin\Http;
 
 use Closure;
+use HughCube\Laravel\Knight\Http\Request as KnightRequest;
 use HughCube\Laravel\Knight\Support\Version;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -19,8 +20,10 @@ use Symfony\Component\HttpFoundation\HeaderBag;
  * @mixin Request
  *
  * @method null|string getClientHeaderPrefix()
- *
  * @property null|Agent $userAgentDetect
+ *
+ * @see KnightRequest
+ * @deprecated
  */
 class RequestMixin
 {
