@@ -9,6 +9,7 @@
 namespace HughCube\Laravel\Knight\Routing;
 
 use BadMethodCallException;
+use HughCube\Laravel\Knight\Http\Request as KnightRequest;
 use HughCube\Laravel\Knight\Ide\Http\KIdeRequest;
 use HughCube\Laravel\Knight\Support\ParameterBag;
 use HughCube\Laravel\Knight\Traits\Container;
@@ -20,7 +21,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
-use HughCube\Laravel\Knight\Http\Request as KnightRequest;
 
 trait Action
 {
