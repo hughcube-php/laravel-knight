@@ -92,8 +92,7 @@ trait MultipleHandler
         $reflection = new ReflectionClass($this);
         foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC | ReflectionMethod::IS_PROTECTED) as $method) {
             /** 方法名必须包含Handler, 不区分大小写 */
-            $position = strripos($method->name, 'Handler');
-            if (false === $position) {
+            if (false === ($position = strripos($method->name, 'Handler'))) {
                 continue;
             }
 

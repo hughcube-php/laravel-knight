@@ -32,10 +32,14 @@ trait Validation
      */
     protected function validate(array $request): array
     {
+        if (empty($rules = $this->rules())) {
+            return [];
+        }
+
         /** @var Factory $factory */
         $factory = app(Factory::class);
 
-        $validator = $factory->make($request, $this->rules());
+        $validator = $factory->make($request, $rules);
 
         /** @var array|null $data */
         $data = $validator->validate();
