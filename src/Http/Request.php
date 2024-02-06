@@ -41,7 +41,7 @@ class Request extends HttpRequest
         return $this->methodResultCache[__METHOD__] ??= parent::prepareBaseUrl();
     }
 
-    public function getQueryString(): string
+    public function getQueryString(): ?string
     {
         return $this->methodResultCache[__METHOD__] ??= parent::getQueryString();
     }
