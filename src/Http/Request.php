@@ -21,6 +21,21 @@ class Request extends HttpRequest
 
     protected array $methodResultCache = [];
 
+    protected function prepareBaseUrl(): string
+    {
+        return $this->methodResultCache[__METHOD__] ??= parent::prepareBaseUrl();
+    }
+
+    protected function prepareRequestUri(): string
+    {
+        return $this->methodResultCache[__METHOD__] ??= parent::prepareRequestUri();
+    }
+
+    protected function preparePathInfo(): string
+    {
+        return $this->methodResultCache[__METHOD__] ??= parent::preparePathInfo();
+    }
+
     public function isFromTrustedProxy(): bool
     {
         return $this->methodResultCache[__METHOD__] ??= parent::isFromTrustedProxy();
@@ -41,19 +56,19 @@ class Request extends HttpRequest
         return $this->methodResultCache[__METHOD__] ??= (intval(parent::getPort()) ?: null);
     }
 
-    public function prepareBaseUrl(): string
-    {
-        return $this->methodResultCache[__METHOD__] ??= parent::prepareBaseUrl();
-    }
-
-    public function prepareRequestUri(): string
-    {
-        return $this->methodResultCache[__METHOD__] ??= parent::prepareRequestUri();
-    }
-
     public function getQueryString(): ?string
     {
         return $this->methodResultCache[__METHOD__] ??= parent::getQueryString();
+    }
+
+    public function getMethod(): string
+    {
+        return $this->methodResultCache[__METHOD__] ??= parent::getMethod();
+    }
+
+    public function getBaseUrl(): string
+    {
+        return $this->methodResultCache[__METHOD__] ??= parent::getBaseUrl();
     }
 
     public function getClientHeaderPrefix(): string
