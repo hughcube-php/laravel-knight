@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2024/2/6
- * Time: 16:29
+ * Time: 16:29.
  */
 
 namespace HughCube\Laravel\Knight\Http;
@@ -149,7 +149,7 @@ class Request extends HttpRequest
      */
     public function isLtClientVersion(string $version, bool $contain = false, ?int $length = null): bool
     {
-        return Version::compare(($contain ? '>=' : '>'), $this->getClientVersion(), $version, $length);
+        return Version::compare($contain ? '>=' : '>', $this->getClientVersion(), $version, $length);
     }
 
     /**
@@ -159,7 +159,7 @@ class Request extends HttpRequest
      */
     public function isGtClientVersion(string $version, bool $contain = false, ?int $length = null): bool
     {
-        return Version::compare(($contain ? '<=' : '<'), $this->getClientVersion(), $version, $length);
+        return Version::compare($contain ? '<=' : '<', $this->getClientVersion(), $version, $length);
     }
 
     /**
