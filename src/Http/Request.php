@@ -36,9 +36,19 @@ class Request extends HttpRequest
         return $this->methodResultCache[__METHOD__] ??= parent::getHost();
     }
 
+    public function getPort(): ?int
+    {
+        return $this->methodResultCache[__METHOD__] ??= (intval(parent::getPort()) ?: null);
+    }
+
     public function prepareBaseUrl(): string
     {
         return $this->methodResultCache[__METHOD__] ??= parent::prepareBaseUrl();
+    }
+
+    public function prepareRequestUri(): string
+    {
+        return $this->methodResultCache[__METHOD__] ??= parent::prepareRequestUri();
     }
 
     public function getQueryString(): ?string
