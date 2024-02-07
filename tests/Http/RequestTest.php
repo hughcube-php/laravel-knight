@@ -8,10 +8,10 @@
 
 namespace HughCube\Laravel\Knight\Tests\Http;
 
+use HughCube\Laravel\Knight\Http\Request;
 use HughCube\Laravel\Knight\Mixin\Http\RequestMixin;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Jenssegers\Agent\Agent;
-use HughCube\Laravel\Knight\Http\Request;
 
 /**
  * @see RequestMixin
