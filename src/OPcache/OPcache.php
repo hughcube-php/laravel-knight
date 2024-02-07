@@ -17,9 +17,14 @@ use HughCube\Laravel\Knight\Traits\Container;
 use HughCube\PUrl\Url as PUrl;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
+use PhpParser\Node\Identifier;
+use PhpParser\Node\Stmt;
+use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\Namespace_;
 use Psr\SimpleCache\InvalidArgumentException;
 
 class OPcache
@@ -90,7 +95,9 @@ class OPcache
             RequestOptions::ALLOW_REDIRECTS => ['max' => 5, 'referer' => true, 'track_redirects' => true],
         ]);
 
-        return json_decode($response->getBody()->getContents(), true);
+        $results = json_decode($response->getBody()->getContents(), true);
+
+        return $results['data']['scripts'];
     }
 
     public function getUrl($url = null): ?PUrl
@@ -131,6 +138,37 @@ class OPcache
         }
 
         return $scripts;
+    }
+
+    /**
+     * @param  array<Stmt>  $stmts
+     */
+    public function getPHPParserStmtClasses(array $stmts, $namespace = null): Collection
+    {
+        $classes = Collection::make();
+
+        foreach ($stmts as $stmt) {
+
+            /** class */
+            if ($stmt instanceof Class_) {
+                if ($stmt->name instanceof Identifier) {
+                    if (empty($namespace)) {
+                        $classes = $classes->add($stmt->name->name);
+                    } else {
+                        $classes = $classes->add(sprintf('%s\%s', $namespace, $stmt->name->name));
+                    }
+                }
+            }
+
+            /** namespace */
+            if ($stmt instanceof Namespace_) {
+                $classes = $classes->merge(
+                    $this->getPHPParserStmtClasses($stmt->stmts, $stmt->name)
+                );
+            }
+        }
+
+        return $classes->unique()->values();
     }
 
     protected function getCacheKey(): string

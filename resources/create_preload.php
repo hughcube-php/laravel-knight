@@ -1,6 +1,7 @@
 <?php
 
 use HughCube\Laravel\Knight\OPcache\OPcache;
+use HughCube\Laravel\Knight\Support\Str;
 use Illuminate\Support\Collection;
 use PhpParser\ParserFactory;
 
@@ -10,10 +11,14 @@ $publicPath = getcwd();
 
 $classes = get_declared_classes();
 
+call_user_func(function () {
+    $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? null ?: 'localhost';
+    $_SERVER['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'] ?? null ?: '127.0.0.1';
+});
+
 /** index.php */
 call_user_func(function () use ($publicPath) {
     ob_start();
-    $_SERVER['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'] ?? null ?: '127.0.0.1';
     require $publicPath.'/index.php';
     ob_clean();
 });
@@ -21,23 +26,34 @@ call_user_func(function () use ($publicPath) {
 /** OPcache Scripts */
 call_user_func(function () {
 
+    if ('1' !== getenv('WITH_REMOTE_SCRIPTS')) {
+        return;
+    }
+
+    $opcache = OPcache::i();
+    $scripts = $opcache->getRemoteScripts();
     $parser = (new ParserFactory())->createForNewestSupportedVersion();
-    $scripts = OPcache::i()->getRemoteScripts();
+
+    $classes = Collection::make();
+
     foreach ($scripts as $script) {
-        if (!is_file($file = base_path($script['file']))) {
-            continue;
-        }
-
-        $stmts = $parser->parse(file_get_contents($file));
-        foreach ($stmts as $stmt){
-
+        if (is_file($file = base_path($script))) {
+            $stmts = $parser->parse(file_get_contents($file));
+            $classes = $classes->merge($opcache->getPHPParserStmtClasses($stmts));
         }
     }
+
+    $classes->each(function ($class) {
+        if (!Str::startsWith($class, "PhpParser\\")) {
+            class_exists($class);
+        }
+    });
 });
 
 $loads = Collection::make(get_declared_classes())
     ->diff($classes)
     ->diff($excludes)
+    ->filter(fn($class) => !Str::startsWith($class, "PhpParser\\"))
     ->values()
     ->map(function ($class) {
         return sprintf("class_exists('%s');", $class);

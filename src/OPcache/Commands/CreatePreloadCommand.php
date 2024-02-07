@@ -2,7 +2,6 @@
 
 namespace HughCube\Laravel\Knight\OPcache\Commands;
 
-use HughCube\Laravel\Knight\OPcache\OPcache;
 use Illuminate\Console\Command;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
@@ -14,7 +13,9 @@ class CreatePreloadCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'opcache:create-preload';
+    protected $signature = 'opcache:create-preload
+                    {--with_remote_scripts=0 }
+    ';
 
     /**
      * The console command description.
@@ -30,7 +31,14 @@ class CreatePreloadCommand extends Command
      */
     public function handle()
     {
-        $process = new Process($this->serverCommand(), public_path());
+        $process = new Process(
+            $this->serverCommand(),
+            public_path(),
+            [
+                'WITH_REMOTE_SCRIPTS' => strval(intval($this->option('with_remote_scripts')))
+            ]
+        );
+
         $process->mustRun(function ($type, $buffer) {
             if (Process::ERR === $type) {
                 echo 'ERR > '.$buffer;
