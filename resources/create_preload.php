@@ -1,7 +1,6 @@
 <?php
 
 use HughCube\Laravel\Knight\OPcache\OPcache;
-use HughCube\Laravel\Knight\Support\Str;
 use Illuminate\Support\Collection;
 use PhpParser\ParserFactory;
 
@@ -35,7 +34,6 @@ call_user_func(function () {
     $parser = (new ParserFactory())->createForNewestSupportedVersion();
 
     $classes = Collection::make();
-
     foreach ($scripts as $script) {
         if (is_file($file = base_path($script))) {
             $stmts = $parser->parse(file_get_contents($file));
@@ -44,16 +42,16 @@ call_user_func(function () {
     }
 
     $classes->each(function ($class) {
-        if (!Str::startsWith($class, "PhpParser\\")) {
-            class_exists($class);
-        }
+        class_exists($class);
     });
 });
 
 $loads = Collection::make(get_declared_classes())
     ->diff($classes)
     ->diff($excludes)
-    ->filter(fn($class) => !Str::startsWith($class, "PhpParser\\"))
+    ->filter(function ($class) {
+        return 0 !== strripos($class, "PhpParser\\");
+    })
     ->values()
     ->map(function ($class) {
         return sprintf("class_exists('%s');", $class);
