@@ -14,7 +14,7 @@ class HKStore
      *
      * @var array
      */
-    protected $storage = [];
+    protected array $storage = [];
 
     /**
      * @param string $key

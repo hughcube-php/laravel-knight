@@ -1,19 +1,20 @@
 <?php
 
-namespace HughCube\Laravel\Knight\Console\Commands;
+namespace HughCube\Laravel\Knight\OPcache\Commands;
 
+use HughCube\Laravel\Knight\OPcache\OPcache;
 use Illuminate\Console\Command;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 
-class CreatePreload extends Command
+class CreatePreloadCommand extends Command
 {
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $signature = 'knight:create-preload';
+    protected $signature = 'opcache:create-preload';
 
     /**
      * The console command description.

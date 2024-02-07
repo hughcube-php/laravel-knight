@@ -2,16 +2,13 @@
 
 namespace HughCube\Laravel\Knight\OPcache\Jobs;
 
-use GuzzleHttp\RequestOptions;
+use GuzzleHttp\Exception\GuzzleException;
 use HughCube\GuzzleHttp\HttpClientTrait;
+use HughCube\Laravel\Knight\OPcache\OPcache;
 use HughCube\Laravel\Knight\Queue\Job;
-use HughCube\Laravel\Knight\Support\Str;
 use HughCube\Laravel\Knight\Traits\Container;
 use HughCube\PUrl\Url as PUrl;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\URL;
-use Throwable;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class WatchFilesJob extends Job
 {
@@ -21,68 +18,43 @@ class WatchFilesJob extends Job
     public function rules(): array
     {
         return [
-            'url'         => ['string', 'nullable'],
+            'url' => ['string', 'nullable'],
             'use_app_url' => ['boolean', 'default:1'],
-            'timeout'     => ['integer', 'default:30'],
+            'timeout' => ['integer', 'default:30'],
         ];
     }
 
     /**
-     * @return void
+     * @throws InvalidArgumentException
      */
     protected function action(): void
     {
-        $url = $this->getUrl();
+        $opcache = new OPcache();
+
+        /** 确定请求的url */
+        $url = $opcache->getUrl($this->p()->get('url') ?: null);
         if (!$url instanceof PUrl) {
             $this->warning('Remote interface URL cannot be found!');
-
             return;
         }
 
-        /** 替换域名为 app.url */
-        if ($this->p('use_app_url')
-            && (Str::isIp($url->getHost()) || $url->matchHost('localhost') || $url->matchHost('127.0.0.1'))
-        ) {
-            $appUrl = PUrl::parse($this->getContainerConfig()->get('app.url'));
-            if ($appUrl instanceof PUrl) {
-                $url = $url->withHost($appUrl->getHost())
-                    ->withPort($appUrl->getPort())
-                    ->withScheme($appUrl->getScheme());
-            }
-        }
-
+        /** 获取到远程的脚本列表 */
         try {
-            $response = $this->getHttpClient()->get($url, [
-                RequestOptions::TIMEOUT         => floatval($this->p()->get('timeout')),
-                RequestOptions::ALLOW_REDIRECTS => ['max' => 5, 'referer' => true, 'track_redirects' => true],
-            ]);
-            $results = json_decode($response->getBody()->getContents(), true);
-        } catch (Throwable $exception) {
+            $results = $opcache->getRemoteScripts(
+                $url,
+                floatval($this->p()->get('timeout')),
+                $this->p()->getBoolean('use_app_url')
+            );
+        } catch (GuzzleException $exception) {
             $this->warning(sprintf('http error: %s!', $exception->getMessage()));
-
             return;
         }
 
+        /** log记录 */
         $this->info(sprintf(
-            'watch OPcache files, count: %s, status: %s, url: %s',
-            $results['data']['count'] ?? null ?: 0,
-            $response->getStatusCode(),
-            Collection::make()
-                ->merge([$url->toString()])
-                ->merge($response->getHeaders()['X-Guzzle-Redirect-History'] ?? [] ?: [])
-                ->implode(', ')
+            'watch OPcache files, url: %s, count: %s.',
+            $url->toString(),
+            ($results['data']['count'] ?? null ?: 0)
         ));
-    }
-
-    protected function getUrl(): ?PUrl
-    {
-        $url = $this->p()->get('url', 'knight.opcache.scripts');
-        if (PUrl::isUrlString($url)) {
-            return $url;
-        }
-
-        return PUrl::parse(
-            Route::has($url) ? URL::route($url) : URL::to($url)
-        );
     }
 }

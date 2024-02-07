@@ -30,7 +30,7 @@ trait Model
     /**
      * @var bool
      */
-    private $isFromCache = false;
+    private bool $isFromCache = false;
 
     /**
      * @param DateTimeInterface|int|float|string|null $date

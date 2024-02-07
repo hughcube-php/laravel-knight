@@ -36,7 +36,7 @@ trait Builder
     /**
      * @var bool
      */
-    protected $enableCache = true;
+    protected bool $enableCache = true;
 
     /**
      * @return $this

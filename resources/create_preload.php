@@ -1,6 +1,8 @@
 <?php
 
+use HughCube\Laravel\Knight\OPcache\OPcache;
 use Illuminate\Support\Collection;
+use PhpParser\ParserFactory;
 
 $excludes = [];
 
@@ -14,6 +16,23 @@ call_user_func(function () use ($publicPath) {
     $_SERVER['REMOTE_ADDR'] = $_SERVER['REMOTE_ADDR'] ?? null ?: '127.0.0.1';
     require $publicPath.'/index.php';
     ob_clean();
+});
+
+/** OPcache Scripts */
+call_user_func(function () {
+
+    $parser = (new ParserFactory())->createForNewestSupportedVersion();
+    $scripts = OPcache::i()->getRemoteScripts();
+    foreach ($scripts as $script) {
+        if (!is_file($file = base_path($script['file']))) {
+            continue;
+        }
+
+        $stmts = $parser->parse(file_get_contents($file));
+        foreach ($stmts as $stmt){
+
+        }
+    }
 });
 
 $loads = Collection::make(get_declared_classes())

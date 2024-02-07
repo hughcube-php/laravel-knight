@@ -10,7 +10,6 @@ namespace HughCube\Laravel\Knight;
 
 use Carbon\Carbon;
 use HughCube\Laravel\Knight\Console\Commands\Config;
-use HughCube\Laravel\Knight\Console\Commands\CreatePreload;
 use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\KRTest;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
@@ -28,6 +27,7 @@ use HughCube\Laravel\Knight\OPcache\Actions\ScriptsAction as OPcacheScriptsActio
 use HughCube\Laravel\Knight\OPcache\Actions\StatesAction as OPcacheStatesAction;
 use HughCube\Laravel\Knight\OPcache\Commands\ClearCliCacheCommand as OPcacheClearCliCacheCommand;
 use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand as OPcacheCompileFilesCommand;
+use HughCube\Laravel\Knight\OPcache\Commands\CreatePreloadCommand as OPcacheCreatePreloadCommand;
 use Illuminate\Config\Repository;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -76,8 +76,7 @@ class ServiceProvider extends IlluminateServiceProvider
                 Config::class,
                 Environment::class,
                 PhpIniFile::class,
-                KRTest::class,
-                CreatePreload::class,
+                KRTest::class
             ]);
         }
 
@@ -100,6 +99,7 @@ class ServiceProvider extends IlluminateServiceProvider
             $this->commands([
                 OPcacheCompileFilesCommand::class,
                 OPcacheClearCliCacheCommand::class,
+                OPcacheCreatePreloadCommand::class,
             ]);
         }
 
