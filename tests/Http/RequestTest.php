@@ -6,20 +6,20 @@
  * Time: 16:50.
  */
 
-namespace HughCube\Laravel\Knight\Tests\Mixin\Http;
+namespace HughCube\Laravel\Knight\Tests\Http;
 
 use HughCube\Laravel\Knight\Mixin\Http\RequestMixin;
 use HughCube\Laravel\Knight\Tests\TestCase;
-use Illuminate\Http\Request;
 use Jenssegers\Agent\Agent;
+use HughCube\Laravel\Knight\Http\Request;
 
 /**
  * @see RequestMixin
  */
-class RequestMixinTest extends TestCase
+class RequestTest extends TestCase
 {
     /**
-     * @see RequestMixin::getUserAgentDetect()
+     * @see Request::getUserAgentDetect()
      */
     public function testGetUserAgentDetect()
     {
@@ -30,7 +30,7 @@ class RequestMixinTest extends TestCase
     }
 
     /**
-     * @see RequestMixin::isWeChat()
+     * @see Request::isWeChat()
      */
     public function testIsWeChat()
     {
@@ -38,7 +38,7 @@ class RequestMixinTest extends TestCase
     }
 
     /**
-     * @see RequestMixin::isWeChatMiniProgram()
+     * @see Request::isWeChatMiniProgram()
      */
     public function testIsWeChatMiniProgram()
     {
@@ -46,14 +46,13 @@ class RequestMixinTest extends TestCase
     }
 
     /**
-     * @see RequestMixin::isEqClientVersion()
+     * @see Request::isEqClientVersion()
      */
     public function testIsEqClientVersion()
     {
         $request = Request::capture();
-        Request::macro('getClientVersion', function () {
-            return '1.0.0';
-        });
+        $request->headers->set('Version', '1.0.0');
+
         $this->assertTrue($request->isEqClientVersion('1', 1));
         $this->assertTrue($request->isEqClientVersion('1.0', 2));
         $this->assertTrue($request->isEqClientVersion('1.0.0', 3));
@@ -62,14 +61,13 @@ class RequestMixinTest extends TestCase
     }
 
     /**
-     * @see RequestMixin::isLtClientVersion()
+     * @see Request::isLtClientVersion()
      */
     public function testIsLtClientApiVersion()
     {
         $request = Request::capture();
-        Request::macro('getClientVersion', function () {
-            return '2.2.2';
-        });
+        $request->headers->set('Version', '2.2.2');
+
         $this->assertTrue($request->isLtClientVersion('2', true));
         $this->assertTrue($request->isLtClientVersion('2'));
 
@@ -85,14 +83,14 @@ class RequestMixinTest extends TestCase
     }
 
     /**
-     * @see RequestMixin::isGtClientVersion()
+     * @see Request::isGtClientVersion()
      */
     public function testIsLtClientVersion()
     {
         $request = Request::capture();
-        Request::macro('getClientVersion', function () {
-            return '2.2.2';
-        });
+
+        $request->headers->set('Version', '2.2.2');
+
         $this->assertTrue($request->isGtClientVersion('3', true));
         $this->assertTrue($request->isGtClientVersion('3'));
 

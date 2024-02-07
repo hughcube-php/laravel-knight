@@ -16,10 +16,12 @@ use HughCube\Laravel\Knight\Traits\Container;
 use HughCube\Laravel\Knight\Traits\GetOrSet;
 use HughCube\Laravel\Knight\Traits\ParameterBag as ParameterBagTrait;
 use HughCube\Laravel\Knight\Traits\Validation;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 
 trait Action
@@ -82,21 +84,12 @@ trait Action
     }
 
     /**
-     * @inheritDoc
-     *
-     * @throws
-     *
-     * @phpstan-ignore-next-line
+     * @throws BindingResolutionException
+     * @throws ValidationException
      */
-    protected function loadParameters()
+    protected function loadParameters(): ParameterBag
     {
-        if ($this->parameterBag instanceof ParameterBag) {
-            return;
-        }
-
-        $this->parameterBag = new ParameterBag(
-            $this->validate($this->getRequest()->all())
-        );
+        return $this->parameterBag ??= new ParameterBag($this->validate($this->getRequest()));
     }
 
     /**

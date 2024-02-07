@@ -39,7 +39,7 @@ class KRTest extends Command
         /** @var int $number */
         $number = $this->argument('number');
 
-        $this->line('<info>当前时间:</info><comment>'.Carbon::now()->format('Y-m-d H:i:s u').'</comment>');
+        $this->line('<info>当前时间:</info><comment>'.Carbon::now()->format('Y-m-d H:i:s.u').'</comment>');
         $this->line("<info>重复次数:</info><comment>{$number}</comment><info>次</info>");
 
         $startPeakMemory = memory_get_peak_usage();

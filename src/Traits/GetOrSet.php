@@ -40,7 +40,8 @@ trait GetOrSet
      */
     protected function getOrSet($name, callable $callable)
     {
-        $cacheKey = sprintf('%s:%s', md5($key = serialize($name)), abs(crc32($key)));
+        $key = is_string($name) ? $name : serialize($name);
+        $cacheKey = sprintf('%s:%x', md5($key), crc32($key));
 
         return $this->getIHKCStore()->getOrSet($cacheKey, $callable);
     }

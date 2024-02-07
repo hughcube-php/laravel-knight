@@ -73,7 +73,7 @@ class Request extends HttpRequest
 
     public function getClientHeaderPrefix(): string
     {
-        throw new BadFunctionCallException('Not implemented');
+        return '';
     }
 
     public function getClientVersion(): ?string
@@ -136,7 +136,7 @@ class Request extends HttpRequest
     /**
      * 判断是否在微信客户端内.
      */
-    public function isWeChat(): ?string
+    public function isWeChat(): bool
     {
         return false !== strripos($this->userAgent(), 'MicroMessenger');
     }
@@ -162,9 +162,13 @@ class Request extends HttpRequest
      *
      * 1.0(client) == 1.0 => true
      */
-    public function isEqClientVersion(string $version, ?int $length = null): bool
+    public function isEqClientVersion(string $version, ?int $length = null): ?bool
     {
-        return Version::compare('=', $this->getClientVersion(), $version, $length);
+        if (null === ($clientVersion = $this->getClientVersion())) {
+            return null;
+        }
+
+        return Version::compare('=', $clientVersion, $version, $length);
     }
 
     /**
@@ -172,9 +176,13 @@ class Request extends HttpRequest
      *
      * 2.0(client) > 1.0 => true
      */
-    public function isLtClientVersion(string $version, bool $contain = false, ?int $length = null): bool
+    public function isLtClientVersion(string $version, bool $contain = false, ?int $length = null): ?bool
     {
-        return Version::compare($contain ? '>=' : '>', $this->getClientVersion(), $version, $length);
+        if (null === ($clientVersion = $this->getClientVersion())) {
+            return null;
+        }
+
+        return Version::compare(($contain ? '>=' : '>'), $clientVersion, $version, $length);
     }
 
     /**
@@ -182,9 +190,13 @@ class Request extends HttpRequest
      *
      * 1.0(client) < 2.0 => true
      */
-    public function isGtClientVersion(string $version, bool $contain = false, ?int $length = null): bool
+    public function isGtClientVersion(string $version, bool $contain = false, ?int $length = null): ?bool
     {
-        return Version::compare($contain ? '<=' : '<', $this->getClientVersion(), $version, $length);
+        if (null === ($clientVersion = $this->getClientVersion())) {
+            return null;
+        }
+
+        return Version::compare($contain ? '<=' : '<', $clientVersion, $version, $length);
     }
 
     /**

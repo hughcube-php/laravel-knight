@@ -8,7 +8,9 @@
 
 namespace HughCube\Laravel\Knight\Traits;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Validation\Factory;
+use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
 trait Validation
@@ -24,22 +26,28 @@ trait Validation
     }
 
     /**
-     * @param array $request
-     *
-     * @throws ValidationException
+     * @param  array|Request  $request
      *
      * @return array
+     * @throws ValidationException
+     * @throws BindingResolutionException
+     *
      */
-    protected function validate(array $request): array
+    protected function validate($request): array
     {
         if (empty($rules = $this->rules())) {
             return [];
         }
 
-        /** @var Factory $factory */
-        $factory = app(Factory::class);
+        $container = method_exists($this, 'getContainer') ? $this->getContainer() : app();
 
-        $validator = $factory->make($request, $rules);
+        /** @var Factory $factory */
+        $factory = $container->make(Factory::class);
+
+        $validator = $factory->make(
+            $request instanceof Request ? $request->all() : $request,
+            $rules
+        );
 
         /** @var array|null $data */
         $data = $validator->validate();
