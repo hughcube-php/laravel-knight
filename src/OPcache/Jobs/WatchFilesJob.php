@@ -18,9 +18,9 @@ class WatchFilesJob extends Job
     public function rules(): array
     {
         return [
-            'url' => ['string', 'nullable'],
+            'url'         => ['string', 'nullable'],
             'use_app_url' => ['boolean', 'default:1'],
-            'timeout' => ['integer', 'default:30'],
+            'timeout'     => ['integer', 'default:30'],
         ];
     }
 
@@ -35,6 +35,7 @@ class WatchFilesJob extends Job
         $url = $opcache->getUrl($this->p()->get('url') ?: null);
         if (!$url instanceof PUrl) {
             $this->warning('Remote interface URL cannot be found!');
+
             return;
         }
 
@@ -47,6 +48,7 @@ class WatchFilesJob extends Job
             );
         } catch (GuzzleException $exception) {
             $this->warning(sprintf('http error: %s!', $exception->getMessage()));
+
             return;
         }
 
@@ -54,7 +56,7 @@ class WatchFilesJob extends Job
         $this->info(sprintf(
             'watch OPcache files, url: %s, count: %s.',
             $url->toString(),
-            ($results['data']['count'] ?? null ?: 0)
+            $results['data']['count'] ?? null ?: 0
         ));
     }
 }

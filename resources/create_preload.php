@@ -24,7 +24,6 @@ call_user_func(function () use ($publicPath) {
 
 /** OPcache Scripts */
 call_user_func(function () {
-
     if ('1' !== getenv('WITH_REMOTE_SCRIPTS')) {
         return;
     }
@@ -50,7 +49,7 @@ $loads = Collection::make(get_declared_classes())
     ->diff($classes)
     ->diff($excludes)
     ->filter(function ($class) {
-        return 0 !== strripos($class, "PhpParser\\");
+        return 0 !== strripos($class, 'PhpParser\\');
     })
     ->values()
     ->map(function ($class) {
