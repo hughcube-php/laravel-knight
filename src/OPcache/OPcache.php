@@ -47,11 +47,11 @@ class OPcache
     {
         $this->loadedOPcacheExtension();
 
-        $scripts = array_merge($this->getHistoryScripts(), $this->getScripts());
+        $scripts = array_merge($this->getHistoryScripts(), $this->getOpCacheScripts());
 
         /** Scripts that have not been used for 30 days are considered invalid */
         foreach ($scripts as $file => $time) {
-            if ((365 * 24 * 3600) < (time() - $time)) {
+            if ((180 * 24 * 3600) < (time() - $time)) {
                 unset($scripts[$file]);
             }
         }
@@ -91,7 +91,7 @@ class OPcache
 
         /** 发送请求 */
         $response = $this->getHttpClient()->get($url, [
-            RequestOptions::TIMEOUT         => floatval($timeout),
+            RequestOptions::TIMEOUT => floatval($timeout),
             RequestOptions::ALLOW_REDIRECTS => ['max' => 5, 'referer' => true, 'track_redirects' => true],
         ]);
 
@@ -114,9 +114,9 @@ class OPcache
     }
 
     /**
+     * @return array
      * @throws InvalidArgumentException
      *
-     * @return array
      */
     protected function getHistoryScripts(): array
     {
@@ -143,7 +143,7 @@ class OPcache
     }
 
     /**
-     * @param array<Stmt> $stmts
+     * @param  array<Stmt>  $stmts
      */
     public function getPHPParserStmtClasses(array $stmts, $namespace = null): Collection
     {
