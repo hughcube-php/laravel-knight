@@ -26,12 +26,12 @@ trait Validation
     }
 
     /**
-     * @param  array|Request  $request
+     * @param array|Request $request
      *
-     * @return array
      * @throws ValidationException
      * @throws BindingResolutionException
      *
+     * @return array
      */
     protected function validate($request): array
     {

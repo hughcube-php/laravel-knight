@@ -8,7 +8,6 @@
 
 namespace HughCube\Laravel\Knight\Http;
 
-use BadFunctionCallException;
 use HughCube\Laravel\Knight\Support\Version;
 use Illuminate\Http\Request as HttpRequest;
 use Illuminate\Support\Str;
@@ -182,7 +181,7 @@ class Request extends HttpRequest
             return null;
         }
 
-        return Version::compare(($contain ? '>=' : '>'), $clientVersion, $version, $length);
+        return Version::compare($contain ? '>=' : '>', $clientVersion, $version, $length);
     }
 
     /**
