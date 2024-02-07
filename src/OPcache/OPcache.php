@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2024/2/7
- * Time: 15:37
+ * Time: 15:37.
  */
 
 namespace HughCube\Laravel\Knight\OPcache;
@@ -36,7 +36,7 @@ class OPcache
     public static function i(): OPcache
     {
         /** @phpstan-ignore-next-line */
-        return new static;
+        return new static();
     }
 
     /**
@@ -91,7 +91,7 @@ class OPcache
 
         /** 发送请求 */
         $response = $this->getHttpClient()->get($url, [
-            RequestOptions::TIMEOUT => floatval($timeout),
+            RequestOptions::TIMEOUT         => floatval($timeout),
             RequestOptions::ALLOW_REDIRECTS => ['max' => 5, 'referer' => true, 'track_redirects' => true],
         ]);
 
@@ -114,12 +114,14 @@ class OPcache
     }
 
     /**
-     * @return array
      * @throws InvalidArgumentException
+     *
+     * @return array
      */
     protected function getHistoryScripts(): array
     {
         $histories = $this->getCache()->get($this->getCacheKey());
+
         return is_array($histories) ? $histories : [];
     }
 
@@ -141,14 +143,13 @@ class OPcache
     }
 
     /**
-     * @param  array<Stmt>  $stmts
+     * @param array<Stmt> $stmts
      */
     public function getPHPParserStmtClasses(array $stmts, $namespace = null): Collection
     {
         $classes = Collection::make();
 
         foreach ($stmts as $stmt) {
-
             /** class */
             if ($stmt instanceof Class_) {
                 if ($stmt->name instanceof Identifier) {
@@ -174,6 +175,7 @@ class OPcache
     protected function getCacheKey(): string
     {
         $string = serialize(['v1.0.2', __METHOD__]);
+
         return sprintf('%s%s', md5($string), crc32($string));
     }
 

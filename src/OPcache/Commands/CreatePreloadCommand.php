@@ -35,7 +35,7 @@ class CreatePreloadCommand extends Command
             $this->serverCommand(),
             public_path(),
             [
-                'WITH_REMOTE_SCRIPTS' => strval(intval($this->option('with_remote_scripts')))
+                'WITH_REMOTE_SCRIPTS' => strval(intval($this->option('with_remote_scripts'))),
             ]
         );
 
