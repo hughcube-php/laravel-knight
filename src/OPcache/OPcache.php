@@ -91,7 +91,7 @@ class OPcache
 
         /** 发送请求 */
         $response = $this->getHttpClient()->get($url, [
-            RequestOptions::TIMEOUT => floatval($timeout),
+            RequestOptions::TIMEOUT         => floatval($timeout),
             RequestOptions::ALLOW_REDIRECTS => ['max' => 5, 'referer' => true, 'track_redirects' => true],
         ]);
 
@@ -114,9 +114,9 @@ class OPcache
     }
 
     /**
-     * @return array
      * @throws InvalidArgumentException
      *
+     * @return array
      */
     protected function getHistoryScripts(): array
     {
@@ -143,7 +143,7 @@ class OPcache
     }
 
     /**
-     * @param  array<Stmt>  $stmts
+     * @param array<Stmt> $stmts
      */
     public function getPHPParserStmtClasses(array $stmts, $namespace = null): Collection
     {
