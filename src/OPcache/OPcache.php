@@ -151,13 +151,11 @@ class OPcache
 
         foreach ($stmts as $stmt) {
             /** class */
-            if ($stmt instanceof Class_) {
-                if ($stmt->name instanceof Identifier) {
-                    if (empty($namespace)) {
-                        $classes = $classes->add($stmt->name->name);
-                    } else {
-                        $classes = $classes->add(sprintf('%s\%s', $namespace, $stmt->name->name));
-                    }
+            if ($stmt instanceof Stmt\ClassLike && $stmt->name instanceof Identifier) {
+                if (empty($namespace)) {
+                    $classes = $classes->add($stmt->name->name);
+                } else {
+                    $classes = $classes->add(sprintf('%s\%s', $namespace, $stmt->name->name));
                 }
             }
 
