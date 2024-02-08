@@ -56,17 +56,16 @@ $loads = Collection::empty()
     ->merge(get_declared_classes())
     ->merge(get_declared_interfaces())
     ->merge(get_declared_traits())
-    /**  */
+
     /** 剔除系统类 */
     ->diff($classes)
     ->diff($excludes)
-    /**  */
+
     /** 剔除PhpParser */
     ->filter(function ($class) {
         return 0 !== strripos($class, 'PhpParser\\');
     })
-    /**  */
-    /**  */
+
     ->values()->map(function ($class) {
         $reflection = new \ReflectionClass($class);
         if ($reflection->isInterface()) {
