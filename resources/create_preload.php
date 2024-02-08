@@ -1,6 +1,7 @@
 <?php
 
 use HughCube\Laravel\Knight\OPcache\OPcache;
+use HughCube\Laravel\Knight\Support\Str;
 use Illuminate\Support\Collection;
 use PhpParser\ParserFactory;
 
@@ -57,7 +58,8 @@ $loads = Collection::empty()
     ->merge(get_declared_traits())
     /**  */
     /** 剔除系统类 */
-    ->diff($classes)->diff($excludes)
+    ->diff($classes)
+    ->diff($excludes)
     /**  */
     /** 剔除PhpParser */
     ->filter(function ($class) {
@@ -74,7 +76,21 @@ $loads = Collection::empty()
         } else {
             return sprintf("class_exists('%s');", $class);
         }
-    });
+    })
+    /** 排序  interface > trait > class */
+    ->sort(function ($a, $b) {
+        $getSort = function ($class) {
+            if (Str::startsWith($class, 'i')) {
+                return 3;
+            } elseif (Str::startsWith($class, 't')) {
+                return 2;
+            } else {
+                return 1;
+            }
+        };
+
+        return $getSort($a) <=> $getSort($b);
+    })->values();
 
 $contents = "<?php \n\nrequire __DIR__.'/vendor/autoload.php';\n\n";
 $contents .= $loads->implode(PHP_EOL);
