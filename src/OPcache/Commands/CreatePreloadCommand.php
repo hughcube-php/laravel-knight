@@ -14,8 +14,7 @@ class CreatePreloadCommand extends Command
      * @var string
      */
     protected $signature = 'opcache:create-preload
-                    {--with_remote_scripts=0 }
-    ';
+                            {--with_remote_scripts }';
 
     /**
      * The console command description.
