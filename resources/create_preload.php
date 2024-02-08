@@ -8,7 +8,11 @@ $excludes = [];
 
 $publicPath = getcwd();
 
-$classes = get_declared_classes();
+$classes = array_merge(
+    get_declared_classes(),
+    get_declared_interfaces(),
+    get_declared_traits()
+);
 
 call_user_func(function () {
     $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_HOST'] ?? null ?: 'localhost';
@@ -42,18 +46,34 @@ call_user_func(function () {
 
     $classes->each(function ($class) {
         class_exists($class);
+        trait_exists($class);
+        interface_exists($class);
     });
 });
 
-$loads = Collection::make(get_declared_classes())
-    ->diff($classes)
-    ->diff($excludes)
+$loads = Collection::empty()
+    ->merge(get_declared_classes())
+    ->merge(get_declared_interfaces())
+    ->merge(get_declared_traits())
+    /**  */
+    /** 剔除系统类 */
+    ->diff($classes)->diff($excludes)
+    /**  */
+    /** 剔除PhpParser */
     ->filter(function ($class) {
         return 0 !== strripos($class, 'PhpParser\\');
     })
-    ->values()
-    ->map(function ($class) {
-        return sprintf("class_exists('%s');", $class);
+    /**  */
+    /**  */
+    ->values()->map(function ($class) {
+        $reflection = new \ReflectionClass($class);
+        if ($reflection->isInterface()) {
+            return sprintf("interface_exists('%s');", $class);
+        } elseif ($reflection->isTrait()) {
+            return sprintf("trait_exists('%s');", $class);
+        } else {
+            return sprintf("class_exists('%s');", $class);
+        }
     });
 
 $contents = "<?php \n\nrequire __DIR__.'/vendor/autoload.php';\n\n";
