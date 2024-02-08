@@ -23,7 +23,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Stmt;
-use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\Namespace_;
 use Psr\SimpleCache\InvalidArgumentException;
 
