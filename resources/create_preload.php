@@ -1,9 +1,9 @@
 <?php
 
 use HughCube\Laravel\Knight\OPcache\OPcache;
-use HughCube\Laravel\Knight\Support\Str;
 use Illuminate\Support\Collection;
 use PhpParser\ParserFactory;
+use HughCube\Laravel\Knight\Support\Str;
 
 $excludes = [];
 
@@ -56,27 +56,31 @@ $loads = Collection::empty()
     ->merge(get_declared_classes())
     ->merge(get_declared_interfaces())
     ->merge(get_declared_traits())
-
+    /**  */
     /** 剔除系统类 */
     ->diff($classes)
     ->diff($excludes)
-
+    /**  */
     /** 剔除PhpParser */
     ->filter(function ($class) {
         return 0 !== strripos($class, 'PhpParser\\');
     })
-
+    /**  */
+    /**  */
     ->values()->map(function ($class) {
         $reflection = new \ReflectionClass($class);
         if ($reflection->isInterface()) {
+            throw_unless(interface_exists($class), sprintf("Interface '%s' does not exist.", $class));
             return sprintf("interface_exists('%s');", $class);
         } elseif ($reflection->isTrait()) {
+            throw_unless(trait_exists($class), sprintf("Trait '%s' does not exist.", $class));
             return sprintf("trait_exists('%s');", $class);
         } else {
+            throw_unless(class_exists($class), sprintf("Class '%s' does not exist.", $class));
             return sprintf("class_exists('%s');", $class);
         }
     })
-    /** 排序  interface > trait > class */
+    /** 排序 */
     ->sort(function ($a, $b) {
         $getSort = function ($class) {
             if (Str::startsWith($class, 'i')) {
