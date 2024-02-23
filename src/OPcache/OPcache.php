@@ -32,10 +32,12 @@ class OPcache
     use HttpClientTrait;
     use LoadedOPcacheExtension;
 
+    protected static $instance = null;
+
     public static function i(): OPcache
     {
         /** @phpstan-ignore-next-line */
-        return new static();
+        return static::$instance ??= new static();
     }
 
     /**
@@ -67,30 +69,14 @@ class OPcache
      */
     public function getRemoteScripts($url = null, $timeout = 5, $useAppHost = true): array
     {
-        $url = $this->getUrl($url);
+        $url = $this->getUrl($url, $useAppHost);
         if (!$url instanceof PUrl) {
             throw new Exception('Remote interface URL cannot be found!');
         }
 
-        /** 替换域名为 app.url */
-        if ($useAppHost
-            && (
-                Str::isIp($url->getHost())
-                || $url->matchHost('localhost')
-                || $url->matchHost('127.0.0.1')
-            )
-        ) {
-            $appUrl = PUrl::parse($this->getContainerConfig()->get('app.url'));
-            if ($appUrl instanceof PUrl) {
-                $url = $url->withHost($appUrl->getHost())
-                    ->withPort($appUrl->getPort())
-                    ->withScheme($appUrl->getScheme());
-            }
-        }
-
         /** 发送请求 */
         $response = $this->getHttpClient()->get($url, [
-            RequestOptions::TIMEOUT         => floatval($timeout),
+            RequestOptions::TIMEOUT => floatval($timeout),
             RequestOptions::ALLOW_REDIRECTS => ['max' => 5, 'referer' => true, 'track_redirects' => true],
         ]);
 
@@ -99,23 +85,38 @@ class OPcache
         return $results['data']['scripts'];
     }
 
-    public function getUrl($url = null): ?PUrl
+    public function getUrl($url = null, $useAppHost = true): ?PUrl
     {
         $url = $url ?? 'knight.opcache.scripts';
 
-        if (($uri = PUrl::parse($url)) instanceof PUrl) {
-            return $uri;
+        $uri = PUrl::parse($url);
+        if (!$uri instanceof PUrl) {
+            $uri = PUrl::parse(Route::has($url) ? URL::route($url) : URL::to($url));
         }
 
-        return PUrl::parse(
-            Route::has($url) ? URL::route($url) : URL::to($url)
-        );
+        /** 替换域名为 app.url */
+        if ($useAppHost
+            && (
+                Str::isIp($uri->getHost())
+                || $uri->matchHost('localhost')
+                || $uri->matchHost('127.0.0.1')
+            )
+        ) {
+            $appUrl = PUrl::parse($this->getContainerConfig()->get('app.url'));
+            if ($appUrl instanceof PUrl) {
+                $uri = $uri->withHost($appUrl->getHost())
+                    ->withPort($appUrl->getPort())
+                    ->withScheme($appUrl->getScheme());
+            }
+        }
+
+        return $uri;
     }
 
     /**
+     * @return array
      * @throws InvalidArgumentException
      *
-     * @return array
      */
     protected function getHistoryScripts(): array
     {
@@ -142,7 +143,7 @@ class OPcache
     }
 
     /**
-     * @param array<Stmt> $stmts
+     * @param  array<Stmt>  $stmts
      */
     public function getPHPParserStmtClasses(array $stmts, $namespace = null): Collection
     {
