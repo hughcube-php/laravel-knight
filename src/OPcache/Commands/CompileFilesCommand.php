@@ -10,16 +10,14 @@
 namespace HughCube\Laravel\Knight\OPcache\Commands;
 
 use Exception;
-use GuzzleHttp\RequestOptions;
 use HughCube\GuzzleHttp\HttpClientTrait;
 use HughCube\Laravel\Knight\OPcache\LoadedOPcacheExtension;
-use HughCube\PUrl\Url as PUrl;
+use HughCube\Laravel\Knight\OPcache\OPcache;
 use Illuminate\Console\Command;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Route;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\PhpProcess;
 use Throwable;
@@ -43,11 +41,11 @@ class CompileFilesCommand extends Command
     protected $description = 'opcache compile file';
 
     /**
-     * @param Schedule $schedule
-     *
-     * @throws Exception
+     * @param  Schedule  $schedule
      *
      * @return void
+     * @throws Exception
+     *
      */
     public function handle(Schedule $schedule)
     {
@@ -94,9 +92,9 @@ class CompileFilesCommand extends Command
     }
 
     /**
+     * @return array
      * @throws Exception
      *
-     * @return array
      */
     protected function getFiles(): array
     {
@@ -164,43 +162,19 @@ class CompileFilesCommand extends Command
 
     protected function getProdFiles(): array
     {
-        if (empty($url = $this->option('with_remote_cached_scripts'))) {
+        if (empty($this->option('with_remote_cached_scripts'))) {
             return [];
         }
 
-        /** @phpstan-ignore-next-line */
-        if (true === $url || '1' === $url || 1 === $url) {
-            $url = 'knight.opcache.scripts';
-        }
-
-        if (!PUrl::isUrlString($url) && Route::has($url)) {
-            $url = route($url);
-        }
-
-        if (!PUrl::isUrlString($url)) {
-            $message = 'Description Failed to run the opcache:compile-files command, ';
-            Log::info($message.'Remote interface URL cannot be found!');
-
-            return [];
-        }
-
+        $scripts = [];
         try {
-            $response = $this->getHttpClient()->post($url, [
-                RequestOptions::TIMEOUT     => 10.0,
-                RequestOptions::HTTP_ERRORS => false,
-            ]);
-            $states = json_decode($response->getBody()->getContents(), true);
-
-            $scripts = [];
-            foreach (($states['data']['scripts'] ?? []) as $file) {
-                $scripts[] = base_path($file);
-            }
-
-            return $scripts;
+            $scripts = OPcache::i()->getRemoteScripts();
         } catch (Throwable $exception) {
             $this->warn($exception->getMessage());
         }
 
-        return [];
+        return Collection::make($scripts)->map(function ($script) {
+            return base_path($script);
+        })->values()->toArray();
     }
 }
