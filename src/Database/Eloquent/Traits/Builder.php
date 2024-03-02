@@ -239,7 +239,7 @@ trait Builder
      */
     public function whereLike(string $column, string $value)
     {
-        return $this->where($column, 'LIKE', sprintf("%%%s%%", $value));
+        return $this->where($column, 'LIKE', sprintf('%%%s%%', $value));
     }
 
     /**
@@ -250,7 +250,7 @@ trait Builder
      */
     public function whereLeftLike(string $column, string $value)
     {
-        return $this->where($column, 'LIKE', sprintf("%s%%", $value));
+        return $this->where($column, 'LIKE', sprintf('%s%%', $value));
     }
 
     /**
@@ -261,7 +261,7 @@ trait Builder
      */
     public function whereRightLike(string $column, string $value)
     {
-        return $this->where($column, 'LIKE', sprintf("%%%s", $value));
+        return $this->where($column, 'LIKE', sprintf('%%%s', $value));
     }
 
     /**
@@ -272,7 +272,7 @@ trait Builder
      */
     public function orWhereLike(string $column, string $value)
     {
-        return $this->orWhere($column, 'LIKE', sprintf("%%%s%%", $value));
+        return $this->orWhere($column, 'LIKE', sprintf('%%%s%%', $value));
     }
 
     /**
@@ -283,7 +283,7 @@ trait Builder
      */
     public function orWhereLeftLike(string $column, string $value)
     {
-        return $this->orWhere($column, 'LIKE', sprintf("%s%%", $value));
+        return $this->orWhere($column, 'LIKE', sprintf('%s%%', $value));
     }
 
     /**
@@ -294,6 +294,6 @@ trait Builder
      */
     public function orWhereRightLike(string $column, string $value)
     {
-        return $this->orWhere($column, 'LIKE', sprintf("%%%s", $value));
+        return $this->orWhere($column, 'LIKE', sprintf('%%%s', $value));
     }
 }
