@@ -130,12 +130,16 @@ class BatchPingJob extends Job
     protected function makeRequests($requests): Generator
     {
         foreach ($requests as $request) {
-            yield new Request($request['method'], $request['url'], [
-                RequestOptions::HTTP_ERRORS     => false,
-                RequestOptions::TIMEOUT         => $request['timeout'],
-                RequestOptions::ALLOW_REDIRECTS => $request['allow_redirects'],
-                RequestOptions::HEADERS         => $request['headers'] ?? [] ?: [],
-            ]);
+            yield new Request($request['method'], $request['url'], array_merge(
+                [
+                    RequestOptions::HTTP_ERRORS     => false,
+                    RequestOptions::TIMEOUT         => $request['timeout'],
+                    RequestOptions::ALLOW_REDIRECTS => $request['allow_redirects'],
+                ],
+                array_filter([
+                    RequestOptions::HEADERS         => $request['headers'] ?? [] ?: [],
+                ])
+            ));
         }
     }
 
