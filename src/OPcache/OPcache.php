@@ -95,14 +95,8 @@ class OPcache
         }
 
         /** 替换域名为 app.url */
-        if ($useAppHost
-            && (
-                Str::isIp($uri->getHost())
-                || $uri->matchHost('localhost')
-                || $uri->matchHost('127.0.0.1')
-            )
-        ) {
-            $appUrl = PUrl::parse($this->getContainerConfig()->get('app.url'));
+        if ($useAppHost && $uri->isLocalhost()) {
+            $appUrl = PUrl::parse($this->getContainerConfig('app.url'));
             if ($appUrl instanceof PUrl) {
                 $uri = $uri->withHost($appUrl->getHost())
                     ->withPort($appUrl->getPort())

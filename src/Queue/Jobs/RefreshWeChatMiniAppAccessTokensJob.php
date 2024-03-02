@@ -20,7 +20,7 @@ class RefreshWeChatMiniAppAccessTokensJob extends Job
 
     protected function action(): void
     {
-        $accounts = $this->getContainerConfig()->get('easywechat.mini_app', []);
+        $accounts = $this->getContainerConfig('easywechat.mini_app', []);
         foreach ($accounts as $name => $_) {
             $app = WeChat::miniApp($name);
 

@@ -35,6 +35,7 @@ class BatchPingJob extends Job
             'jobs.*.method'          => ['string', 'nullable'],
             'jobs.*.timeout'         => ['integer', 'nullable'],
             'jobs.*.allow_redirects' => ['integer', 'nullable'],
+            'jobs.*.headers'         => ['array', 'nullable'],
         ];
     }
 
@@ -48,7 +49,7 @@ class BatchPingJob extends Job
             $requests[$index] = [
                 'url'             => $this->parseUrl($job['url'] ?? 'knight.ping'),
                 'method'          => strtoupper($job['method'] ?? null ?: 'GET'),
-                'timeout'         => $job['timeout'] ?? null ?: 2,
+                'timeout'         => $job['timeout'] ?? null ?: 2.0,
                 'allow_redirects' => $this->parseAllowRedirects($job['allow_redirects'] ?? null ?: 0),
             ];
         }
@@ -133,6 +134,7 @@ class BatchPingJob extends Job
                 RequestOptions::HTTP_ERRORS     => false,
                 RequestOptions::TIMEOUT         => $request['timeout'],
                 RequestOptions::ALLOW_REDIRECTS => $request['allow_redirects'],
+                RequestOptions::HEADERS         => $request['headers'] ?? [] ?: [],
             ]);
         }
     }
@@ -155,7 +157,7 @@ class BatchPingJob extends Job
         }
 
         /** with app url scheme */
-        $appUrl = PUrl::parse($this->getContainerConfig()->get('app.url'));
+        $appUrl = PUrl::parse($this->getContainerConfig('app.url'));
         if ($appUrl instanceof PUrl && !empty($appUrl->getScheme())) {
             $purl = $purl->withScheme($appUrl->getScheme());
         }

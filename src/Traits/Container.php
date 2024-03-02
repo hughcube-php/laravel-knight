@@ -76,23 +76,30 @@ trait Container
     /**
      * @throws
      *
-     * @return Repository
+     * @return Repository|mixed|null
      *
      * @phpstan-ignore-next-line
      */
-    protected function getContainerConfig(): Repository
+    protected function getContainerConfig($key = null, $default = null)
     {
-        return $this->getContainer()->make('config');
+        /** @var Repository $config */
+        $config = $this->getContainer()->make('config');
+
+        if (null === $key) {
+            return $config;
+        }
+
+        return $config->get($key, $default);
     }
 
     protected function isContainerDebug(): bool
     {
-        return true == $this->getContainerConfig()->get('app.debug');
+        return true == $this->getContainerConfig('app.debug');
     }
 
     protected function isContainerEnv($env): bool
     {
-        return $env === $this->getContainerConfig()->get('app.env', 'production');
+        return $env === $this->getContainerConfig('app.env', 'production');
     }
 
     protected function isContainerLocalEnv(): bool

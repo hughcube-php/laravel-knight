@@ -20,7 +20,7 @@ class RefreshWeChatOfficialAccountAccessTokensJob extends Job
 
     protected function action(): void
     {
-        $accounts = $this->getContainerConfig()->get('easywechat.official_account', []);
+        $accounts = $this->getContainerConfig('easywechat.official_account', []);
         foreach ($accounts as $name => $_) {
             $app = WeChat::officialAccount($name);
 
