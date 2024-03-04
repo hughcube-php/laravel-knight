@@ -49,6 +49,7 @@ class BatchPingJob extends Job
             $requests[$index] = [
                 'url'             => $this->parseUrl($job['url'] ?? 'knight.ping'),
                 'method'          => strtoupper($job['method'] ?? null ?: 'GET'),
+                'headers'         => $job['headers'] ?? [] ?: [],
                 'timeout'         => $job['timeout'] ?? null ?: 2.0,
                 'allow_redirects' => $this->parseAllowRedirects($job['allow_redirects'] ?? null ?: 0),
             ];
@@ -67,7 +68,6 @@ class BatchPingJob extends Job
                 $url = $requests[$index]['url'];
                 $method = $requests[$index]['method'];
                 $duration = Carbon::now()->diffInMilliseconds($start);
-
                 /** parse response */
                 $response = null;
                 if (is_object($reason) && method_exists($reason, 'getResponse')) {
