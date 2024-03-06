@@ -2,9 +2,8 @@
 
 namespace HughCube\Laravel\Knight\Queue\Jobs;
 
+use Carbon\Carbon;
 use Exception;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\RequestOptions;
 use HughCube\GuzzleHttp\HttpClientTrait;
 use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\PUrl\Url as PUrl;
@@ -21,10 +20,9 @@ class PingJob extends Job
     public function rules(): array
     {
         return [
-            'url'             => ['string', 'nullable'],
-            'method'          => ['string', 'default:GET'],
-            'timeout'         => ['integer', 'default:2'],
-            'allow_redirects' => ['integer', 'default:0'],
+            'url' => ['string', 'nullable'],
+            'method' => ['string', 'nullable'],
+            'options' => ['array', 'nullable'],
         ];
     }
 
@@ -34,26 +32,21 @@ class PingJob extends Job
     protected function action(): void
     {
         $url = $this->getUrl();
-        $method = strtoupper($this->p()->get('method'));
-        $timeout = $this->p()->get('timeout');
+        $method = strtoupper($this->p('method', 'GET'));
+        $options = array_merge(['timeout' => 2.0, 'http_errors' => false,], $this->p('options', []));
 
         $response = null;
         $exception = null;
 
-        $start = microtime(true);
-
+        $start = Carbon::now();
         try {
-            $response = $this->request($method, $url, [
-                RequestOptions::HTTP_ERRORS     => false,
-                RequestOptions::TIMEOUT         => $timeout,
-                RequestOptions::ALLOW_REDIRECTS => $this->getAllowRedirects(),
-            ]);
+            $response = $this->getHttpClient()->request($method, $url, $options);
         } catch (Throwable $exception) {
         }
-        $end = microtime(true);
+        $end = Carbon::now();
 
-        $duration = round(($end - $start) * 1000, 2);
         $requestId = $this->getRequestId($response);
+        $duration = $end->diffInMilliseconds($start);
         $statusCode = $response instanceof Response ? $response->getStatusCode() : null;
         $exception = $exception instanceof Throwable ? $exception->getMessage() : null;
 
@@ -66,14 +59,6 @@ class PingJob extends Job
             $requestId,
             $exception
         ));
-    }
-
-    /**
-     * @throws GuzzleException
-     */
-    protected function request(string $method, $uri = '', array $options = []): Response
-    {
-        return $this->getHttpClient()->request($method, $uri, $options);
     }
 
     protected function getRequestId($response): ?string
@@ -110,22 +95,5 @@ class PingJob extends Job
         }
 
         return $purl instanceof PUrl ? $purl->toString() : $url;
-    }
-
-    /**
-     * @return array|false
-     */
-    protected function getAllowRedirects()
-    {
-        if (0 >= ($redirects = intval($this->p()->get('allow_redirects', 0)))) {
-            return false;
-        }
-
-        return [
-            'max'       => $redirects,
-            'strict'    => true,
-            'referer'   => true,
-            'protocols' => ['https', 'http'],
-        ];
     }
 }

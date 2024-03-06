@@ -8,7 +8,6 @@ use Generator;
 use GuzzleHttp\Client;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\RequestOptions;
 use HughCube\GuzzleHttp\HttpClientTrait;
 use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\Traits\Container;
@@ -27,15 +26,14 @@ class BatchPingJob extends Job
     public function rules(): array
     {
         return [
+            'options' => ['array', 'nullable'],
             'concurrency' => ['integer', 'nullable'],
 
             'jobs' => ['array', 'min:1'],
 
-            'jobs.*.url'             => ['string', 'nullable'],
-            'jobs.*.method'          => ['string', 'nullable'],
-            'jobs.*.timeout'         => ['integer', 'nullable'],
-            'jobs.*.allow_redirects' => ['integer', 'nullable'],
-            'jobs.*.headers'         => ['array', 'nullable'],
+            'jobs.*.url' => ['string', 'nullable'],
+            'jobs.*.method' => ['string', 'nullable'],
+            'jobs.*.headers' => ['array', 'nullable'],
         ];
     }
 
@@ -47,18 +45,20 @@ class BatchPingJob extends Job
         $requests = [];
         foreach ($this->p('jobs', []) as $index => $job) {
             $requests[$index] = [
-                'url'             => $this->parseUrl($job['url'] ?? 'knight.ping'),
-                'method'          => strtoupper($job['method'] ?? null ?: 'GET'),
-                'headers'         => $job['headers'] ?? [] ?: [],
-                'timeout'         => $job['timeout'] ?? null ?: 2.0,
-                'allow_redirects' => $this->parseAllowRedirects($job['allow_redirects'] ?? null ?: 0),
+                'url' => $this->parseUrl($job['url'] ?? 'knight.ping'),
+                'method' => strtoupper($job['method'] ?? null ?: 'GET'),
+                'headers' => $job['headers'] ?? [] ?: [],
             ];
         }
 
+        $client = new Client(
+            array_merge(['timeout' => 2.0, 'http_errors' => false], $this->p('options', []))
+        );
+
         $start = Carbon::now();
-        $pool = new Pool(new Client(), $this->makeRequests($requests), [
+        $pool = new Pool($client, $this->makeRequests($requests), [
             'concurrency' => $this->p('concurrency') ?: 5,
-            'fulfilled'   => function (Response $response, $index) use ($requests, $start) {
+            'fulfilled' => function (Response $response, $index) use ($requests, $start) {
                 $url = $requests[$index]['url'];
                 $method = $requests[$index]['method'];
                 $duration = Carbon::now()->diffInMilliseconds($start);
@@ -130,16 +130,7 @@ class BatchPingJob extends Job
     protected function makeRequests($requests): Generator
     {
         foreach ($requests as $request) {
-            yield new Request($request['method'], $request['url'], array_merge(
-                [
-                    RequestOptions::HTTP_ERRORS     => false,
-                    RequestOptions::TIMEOUT         => $request['timeout'],
-                    RequestOptions::ALLOW_REDIRECTS => $request['allow_redirects'],
-                ],
-                array_filter([
-                    RequestOptions::HEADERS         => $request['headers'] ?? [] ?: [],
-                ])
-            ));
+            yield new Request($request['method'], $request['url'], $request['headers']);
         }
     }
 
@@ -167,23 +158,6 @@ class BatchPingJob extends Job
         }
 
         return $purl->toString();
-    }
-
-    /**
-     * @return array|false
-     */
-    protected function parseAllowRedirects($redirects)
-    {
-        if (0 >= $redirects) {
-            return false;
-        }
-
-        return [
-            'max'       => $redirects,
-            'strict'    => true,
-            'referer'   => true,
-            'protocols' => ['https', 'http'],
-        ];
     }
 
     protected function parseRequestId($response): ?string
