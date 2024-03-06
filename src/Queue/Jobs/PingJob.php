@@ -20,8 +20,8 @@ class PingJob extends Job
     public function rules(): array
     {
         return [
-            'url' => ['string', 'nullable'],
-            'method' => ['string', 'nullable'],
+            'url'     => ['string', 'nullable'],
+            'method'  => ['string', 'nullable'],
             'options' => ['array', 'nullable'],
         ];
     }
@@ -33,12 +33,13 @@ class PingJob extends Job
     {
         $url = $this->getUrl();
         $method = strtoupper($this->p('method', 'GET'));
-        $options = array_merge(['timeout' => 2.0, 'http_errors' => false,], $this->p('options', []));
+        $options = array_merge(['timeout' => 2.0, 'http_errors' => false], $this->p('options', []));
 
         $response = null;
         $exception = null;
 
         $start = Carbon::now();
+
         try {
             $response = $this->getHttpClient()->request($method, $url, $options);
         } catch (Throwable $exception) {
