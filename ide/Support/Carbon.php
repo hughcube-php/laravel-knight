@@ -39,4 +39,13 @@ class Carbon
     {
         return '';
     }
+
+    /**
+     * @see CarbonMixin::try()
+     * @return mixed
+     */
+    public static function try(callable $callable, $default = null)
+    {
+        return null;
+    }
 }
