@@ -42,6 +42,7 @@ class Carbon
 
     /**
      * @see CarbonMixin::try()
+     *
      * @return mixed
      */
     public static function try(callable $callable, $default = null)

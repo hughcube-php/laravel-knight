@@ -92,7 +92,6 @@ class CarbonMixin
     public static function try(): Closure
     {
         return function (callable $callable, $default = null) {
-
             try {
                 return $callable();
             } catch (Throwable $exception) {
