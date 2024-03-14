@@ -50,7 +50,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     /**
      * @var array
      */
-    protected $data = [];
+    protected array $data = [];
 
     /**
      * @var array|string|null
@@ -58,19 +58,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     protected $logChannel = null;
 
     /**
-     * @var string|int|null
-     */
-    protected $pid = null;
-
-    /**
      * @var null|FlowJobDescribe
      */
-    protected $flowJobDescribe = null;
-
-    /**
-     * @var Carbon|null
-     */
-    private $jobStartedAt = null;
+    protected ?FlowJobDescribe $flowJobDescribe = null;
 
     /**
      * Create a new job instance.
@@ -82,9 +72,19 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
         $this->data = $data;
     }
 
+    /**
+     * @return void
+     * @throws Exception
+     */
     public function handle(): void
     {
-        $this->jobStartedAt = Carbon::now();
+        // Log the time of entry in the job logic
+        $this->getJobStartedAt();
+
+        // Prepare the pid of the job
+        $this->getPid();
+
+        // Collect all validated parameters
         $this->loadParameters();
 
         try {
@@ -107,11 +107,26 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     protected function getJobStartedAt(): Carbon
     {
-        if (!$this->jobStartedAt instanceof Carbon) {
-            $this->jobStartedAt = Carbon::now();
-        }
+        /** @var Carbon $dateTime */
+        $dateTime = $this->getOrSet(__METHOD__, function () {
+            return Carbon::now();
+        });
 
-        return $this->jobStartedAt;
+        return $dateTime->clone();
+    }
+
+    /**
+     * @throws Exception
+     */
+    protected function getPid(): string
+    {
+        return $this->getOrSet(__METHOD__, function () {
+            $hostname = base_convert(abs(crc32(gethostname())), 10, 36);
+            $pid = base_convert(getmypid(), 10, 36);
+            $random = base_convert(abs(crc32(random_bytes(10))), 10, 36);
+
+            return sprintf('%s-%s-%s', $hostname, $pid, $random);
+        });
     }
 
     protected function getDelays(): float
@@ -165,31 +180,6 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
         return json_encode($this->getValidData(), $flags);
     }
 
-    /**
-     * @throws Exception
-     */
-    protected function getPid(): string
-    {
-        if (null === $this->pid) {
-            $hostname = base_convert(abs(crc32(gethostname())), 10, 36);
-            $pid = base_convert(getmypid(), 10, 36);
-            $random = base_convert(abs(crc32(random_bytes(10))), 10, 36);
-            $this->setPid(sprintf('%s-%s-%s', $hostname, $pid, $random));
-        }
-
-        return $this->pid;
-    }
-
-    /**
-     * @return $this
-     */
-    public function setPid(string $pid)
-    {
-        $this->pid = $pid;
-
-        return $this;
-    }
-
     protected function getName(object $job = null): string
     {
         return Str::afterLast(get_class($job ?? $this), '\\');
@@ -204,11 +194,11 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param array|string|null $channel
+     * @param  array|string|null  $channel
      *
      * @return $this
      */
-    public function setLogChannel($channel = null)
+    public function setLogChannel($channel = null): Job
     {
         $this->logChannel = $channel;
 
@@ -216,9 +206,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function log($level, string $message, array $context = [])
     {
@@ -244,8 +234,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param string $key
-     * @param null   $default
+     * @param  string  $key
+     * @param  null  $default
      *
      * @return mixed
      *
@@ -257,7 +247,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param mixed $key
+     * @param  mixed  $key
      *
      * @return bool
      *
@@ -269,8 +259,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param string $key
-     * @param mixed  $value
+     * @param  string  $key
+     * @param  mixed  $value
      *
      * @return $this
      *
