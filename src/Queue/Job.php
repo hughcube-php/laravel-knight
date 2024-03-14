@@ -86,10 +86,24 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     {
         $this->jobStartedAt = Carbon::now();
         $this->loadParameters();
-        $this->action();
+
+        try {
+            $this->beforeAction();
+            $this->action();
+        } finally {
+            $this->afterAction();
+        }
+    }
+
+    protected function beforeAction()
+    {
     }
 
     abstract protected function action(): void;
+
+    protected function afterAction()
+    {
+    }
 
     protected function getJobStartedAt(): Carbon
     {
@@ -190,7 +204,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param array|string|null $channel
+     * @param  array|string|null  $channel
      *
      * @return $this
      */
@@ -202,9 +216,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function log($level, string $message, array $context = [])
     {
@@ -230,8 +244,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param string $key
-     * @param null   $default
+     * @param  string  $key
+     * @param  null  $default
      *
      * @return mixed
      *
@@ -243,7 +257,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param mixed $key
+     * @param  mixed  $key
      *
      * @return bool
      *
@@ -255,8 +269,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param string $key
-     * @param mixed  $value
+     * @param  string  $key
+     * @param  mixed  $value
      *
      * @return $this
      *
