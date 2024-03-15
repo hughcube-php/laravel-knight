@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2021/10/28
- * Time: 11:34
+ * Time: 11:34.
  */
 
 namespace HughCube\Laravel\Knight\Listeners;
@@ -22,7 +22,7 @@ class LogDatabaseQuerySql
         Log::debug(
             'query executed'
             .sprintf(', connection: %s, duration: %sms', $event->connectionName, $event->time)
-            .sprintf(', sql: %s', vsprintf(str_replace("?", "'%s'", $event->sql), $event->bindings))
+            .sprintf(', sql: %s', vsprintf(str_replace('?', "'%s'", $event->sql), $event->bindings))
         );
     }
 }
