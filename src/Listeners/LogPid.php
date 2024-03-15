@@ -9,13 +9,14 @@
 namespace HughCube\Laravel\Knight\Listeners;
 
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\Process\Process;
 
 class LogPid
 {
     public function handle($event = null): void
     {
         Log::info(sprintf(
-            'event: %s, hostname: %s, pid: %s',
+            'Process pid, event: %s, hostname: %s, pid: %s',
             get_debug_type($event),
             gethostname(),
             getmypid()
