@@ -9,7 +9,6 @@
 namespace HughCube\Laravel\Knight\Listeners;
 
 use Illuminate\Support\Facades\Log;
-use Symfony\Component\Process\Process;
 
 class LogPid
 {
