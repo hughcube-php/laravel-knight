@@ -14,6 +14,11 @@ class LogPid
 {
     public function handle($event = null): void
     {
-        Log::info(sprintf('event: %s, pid: %s', get_debug_type($event), getmypid()));
+        Log::info(sprintf(
+            'event: %s, hostname: %s, pid: %s',
+            get_debug_type($event),
+            gethostname(),
+            getmypid()
+        ));
     }
 }
