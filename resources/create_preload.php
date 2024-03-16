@@ -107,7 +107,7 @@ $loads = Collection::empty()
         return $getSort($a) <=> $getSort($b);
     })->values();
 
-$contents = "<?php \n\nrequire __DIR__.'/vendor/autoload.php';\n\n";
+$contents = "<?php \n\nrequire_once __DIR__.'/vendor/autoload.php';\n\n";
 $contents .= $loads->implode(PHP_EOL);
 
 if (file_put_contents($preloadFile, $contents) <= 0) {
