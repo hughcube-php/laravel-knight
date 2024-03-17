@@ -42,11 +42,11 @@ trait Action
     }
 
     /**
+     * @throws
+     *
      * @return mixed
      *
      * @phpstan-ignore-next-line
-     * @throws
-     *
      */
     public function invoke()
     {
@@ -61,6 +61,7 @@ trait Action
         $this->loadParameters();
 
         $this->getEventsDispatcher()->dispatch(new ActionProcessing($this));
+
         try {
             $this->beforeAction();
             $result = $this->action();
@@ -98,11 +99,11 @@ trait Action
     }
 
     /**
+     * @throws
+     *
      * @return Request|\Request|KIdeRequest|KnightRequest
      *
      * @phpstan-ignore-next-line
-     * @throws
-     *
      */
     protected function getRequest(): Request
     {
@@ -130,8 +131,8 @@ trait Action
     }
 
     /**
-     * @param  string  $name
-     * @param  array  $arguments
+     * @param string $name
+     * @param array  $arguments
      *
      * @return mixed
      */
@@ -176,9 +177,9 @@ trait Action
     protected function asResponse(array $data = [], int $code = 200): Response
     {
         return new JsonResponse([
-            'code' => $code,
+            'code'    => $code,
             'message' => 'ok',
-            'data' => $data,
+            'data'    => $data,
         ]);
     }
 
