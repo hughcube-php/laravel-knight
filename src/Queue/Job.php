@@ -11,6 +11,8 @@ namespace HughCube\Laravel\Knight\Queue;
 use BadMethodCallException;
 use Exception;
 use HughCube\Laravel\Knight\Contracts\Queue\FromFlowJob;
+use HughCube\Laravel\Knight\Events\ActionProcessed;
+use HughCube\Laravel\Knight\Events\ActionProcessing;
 use HughCube\Laravel\Knight\Support\ParameterBag;
 use HughCube\Laravel\Knight\Traits\Container;
 use HughCube\Laravel\Knight\Traits\GetOrSet;
@@ -73,9 +75,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function handle(): void
     {
@@ -88,12 +90,14 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
         // Collect all validated parameters
         $this->loadParameters();
 
+        $this->getEventsDispatcher()->dispatch(new ActionProcessing($this));
         try {
             $this->beforeAction();
             $this->action();
         } finally {
             $this->afterAction();
         }
+        $this->getEventsDispatcher()->dispatch(new ActionProcessed($this));
     }
 
     protected function beforeAction()
@@ -195,7 +199,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param array|string|null $channel
+     * @param  array|string|null  $channel
      *
      * @return $this
      */
@@ -207,9 +211,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function log($level, string $message, array $context = [])
     {
@@ -235,8 +239,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param string $key
-     * @param null   $default
+     * @param  string  $key
+     * @param  null  $default
      *
      * @return mixed
      *
@@ -248,7 +252,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param mixed $key
+     * @param  mixed  $key
      *
      * @return bool
      *
@@ -260,8 +264,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param string $key
-     * @param mixed  $value
+     * @param  string  $key
+     * @param  mixed  $value
      *
      * @return $this
      *
