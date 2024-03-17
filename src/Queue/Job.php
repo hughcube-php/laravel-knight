@@ -75,9 +75,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function handle(): void
     {
@@ -91,6 +91,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
         $this->loadParameters();
 
         $this->getEventsDispatcher()->dispatch(new ActionProcessing($this));
+
         try {
             $this->beforeAction();
             $this->action();
@@ -199,7 +200,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param  array|string|null  $channel
+     * @param array|string|null $channel
      *
      * @return $this
      */
@@ -211,9 +212,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function log($level, string $message, array $context = [])
     {
@@ -239,8 +240,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param  string  $key
-     * @param  null  $default
+     * @param string $key
+     * @param null   $default
      *
      * @return mixed
      *
@@ -252,7 +253,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param  mixed  $key
+     * @param mixed $key
      *
      * @return bool
      *
@@ -264,8 +265,8 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @param  string  $key
-     * @param  mixed  $value
+     * @param string $key
+     * @param mixed  $value
      *
      * @return $this
      *

@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2024/3/17
- * Time: 11:35
+ * Time: 11:35.
  */
 
 namespace HughCube\Laravel\Knight\Events;
@@ -22,6 +22,7 @@ class ActionProcessing
 
     /**
      * @return Job|Action|null
+     *
      * @phpstan-ignore-next-line
      */
     protected function getAction()
