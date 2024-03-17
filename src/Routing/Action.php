@@ -68,6 +68,7 @@ trait Action
         } finally {
             $this->afterAction();
         }
+
         $this->getEventsDispatcher()->dispatch(new ActionProcessed($this));
 
         return $result;
