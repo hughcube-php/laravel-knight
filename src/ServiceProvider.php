@@ -106,9 +106,16 @@ class ServiceProvider extends IlluminateServiceProvider
         /** @var Repository $config */
         $config = $this->app->make('config');
         if (!$this->hasRoutesCache() && false !== ($prefix = $config->get('knight.opcache.route_prefix', false))) {
-            Route::group(['prefix' => $prefix], function () {
-                Route::any('/opcache/scripts', OPcacheScriptsAction::class)->name('knight.opcache.scripts');
-                Route::any('/opcache/states', OPcacheStatesAction::class)->name('knight.opcache.states');
+            Route::group(['prefix' => $prefix], function () use ($config) {
+                Route::any(
+                    '/opcache/scripts',
+                    $config->get('knight.opcache.action.scripts', OPcacheScriptsAction::class)
+                )->name('knight.opcache.scripts');
+
+                Route::any(
+                    '/opcache/states',
+                    $config->get('knight.opcache.action.states', OPcacheStatesAction::class)
+                )->name('knight.opcache.states');
             });
         }
     }
@@ -118,9 +125,16 @@ class ServiceProvider extends IlluminateServiceProvider
         /** @var Repository $config */
         $config = $this->app->make('config');
         if (!$this->hasRoutesCache() && false !== ($prefix = $config->get('knight.request.route_prefix', false))) {
-            Route::group(['prefix' => $prefix], function () {
-                Route::any('/request/log', RequestLogAction::class)->name('knight.request.log');
-                Route::any('/request/show', RequestShowAction::class)->name('knight.request.show');
+            Route::group(['prefix' => $prefix], function () use ($config) {
+                Route::any(
+                    '/request/log',
+                    $config->get('knight.request.action.log', RequestLogAction::class)
+                )->name('knight.request.log');
+
+                Route::any(
+                    '/request/show',
+                    $config->get('knight.request.action.show', RequestShowAction::class)
+                )->name('knight.request.show');
             });
         }
     }
@@ -130,8 +144,11 @@ class ServiceProvider extends IlluminateServiceProvider
         /** @var Repository $config */
         $config = $this->app->make('config');
         if (!$this->hasRoutesCache() && false !== ($prefix = $config->get('knight.healthcheck.route_prefix'))) {
-            Route::group(['prefix' => $prefix], function () {
-                Route::any('/healthcheck', PingAction::class)->name('knight.healthcheck');
+            Route::group(['prefix' => $prefix], function () use ($config) {
+                Route::any(
+                    '/healthcheck',
+                    $config->get('knight.healthcheck.action.healthcheck', PingAction::class)
+                )->name('knight.healthcheck');
             });
         }
     }
@@ -141,8 +158,11 @@ class ServiceProvider extends IlluminateServiceProvider
         /** @var Repository $config */
         $config = $this->app->make('config');
         if (!$this->hasRoutesCache() && false !== ($prefix = $config->get('knight.phpinfo.route_prefix', false))) {
-            Route::group(['prefix' => $prefix], function () {
-                Route::any('/phpinfo', PhpInfoAction::class)->name('knight.phpinfo');
+            Route::group(['prefix' => $prefix], function () use ($config) {
+                Route::any(
+                    '/phpinfo',
+                    $config->get('knight.phpinfo.action.phpinfo', PhpInfoAction::class)
+                )->name('knight.phpinfo');
             });
         }
     }

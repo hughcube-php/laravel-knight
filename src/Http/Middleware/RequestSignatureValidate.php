@@ -40,6 +40,10 @@ class RequestSignatureValidate
         throw new ValidateSignatureException();
     }
 
+    /**
+     * 时区为GMT的RFC1123格式，例如Mon, 02 Jan 2006 15:04:05 GMT
+     * @see https://datatracker.ietf.org/doc/html/rfc1123
+     */
     protected function parseRequestDate($request)
     {
         /** @var Request|KIdeRequest $request */
@@ -86,9 +90,6 @@ class RequestSignatureValidate
                 ->forget([
                     /** 签名字符串 */
                     strtolower(sprintf('%sSignature', $request->getClientHeaderPrefix())),
-
-                    /** 日期字符串, (浏览器端无法直接传递Date时候使用) */
-                    strtolower(sprintf('%sDate', $request->getClientHeaderPrefix())),
                 ])
                 ->sortKeys()
                 ->map(function ($value, $key) {
