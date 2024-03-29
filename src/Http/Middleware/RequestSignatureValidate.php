@@ -41,7 +41,8 @@ class RequestSignatureValidate
     }
 
     /**
-     * 时区为GMT的RFC1123格式，例如Mon, 02 Jan 2006 15:04:05 GMT
+     * 时区为GMT的RFC1123格式，例如Mon, 02 Jan 2006 15:04:05 GMT.
+     *
      * @see https://datatracker.ietf.org/doc/html/rfc1123
      */
     protected function parseRequestDate($request)
