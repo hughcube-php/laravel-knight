@@ -76,7 +76,7 @@ trait Builder
     }
 
     /**
-     * @param  mixed  $pk
+     * @param mixed $pk
      *
      * @return IlluminateModel|Model|mixed|null
      */
@@ -86,7 +86,7 @@ trait Builder
     }
 
     /**
-     * @param  array|Arrayable|Traversable  $pks
+     * @param array|Arrayable|Traversable $pks
      *
      * @return KnightCollection
      */
@@ -120,7 +120,7 @@ trait Builder
     }
 
     /**
-     * @param  mixed  $id
+     * @param mixed $id
      *
      * @return IlluminateModel|Model|mixed|null
      */
@@ -132,13 +132,13 @@ trait Builder
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param  array|Arrayable|Traversable  $ids  必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
+     * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
+     *
+     * @throws
      *
      * @return KnightCollection
      *
      * @phpstan-ignore-next-line
-     * @throws
-     *
      */
     public function findUniqueRows($ids): KnightCollection
     {
@@ -219,7 +219,7 @@ trait Builder
     }
 
     /**
-     * @param  mixed  $value
+     * @param mixed $value
      *
      * @return static
      */
@@ -233,8 +233,8 @@ trait Builder
     }
 
     /**
-     * @param  string  $column
-     * @param  string  $value
+     * @param string $column
+     * @param string $value
      *
      * @return static
      */
@@ -244,8 +244,8 @@ trait Builder
     }
 
     /**
-     * @param  string  $column
-     * @param  string  $value
+     * @param string $column
+     * @param string $value
      *
      * @return static
      */
@@ -255,8 +255,8 @@ trait Builder
     }
 
     /**
-     * @param  string  $column
-     * @param  string  $value
+     * @param string $column
+     * @param string $value
      *
      * @return static
      */
@@ -266,8 +266,8 @@ trait Builder
     }
 
     /**
-     * @param  string  $column
-     * @param  string  $value
+     * @param string $column
+     * @param string $value
      *
      * @return static
      */
@@ -277,8 +277,8 @@ trait Builder
     }
 
     /**
-     * @param  string  $column
-     * @param  string  $value
+     * @param string $column
+     * @param string $value
      *
      * @return static
      */
@@ -288,8 +288,8 @@ trait Builder
     }
 
     /**
-     * @param  string  $column
-     * @param  string  $value
+     * @param string $column
+     * @param string $value
      *
      * @return static
      */
@@ -299,10 +299,11 @@ trait Builder
     }
 
     /**
-     * @param  bool|int  $when
-     * @param  ParameterBag  $bag
-     * @param  string|int  $key
-     * @param  callable  $callable
+     * @param bool|int     $when
+     * @param ParameterBag $bag
+     * @param string|int   $key
+     * @param callable     $callable
+     *
      * @return $this
      */
     public function whenParameterBag($when, ParameterBag $bag, $key, callable $callable)
@@ -317,9 +318,10 @@ trait Builder
     }
 
     /**
-     * @param  ParameterBag  $bag
-     * @param  string|int  $key
-     * @param  callable  $callable
+     * @param ParameterBag $bag
+     * @param string|int   $key
+     * @param callable     $callable
+     *
      * @return $this
      */
     public function whenParameterBagHas(ParameterBag $bag, $key, callable $callable)
@@ -328,9 +330,10 @@ trait Builder
     }
 
     /**
-     * @param  ParameterBag  $bag
-     * @param  string|int  $key
-     * @param  callable  $callable
+     * @param ParameterBag $bag
+     * @param string|int   $key
+     * @param callable     $callable
+     *
      * @return $this
      */
     public function whenParameterBagNotHas(ParameterBag $bag, $key, callable $callable)
@@ -339,9 +342,10 @@ trait Builder
     }
 
     /**
-     * @param  ParameterBag  $bag
-     * @param  string|int  $key
-     * @param  callable  $callable
+     * @param ParameterBag $bag
+     * @param string|int   $key
+     * @param callable     $callable
+     *
      * @return $this
      */
     public function whenParameterBagNull(ParameterBag $bag, $key, callable $callable)
@@ -350,9 +354,10 @@ trait Builder
     }
 
     /**
-     * @param  ParameterBag  $bag
-     * @param  string|int  $key
-     * @param  callable  $callable
+     * @param ParameterBag $bag
+     * @param string|int   $key
+     * @param callable     $callable
+     *
      * @return $this
      */
     public function whenParameterBagNotNull(ParameterBag $bag, $key, callable $callable)
@@ -361,9 +366,10 @@ trait Builder
     }
 
     /**
-     * @param  ParameterBag  $bag
-     * @param  string|int  $key
-     * @param  callable  $callable
+     * @param ParameterBag $bag
+     * @param string|int   $key
+     * @param callable     $callable
+     *
      * @return $this
      */
     public function whenParameterBagEmpty(ParameterBag $bag, $key, callable $callable)
@@ -372,9 +378,10 @@ trait Builder
     }
 
     /**
-     * @param  ParameterBag  $bag
-     * @param  string|int  $key
-     * @param  callable  $callable
+     * @param ParameterBag $bag
+     * @param string|int   $key
+     * @param callable     $callable
+     *
      * @return $this
      */
     public function whenParameterBagNotEmpty(ParameterBag $bag, $key, callable $callable)
