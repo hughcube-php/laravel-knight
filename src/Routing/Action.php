@@ -24,6 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use stdClass;
 use Symfony\Component\HttpFoundation\Response;
 
 trait Action
@@ -174,12 +175,12 @@ trait Action
         return $this->asResponse($data, $code);
     }
 
-    protected function asResponse(array $data = [], int $code = 200): Response
+    protected function asResponse(array $data = null, int $code = 200): Response
     {
         return new JsonResponse([
             'code'    => $code,
             'message' => 'ok',
-            'data'    => $data,
+            'data'    => $data ?? new stdClass(),
         ]);
     }
 
