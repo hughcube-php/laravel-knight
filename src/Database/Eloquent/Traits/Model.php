@@ -331,7 +331,7 @@ trait Model
     /**
      * @param array|Arrayable|Traversable $ids
      *
-     * @return KnightCollection<int, static>|array<int, static>
+     * @return KnightCollection<int, static>
      */
     public static function findByIds($ids): KnightCollection
     {
