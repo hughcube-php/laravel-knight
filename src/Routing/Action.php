@@ -175,12 +175,12 @@ trait Action
         return $this->asResponse($data, $code);
     }
 
-    protected function asResponse(array $data = null, int $code = 200): Response
+    protected function asResponse(array $data = [], int $code = 200): Response
     {
         return new JsonResponse([
             'code'    => $code,
             'message' => 'ok',
-            'data'    => $data ?? new stdClass(),
+            'data'    => $data ?: new stdClass(),
         ]);
     }
 
