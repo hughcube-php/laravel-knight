@@ -11,8 +11,6 @@
     "require": {
         "php": ">=7.4",
         "ext-json": "*",
-        "symfony/console": "*",
-        "symfony/process": "*",
         "nikic/php-parser": "*",
         "hughcube/enum": "*",
         "hughcube/purl": "*",

@@ -108,7 +108,7 @@ trait Builder
 
         $rows = $this->findUniqueRows($collection->toArray())->keyBy($column);
 
-        $collection = $this->getModel()->newCollection([]);
+        $collection = $this->getModel()->newCollection();
         foreach ($values as $value) {
             $row = $rows->get($value);
             if ($row instanceof IlluminateModel) {
