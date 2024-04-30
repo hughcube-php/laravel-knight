@@ -13,12 +13,14 @@ use HughCube\Laravel\Knight\Mixin\Support\CollectionMixin;
 
 /**
  * @see CollectionMixin
+ *
  * @mixin KIdeCollection
  *
  * @template TKey of array-key
  * @template TModel of Model
  *
  * @extends \Illuminate\Support\Collection<TKey, TModel>
+ *
  * @phpstan-ignore-next-line
  */
 class Collection extends \Illuminate\Database\Eloquent\Collection
