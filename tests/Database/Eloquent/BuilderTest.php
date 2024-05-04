@@ -23,6 +23,7 @@ class BuilderTest extends TestCase
         Schema::create('users', function (Blueprint $table) {
             $table->bigIncrements('id')->unsigned()->comment('id');
             $table->string('nickname')->nullable();
+            $table->integer('range')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -112,5 +113,143 @@ class BuilderTest extends TestCase
         /** @var User $user */
         $user = User::query()->orWhereRightLike('nickname', $keyword)->first();
         $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testWhereRange()
+    {
+        $keyword = __FUNCTION__;
+
+        for ($i = 1; $i <= 100; $i++) {
+            $user = new User();
+            $user->nickname = sprintf('%s_%s', $keyword, Str::random());
+            $user->range = $i;
+            $user->save();
+        }
+
+        $rows = User::query()
+            ->whereRaw(sprintf("nickname LIKE '%s_%%'", $keyword))
+            ->whereRange('range', [1, 10])
+            ->get();
+        $this->assertSame(
+            range(1, 10),
+            $rows->pluck('range')->values()->toArray()
+        );
+
+        $rows = User::query()
+            ->whereRaw(sprintf("nickname LIKE '%s%%'", $keyword))
+            ->whereRange('range', [11, 20])
+            ->get();
+        $this->assertSame(
+            range(11, 20),
+            $rows->pluck('range')->values()->toArray()
+        );
+
+        $rows = User::query()
+            ->whereRaw(sprintf("nickname LIKE '%s%%'", $keyword))
+            ->whereRange('range', [null, 20])
+            ->get();
+        $this->assertSame(
+            range(1, 20),
+            $rows->pluck('range')->values()->toArray()
+        );
+
+        $rows = User::query()
+            ->whereRaw(sprintf("nickname LIKE '%s%%'", $keyword))
+            ->whereRange('range', [20, null])
+            ->get();
+        $this->assertSame(
+            range(20, 100),
+            $rows->pluck('range')->values()->toArray()
+        );
+    }
+
+    public function testOrWhereRange()
+    {
+        $keyword = __FUNCTION__;
+
+        for ($i = 1; $i <= 100; $i++) {
+            $user = new User();
+            $user->nickname = sprintf('%s_%s', $keyword, Str::random());
+            $user->range = $i;
+            $user->save();
+        }
+
+        $rows = User::query()
+            ->whereRaw(sprintf("nickname LIKE '%s_%%'", $keyword))
+            ->orWhereRange('range', [1, 10])
+            ->get();
+        $this->assertSame(
+            range(1, 100),
+            $rows->pluck('range')->values()->toArray()
+        );
+
+        $rows = User::query()
+            ->whereRaw(sprintf("nickname LIKE '%s%%'", $keyword))
+            ->orWhereRange('range', [11, 20])
+            ->get();
+        $this->assertSame(
+            range(1, 100),
+            $rows->pluck('range')->values()->toArray()
+        );
+    }
+
+    public function testWhereNotRange()
+    {
+        $keyword = __FUNCTION__;
+
+        for ($i = 1; $i <= 100; $i++) {
+            $user = new User();
+            $user->nickname = sprintf('%s_%s', $keyword, Str::random());
+            $user->range = $i;
+            $user->save();
+        }
+
+        $rows = User::query()
+            ->whereRaw(sprintf("nickname LIKE '%s_%%'", $keyword))
+            ->whereNotRange('range', [1, 10])
+            ->get();
+        $this->assertSame(
+            range(11, 100),
+            $rows->pluck('range')->values()->toArray()
+        );
+
+        $rows = User::query()
+            ->whereRaw(sprintf("nickname LIKE '%s%%'", $keyword))
+            ->whereNotRange('range', [91, 100])
+            ->get();
+        $this->assertSame(
+            range(1, 90),
+            $rows->pluck('range')->values()->toArray()
+        );
+    }
+
+    public function testOrWhereNotRange()
+    {
+        $keyword = __FUNCTION__;
+
+        for ($i = 1; $i <= 100; $i++) {
+            $user = new User();
+            $user->nickname = sprintf('%s_%s', $keyword, Str::random());
+            $user->range = $i;
+            $user->save();
+        }
+
+        $rows = User::query()
+            ->whereRaw(sprintf("nickname LIKE '%s_%%'", $keyword))
+            ->orWhereNotRange('range', [1, 10])
+            ->get();
+        $this->assertSame(
+            range(1, 100),
+            $rows->pluck('range')->values()->toArray()
+        );
+
+        $rows = User::query()
+            ->whereRaw(sprintf("nickname LIKE '%s%%'", $keyword))
+            ->orWhereNotRange('range', [91, 100])
+            ->get();
+        $this->assertSame(
+            range(1, 100),
+            $rows->pluck('range')->values()->toArray()
+        );
     }
 }

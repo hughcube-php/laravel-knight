@@ -8,6 +8,7 @@
 
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
+use Carbon\CarbonPeriod;
 use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use HughCube\Laravel\Knight\Ide\Database\Query\KIdeBuilder;
@@ -17,6 +18,7 @@ use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
+use Illuminate\Database\Eloquent\Builder as IlluminateBuilder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\CacheInterface;
@@ -76,7 +78,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $pk
+     * @param  mixed  $pk
      *
      * @return IlluminateModel|Model|mixed|null
      */
@@ -86,7 +88,7 @@ trait Builder
     }
 
     /**
-     * @param array|Arrayable|Traversable $pks
+     * @param  array|Arrayable|Traversable  $pks
      *
      * @return KnightCollection
      */
@@ -120,7 +122,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $id
+     * @param  mixed  $id
      *
      * @return IlluminateModel|Model|mixed|null
      */
@@ -132,13 +134,13 @@ trait Builder
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
-     *
-     * @throws
+     * @param  array|Arrayable|Traversable  $ids  必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
      * @return KnightCollection
      *
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function findUniqueRows($ids): KnightCollection
     {
@@ -219,7 +221,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return static
      */
@@ -233,8 +235,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -244,8 +246,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -255,8 +257,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -266,8 +268,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -277,8 +279,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -288,8 +290,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -299,12 +301,13 @@ trait Builder
     }
 
     /**
-     * @param bool|int     $when
-     * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param  bool|int  $when
+     * @param  ParameterBag  $bag
+     * @param  string|int  $key
+     * @param  callable  $callable
      *
      * @return $this
+     * @deprecated
      */
     public function whenParameterBag($when, ParameterBag $bag, $key, callable $callable)
     {
@@ -318,11 +321,12 @@ trait Builder
     }
 
     /**
-     * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param  ParameterBag  $bag
+     * @param  string|int  $key
+     * @param  callable  $callable
      *
      * @return $this
+     * @deprecated
      */
     public function whenParameterBagHas(ParameterBag $bag, $key, callable $callable)
     {
@@ -330,11 +334,12 @@ trait Builder
     }
 
     /**
-     * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param  ParameterBag  $bag
+     * @param  string|int  $key
+     * @param  callable  $callable
      *
      * @return $this
+     * @deprecated
      */
     public function whenParameterBagNotHas(ParameterBag $bag, $key, callable $callable)
     {
@@ -342,11 +347,12 @@ trait Builder
     }
 
     /**
-     * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param  ParameterBag  $bag
+     * @param  string|int  $key
+     * @param  callable  $callable
      *
      * @return $this
+     * @deprecated
      */
     public function whenParameterBagNull(ParameterBag $bag, $key, callable $callable)
     {
@@ -354,11 +360,12 @@ trait Builder
     }
 
     /**
-     * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param  ParameterBag  $bag
+     * @param  string|int  $key
+     * @param  callable  $callable
      *
      * @return $this
+     * @deprecated
      */
     public function whenParameterBagNotNull(ParameterBag $bag, $key, callable $callable)
     {
@@ -366,11 +373,12 @@ trait Builder
     }
 
     /**
-     * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param  ParameterBag  $bag
+     * @param  string|int  $key
+     * @param  callable  $callable
      *
      * @return $this
+     * @deprecated
      */
     public function whenParameterBagEmpty(ParameterBag $bag, $key, callable $callable)
     {
@@ -378,14 +386,69 @@ trait Builder
     }
 
     /**
-     * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param  ParameterBag  $bag
+     * @param  string|int  $key
+     * @param  callable  $callable
      *
      * @return $this
+     * @deprecated
      */
     public function whenParameterBagNotEmpty(ParameterBag $bag, $key, callable $callable)
     {
         return $this->whenParameterBag(!$bag->isEmpty($key), $bag, $key, $callable);
+    }
+
+    /**
+     * @param  string  $column
+     * @param  iterable  $values
+     * @param  string  $boolean
+     * @param  bool  $not
+     * @return $this
+     */
+    public function whereRange(string $column, iterable $values, $boolean = 'and', $not = false)
+    {
+        $values = Collection::make(
+            $values instanceof CarbonPeriod ? [$values->start, $values->end] : $values
+        )->values()->slice(0, 2)->toArray();
+
+        return $this->{$not ? 'whereNot' : 'where'}(function (IlluminateBuilder $builder) use ($values, $column) {
+            if (isset($values[0])) {
+                $builder->where($column, '>=', $values[0]);
+            }
+
+            if (isset($values[1])) {
+                $builder->where($column, '<=', $values[1]);
+            }
+        }, null, null, $boolean);
+    }
+
+    /**
+     * @param  string  $column
+     * @param  iterable  $values
+     * @return $this
+     */
+    public function orWhereRange(string $column, iterable $values)
+    {
+        return $this->whereRange($column, $values, 'or');
+    }
+
+    /**
+     * @param  string  $column
+     * @param  iterable  $values
+     * @return $this
+     */
+    public function whereNotRange(string $column, iterable $values)
+    {
+        return $this->whereRange($column, $values, 'and', true);
+    }
+
+    /**
+     * @param  string  $column
+     * @param  iterable  $values
+     * @return $this
+     */
+    public function orWhereNotRange(string $column, iterable $values)
+    {
+        return $this->whereRange($column, $values, 'or', true);
     }
 }

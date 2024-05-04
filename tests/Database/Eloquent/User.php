@@ -15,8 +15,9 @@ use Illuminate\Support\Facades\Cache;
 use Psr\SimpleCache\CacheInterface;
 
 /**
- * @property int         $id
- * @property string      $nickname
+ * @property int $id
+ * @property string $nickname
+ * @property integer $range
  * @property null|Carbon $created_at
  * @property null|Carbon $updated_at
  * @property null|Carbon $deleted_at
