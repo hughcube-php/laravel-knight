@@ -78,7 +78,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $pk
+     * @param  mixed  $pk
      *
      * @return IlluminateModel|Model|mixed|null
      */
@@ -88,7 +88,7 @@ trait Builder
     }
 
     /**
-     * @param array|Arrayable|Traversable $pks
+     * @param  array|Arrayable|Traversable  $pks
      *
      * @return KnightCollection
      */
@@ -122,7 +122,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $id
+     * @param  mixed  $id
      *
      * @return IlluminateModel|Model|mixed|null
      */
@@ -134,13 +134,13 @@ trait Builder
     /**
      * 根据唯一建查找对象列表.
      *
-     * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
-     *
-     * @throws
+     * @param  array|Arrayable|Traversable  $ids  必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
      * @return KnightCollection
      *
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function findUniqueRows($ids): KnightCollection
     {
@@ -221,7 +221,7 @@ trait Builder
     }
 
     /**
-     * @param mixed $value
+     * @param  mixed  $value
      *
      * @return static
      */
@@ -235,8 +235,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -246,8 +246,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -257,8 +257,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -268,8 +268,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -279,8 +279,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -290,8 +290,8 @@ trait Builder
     }
 
     /**
-     * @param string $column
-     * @param string $value
+     * @param  string  $column
+     * @param  string  $value
      *
      * @return static
      */
@@ -301,10 +301,10 @@ trait Builder
     }
 
     /**
-     * @param bool|int     $when
-     * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param  bool|int  $when
+     * @param  ParameterBag  $bag
+     * @param  string|int  $key
+     * @param  callable  $callable
      *
      * @return $this
      *
@@ -322,9 +322,9 @@ trait Builder
     }
 
     /**
-     * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param  ParameterBag  $bag
+     * @param  string|int  $key
+     * @param  callable  $callable
      *
      * @return $this
      *
@@ -336,9 +336,9 @@ trait Builder
     }
 
     /**
-     * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param  ParameterBag  $bag
+     * @param  string|int  $key
+     * @param  callable  $callable
      *
      * @return $this
      *
@@ -350,9 +350,9 @@ trait Builder
     }
 
     /**
-     * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param  ParameterBag  $bag
+     * @param  string|int  $key
+     * @param  callable  $callable
      *
      * @return $this
      *
@@ -364,9 +364,9 @@ trait Builder
     }
 
     /**
-     * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param  ParameterBag  $bag
+     * @param  string|int  $key
+     * @param  callable  $callable
      *
      * @return $this
      *
@@ -378,9 +378,9 @@ trait Builder
     }
 
     /**
-     * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param  ParameterBag  $bag
+     * @param  string|int  $key
+     * @param  callable  $callable
      *
      * @return $this
      *
@@ -392,9 +392,9 @@ trait Builder
     }
 
     /**
-     * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param  ParameterBag  $bag
+     * @param  string|int  $key
+     * @param  callable  $callable
      *
      * @return $this
      *
@@ -406,15 +406,19 @@ trait Builder
     }
 
     /**
-     * @param string   $column
-     * @param iterable $values
-     * @param string   $boolean
-     * @param bool     $not
+     * @param  string  $column
+     * @param  iterable  $values
+     * @param  string  $boolean
+     * @param  bool  $not
      *
      * @return $this
      */
-    public function whereRange(string $column, iterable $values, $boolean = 'and', $not = false)
+    public function whereRange(string $column, iterable $values, string $boolean = 'and', bool $not = false)
     {
+        if (is_array($values) && (isset($values['start']) || isset($values['end']))) {
+            $values = [$values['start'] ?? null, $values['end'] ?? null];
+        }
+
         $values = Collection::make(
             $values instanceof CarbonPeriod ? [$values->start, $values->end] : $values
         )->values()->slice(0, 2)->toArray();
@@ -431,8 +435,8 @@ trait Builder
     }
 
     /**
-     * @param string   $column
-     * @param iterable $values
+     * @param  string  $column
+     * @param  iterable  $values
      *
      * @return $this
      */
@@ -442,8 +446,8 @@ trait Builder
     }
 
     /**
-     * @param string   $column
-     * @param iterable $values
+     * @param  string  $column
+     * @param  iterable  $values
      *
      * @return $this
      */
@@ -453,8 +457,8 @@ trait Builder
     }
 
     /**
-     * @param string   $column
-     * @param iterable $values
+     * @param  string  $column
+     * @param  iterable  $values
      *
      * @return $this
      */
