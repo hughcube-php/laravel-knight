@@ -79,10 +79,8 @@ class CarbonMixin
                         '5' => '五', '6' => '六', '7' => '七', '8' => '八', '9' => '九',
                     ]
                 ),
-
                 /** @phpstan-ignore-next-line */
                 CNNumber::toLower($this->month),
-
                 /** @phpstan-ignore-next-line */
                 CNNumber::toLower($this->day)
             );
