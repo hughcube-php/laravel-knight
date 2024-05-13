@@ -77,9 +77,7 @@ class BatchPingJob extends Job
                 /** log response */
                 if ($response instanceof Response) {
                     $this->logResponse($method, $url, $duration, $reason->getResponse());
-                }
-                /** log exception */
-                elseif ($reason instanceof Throwable) {
+                }elseif ($reason instanceof Throwable) {
                     $this->info(sprintf(
                         'method: %s, url: %s, status: %s, duration: %sms requestId: %s, exception: %s',
                         $method,
@@ -89,9 +87,7 @@ class BatchPingJob extends Job
                         '',
                         $reason->getMessage()
                     ));
-                }
-                /** log unknown */
-                else {
+                }else {
                     $this->info(sprintf(
                         'method: %s, url: %s, status: %s, duration: %sms requestId: %s, exception: %s',
                         $method,
