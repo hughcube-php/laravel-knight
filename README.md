@@ -1,4 +1,4 @@
-<p align="center"><h1> Laravel Knight </h1></p>
+<h1><p align="center"> Laravel Knight </p></h1>
 
 <p align="center">
     <a href="https://github.com/hughcube-php/laravel-knight/actions?query=workflow%3ATest">
