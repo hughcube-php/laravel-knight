@@ -138,7 +138,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     protected function getDelays(): float
     {
-        return round(Carbon::now()->diffInMicroseconds($this->getJobStartedAt()) / 1000, 2);
+        return round(abs(Carbon::now()->diffInMicroseconds($this->getJobStartedAt())) / 1000, 2);
     }
 
     public function getData(): array
