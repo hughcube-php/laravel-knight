@@ -73,6 +73,11 @@ $loads = Collection::empty()
         return 0 !== strripos($class, 'PhpParser\\');
     })
 
+    /** 剔除Laravel别名类 */
+    ->filter(function ($class) {
+        return 0 < strripos($class, '\\');
+    })
+
     ->values()->map(function ($class) {
         $reflection = new \ReflectionClass($class);
 
