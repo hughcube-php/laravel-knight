@@ -10,16 +10,18 @@ class RotateFileJobTest extends TestCase
 {
     public function testRun()
     {
-        $file = sprintf('/tmp/FileRotateJobTest-%s.log', md5(1));
-
+        $file = sprintf('/tmp/FileRotateJobTest-%s.test.log', md5(1));
         File::put($file, 'test');
+
+        $file = sprintf('/tmp/FileRotateJobTest-%s.test.log', md5(2));
+        File::put($file, '');
 
         try {
             $this->assertJob(RotateFileJob::new([
                 'items' => [
                     [
-                        'dir'         => '/tmp/',
-                        'pattern'     => File::basename($file),
+                        'dir'         => ['/tmp/', '/tmp/xxx/'],
+                        'pattern'     => 'FileRotateJobTest-*.test.log',
                         'date_format' => date('Y-m-d'),
                     ],
                 ],

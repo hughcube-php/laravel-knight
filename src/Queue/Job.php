@@ -10,6 +10,7 @@ namespace HughCube\Laravel\Knight\Queue;
 
 use BadMethodCallException;
 use Exception;
+use HughCube\Base\Base;
 use HughCube\Laravel\Knight\Contracts\Queue\FromFlowJob;
 use HughCube\Laravel\Knight\Events\ActionProcessed;
 use HughCube\Laravel\Knight\Events\ActionProcessing;
@@ -91,22 +92,20 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
         $this->loadParameters();
 
         $this->getEventsDispatcher()->dispatch(new ActionProcessing($this));
-
         try {
             $this->beforeAction();
             $this->action();
         } finally {
             $this->afterAction();
         }
-
         $this->getEventsDispatcher()->dispatch(new ActionProcessed($this));
     }
+
+    abstract protected function action(): void;
 
     protected function beforeAction()
     {
     }
-
-    abstract protected function action(): void;
 
     protected function afterAction()
     {
@@ -128,9 +127,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     protected function getPid(): string
     {
         return $this->getOrSet(__METHOD__, function () {
-            $hostname = base_convert(abs(crc32(gethostname())), 10, 36);
-            $pid = base_convert(getmypid(), 10, 36);
-            $random = base_convert(abs(crc32(random_bytes(10))), 10, 36);
+            $hostname = base_convert(Base::toString(abs(crc32(gethostname()))), 10, 36);
+            $pid = base_convert(Base::toString(getmypid()), 10, 36);
+            $random = base_convert(Base::toString(abs(crc32(random_bytes(10)))), 10, 36);
 
             return sprintf('%s-%s-%s', $hostname, $pid, $random);
         });
@@ -164,7 +163,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     protected function getSerializeData(): string
     {
-        return base64_encode(serialize($this->data));
+        return serialize($this->data);
     }
 
     protected function getJsonData(int $flags = JSON_UNESCAPED_UNICODE): string
@@ -179,7 +178,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     protected function getSerializeValidData(): string
     {
-        return base64_encode(serialize($this->getValidData()));
+        return serialize($this->getValidData());
     }
 
     protected function getJsonValidData(int $flags = JSON_UNESCAPED_UNICODE): string
@@ -219,13 +218,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
      */
     public function log($level, string $message, array $context = [])
     {
-        $message = sprintf(
-            '%s [%s] [%.2fms] %s',
-            $this->getName(),
-            $this->getPid(),
-            $this->getDelays(),
-            $message
-        );
+        $message = sprintf('%s [%s] [%.2fms] %s', $this->getName(), $this->getPid(), $this->getDelays(), $message);
 
         Log::channel($this->getLogChannel())->log($level, $message, $context);
     }

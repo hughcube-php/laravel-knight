@@ -282,7 +282,7 @@ class Str extends \Illuminate\Support\Str
      */
     public static function msubstr($str, $start = 0, $length = null, $suffix = '...', $charset = 'utf-8'): string
     {
-        $length = null === $length ? strlen($length) : $length;
+        $length = null === $length ? strlen($str) : $length;
         $charLen = in_array($charset, ['utf-8', 'UTF8']) ? 3 : 2;
 
         // 小于指定长度，直接返回
@@ -314,7 +314,7 @@ class Str extends \Illuminate\Support\Str
      */
     public static function countWords($string): int
     {
-        return count(preg_split('/\s+/u', $string, null, PREG_SPLIT_NO_EMPTY));
+        return count(preg_split('/\s+/u', $string, -1, PREG_SPLIT_NO_EMPTY));
     }
 
     /**

@@ -8,6 +8,7 @@ use HughCube\Laravel\Knight\Database\Eloquent\Builder;
 use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
 use HughCube\Laravel\Knight\Support\Json;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -23,7 +24,7 @@ use Traversable;
  * @method static Builder newQuery()
  *
  * @mixin SoftDeletes
- * @mixin \Illuminate\Database\Eloquent\Model
+ * @mixin EloquentModel
  */
 trait Model
 {
@@ -434,5 +435,32 @@ trait Model
         }
 
         return $collection->all();
+    }
+
+    public function equal($model): bool
+    {
+        if (!$model instanceof EloquentModel || !$this->is($model)) {
+            return false;
+        }
+
+        $attributes = $model->getAttributes();
+        $thisAttributes = $this->getAttributes();
+
+        $names = Collection::empty()
+            ->merge(array_keys($attributes))
+            ->merge(array_keys($thisAttributes))
+            ->unique()->filter()->values();
+
+        foreach ($names as $name) {
+            if (!array_key_exists($name, $attributes) || !array_key_exists($name, $thisAttributes)) {
+                return false;
+            }
+
+            if ($attributes[$name] !== $thisAttributes[$name]) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

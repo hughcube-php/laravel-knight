@@ -62,7 +62,6 @@ trait Action
         $this->loadParameters();
 
         $this->getEventsDispatcher()->dispatch(new ActionProcessing($this));
-
         try {
             $this->beforeAction();
             $result = $this->action();

@@ -57,6 +57,7 @@ class OPcache
             }
         }
 
+        /** @phpstan-ignore-next-line */
         $this->getCache()->set($this->getCacheKey(), $scripts, Carbon::now()->addYears());
 
         return $scripts;

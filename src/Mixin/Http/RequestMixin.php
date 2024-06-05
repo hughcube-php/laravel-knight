@@ -153,6 +153,7 @@ class RequestMixin
     public function isEqClientVersion(): Closure
     {
         return function (string $version, ?int $length = null): bool {
+            /** @phpstan-ignore-next-line */
             return Version::compare('=', $this->getClientVersion(), $version, $length);
         };
     }
@@ -165,6 +166,7 @@ class RequestMixin
     public function isLtClientVersion(): Closure
     {
         return function (string $version, bool $contain = false, ?int $length = null): bool {
+            /** @phpstan-ignore-next-line */
             return Version::compare($contain ? '>=' : '>', $this->getClientVersion(), $version, $length);
         };
     }
@@ -177,6 +179,7 @@ class RequestMixin
     public function isGtClientVersion(): Closure
     {
         return function (string $version, bool $contain = false, ?int $length = null): bool {
+            /** @phpstan-ignore-next-line */
             return Version::compare($contain ? '<=' : '<', $this->getClientVersion(), $version, $length);
         };
     }
