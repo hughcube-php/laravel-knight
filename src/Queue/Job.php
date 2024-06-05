@@ -92,6 +92,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
         $this->loadParameters();
 
         $this->getEventsDispatcher()->dispatch(new ActionProcessing($this));
+
         try {
             $this->beforeAction();
             $this->action();
