@@ -100,7 +100,7 @@ class ScheduleJob extends Job
             $this->incrementScheduledJobCount(),
             $this->getName($job),
             is_scalar($id) ? $id : '',
-            round($end->diffInMicroseconds($start) / 1000, 2),
+            round($start->diffInMicroseconds($end) / 1000, 2),
             $this->getDelays()
         ));
 
@@ -137,7 +137,7 @@ class ScheduleJob extends Job
             '[%s] fire job: %s, duration: %.2fms, delays: %.2fms',
             $this->incrementScheduledJobCount(),
             $this->getName($job),
-            round($end->diffInMicroseconds($start) / 1000, 2),
+            round($start->diffInMicroseconds($end) / 1000, 2),
             $this->getDelays()
         ));
 

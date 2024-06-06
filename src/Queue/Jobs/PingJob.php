@@ -47,7 +47,7 @@ class PingJob extends Job
         $end = Carbon::now();
 
         $requestId = $this->getRequestId($response);
-        $duration = $end->diffInMilliseconds($start);
+        $duration = $start->diffInMilliseconds($end);
         $statusCode = $response instanceof Response ? $response->getStatusCode() : null;
         $exception = $exception instanceof Throwable ? $exception->getMessage() : null;
 

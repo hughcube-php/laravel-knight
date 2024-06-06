@@ -61,13 +61,13 @@ class BatchPingJob extends Job
             'fulfilled'   => function (Response $response, $index) use ($requests, $start) {
                 $url = $requests[$index]['url'];
                 $method = $requests[$index]['method'];
-                $duration = Carbon::now()->diffInMilliseconds($start);
+                $duration = $start->diffInMilliseconds(Carbon::now());
                 $this->logResponse($method, $url, $duration, $response);
             },
             'rejected' => function ($reason, $index) use ($requests, $start) {
                 $url = $requests[$index]['url'];
                 $method = $requests[$index]['method'];
-                $duration = Carbon::now()->diffInMilliseconds($start);
+                $duration = $start->diffInMilliseconds(Carbon::now());
                 /** parse response */
                 $response = null;
                 if (is_object($reason) && method_exists($reason, 'getResponse')) {
