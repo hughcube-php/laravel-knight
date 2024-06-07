@@ -9,11 +9,21 @@
 namespace HughCube\Laravel\Knight\Http\Actions;
 
 use HughCube\Laravel\Knight\Routing\Controller;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 
 class PhpInfoAction extends Controller
 {
-    protected function action(): void
+    protected function action(): Response
     {
+        ob_start();
         phpinfo();
+        $content = ob_get_clean();
+
+        if (!Str::startsWith($content, '<')) {
+            $content = sprintf('<html><pre>%s</pre></html>', $content);
+        }
+
+        return new Response($content);
     }
 }

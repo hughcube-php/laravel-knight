@@ -33,8 +33,7 @@ class PingDatabaseJob extends Job
         }
 
         $this->info(sprintf(
-            'pid: %s, connection: %s, write: %s, read: %s',
-            getmypid(),
+            'connection: %s, write: %s, read: %s',
             $connection->getName(),
             $writeResultMessage,
             $readResultMessage ?? '-'

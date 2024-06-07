@@ -14,6 +14,7 @@ use HughCube\Laravel\Knight\Queue\Job;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Queue\DatabaseQueue;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Throwable;
 
 class QueueFlowJob extends Job
@@ -40,15 +41,15 @@ class QueueFlowJob extends Job
         $startDate = Carbon::now();
         $maxTime = $this->getMaxTime();
 
-        $ids = [];
+        $ids = Collection::empty();
         while ($maxTime >= $startDate->diffInSeconds(Carbon::now())) {
             if (empty($id = $this->nextAvailableJob())) {
                 break;
             }
-            $ids[] = $id;
+            $ids = $ids->add($id);
         }
 
-        $this->info(sprintf('推送任务%s个, ids:[%s]', count($ids), implode(', ', $ids)));
+        $this->info(sprintf('推送任务%s个, ids: %s', $ids->count(), $ids->implode(', ')));
     }
 
     /**
