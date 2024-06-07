@@ -23,8 +23,8 @@ class NowAction extends Controller
 
         return $this->asResponse([
             'timestamp' => $now->getTimestampAsFloat(),
-            'rfc3339' => $now->toRfc3339ExtendedString(),
-            'date' => $now->format('Y-m-d H:i:s.u'),
+            'rfc3339'   => $now->toRfc3339ExtendedString(),
+            'date'      => $now->format('Y-m-d H:i:s.u'),
         ]);
     }
 }
