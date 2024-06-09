@@ -159,6 +159,16 @@ trait Model
     }
 
     /**
+     * @return $this
+     */
+    public function resetModelVersion()
+    {
+        $this->data_version = $this->genModelVersion();
+
+        return $this;
+    }
+
+    /**
      * @param $query
      *
      * @return Builder
