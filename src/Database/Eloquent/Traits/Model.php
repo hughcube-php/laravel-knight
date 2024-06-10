@@ -163,6 +163,7 @@ trait Model
      */
     public function resetModelVersion()
     {
+        /** @phpstan-ignore-next-line */
         $this->data_version = $this->genModelVersion();
 
         return $this;

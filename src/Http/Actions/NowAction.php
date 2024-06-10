@@ -22,8 +22,9 @@ class NowAction extends Controller
         $now = Carbon::now();
 
         return $this->asResponse([
+            /** @phpstan-ignore-next-line */
             'timestamp' => $now->getTimestampAsFloat(),
-            'date'      => $now->format('Y-m-d H:i:s.u'),
+            /** @phpstan-ignore-next-line */
             'rfc3339'   => $now->toRfc3339ExtendedString(),
         ]);
     }
