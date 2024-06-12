@@ -75,22 +75,22 @@ class RotateFileJob extends Job
         }
 
         $this->info($message = sprintf(
-            'In directory "%s" that match "%s" find %s files (%s), skip %s empty files, rotated %s files (%s).',
+            'In directory "%s" that match "%s" find %s files%s, skip %s empty files, rotated %s files%s.',
             $dirs->implode(', '),
             $patterns->implode(', '),
             $files->count(),
-            Collection::make($files->getIterator())->map(function (SplFileInfo $file) use ($dirs) {
+            0 >= $files->count() ? '' : sprintf(' (%s)', Collection::make($files->getIterator())->map(function (SplFileInfo $file) use ($dirs) {
                 return $dirs->count() > 1 ? $file->getRealPath() : $file->getBasename();
-            })->implode(', '),
+            })->implode(', ')),
             $files->count() - $rotates->count(),
             $rotates->count(),
-            $rotates->map(function ($result) use ($dirs) {
+            0 >= $rotates->count() ? '' : sprintf(' (%s)', $rotates->map(function ($result) use ($dirs) {
                 if ($dirs->count() > 1) {
                     return sprintf('[%s => %s]', $result['path'], $result['date_path']);
                 } else {
                     return sprintf('[%s => %s]', File::basename($result['path']), File::basename($result['date_path']));
                 }
-            })->implode(', ')
+            })->implode(', '))
         ));
     }
 
