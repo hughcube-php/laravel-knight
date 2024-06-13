@@ -18,7 +18,7 @@ class LogRequest
     {
         Log::info(
             sprintf(
-                'request: uri:%s, headers:%s, body:%s',
+                'uri: %s, headers: %s, body: %s',
                 $request->getUri(),
                 json_encode($request->headers->all()),
                 serialize($request->getContent())
