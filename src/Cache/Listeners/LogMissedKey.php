@@ -21,7 +21,7 @@ class LogMissedKey
      */
     public function handle(CacheEvent $event)
     {
-        Log::info(sprintf(
+        Log::debug(sprintf(
             'store: %s, key: %s, tags: %s',
             $event->storeName,
             $event->key,
