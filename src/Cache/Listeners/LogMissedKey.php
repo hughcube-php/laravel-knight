@@ -16,6 +16,7 @@ class LogMissedKey
 {
     /**
      * @param CacheMissed $event
+     *
      * @return void
      */
     public function handle(CacheEvent $event)
