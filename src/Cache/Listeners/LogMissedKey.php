@@ -23,7 +23,7 @@ class LogMissedKey
     {
         Log::debug(sprintf(
             'store: %s, key: %s, tags: %s',
-            $event->storeName,
+            property_exists($event, 'storeName') ? $event->storeName : null,
             $event->key,
             implode(',', $event->tags)
         ));

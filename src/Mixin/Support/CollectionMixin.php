@@ -9,6 +9,7 @@
 namespace HughCube\Laravel\Knight\Mixin\Support;
 
 use Closure;
+use HughCube\Laravel\Knight\Support\Str;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
@@ -19,6 +20,7 @@ class CollectionMixin
 {
     /**
      * 根据回调方法检查是否存在指定元素.
+     * @deprecated
      */
     public function hasByCallable(): Closure
     {
@@ -29,6 +31,64 @@ class CollectionMixin
                 }
             }
 
+            return false;
+        };
+    }
+
+    public function hasAnyValues(): Closure
+    {
+        return function ($values, bool $strict = false) {
+            if ($this->isEmpty()) {
+                return false;
+            }
+
+            if (0 === count($values)) {
+                return true;
+            }
+
+            foreach ($this->getIterator() as $item) {
+                if (in_array($item, $values, $strict)) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+    }
+
+    public function hasAllValues(): Closure
+    {
+        return function ($values, bool $strict = false) {
+            if ($this->isEmpty()) {
+                return false;
+            }
+
+            if (0 === count($values)) {
+                return true;
+            }
+
+            foreach ($this->getIterator() as $item) {
+                if (!in_array($item, $values, $strict)) {
+                    return false;
+                }
+            }
+
+            return true;
+        };
+    }
+
+    public function hasValue(): Closure
+    {
+        return function ($needle, $strict = false) {
+            foreach ($this->getIterator() as $index => $item) {
+                if ($needle instanceof Closure && $needle($item, $index)) {
+                    return true;
+                } elseif ($strict && $item === $needle) {
+                    return true;
+                } elseif (!$strict && $item == $needle) {
+                    return true;
+                }
+            }
             return false;
         };
     }
@@ -54,6 +114,93 @@ class CollectionMixin
             }
 
             return true;
+        };
+    }
+
+    public function afterKeyItems(): Closure
+    {
+        return function ($key = null) {
+            $collection = $this->make();
+
+            return $this->filter(function ($item) use (&$preSearched, $value, $withBeacon, $strict) {
+                if ($preSearched) {
+                    return true;
+                }
+
+                $searched = false;
+                if ($value instanceof Closure && $value($item)) {
+                    $searched = true;
+                } elseif ($strict && $item === $value) {
+                    $searched = true;
+                } elseif (!$strict && $item == $value) {
+                    $searched = true;
+                }
+
+                if ($searched) {
+                    $preSearched = $searched;
+                }
+
+                return $withBeacon && $searched;
+            });
+        };
+    }
+
+    /**
+     * 返回指定元素之后的所有元素
+     */
+    public function afterFirstItems(): Closure
+    {
+        return function ($value = null, $withBeacon = false, $strict = false) {
+            return $this->filter(function ($item) use (&$preSearched, $value, $withBeacon, $strict) {
+                if ($preSearched) {
+                    return true;
+                }
+
+                $searched = false;
+                if ($value instanceof Closure && $value($item)) {
+                    $searched = true;
+                } elseif ($strict && $item === $value) {
+                    $searched = true;
+                } elseif (!$strict && $item == $value) {
+                    $searched = true;
+                }
+
+                if ($searched) {
+                    $preSearched = $searched;
+                }
+
+                return $withBeacon && $searched;
+            });
+        };
+    }
+
+    /**
+     * 返回指定元素之后的所有元素
+     */
+    public function afterLastItems(): Closure
+    {
+        return function ($value = null, $withBeacon = false, $strict = false) {
+            $preSearched = false;
+            return $this->filter(function ($item) use (&$preSearched, $value, $withBeacon, $strict) {
+                if ($preSearched) {
+                    return true;
+                }
+
+                $searched = false;
+                if ($value instanceof Closure && $value($item)) {
+                    $searched = true;
+                } elseif ($strict && $item === $value) {
+                    $searched = true;
+                } elseif (!$strict && $item == $value) {
+                    $searched = true;
+                }
+
+                if ($searched) {
+                    $preSearched = $searched;
+                }
+
+                return $withBeacon && $searched;
+            });
         };
     }
 
@@ -149,23 +296,6 @@ class CollectionMixin
             }
 
             return $this->make($this->getIterator());
-        };
-    }
-
-    public function hasValue(): Closure
-    {
-        return function ($needle, $strict = false) {
-            foreach ($this->getIterator() as $value) {
-                if ($strict && $value === $needle) {
-                    return true;
-                }
-
-                if (!$strict && $value == $needle) {
-                    return true;
-                }
-            }
-
-            return false;
         };
     }
 

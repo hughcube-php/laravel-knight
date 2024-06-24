@@ -21,6 +21,9 @@ class KIdeCollection
 {
     /**
      * @see CollectionMixin::hasByCallable()
+     *
+     * @deprecated
+     * @see CollectionMixin::hasValue()
      */
     public function hasByCallable(callable $key): bool
     {
