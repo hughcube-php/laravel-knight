@@ -9,7 +9,6 @@
 namespace HughCube\Laravel\Knight\Mixin\Support;
 
 use Closure;
-use HughCube\Laravel\Knight\Support\Str;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
@@ -20,6 +19,7 @@ class CollectionMixin
 {
     /**
      * 根据回调方法检查是否存在指定元素.
+     *
      * @deprecated
      */
     public function hasByCallable(): Closure
@@ -89,6 +89,7 @@ class CollectionMixin
                     return true;
                 }
             }
+
             return false;
         };
     }
@@ -146,7 +147,7 @@ class CollectionMixin
     }
 
     /**
-     * 返回指定元素之后的所有元素
+     * 返回指定元素之后的所有元素.
      */
     public function afterFirstItems(): Closure
     {
@@ -175,12 +176,13 @@ class CollectionMixin
     }
 
     /**
-     * 返回指定元素之后的所有元素
+     * 返回指定元素之后的所有元素.
      */
     public function afterLastItems(): Closure
     {
         return function ($value = null, $withBeacon = false, $strict = false) {
             $preSearched = false;
+
             return $this->filter(function ($item) use (&$preSearched, $value, $withBeacon, $strict) {
                 if ($preSearched) {
                     return true;
