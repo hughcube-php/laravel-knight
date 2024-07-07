@@ -21,7 +21,6 @@ class KIdeCollection
 {
     /**
      * @see CollectionMixin::hasByCallable()
-     *
      * @deprecated
      * @see CollectionMixin::hasValue()
      */
