@@ -23,12 +23,13 @@ class DB extends \Illuminate\Support\Facades\DB
 
         for ($i = 1; $i <= $count; $i++) {
             $exception = null;
-
             try {
                 $results = $callable();
                 break;
             } catch (QueryException $exception) {
-                usleep($usleepMicroseconds ?: random_int(100000, 1000000));
+                if (0 < ($microseconds = $usleepMicroseconds ?? random_int(100000, 1000000))) {
+                    usleep($microseconds);
+                }
             }
         }
 

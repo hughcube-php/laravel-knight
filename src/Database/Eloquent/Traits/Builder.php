@@ -419,6 +419,7 @@ trait Builder
         }
 
         $values = Collection::make(
+        /** @phpstan-ignore-next-line */
             $values instanceof CarbonPeriod ? [$values->start, $values->end] : $values
         )->values()->slice(0, 2)->toArray();
 

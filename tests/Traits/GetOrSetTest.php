@@ -22,7 +22,9 @@ class GetOrSetTest extends TestCase
      */
     public function testGetOrSetNotEmpty()
     {
-        $mock = $this->getMockForTrait(GetOrSet::class);
+        $mock = new class {
+            use GetOrSet;
+        };
 
         $values = [];
         $key = Str::random();
@@ -46,7 +48,9 @@ class GetOrSetTest extends TestCase
      */
     public function testGetOrSetEmpty()
     {
-        $mock = $this->getMockForTrait(GetOrSet::class);
+        $mock = new class {
+            use GetOrSet;
+        };
 
         $key = Str::random();
 
@@ -77,7 +81,9 @@ class GetOrSetTest extends TestCase
      */
     public function testFlushHughCubeKnightClassSelfCacheStorage()
     {
-        $mock = $this->getMockForTrait(GetOrSet::class);
+        $mock = new class {
+            use GetOrSet;
+        };
 
         $value = $this->callMethod($mock, 'getOrSet', [
             Str::random(), function () {

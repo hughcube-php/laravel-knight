@@ -15,6 +15,10 @@ class LogQuerySql
 {
     public function handle($event): void
     {
+        if (!$this->isEnable()) {
+            return;
+        }
+
         if (!$event instanceof QueryExecuted || empty($event->sql)) {
             return;
         }
@@ -24,5 +28,10 @@ class LogQuerySql
             .sprintf(', connection: %s, duration: %sms', $event->connectionName, $event->time)
             .sprintf(', sql: %s', vsprintf(str_replace('?', "'%s'", $event->sql), $event->bindings))
         );
+    }
+
+    protected function isEnable(): bool
+    {
+        return true;
     }
 }
