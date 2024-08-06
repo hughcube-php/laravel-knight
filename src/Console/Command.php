@@ -8,8 +8,8 @@
 
 namespace HughCube\Laravel\Knight\Console;
 
+use HughCube\Laravel\Knight\Support\Str;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 
 class Command extends \Illuminate\Console\Command
 {
@@ -34,7 +34,6 @@ class Command extends \Illuminate\Console\Command
     {
         $value = $this->option($name);
         if (null !== $value && '' !== $value) {
-            /** @phpstan-ignore-next-line */
             return Str::isTrue($value);
         }
 
