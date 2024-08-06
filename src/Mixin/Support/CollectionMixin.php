@@ -118,33 +118,33 @@ class CollectionMixin
         };
     }
 
-    public function afterKeyItems(): Closure
-    {
-        return function ($key = null) {
-            $collection = $this->make();
-
-            return $this->filter(function ($item) use (&$preSearched, $value, $withBeacon, $strict) {
-                if ($preSearched) {
-                    return true;
-                }
-
-                $searched = false;
-                if ($value instanceof Closure && $value($item)) {
-                    $searched = true;
-                } elseif ($strict && $item === $value) {
-                    $searched = true;
-                } elseif (!$strict && $item == $value) {
-                    $searched = true;
-                }
-
-                if ($searched) {
-                    $preSearched = $searched;
-                }
-
-                return $withBeacon && $searched;
-            });
-        };
-    }
+//    public function afterKeyItems(): Closure
+//    {
+//        return function ($key = null) {
+//            $collection = $this->make();
+//
+//            return $this->filter(function ($item) use (&$preSearched, $value, $withBeacon, $strict) {
+//                if ($preSearched) {
+//                    return true;
+//                }
+//
+//                $searched = false;
+//                if ($value instanceof Closure && $value($item)) {
+//                    $searched = true;
+//                } elseif ($strict && $item === $value) {
+//                    $searched = true;
+//                } elseif (!$strict && $item == $value) {
+//                    $searched = true;
+//                }
+//
+//                if ($searched) {
+//                    $preSearched = $searched;
+//                }
+//
+//                return $withBeacon && $searched;
+//            });
+//        };
+//    }
 
     /**
      * 返回指定元素之后的所有元素.

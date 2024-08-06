@@ -98,4 +98,21 @@ class CarbonMixin
             return $default;
         };
     }
+
+    public static function tryCreateFromFormat(): Closure
+    {
+        return function ($format, $time, $timezone = null): ?Carbon {
+            if (empty($time)) {
+                return null;
+            }
+
+            try {
+                $date = static::createFromFormat($format, $time, $timezone);
+            } catch (Throwable $exception) {
+                $date = false;
+            }
+
+            return $date instanceof Carbon ? $date : null;
+        };
+    }
 }
