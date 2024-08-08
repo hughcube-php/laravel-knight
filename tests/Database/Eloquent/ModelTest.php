@@ -560,6 +560,39 @@ class ModelTest extends TestCase
     }
 
     /**
+     * @return void
+     * @throws Exception
+     *
+     */
+    public function testUniqueRows()
+    {
+        $this->resetTable();
+
+        $condition = Collection::make();
+        for ($i = 1; $i <= 100; $i++) {
+            $user = new User();
+            $user->nickname = sprintf('nickname-%s', $i);
+            $user->save();
+
+            $condition->add(['id' => $user->id, 'nickname' => $user->nickname]);
+        }
+
+        /** @var Collection<integer, User> $rows */
+        $rows = User::query()->findUniqueRows($condition);
+        $this->assertSame($rows->count(), $condition->count());
+        foreach ($rows as $row) {
+            $this->assertFalse($row->isFromCache());
+        }
+
+        /** @var Collection<integer, User> $rows */
+        $rows = User::query()->findUniqueRows($condition);
+        $this->assertSame($rows->count(), $condition->count());
+        foreach ($rows as $row) {
+            $this->assertTrue($row->isFromCache());
+        }
+    }
+
+    /**
      * @throws Exception
      *
      * @return void
