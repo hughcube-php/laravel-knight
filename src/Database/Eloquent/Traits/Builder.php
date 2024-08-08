@@ -55,11 +55,8 @@ trait Builder
      */
     public function getCache(): CacheInterface
     {
-        if (!$this->enableCache) {
-            return $this->getNullCache();
-        }
-
-        return $this->getModel()->getCache() ?? $this->getNullCache();
+        $cache = $this->enableCache ? $this->getModel()->getCache() : null;
+        return $cache ?? $this->getNullCache();
     }
 
     /**
@@ -143,6 +140,7 @@ trait Builder
      */
     public function findUniqueRows($ids): KnightCollection
     {
+        /** @var Collection $ids */
         $ids = Collection::make($ids)->values();
         $rows = $this->getModel()->newCollection();
 
@@ -173,13 +171,19 @@ trait Builder
             return $rows->values();
         }
 
-        /** db 查询没有命中缓存的数据 */
-        /** [['pk1' => 1, 'pk2' => 1], ['pk1' => 1, 'pk2' => 1]] => ['pk1' => [1, 1], 'pk2' => [1, 1]] */
-        /** [['pk1' => 1, 'pk2' => 1]] => ['pk1' => 1, 'pk2' => 1] */
-        $condition = Collection::make(array_merge_recursive(...$ids->only($missIndexes->toArray())->toArray()));
+        /**
+         * db 查询没有命中缓存的数据
+         *
+         * [['pk1' => 1, 'pk2' => 1], ['pk1' => 1, 'pk2' => 1]] => ['pk1' => [1, 1], 'pk2' => [1, 1]]
+         * [['pk1' => 1, 'pk2' => 1]] => ['pk1' => 1, 'pk2' => 1]
+         */
+        $missIds = $ids->only($missIndexes->toArray());
+        $condition = Collection::make(array_merge_recursive(...$missIds->toArray()));
         $fromDbRows = $this
-            ->where(
-                function (self $query) use ($condition) {
+            ->where(function (self $query) use ($missIds, $condition) {
+
+                /** 非联合唯一键 */
+                if (1 === $condition->count()) {
                     foreach ($condition as $name => $values) {
                         if (is_array($values)) {
                             $query->whereIn($name, array_values(array_unique($values)));
@@ -189,8 +193,36 @@ trait Builder
                             $query->where($name, $values);
                         }
                     }
+                    return;
                 }
-            )
+
+                /** 联合唯一健, 但是只有一个In操作的 */
+                if (1 === $condition->filter(fn($v) => is_array($v) && 1 < count($v))->count()) {
+                    foreach ($condition as $name => $values) {
+                        if (is_array($values)) {
+                            $query->whereIn($name, array_values(array_unique($values)));
+                        } elseif (null === $values) {
+                            $query->whereNull($name);
+                        } else {
+                            $query->where($name, $values);
+                        }
+                    }
+                    return;
+                }
+
+                /** 兜底方案 */
+                foreach ($missIds as $id) {
+                    $query->orWhere(function (self $query) use ($id) {
+                        foreach ($id as $name => $value) {
+                            if (null === $value) {
+                                $query->whereNull($name);
+                            } else {
+                                $query->where($name, $value);
+                            }
+                        }
+                    });
+                }
+            })
             ->limit($missIndexes->count())
             ->get()->keyBy(function (IlluminateModel $model) use ($condition) {
                 return $this->getModel()->makeColumnsCacheKey(
