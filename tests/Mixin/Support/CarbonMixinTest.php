@@ -54,4 +54,25 @@ class CarbonMixinTest extends TestCase
         $date = Carbon::parse('2001-10-01');
         $this->assertSame($date->toChineseDate(), '二〇〇一年十月一日');
     }
+
+    public function testTryParseDate()
+    {
+        $datetime = Carbon::tryParseDate('2023-07-31');
+        $this->assertSame($datetime?->format('Y-m-d'), '2023-07-31');
+
+        $datetime = Carbon::tryParseDate('2023/07/31');
+        $this->assertSame($datetime?->format('Y-m-d'), '2023-07-31');
+
+        $datetime = Carbon::tryParseDate('2023.07.31');
+        $this->assertSame($datetime?->format('Y-m-d'), '2023-07-31');
+
+        $datetime = Carbon::tryParseDate('2023年07月31日');
+        $this->assertSame($datetime?->format('Y-m-d'), '2023-07-31');
+
+        $datetime = Carbon::tryParseDate('2023年07月31');
+        $this->assertSame($datetime?->format('Y-m-d'), '2023-07-31');
+
+        $datetime = Carbon::tryParseDate(null);
+        $this->assertNull($datetime);
+    }
 }

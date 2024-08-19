@@ -98,4 +98,29 @@ class CarbonMixin
             return $default;
         };
     }
+
+    public static function tryCreateFromFormat(): Closure
+    {
+        return function ($format, $time, $timezone = null) {
+            try {
+                return static::createFromFormat($format, $time, $timezone);
+            } catch (Throwable $exception) {
+                return null;
+            }
+        };
+    }
+
+    public static function tryParseDate(): Closure
+    {
+        return function ($date) {
+            $datetime ??= static::tryParse($date);
+            $dateTime ??= static::tryCreateFromFormat('Y年m月d日', $date);
+            $dateTime ??= static::tryCreateFromFormat('Y年m月d', $date);
+            $dateTime ??= static::tryCreateFromFormat('Y-m-d', $date);
+            $dateTime ??= static::tryCreateFromFormat('Y/m/d', $date);
+            $dateTime ??= static::tryCreateFromFormat('Y.m.d', $date);
+            $dateTime ??= static::tryCreateFromFormat('Ymd', $date);
+            return $dateTime;
+        };
+    }
 }
