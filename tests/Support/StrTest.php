@@ -10,7 +10,6 @@ namespace HughCube\Laravel\Knight\Tests\Support;
 
 use HughCube\Laravel\Knight\Support\Str;
 use HughCube\Laravel\Knight\Tests\TestCase;
-use Illuminate\Support\Carbon;
 
 class StrTest extends TestCase
 {
@@ -19,5 +18,9 @@ class StrTest extends TestCase
         $this->assertSame(Str::countCommonChars('我喜欢编程', '编程让我快乐'), 3);
         $this->assertSame(Str::countCommonChars('我喜欢编程', '编a程让我快乐'), 3);
         $this->assertSame(Str::countCommonChars('a喜欢编程', '编a程让我快乐'), 3);
+
+        $this->assertSame(Str::countCommonChars('我喜欢编程', '编程让我快乐', true), 1);
+        $this->assertSame(Str::countCommonChars('我喜欢编程', '程编让我快乐', true), 1);
+        $this->assertSame(Str::countCommonChars('a喜欢编程我', '编a程让我快乐', true), 3);
     }
 }
