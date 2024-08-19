@@ -407,4 +407,35 @@ class Str extends \Illuminate\Support\Str
 
         return $array;
     }
+
+    /**
+     * 计算两个字符串的相同的字符
+     */
+    public static function countCommonChars(string $a, string $b, bool $inOrder = false): int
+    {
+        $aChars = preg_split('//u', $a, -1, PREG_SPLIT_NO_EMPTY);
+        $bChars = preg_split('//u', $b, -1, PREG_SPLIT_NO_EMPTY);
+
+        if (!$inOrder) {
+            return count(array_intersect($aChars, $bChars));
+        }
+
+        $aCount = count($aChars);
+        $bCount = count($bChars);
+
+        $count = 0;
+
+        $lastIndex = 0;
+        for ($aIndex = 0; $aIndex < $aCount; $aIndex++) {
+            for ($bIndex = $lastIndex; $bIndex < $bCount; $bIndex++) {
+                if ($aChars[$aIndex] === $bChars[$bIndex]) {
+                    $count++;
+                    $lastIndex = $bIndex;
+                    break;
+                }
+            }
+        }
+
+        return $count;
+    }
 }
