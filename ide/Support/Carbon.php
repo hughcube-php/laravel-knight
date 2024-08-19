@@ -49,4 +49,24 @@ class Carbon
     {
         return null;
     }
+
+    /**
+     * @see CarbonMixin::tryCreateFromFormat()
+     *
+     * @return null|static
+     */
+    public static function tryCreateFromFormat($format, $time, $timezone = null)
+    {
+        return null;
+    }
+
+    /**
+     * @see CarbonMixin::tryParseDate()
+     *
+     * @return null|static
+     */
+    public static function tryParseDate($date)
+    {
+        return null;
+    }
 }
