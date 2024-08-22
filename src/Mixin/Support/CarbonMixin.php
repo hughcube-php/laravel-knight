@@ -120,6 +120,7 @@ class CarbonMixin
             $dateTime ??= static::tryCreateFromFormat('Y/m/d', $date);
             $dateTime ??= static::tryCreateFromFormat('Y.m.d', $date);
             $dateTime ??= static::tryCreateFromFormat('Ymd', $date);
+            $dateTime ??= static::tryCreateFromFormat('m/d/Y', $date);
             return $dateTime;
         };
     }
