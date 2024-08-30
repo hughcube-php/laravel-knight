@@ -3,7 +3,6 @@
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
 use DateTimeInterface;
-use HughCube\Base\Base;
 use HughCube\Laravel\Knight\Database\Eloquent\Builder;
 use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
 use HughCube\Laravel\Knight\Support\Json;
@@ -313,20 +312,17 @@ trait Model
         ksort($cacheKey);
         $cacheKey = json_encode($cacheKey);
 
-        $string = sprintf('%s:%s', get_class($this), $cacheKey);
+        $class = get_class($this);
+        $string = sprintf('%s:%s', $class, $cacheKey);
 
         return sprintf(
             '%s:%s-%s:%s:%s-%s',
             $this->getModelCachePrefix(),
-            Str::snake(Str::afterLast(get_class($this), '\\')),
-            Base::conv(abs(crc32(get_class($this))), '0123456789', '0123456789abcdefghijklmnopqrstuvwxyz'),
+            Str::snake(Str::afterLast($class, '\\')),
+            base_convert(abs(crc32($class)), 10, 36),
             $this->getCacheVersion(),
-            Base::conv(
-                ltrim(strtoupper(md5($string)), '0'),
-                '0123456789abcdef',
-                '0123456789abcdefghijklmnopqrstuvwxyz'
-            ),
-            Base::conv(abs(crc32($string)), '0123456789', '0123456789abcdefghijklmnopqrstuvwxyz')
+            md5($string),
+            base_convert(abs(crc32($string)), 10, 32)
         );
     }
 
