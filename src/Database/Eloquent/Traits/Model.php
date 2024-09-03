@@ -220,7 +220,7 @@ trait Model
 
     public function getModelCachePrefix(): string
     {
-        return 'm-v1';
+        return 'm1';
     }
 
     public function getCacheVersion(): string

@@ -18,7 +18,7 @@ trait BuildUniqueKey
      */
     protected static function buildUniqueKey($data, ?int $length = null): string
     {
-        $string = serialize($data);
+        $string = is_string($data) ? $data : serialize($data);
 
         $crc32 = base_convert(abs(crc32($string)), 10, 36);
         $hash = sprintf('%s%s', $crc32, md5($string));
