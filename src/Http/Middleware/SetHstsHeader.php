@@ -14,8 +14,8 @@ use Symfony\Component\HttpFoundation\Response;
 class SetHstsHeader
 {
     /**
-     * @param Request $request
-     * @param callable $next
+     * @param Request     $request
+     * @param callable    $next
      * @param string|null $hsts
      *
      * @return Response

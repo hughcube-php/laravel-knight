@@ -12,7 +12,6 @@ use Illuminate\Support\Traits\Macroable;
 
 /**
  * @deprecated 已经弃用
- *
  * @see Macroable
  */
 trait SimpleMacroableBridge
