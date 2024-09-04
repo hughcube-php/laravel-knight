@@ -28,14 +28,14 @@ class Str extends \Illuminate\Support\Str
         return true;
     }
 
-    public static function maskMobile($string): string
+    public static function maskMobile($string, $offset = 3, $length = 4): string
     {
-        return substr_replace($string, '****', 3, 4);
+        return substr_replace($string, '****', $offset, $length);
     }
 
-    public static function maskChinaIdCode($string): string
+    public static function maskChinaIdCode($string, $offset = 6, $length = 8): string
     {
-        return substr_replace($string, '********', 6, 8);
+        return substr_replace($string, '********', $offset, $length);
     }
 
     public static function splitWhitespace($string): array
@@ -437,5 +437,44 @@ class Str extends \Illuminate\Support\Str
         }
 
         return $count;
+    }
+
+    public static function matchKeywordPrefix($text, $keyword): int
+    {
+        $match_length = 0;
+        $keyword_length = mb_strlen($keyword);
+        while (true) {
+            if (
+                $match_length >= $keyword_length
+                || false === mb_strpos($text, mb_substr($keyword, 0, ($match_length + 1)))
+            ) {
+                break;
+            }
+            $match_length++;
+        }
+
+        return $match_length;
+    }
+
+    public static function matchKeywordSuffix($text, $keyword): int
+    {
+        $match_length = 0;
+        $keyword_length = mb_strlen($keyword);
+        while (true) {
+            if (
+                $match_length >= $keyword_length
+                || false === mb_strpos($text, mb_substr($keyword, 0 - ($match_length + 1)))
+            ) {
+                break;
+            }
+            $match_length++;
+        }
+
+        return $match_length;
+    }
+
+    public static function matchKeywordExact($text, $keyword): int
+    {
+        return false === mb_strpos($text, $keyword) ? 0 : mb_strlen($keyword);
     }
 }
