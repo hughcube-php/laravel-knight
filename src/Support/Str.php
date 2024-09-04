@@ -409,7 +409,7 @@ class Str extends \Illuminate\Support\Str
     }
 
     /**
-     * 计算两个字符串的相同的字符
+     * 计算两个字符串的相同的字符.
      */
     public static function countCommonChars(string $a, string $b, bool $inOrder = false): int
     {
@@ -446,7 +446,7 @@ class Str extends \Illuminate\Support\Str
         while (true) {
             if (
                 $match_length >= $keyword_length
-                || false === mb_strpos($text, mb_substr($keyword, 0, ($match_length + 1)))
+                || false === mb_strpos($text, mb_substr($keyword, 0, $match_length + 1))
             ) {
                 break;
             }

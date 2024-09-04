@@ -23,6 +23,7 @@ class DB extends \Illuminate\Support\Facades\DB
 
         for ($i = 1; $i <= $count; $i++) {
             $exception = null;
+
             try {
                 $results = $callable();
                 break;

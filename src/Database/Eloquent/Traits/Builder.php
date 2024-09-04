@@ -56,6 +56,7 @@ trait Builder
     public function getCache(): CacheInterface
     {
         $cache = $this->enableCache ? $this->getModel()->getCache() : null;
+
         return $cache ?? $this->getNullCache();
     }
 
@@ -172,7 +173,7 @@ trait Builder
         }
 
         /**
-         * db 查询没有命中缓存的数据
+         * db 查询没有命中缓存的数据.
          *
          * [['pk1' => 1, 'pk2' => 1], ['pk1' => 1, 'pk2' => 1]] => ['pk1' => [1, 1], 'pk2' => [1, 1]]
          * [['pk1' => 1, 'pk2' => 1]] => ['pk1' => 1, 'pk2' => 1]
@@ -181,7 +182,6 @@ trait Builder
         $condition = Collection::make(array_merge_recursive(...$missIds->toArray()));
         $fromDbRows = $this
             ->where(function (self $query) use ($missIds, $condition) {
-
                 /** 非联合唯一键 */
                 if (1 === $condition->count()) {
                     foreach ($condition as $name => $values) {
@@ -193,11 +193,12 @@ trait Builder
                             $query->where($name, $values);
                         }
                     }
+
                     return;
                 }
 
                 /** 联合唯一健, 但是只有一个In操作的 */
-                if (1 === $condition->filter(fn($v) => is_array($v) && 1 < count($v))->count()) {
+                if (1 === $condition->filter(fn ($v) => is_array($v) && 1 < count($v))->count()) {
                     foreach ($condition as $name => $values) {
                         if (is_array($values)) {
                             $query->whereIn($name, array_values(array_unique($values)));
@@ -207,6 +208,7 @@ trait Builder
                             $query->where($name, $values);
                         }
                     }
+
                     return;
                 }
 
@@ -451,7 +453,7 @@ trait Builder
         }
 
         $values = Collection::make(
-        /** @phpstan-ignore-next-line */
+            /** @phpstan-ignore-next-line */
             $values instanceof CarbonPeriod ? [$values->start, $values->end] : $values
         )->values()->slice(0, 2)->toArray();
 
