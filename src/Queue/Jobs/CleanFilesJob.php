@@ -17,9 +17,9 @@ class CleanFilesJob extends Job
     {
         return [
             'items' => ['array'],
-
             'items.*.dir'      => ['required'],
             'items.*.pattern'  => ['nullable'],
+            'items.*.exclude' => ['nullable'],
             'items.*.max_days' => ['required', 'integer', 'min:0'],
         ];
     }
@@ -33,9 +33,10 @@ class CleanFilesJob extends Job
 
     protected function cleanFiles($job)
     {
-        $dirs = Collection::wrap($job['dir'])->filter();
-        $patterns = Collection::wrap($job['pattern'] ?? '*')->filter();
         $maxDays = $job['max_days'] ?: 30;
+        $dirs = Collection::wrap($job['dir'])->filter();
+        $patterns = Collection::wrap($job['pattern'] ?? '*')->filter()->values();
+        $excludes = Collection::wrap($job['exclude'] ?? null ?: [])->filter()->values();
 
         /** @var Collection $existDirs */
         $existDirs = $dirs->filter(function ($dir) {
@@ -44,7 +45,11 @@ class CleanFilesJob extends Job
 
         $files = [];
         if ($existDirs->isNotEmpty()) {
-            $files = Finder::create()->in($existDirs->all())->name($patterns->all())->files();
+            $files = Finder::create()
+                ->in($existDirs->all())
+                ->name($patterns->all())
+                ->notName($excludes->all())
+                ->files();
         }
 
         $count = 0;

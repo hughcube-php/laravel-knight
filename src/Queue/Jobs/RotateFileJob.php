@@ -20,10 +20,9 @@ class RotateFileJob extends Job
     {
         return [
             'items' => ['array'],
-
-            'items.*.dir'     => ['required'],
+            'items.*.dir' => ['required'],
             'items.*.pattern' => ['nullable'],
-
+            'items.*.exclude' => ['nullable'],
             'items.*.date_format' => ['nullable', 'string'],
         ];
     }
@@ -43,10 +42,11 @@ class RotateFileJob extends Job
      */
     protected function rotateFiles($job)
     {
+        $skipEmpty = $job['skip_empty'] ?? true;
+        $dateFormat = $job['date_format'] ?: 'Y-m-d';
         $dirs = Collection::wrap($job['dir'])->filter();
         $patterns = Collection::wrap($job['pattern'] ?? '*')->filter();
-        $dateFormat = $job['date_format'] ?: 'Y-m-d';
-        $skipEmpty = $job['skip_empty'] ?? true;
+        $excludes = Collection::wrap($job['exclude'] ?? null ?: [])->filter()->values();
 
         /** @var Collection $existDirs */
         $existDirs = $dirs->filter(function ($dir) {
@@ -55,7 +55,11 @@ class RotateFileJob extends Job
 
         $files = [];
         if ($existDirs->isNotEmpty()) {
-            $files = Finder::create()->in($existDirs->all())->name($patterns->all())->files();
+            $files = Finder::create()
+                ->in($existDirs->all())
+                ->name($patterns->all())
+                ->notName($excludes->all())
+                ->files();
         }
 
         $rotates = Collection::empty();
