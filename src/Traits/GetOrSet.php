@@ -33,15 +33,16 @@ trait GetOrSet
      *     return Model::findById($this->getParameter()->get('id'));
      * });
      *
-     * @param mixed    $name
+     * @param mixed $name
      * @param callable $callable
      *
      * @return mixed
      */
     protected function getOrSet($name, callable $callable)
     {
-        $key = is_string($name) ? $name : serialize($name);
-        $cacheKey = sprintf('%s:%x', md5($key), crc32($key));
+        $cacheKey = is_string($name)
+            ? sprintf('o:%s:01', $name)
+            : sprintf('s:%s:%x', md5($key = serialize($name)), crc32($key));
 
         return $this->getIHKCStore()->getOrSet($cacheKey, $callable);
     }
