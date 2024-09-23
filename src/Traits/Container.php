@@ -12,7 +12,7 @@ use Illuminate\Config\Repository;
 use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Contracts\Debug\ExceptionHandler;
-use Illuminate\Events\Dispatcher as EventsDispatcher;
+use Illuminate\Contracts\Events\Dispatcher as EventsDispatcher;
 use Illuminate\Queue\QueueManager;
 
 trait Container
