@@ -33,7 +33,7 @@ trait GetOrSet
      *     return Model::findById($this->getParameter()->get('id'));
      * });
      *
-     * @param mixed $name
+     * @param mixed    $name
      * @param callable $callable
      *
      * @return mixed
