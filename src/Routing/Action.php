@@ -56,7 +56,7 @@ trait Action
         $this->clearActionStatus();
 
         // Log the time of entry in the action logic
-        $this->getActionStartedAt();
+        $this->getActionStartedAt(true);
 
         // Collect all validated parameters
         $this->loadParameters();
@@ -80,14 +80,14 @@ trait Action
         $this->getIHKCStore()->clear();
     }
 
-    protected function getActionStartedAt(): Carbon
+    protected function getActionStartedAt($share = false): Carbon
     {
         /** @var Carbon $dateTime */
         $dateTime = $this->getOrSet(__METHOD__, function () {
             return Carbon::now();
         });
 
-        return $dateTime->clone();
+        return $share ? $dateTime : $dateTime->clone();
     }
 
     /**

@@ -83,7 +83,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     public function handle(): void
     {
         // Log the time of entry in the job logic
-        $this->getJobStartedAt();
+        $this->getActionStartedAt(true);
 
         // Prepare the pid of the job
         $this->getPid();
@@ -112,14 +112,22 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     {
     }
 
-    protected function getJobStartedAt(): Carbon
+    protected function getActionStartedAt($share = false): Carbon
     {
         /** @var Carbon $dateTime */
         $dateTime = $this->getOrSet(__METHOD__, function () {
             return Carbon::now();
         });
 
-        return $dateTime->clone();
+        return $share ? $dateTime : $dateTime->clone();
+    }
+
+    /**
+     * @deprecated
+     */
+    protected function getJobStartedAt($share = false): Carbon
+    {
+        return $this->getActionStartedAt($share);
     }
 
     /**
@@ -138,7 +146,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     protected function getDelays(): float
     {
-        return round($this->getJobStartedAt()->diffInMicroseconds(Carbon::now()) / 1000, 2);
+        return round($this->getActionStartedAt(true)->diffInMicroseconds(Carbon::now()) / 1000, 2);
     }
 
     public function getData(): array
