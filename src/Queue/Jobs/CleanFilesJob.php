@@ -16,10 +16,10 @@ class CleanFilesJob extends Job
     protected function rules(): array
     {
         return [
-            'items' => ['array'],
+            'items'            => ['array'],
             'items.*.dir'      => ['required'],
             'items.*.pattern'  => ['nullable'],
-            'items.*.exclude' => ['nullable'],
+            'items.*.exclude'  => ['nullable'],
             'items.*.max_days' => ['required', 'integer', 'min:0'],
         ];
     }

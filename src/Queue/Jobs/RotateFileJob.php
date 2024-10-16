@@ -19,10 +19,10 @@ class RotateFileJob extends Job
     protected function rules(): array
     {
         return [
-            'items' => ['array'],
-            'items.*.dir' => ['required'],
-            'items.*.pattern' => ['nullable'],
-            'items.*.exclude' => ['nullable'],
+            'items'               => ['array'],
+            'items.*.dir'         => ['required'],
+            'items.*.pattern'     => ['nullable'],
+            'items.*.exclude'     => ['nullable'],
             'items.*.date_format' => ['nullable', 'string'],
         ];
     }
