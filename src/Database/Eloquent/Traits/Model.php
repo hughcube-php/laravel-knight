@@ -34,7 +34,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|string|null $date
-     * @param string|null $format
+     * @param string|null                             $format
      *
      * @return Carbon|null
      */
@@ -56,7 +56,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|null $dateTime
-     * @param string $format
+     * @param string                           $format
      *
      * @return string|null
      */
