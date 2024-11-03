@@ -336,7 +336,7 @@ class CollectionMixin
     }
 
     /**
-     * split
+     * split.
      */
     public function split(): Closure
     {
