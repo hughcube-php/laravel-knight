@@ -337,10 +337,22 @@ class CollectionMixin
 
     /**
      * split.
+     * /[,，]/
+     * /\s+/
      */
     public function split(): Closure
     {
         return function (string $separator, string $pattern = '/\s+/', int $limit = -1) {
+            return static::make(preg_split($separator, $pattern, $limit) ?: []);
+        };
+    }
+
+    /**
+     * split ,.
+     */
+    public function splitComma(): Closure
+    {
+        return function (string $separator, string $pattern = '/[,，]/', int $limit = -1) {
             return static::make(preg_split($separator, $pattern, $limit) ?: []);
         };
     }
