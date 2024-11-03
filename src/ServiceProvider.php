@@ -80,7 +80,7 @@ class ServiceProvider extends IlluminateServiceProvider
             ]);
         }
 
-        $this->bootOPcache();
+        $this->bootOpCache();
         $this->bootRequest();
         $this->bootPhpInfo();
         $this->bootHealthCheck();
@@ -93,7 +93,7 @@ class ServiceProvider extends IlluminateServiceProvider
         return $this->routesAreCached ??= $this->app->routesAreCached();
     }
 
-    protected function bootOPcache()
+    protected function bootOpCache()
     {
         if ($this->app->runningInConsole()) {
             $this->commands([

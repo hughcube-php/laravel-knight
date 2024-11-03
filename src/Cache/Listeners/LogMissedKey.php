@@ -22,7 +22,7 @@ class LogMissedKey
     public function handle(CacheEvent $event)
     {
         Log::debug(sprintf(
-            'store: %s, key: %s, tags: %s',
+            'cache missed: store: %s, key: %s, tags: %s',
             property_exists($event, 'storeName') ? $event->storeName : null,
             $event->key,
             implode(',', $event->tags)

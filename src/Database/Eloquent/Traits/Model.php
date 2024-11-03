@@ -34,7 +34,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|string|null $date
-     * @param string|null                             $format
+     * @param string|null $format
      *
      * @return Carbon|null
      */
@@ -47,7 +47,7 @@ trait Model
         }
 
         if (empty($format)) {
-            /** @phpstan-ignore-next-line  */
+            /** @phpstan-ignore-next-line */
             return Carbon::tryParse($format, $date);
         }
 
@@ -56,7 +56,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|null $dateTime
-     * @param string                           $format
+     * @param string $format
      *
      * @return string|null
      */
@@ -408,11 +408,7 @@ trait Model
         return $model;
     }
 
-    /**
-     * @inheritDoc
-     *
-     * @return KnightCollection
-     */
+    /** @phpstan-ignore-next-line */
     public function newCollection(array $models = []): KnightCollection
     {
         return new KnightCollection($models);

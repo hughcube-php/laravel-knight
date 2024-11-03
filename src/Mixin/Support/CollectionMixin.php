@@ -334,4 +334,14 @@ class CollectionMixin
             return static::make(explode($separator, $string, $limit) ?: []);
         };
     }
+
+    /**
+     * split
+     */
+    public function split(): Closure
+    {
+        return function (string $separator, string $pattern = '/\s+/', int $limit = -1) {
+            return static::make(preg_split($separator, $pattern, $limit) ?: []);
+        };
+    }
 }

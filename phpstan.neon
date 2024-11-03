@@ -19,3 +19,12 @@ parameters:
             message: '#.*#'
             paths:
                 - src/Sanctum/PersonalAccessToken.php
+        -
+            message: '#.*parameter.*#'
+            paths:
+                - src/Mixin/Support/CarbonMixin.php
+        -
+            message: '#.*\?\?=.*#'
+            paths:
+                - src/Mixin/Support/CarbonMixin.php
+        - '#Parameter \#1 \$num of function base_convert expects string, int<0, max> given.#'
