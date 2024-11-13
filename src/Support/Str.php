@@ -38,9 +38,9 @@ class Str extends \Illuminate\Support\Str
         return substr_replace($string, '********', $offset, $length);
     }
 
-    public static function splitWhitespace($string): array
+    public static function splitWhitespace($string, int $limit = -1, int $flags = 0): array
     {
-        return preg_split('/\s+/', $string) ?: [];
+        return preg_split('/\s+/', $string, $limit, $flags) ?: [];
     }
 
     /**

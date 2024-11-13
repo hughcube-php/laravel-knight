@@ -89,8 +89,8 @@ class StrMixin
 
     protected function splitWhitespace(): Closure
     {
-        return function ($string): array {
-            return preg_split('/\s+/', $string) ?: [];
+        return function ($string, int $limit = -1, int $flags = 0): array {
+            return preg_split('/\s+/', $string, $limit, $flags) ?: [];
         };
     }
 
