@@ -60,8 +60,8 @@ class Downloader implements StaticInstanceInterface
     public function to(string $method, string $url, ?string $file = null, array $options = []): string
     {
         $file = $file ?: $this->path($url);
-        if (!File::exists(dirname($file))) {
-            File::makeDirectory(dirname($file), 0777, true);
+        if (!is_dir($dir = dirname($file))) {
+            File::makeDirectory($dir, 0777, true);
         }
 
         $response = $this->getHttpClient()->request($method, $url, array_merge(
