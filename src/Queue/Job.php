@@ -156,6 +156,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     /**
      * @inheritDoc
+     *
      * @throws
      */
     protected function loadParameters()

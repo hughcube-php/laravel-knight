@@ -338,7 +338,7 @@ class CollectionMixin
     /**
      * split.
      * /[,，]/
-     * /\s+/
+     * /\s+/.
      */
     public function split(): Closure
     {
