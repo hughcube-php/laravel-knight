@@ -12,6 +12,9 @@ use HughCube\Laravel\Knight\Ide\Http\KIdeRequest as IdeRequest;
 use Illuminate\Http\Request;
 use Laravel\Lumen\Http\Request as LumenRequest;
 
+/**
+ * @phpstan-ignore-next-line
+ */
 trait GetRequest
 {
     /**

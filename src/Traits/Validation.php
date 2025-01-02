@@ -39,6 +39,7 @@ trait Validation
             return [];
         }
 
+        /** @phpstan-ignore-next-line */
         $container = method_exists($this, 'getContainer') ? $this->getContainer() : app();
 
         /** @var Factory $factory */

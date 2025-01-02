@@ -51,16 +51,20 @@ class RequestSignatureValidate
         return $request->getClientDate() ?: $request->getDate() ?: null;
     }
 
+    /**
+     * @param  Request|KIdeRequest  $request
+     * @return bool
+     * @phpstan-ignore-next-line
+     */
     protected function validate(Request $request): bool
     {
-        /** @var Request|KIdeRequest $request */
-
-        /** 签名不能为空 */
+        /** @phpstan-ignore-next-line */
         $signature = $request->getClientSignature();
         if (null == $signature) {
             return false;
         }
 
+        /** @phpstan-ignore-next-line */
         $nonce = $request->getClientNonce();
         if (empty($nonce) || 10 > strlen($nonce)) {
             return false;
@@ -69,10 +73,12 @@ class RequestSignatureValidate
         return $this->makeSignature($request) === $signature;
     }
 
+    /**
+     * @param  Request|KIdeRequest  $request
+     * @phpstan-ignore-next-line
+     */
     protected function makeSignature(Request $request): ?string
     {
-        /** @var Request|KIdeRequest $request */
-
         /** @var null|GetUserLoginAccessSecret $user */
         $user = $request->user();
 

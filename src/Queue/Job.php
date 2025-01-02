@@ -156,10 +156,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     /**
      * @inheritDoc
-     *
      * @throws
-     *
-     * @phpstan-ignore-next-line
      */
     protected function loadParameters()
     {

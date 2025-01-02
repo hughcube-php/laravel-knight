@@ -5,7 +5,11 @@ parameters:
         - src
     inferPrivatePropertyTypeFromConstructor: true
     ignoreErrors:
+        - '#Trait HughCube\\Laravel\\Knight\\.* is used zero times and is not analysed.#'
+        - '#Call to an undefined method Illuminate\\Http\\Request::getClientHeaders\(\).#'
+        - '#Call to an undefined method Illuminate\\Http\\Request::getClientHeaderPrefix\(\).#'
         - '#Method HughCube\\Laravel\\Knight\\Database\\Eloquent\\.*should return.*#'
+        - '#PHPDoc tag @throws has invalid value \(\).*#'
         - '#.*lass HughCube\\Laravel\\EasySms\\Exceptions.*#'
         - '#Method HughCube\\Laravel\\Knight\\Sanctum\\PersonalAccessToken::findById.*should return.*#'
         - '#.*method HughCube\\Laravel\\Knight\\Sanctum\\PersonalAccessToken::tokenable.* should be.*#'

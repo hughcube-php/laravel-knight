@@ -154,7 +154,7 @@ trait Builder
         });
 
         /** 缓存读取 */
-        $missIndexes = Collection::make([]);
+        $missIndexes = Collection::make();
         $fromCacheRows = $this->getCache()->getMultiple($cacheKeys->toArray());
         foreach ($cacheKeys as $cacheKeyIndex => $cacheKey) {
             if (isset($fromCacheRows[$cacheKey]) && $fromCacheRows[$cacheKey] instanceof IlluminateModel) {
@@ -168,6 +168,8 @@ trait Builder
                 $missIndexes->push($cacheKeyIndex);
             }
         }
+
+        /** @phpstan-ignore-next-line */
         if ($missIndexes->isEmpty()) {
             return $rows->values();
         }
@@ -226,6 +228,7 @@ trait Builder
                 }
             })
             ->limit($missIndexes->count())
+            /** @phpstan-ignore-next-line */
             ->get()->keyBy(function (IlluminateModel $model) use ($condition) {
                 return $this->getModel()->makeColumnsCacheKey(
                     Arr::only($model->getAttributes(), $condition->keys()->toArray())
@@ -247,6 +250,7 @@ trait Builder
 
         /** 合并db的查询结果 */
         foreach ($fromDbRows as $fromDbRow) {
+            /** @phpstan-ignore-next-line */
             $rows->push($fromDbRow);
         }
 

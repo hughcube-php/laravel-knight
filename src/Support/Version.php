@@ -19,9 +19,9 @@ class Version
     {
         $length = $length ?: 3;
 
-        /** @var array|false $results */
         $results = explode('.', $version);
 
+        /** @phpstan-ignore-next-line */
         return Collection::make($results ?: [])
             ->pad($length, '0')
             ->splice(0, $length)

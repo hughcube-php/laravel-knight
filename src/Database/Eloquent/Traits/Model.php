@@ -33,6 +33,11 @@ trait Model
     private bool $isFromCache = false;
 
     /**
+     * @var array
+     */
+    protected static array $modelCacheKeyMakeCache = [];
+
+    /**
      * @param DateTimeInterface|int|float|string|null $date
      * @param string|null                             $format
      *
@@ -303,25 +308,37 @@ trait Model
      */
     public function makeColumnsCacheKey(array $columns): string
     {
+        $class = get_class($this);
+
         $cacheKey = [];
         foreach ($columns as $name => $value) {
             $name = is_numeric($name) ? $this->getKeyName() : $name;
-            $cacheKey[strval($name)] = strval($value);
+
+            /** Builds the property value of the cache key */
+            if (!isset(static::$modelCacheKeyMakeCache['getMakeCacheKeyColumnValue'][$class][$name])) {
+                static::$modelCacheKeyMakeCache['getMakeCacheKeyColumnValue'][$class][$name] = sprintf('getMakeCacheKey%sValue', Str::studly($name));
+            }
+            $method = static::$modelCacheKeyMakeCache['getMakeCacheKeyColumnValue'][$class][$name];
+
+            $cacheKey[$name] = method_exists($this, $method) ? $this->{$method}($name) : strval($value);
         }
 
         ksort($cacheKey);
         $cacheKey = json_encode($cacheKey);
 
-        $class = get_class($this);
-        $string = sprintf('%s:%s', $class, $cacheKey);
+        if (!isset(static::$modelCacheKeyMakeCache['classCacheKeyPrefix'][$class])) {
+            static::$modelCacheKeyMakeCache['classCacheKeyPrefix'][$class] = sprintf('%s-%s',
+                Str::snake(Str::afterLast($class, '\\')),
+                base_convert(abs(crc32($class)), 10, 36)
+            );
+        };
 
         return sprintf(
-            '%s:%s-%s:%s:%s-%s',
+            '%s:%s:%s:%s-%s',
             $this->getModelCachePrefix(),
-            Str::snake(Str::afterLast($class, '\\')),
-            base_convert(abs(crc32($class)), 10, 36),
+            static::$modelCacheKeyMakeCache['classCacheKeyPrefix'][$class],
             $this->getCacheVersion(),
-            md5($string),
+            md5($string = sprintf('%s:%s', $class, $cacheKey)),
             base_convert(abs(crc32($string)), 10, 32)
         );
     }

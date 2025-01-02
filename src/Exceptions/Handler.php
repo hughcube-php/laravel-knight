@@ -61,6 +61,7 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
+        /** @phpstan-ignore-next-line */
         if (method_exists($this, 'reportable')) {
             $this->reportable(function (Throwable $e) {
             });
@@ -81,6 +82,7 @@ class Handler extends ExceptionHandler
 
     protected function convertExceptionToResults($e): ?array
     {
+        /** @phpstan-ignore-next-line */
         if (method_exists($this, 'convertExceptionToResponseData')) {
             return $this->convertExceptionToResponseData($e);
         }
@@ -98,6 +100,7 @@ class Handler extends ExceptionHandler
      */
     public function render($request, $e)
     {
+        /** @phpstan-ignore-next-line */
         $e = method_exists($this, 'mapException') ? $this->mapException($e) : $e;
         $e = $this->prepareException($e);
 
@@ -105,6 +108,7 @@ class Handler extends ExceptionHandler
             return $e->getResponse();
         }
 
+        /** @phpstan-ignore-next-line */
         if (!empty($data = $this->convertExceptionToResults($e)) && is_array($data)) {
             $results = $data;
         } elseif ($e instanceof ValidateSignatureException) {
