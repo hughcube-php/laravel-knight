@@ -52,8 +52,10 @@ class RequestSignatureValidate
     }
 
     /**
-     * @param  Request|KIdeRequest  $request
+     * @param Request|KIdeRequest $request
+     *
      * @return bool
+     *
      * @phpstan-ignore-next-line
      */
     protected function validate(Request $request): bool
@@ -74,7 +76,8 @@ class RequestSignatureValidate
     }
 
     /**
-     * @param  Request|KIdeRequest  $request
+     * @param Request|KIdeRequest $request
+     *
      * @phpstan-ignore-next-line
      */
     protected function makeSignature(Request $request): ?string

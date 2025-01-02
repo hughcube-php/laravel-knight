@@ -13,6 +13,7 @@ use Illuminate\Support\Traits\Macroable;
 /**
  * @deprecated 已经弃用
  * @see Macroable
+ *
  * @phpstan-ignore-next-line
  */
 trait SimpleMacroableBridge

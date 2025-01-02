@@ -117,6 +117,7 @@ trait MultipleHandler
 
         /**
          * 返回所有的method对象
+         *
          * @phpstan-ignore-next-line
          */
         return array_values(array_map(function ($handler) {

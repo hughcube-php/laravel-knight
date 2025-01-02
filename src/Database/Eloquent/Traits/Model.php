@@ -327,11 +327,12 @@ trait Model
         $cacheKey = json_encode($cacheKey);
 
         if (!isset(static::$modelCacheKeyMakeCache['classCacheKeyPrefix'][$class])) {
-            static::$modelCacheKeyMakeCache['classCacheKeyPrefix'][$class] = sprintf('%s-%s',
+            static::$modelCacheKeyMakeCache['classCacheKeyPrefix'][$class] = sprintf(
+                '%s-%s',
                 Str::snake(Str::afterLast($class, '\\')),
                 base_convert(abs(crc32($class)), 10, 36)
             );
-        };
+        }
 
         return sprintf(
             '%s:%s:%s:%s-%s',

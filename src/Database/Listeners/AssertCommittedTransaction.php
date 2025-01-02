@@ -26,7 +26,6 @@ class AssertCommittedTransaction
     public function handle($event)
     {
         foreach ($this->getConnections() as $connection) {
-
             /** @phpstan-ignore-next-line */
             if (method_exists($connection, 'transactionLevel') && $connection->transactionLevel() > 0) {
                 throw new NotCloseTransactionException(
