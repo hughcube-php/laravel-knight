@@ -67,7 +67,6 @@ class RequestMixin
     public function getClientHeaders(): Closure
     {
         return function (): HeaderBag {
-
             /** @phpstan-ignore-next-line */
             $headers = array_filter($this->headers ?: [], function ($name) {
                 return Str::startsWith(strtolower($name), strtolower($this->getClientHeaderPrefix()));
