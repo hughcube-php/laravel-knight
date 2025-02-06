@@ -14,6 +14,9 @@ use Illuminate\Support\Str;
 use Jenssegers\Agent\Agent;
 use Symfony\Component\HttpFoundation\HeaderBag;
 
+/**
+ * @deprecated Support in octane is not very good, try to use mixin implementation.
+ */
 class Request extends HttpRequest
 {
     protected ?Agent $userAgentDetect = null;

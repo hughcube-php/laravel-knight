@@ -8,6 +8,9 @@
 
 namespace HughCube\Laravel\Knight\Contracts\Support;
 
+/**
+ * @dataProvider Use AccessSecret instead
+ */
 interface GetUserLoginAccessSecret
 {
     public function getUserLoginAccessSecret(): ?string;
