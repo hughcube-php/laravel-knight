@@ -154,12 +154,12 @@ class Handler extends ExceptionHandler
     protected function convertExceptionToArray($e): array
     {
         $array = [
-            'name'        => get_class($e),
-            'message'     => $e->getMessage(),
             'code'        => $e->getCode(),
+            'exception'   => get_class($e),
+            'message'     => $e->getMessage(),
             'file'        => $e->getFile(),
             'line'        => $e->getLine(),
-            'stack-trace' => explode("\n", $e->getTraceAsString()),
+            'stack-trace' => $e->getTrace(),
         ];
 
         if ($e instanceof ValidationException) {
