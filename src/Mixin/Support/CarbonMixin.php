@@ -125,4 +125,17 @@ class CarbonMixin
             return $dateTime;
         };
     }
+
+    public static function tryCreateFromFormats(): Closure
+    {
+        return function ($date, $formats) {
+            foreach ($formats as $format) {
+                $dateTime = static::tryCreateFromFormat($format, $date);
+                if (null !== $dateTime) {
+                    return $dateTime;
+                }
+            }
+            return null;
+        };
+    }
 }
