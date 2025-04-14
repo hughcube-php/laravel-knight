@@ -28,7 +28,6 @@
         "phpstan/phpstan": "*",
         "jenssegers/agent": "*",
         "laravel/framework": "*",
-        "laravel/lumen-framework": "*",
         "orchestra/testbench": "*",
         "squizlabs/php_codesniffer": "*",
         "hughcube/laravel-wechat": "*"
@@ -70,5 +69,6 @@
         "preferred-install": "dist"
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "platform-check": false
 }
