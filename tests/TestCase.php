@@ -79,7 +79,7 @@ class TestCase extends OrchestraTestCase
         /** @var Repository $appConfig */
         $appConfig = $app['config'];
 
-        $file = sprintf('/tmp/%s-%s-database.sqlite', date('Y-m-d'), md5(random_bytes(100)));
+        $file = sprintf('%s/%s-%s-database.sqlite', sys_get_temp_dir(), date('Y-m-d'), md5(random_bytes(100)));
         touch($file);
 
         $appConfig->set('database', [
