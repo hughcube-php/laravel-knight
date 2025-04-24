@@ -10,7 +10,7 @@ namespace HughCube\Laravel\Knight\Http\Middleware;
 
 use Illuminate\Http\Request;
 
-class HandleCors extends \Illuminate\Http\Middleware\HandleCors
+class HandleAllPathCors extends \Illuminate\Http\Middleware\HandleCors
 {
     protected function hasMatchingPath(Request $request): bool
     {
