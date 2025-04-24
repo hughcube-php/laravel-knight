@@ -14,11 +14,6 @@ class HandleCors extends \Illuminate\Http\Middleware\HandleCors
 {
     protected function hasMatchingPath(Request $request): bool
     {
-        $hasMatchingPath = $this->container['config']->get('cors.has_matching_path');
-        if (null !== $hasMatchingPath) {
-            return $hasMatchingPath;
-        }
-
-        return parent::hasMatchingPath($request);
+        return true;
     }
 }
