@@ -34,6 +34,8 @@ trait Action
     use ParameterBagTrait;
     use Container;
 
+    private ?float $_HughCubeActionStartedTimestamp = null;
+
     /**
      * @return mixed
      */
@@ -56,7 +58,7 @@ trait Action
         $this->clearActionStatus();
 
         // Log the time of entry in the action logic
-        $this->getActionStartedAt(true);
+        $this->_HughCubeActionStartedTimestamp = microtime(true);
 
         // Collect all validated parameters
         $this->loadParameters();
@@ -78,18 +80,16 @@ trait Action
 
     protected function clearActionStatus()
     {
-        $this->parameterBag = null;
+        $this->parameterBag = $this->_HughCubeActionStartedTimestamp = null;
         $this->getIHKCStore()->clear();
     }
 
-    protected function getActionStartedAt($share = false): Carbon
+    /**
+     * @return Carbon
+     */
+    protected function getActionStartedAt(): Carbon
     {
-        /** @var Carbon $dateTime */
-        $dateTime = $this->getOrSet(__METHOD__, function () {
-            return Carbon::now();
-        });
-
-        return $share ? $dateTime : $dateTime->clone();
+        return Carbon::createFromTimestamp($this->_HughCubeActionStartedTimestamp);
     }
 
     /**
