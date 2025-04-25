@@ -61,15 +61,17 @@ trait Action
         // Collect all validated parameters
         $this->loadParameters();
 
-        $this->getEventsDispatcher()->dispatch(new ActionProcessing($this));
+        // Events Dispatcher
+        $eventsDispatcher = $this->getEventsDispatcher();
 
+        $eventsDispatcher->dispatch(new ActionProcessing($this));
         try {
             $this->beforeAction();
             $result = $this->action();
         } finally {
             $this->afterAction();
         }
-        $this->getEventsDispatcher()->dispatch(new ActionProcessed($this));
+        $eventsDispatcher->dispatch(new ActionProcessed($this));
 
         return $result;
     }
