@@ -49,11 +49,9 @@ trait GetOrSet
 
     /**
      * @return void
-     *
-     * @deprecated
      */
     public function flushHughCubeKnightClassSelfCacheStorage()
     {
-        $this->getIHKCStore()->clear();
+        $this->IHKCStore = null;
     }
 }

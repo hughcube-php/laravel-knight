@@ -9,8 +9,6 @@
 namespace HughCube\Laravel\Knight\Routing;
 
 use BadMethodCallException;
-use HughCube\Laravel\Knight\Events\ActionProcessed;
-use HughCube\Laravel\Knight\Events\ActionProcessing;
 use HughCube\Laravel\Knight\Http\Request as KnightRequest;
 use HughCube\Laravel\Knight\Ide\Http\KIdeRequest;
 use HughCube\Laravel\Knight\Support\ParameterBag;
@@ -63,25 +61,32 @@ trait Action
         // Collect all validated parameters
         $this->loadParameters();
 
-        // Events Dispatcher
-        $eventsDispatcher = $this->getEventsDispatcher();
-
-        $eventsDispatcher->dispatch(new ActionProcessing($this));
+        $this->dispatchActionProcessingEvent();
         try {
             $this->beforeAction();
             $result = $this->action();
         } finally {
             $this->afterAction();
         }
-        $eventsDispatcher->dispatch(new ActionProcessed($this));
+        $this->dispatchActionProcessedEvent();
 
         return $result;
+    }
+
+    protected function dispatchActionProcessingEvent()
+    {
+        #$this->getEventsDispatcher()->dispatch(new \HughCube\Laravel\Knight\Events\ActionProcessing($this));
+    }
+
+    protected function dispatchActionProcessedEvent()
+    {
+        $this->getEventsDispatcher()->dispatch(new \HughCube\Laravel\Knight\Events\ActionProcessed($this));
     }
 
     protected function clearActionStatus()
     {
         $this->parameterBag = $this->_HughCubeActionStartedTimestamp = null;
-        $this->getIHKCStore()->clear();
+        $this->flushHughCubeKnightClassSelfCacheStorage();
     }
 
     /**
@@ -181,7 +186,7 @@ trait Action
     {
         return new JsonResponse([
             'code'    => $code,
-            'message' => 'ok',
+            'message' => 'success',
             'data'    => $data ?: new stdClass(),
         ]);
     }
