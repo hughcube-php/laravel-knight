@@ -39,8 +39,8 @@ class PingDatabaseJob extends Job
 
         $this->info(sprintf(
             'memory: %s => %s, connection: %s, write: %s, read: %s',
-            Number::fileSize($beginMemoryUsage),
-            Number::fileSize($terminatedMemoryUsage),
+            Number::fileSize($beginMemoryUsage, 5),
+            Number::fileSize($terminatedMemoryUsage, 5),
             $connection->getName(),
             $writeResultMessage,
             $readResultMessage ?? '-'
