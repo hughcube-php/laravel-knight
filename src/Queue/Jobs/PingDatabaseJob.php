@@ -8,6 +8,7 @@ use Illuminate\Database\Connection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Number;
 
 class PingDatabaseJob extends Job
 {
@@ -23,6 +24,8 @@ class PingDatabaseJob extends Job
      */
     protected function action(): void
     {
+        $beginMemoryUsage = memory_get_usage();
+
         $connection = DB::connection($this->p('connection'));
 
         $writeResultMessage = $this->pingResultMessage($connection, false);
@@ -32,8 +35,12 @@ class PingDatabaseJob extends Job
             $readResultMessage = $this->pingResultMessage($connection, false);
         }
 
+        $terminatedMemoryUsage = memory_get_usage();
+
         $this->info(sprintf(
-            'connection: %s, write: %s, read: %s',
+            'memory: %s => %s, connection: %s, write: %s, read: %s',
+            Number::fileSize($beginMemoryUsage),
+            Number::fileSize($terminatedMemoryUsage),
             $connection->getName(),
             $writeResultMessage,
             $readResultMessage ?? '-'
@@ -57,6 +64,6 @@ class PingDatabaseJob extends Job
         $result = Collection::wrap((array) $connection->selectOne($sql, [], $useReadPdo))->first();
         $duration = $now->diffInMilliseconds(Carbon::now());
 
-        return sprintf('%s>%sms', $result, $duration);
+        return sprintf('conn#%s completed ping in %sms', $result, $duration);
     }
 }
