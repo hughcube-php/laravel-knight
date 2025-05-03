@@ -64,6 +64,6 @@ class PingDatabaseJob extends Job
         $result = Collection::wrap((array) $connection->selectOne($sql, [], $useReadPdo))->first();
         $duration = $now->diffInMilliseconds(Carbon::now());
 
-        return sprintf('conn#%s completed ping in %sms', $result, $duration);
+        return sprintf('conn#%s#%sms', $result, $duration);
     }
 }
