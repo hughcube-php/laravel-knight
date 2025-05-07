@@ -9,6 +9,7 @@
 namespace HughCube\Laravel\Knight;
 
 use Carbon\Carbon;
+use HughCube\Laravel\Knight\Auth\ModelUserProvider;
 use HughCube\Laravel\Knight\Console\Commands\Config;
 use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\KRTest;
@@ -29,6 +30,7 @@ use HughCube\Laravel\Knight\OPcache\Commands\ClearCliCacheCommand as OPcacheClea
 use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand as OPcacheCompileFilesCommand;
 use HughCube\Laravel\Knight\OPcache\Commands\CreatePreloadCommand as OPcacheCreatePreloadCommand;
 use Illuminate\Config\Repository;
+use Illuminate\Contracts\Auth\Factory as AuthFactory;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
@@ -36,6 +38,7 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Grammars\Grammar;
 use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider as IlluminateServiceProvider;
 use Laravel\Lumen\Application as LumenApplication;
@@ -84,6 +87,7 @@ class ServiceProvider extends IlluminateServiceProvider
         $this->bootRequest();
         $this->bootPhpInfo();
         $this->bootHealthCheck();
+        $this->configureAuthUserProvider();
 
         $this->registerRefreshModelCacheEvent();
     }
@@ -193,6 +197,15 @@ class ServiceProvider extends IlluminateServiceProvider
                     $model->deleteRowCache();
                 }
             }
+        });
+    }
+
+    protected function configureAuthUserProvider()
+    {
+        Auth::resolved(function ($auth) {
+            $auth->provider('knight-model', function ($app, $name, array $config) use ($auth) {
+                return new ModelUserProvider($this->app['hash'], $config['model']);
+            });
         });
     }
 }
