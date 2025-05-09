@@ -5,49 +5,24 @@ namespace HughCube\Laravel\Knight\Auth;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
-use Illuminate\Contracts\Hashing\Hasher as HasherContract;
 
 class ModelUserProvider implements UserProvider
 {
-
     /**
-     * The hasher implementation.
-     *
-     * @var HasherContract
-     */
-    protected HasherContract $hasher;
-
-    /**
-     * The Eloquent user model.
+     * The Eloquent user model class.
      *
      * @var class-string<Model> $model
      */
     protected string $model;
 
-    /**
-     * Create a new database user provider.
-     *
-     * @param HasherContract $hasher
-     * @param string $model
-     */
-    public function __construct(HasherContract $hasher, string $model)
+    public function __construct(string $model)
     {
         $this->model = $model;
-        $this->hasher = $hasher;
     }
 
-    /**
-     * @param $identifier
-     * @return Authenticatable|null
-     */
-    protected function findUser($identifier): ?Authenticatable
+    protected function callModelMethod($method, ...$args)
     {
-        $class = $this->model;
-
-        /** @var Authenticatable|null $model */
-        $model = $class::findById($identifier);
-
-        return $model;
+        return call_user_func_array([$this->model, $method], $args);
     }
 
     /**
@@ -55,7 +30,7 @@ class ModelUserProvider implements UserProvider
      */
     public function retrieveById($identifier)
     {
-        return $this->findUser($identifier);
+        return $this->callModelMethod(__FUNCTION__, $identifier);
     }
 
     /**
@@ -63,7 +38,7 @@ class ModelUserProvider implements UserProvider
      */
     public function retrieveByToken($identifier, $token)
     {
-        return null;
+        return $this->callModelMethod(__FUNCTION__, $identifier, $token);
     }
 
     /**
@@ -71,6 +46,7 @@ class ModelUserProvider implements UserProvider
      */
     public function updateRememberToken(Authenticatable $user, $token)
     {
+        return $this->callModelMethod(__FUNCTION__, $user, $token);
     }
 
     /**
@@ -78,7 +54,7 @@ class ModelUserProvider implements UserProvider
      */
     public function retrieveByCredentials(array $credentials)
     {
-        return null;
+        return $this->callModelMethod(__FUNCTION__, $credentials);
     }
 
     /**
@@ -86,7 +62,7 @@ class ModelUserProvider implements UserProvider
      */
     public function validateCredentials(Authenticatable $user, array $credentials)
     {
-        return false;
+        return $this->callModelMethod(__FUNCTION__, $user, $credentials);
     }
 
     /**
@@ -94,5 +70,6 @@ class ModelUserProvider implements UserProvider
      */
     public function rehashPasswordIfRequired(Authenticatable $user, array $credentials, bool $force = false)
     {
+        return $this->callModelMethod(__FUNCTION__, $user, $credentials, $force);
     }
 }

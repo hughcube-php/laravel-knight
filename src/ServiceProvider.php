@@ -30,7 +30,6 @@ use HughCube\Laravel\Knight\OPcache\Commands\ClearCliCacheCommand as OPcacheClea
 use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand as OPcacheCompileFilesCommand;
 use HughCube\Laravel\Knight\OPcache\Commands\CreatePreloadCommand as OPcacheCreatePreloadCommand;
 use Illuminate\Config\Repository;
-use Illuminate\Contracts\Auth\Factory as AuthFactory;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
@@ -203,8 +202,8 @@ class ServiceProvider extends IlluminateServiceProvider
     protected function configureAuthUserProvider()
     {
         Auth::resolved(function ($auth) {
-            $auth->provider('knight-model', function ($app, $name, array $config) use ($auth) {
-                return new ModelUserProvider($this->app['hash'], $config['model']);
+            $auth->provider('knightModel', function ($app, array $config) {
+                return new ModelUserProvider($config['model']);
             });
         });
     }
