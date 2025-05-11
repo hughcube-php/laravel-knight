@@ -8,7 +8,9 @@
 
 namespace HughCube\Laravel\Knight\Support;
 
+use Illuminate\Validation\ValidationException;
 use RuntimeException;
+use Throwable;
 
 class Helper
 {
@@ -30,5 +32,26 @@ class Helper
         if (!extension_loaded($name)) {
             throw new RuntimeException(sprintf('Not have the %s extension loaded.', $name));
         }
+    }
+
+    public static function convertExceptionToArray(Throwable $e): array
+    {
+        $array = [
+            'Code' => $e->getCode(),
+            'Exception' => get_class($e),
+            'Message' => $e->getMessage(),
+            'File' => sprintf('%s(%s)', $e->getFile(), $e->getLine()),
+            'StackTrace' => $e->getTrace(),
+        ];
+
+        if ($e instanceof ValidationException) {
+            $array['Errors'] = $e->errors();
+        }
+
+        if (($prev = $e->getPrevious()) !== null) {
+            $array['Previous'] = static::convertExceptionToArray($prev);
+        }
+
+        return $array;
     }
 }
