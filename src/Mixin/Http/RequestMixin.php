@@ -20,11 +20,7 @@ use Symfony\Component\HttpFoundation\HeaderBag;
  * @mixin Request
  *
  * @method null|string getClientHeaderPrefix()
- *
- * @property null|Agent $userAgentDetect
- *
  * @see KnightRequest
- * @deprecated
  */
 class RequestMixin
 {
@@ -68,7 +64,7 @@ class RequestMixin
     {
         return function (): HeaderBag {
             /** @phpstan-ignore-next-line */
-            $headers = array_filter($this->headers ?: [], function ($name) {
+            $headers = array_filter($this->headers->all() ?: [], function ($name) {
                 return Str::startsWith(strtolower($name), strtolower($this->getClientHeaderPrefix()));
             }, ARRAY_FILTER_USE_KEY);
 
