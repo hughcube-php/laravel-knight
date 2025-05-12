@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class HttpsGuardTest extends TestCase
 {
@@ -77,9 +78,12 @@ class HttpsGuardTest extends TestCase
     /**
      * @dataProvider getCases
      */
+    #[DataProvider('getCases')]
     public function testHandle(string $appUrl, Request $request, int $statusCode, $except = null)
     {
-        HttpsGuard::customExcept(__METHOD__, $except);
+        if (!empty($except)) {
+            HttpsGuard::customExcept(__METHOD__, $except);
+        }
 
         $this->app['config']->set('app.url', $appUrl);
         $guard = $this->makeGuard();

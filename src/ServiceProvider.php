@@ -10,6 +10,7 @@ namespace HughCube\Laravel\Knight;
 
 use Carbon\Carbon;
 use HughCube\Laravel\Knight\Auth\ModelUserProvider;
+use HughCube\Laravel\Knight\Console\Commands\ClearModelCache;
 use HughCube\Laravel\Knight\Console\Commands\Config;
 use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\KRTest;
@@ -79,6 +80,7 @@ class ServiceProvider extends IlluminateServiceProvider
                 Environment::class,
                 PhpIniFile::class,
                 KRTest::class,
+                ClearModelCache::class,
             ]);
         }
 
