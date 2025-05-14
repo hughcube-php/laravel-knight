@@ -1,9 +1,10 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2025/5/12
- * Time: 23:04
+ * Time: 23:04.
  */
 
 namespace HughCube\Laravel\Knight\Console\Commands;
@@ -37,13 +38,13 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
         $connection = DB::connection($this->option('connection') ?: null);
 
         if (!empty($database = $this->option('database') ?: null)) {
-            $connection->getPdo()->exec(sprintf("use `%s`;", $database));
+            $connection->getPdo()->exec(sprintf('use `%s`;', $database));
         }
 
         $rows = $connection->select('show tables;');
         foreach ($rows as $row) {
             $start = $this->option('start');
-            $table = Collection::wrap((array)$row)->first();
+            $table = Collection::wrap((array) $row)->first();
 
             if (true !== $this->confirm(sprintf('set "%s" table auto increment start id to "%s"?', $table, $start))) {
                 continue;

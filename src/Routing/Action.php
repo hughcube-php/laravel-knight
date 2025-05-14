@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: hugh.li
@@ -62,6 +63,7 @@ trait Action
         $this->loadParameters();
 
         $this->dispatchActionProcessingEvent();
+
         try {
             $this->beforeAction();
             $result = $this->action();
@@ -75,7 +77,7 @@ trait Action
 
     protected function dispatchActionProcessingEvent()
     {
-        #$this->getEventsDispatcher()->dispatch(new \HughCube\Laravel\Knight\Events\ActionProcessing($this));
+        //$this->getEventsDispatcher()->dispatch(new \HughCube\Laravel\Knight\Events\ActionProcessing($this));
     }
 
     protected function dispatchActionProcessedEvent()

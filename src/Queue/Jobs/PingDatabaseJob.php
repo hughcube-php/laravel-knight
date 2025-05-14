@@ -5,7 +5,6 @@ namespace HughCube\Laravel\Knight\Queue\Jobs;
 use Exception;
 use HughCube\Laravel\Knight\Queue\Job;
 use Illuminate\Database\Connection;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
