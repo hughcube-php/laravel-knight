@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: hugh.li
@@ -59,7 +60,7 @@ class TrustIps
         return $next($request);
     }
 
-    protected function isTrustIp(string $requestIp, string $ips = null): bool
+    protected function isTrustIp(string $requestIp, ?string $ips = null): bool
     {
         if (empty($ips) || '*' === $ips || '**' === $ips) {
             return true;

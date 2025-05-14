@@ -11,7 +11,7 @@ class ModelUserProvider implements UserProvider
     /**
      * The Eloquent user model class.
      *
-     * @var class-string<Model> $model
+     * @var class-string<Model>
      */
     protected string $model;
 

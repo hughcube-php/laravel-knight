@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: hugh.li
@@ -135,6 +136,7 @@ class CarbonMixin
                     return $dateTime;
                 }
             }
+
             return null;
         };
     }

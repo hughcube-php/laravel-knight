@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: hugh.li
@@ -37,10 +38,10 @@ class Helper
     public static function convertExceptionToArray(Throwable $e): array
     {
         $array = [
-            'Code' => $e->getCode(),
-            'Exception' => get_class($e),
-            'Message' => $e->getMessage(),
-            'File' => sprintf('%s(%s)', $e->getFile(), $e->getLine()),
+            'Code'       => $e->getCode(),
+            'Exception'  => get_class($e),
+            'Message'    => $e->getMessage(),
+            'File'       => sprintf('%s(%s)', $e->getFile(), $e->getLine()),
             'StackTrace' => $e->getTrace(),
         ];
 

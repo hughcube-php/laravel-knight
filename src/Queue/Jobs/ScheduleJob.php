@@ -50,9 +50,9 @@ class ScheduleJob extends Job
      * @param string|array|null $in
      * @param string|null       $basePath
      *
-     * @return array<integer, object>
+     * @return array<int, object>
      */
-    protected function parseDirJobs($name = '*.php', $in = null, string $basePath = null): array
+    protected function parseDirJobs($name = '*.php', $in = null, ?string $basePath = null): array
     {
         $in = $in ?: app_path('Jobs');
         $basePath = $basePath ?: base_path();

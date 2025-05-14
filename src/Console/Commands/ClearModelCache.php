@@ -1,9 +1,10 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2025/5/12
- * Time: 23:04
+ * Time: 23:04.
  */
 
 namespace HughCube\Laravel\Knight\Console\Commands;
@@ -32,6 +33,7 @@ class ClearModelCache extends \HughCube\Laravel\Knight\Console\Command
      * Execute the console command.
      *
      * @param Schedule $schedule
+     *
      * @return void
      */
     public function handle(Schedule $schedule): void

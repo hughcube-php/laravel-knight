@@ -19,7 +19,7 @@ use Throwable;
 class Handler extends ExceptionHandler
 {
     /**
-     * @var array<integer, string>
+     * @var array<int, string>
      *
      * @phpstan-ignore-next-line
      */

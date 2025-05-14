@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: hugh.li
@@ -20,6 +21,7 @@ use Symfony\Component\HttpFoundation\HeaderBag;
  * @mixin Request
  *
  * @method null|string getClientHeaderPrefix()
+ *
  * @see KnightRequest
  */
 class RequestMixin

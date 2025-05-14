@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: hugh.li
@@ -577,14 +578,14 @@ class ModelTest extends TestCase
             $condition->add(['id' => $user->id, 'nickname' => $user->nickname]);
         }
 
-        /** @var Collection<integer, User> $rows */
+        /** @var Collection<int, User> $rows */
         $rows = User::query()->findUniqueRows($condition);
         $this->assertSame($rows->count(), $condition->count());
         foreach ($rows as $row) {
             $this->assertFalse($row->isFromCache());
         }
 
-        /** @var Collection<integer, User> $rows */
+        /** @var Collection<int, User> $rows */
         $rows = User::query()->findUniqueRows($condition);
         $this->assertSame($rows->count(), $condition->count());
         foreach ($rows as $row) {

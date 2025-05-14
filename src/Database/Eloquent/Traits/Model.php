@@ -238,7 +238,7 @@ trait Model
      *
      * @phpstan-ignore-next-line
      */
-    public function getCacheTtl(int $duration = null): int
+    public function getCacheTtl(?int $duration = null): int
     {
         return null === $duration ? random_int(5 * 24 * 3600, 7 * 24 * 3600) : $duration;
     }
@@ -415,7 +415,7 @@ trait Model
     /**
      * @return static
      */
-    public function clone(callable $callable = null)
+    public function clone(?callable $callable = null)
     {
         $model = clone $this;
 

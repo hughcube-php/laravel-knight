@@ -1,9 +1,10 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2024/9/3
- * Time: 10:10
+ * Time: 10:10.
  */
 
 namespace HughCube\Laravel\Knight\Database;

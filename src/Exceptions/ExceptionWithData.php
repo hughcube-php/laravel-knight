@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: hugh.li
@@ -18,7 +19,7 @@ class ExceptionWithData extends Exception implements DataExceptionInterface
      */
     protected $data = null;
 
-    public function __construct($data, string $message = '', int $code = 0, Throwable $previous = null)
+    public function __construct($data, string $message = '', int $code = 0, ?Throwable $previous = null)
     {
         $this->data = $data;
         parent::__construct($message, $code, $previous);

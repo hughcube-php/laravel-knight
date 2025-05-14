@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: hugh.li
@@ -19,7 +20,7 @@ class NotCloseTransactionException extends RuntimeException
      */
     protected $connection;
 
-    public function __construct(Connection $connection, $message = null, $code = 0, Throwable $previous = null)
+    public function __construct(Connection $connection, $message = null, $code = 0, ?Throwable $previous = null)
     {
         $this->connection = $connection;
         parent::__construct($message, $code, $previous);

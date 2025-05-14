@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: hugh.li
@@ -67,7 +68,7 @@ class User extends Model
         return Cache::store('array');
     }
 
-    public function getCacheTtl(int $duration = null): int
+    public function getCacheTtl(?int $duration = null): int
     {
         return 10;
     }

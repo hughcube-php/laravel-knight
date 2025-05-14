@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: hugh.li
@@ -193,7 +194,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
         return json_encode($this->getValidData(), $flags);
     }
 
-    protected function getName(object $job = null): string
+    protected function getName(?object $job = null): string
     {
         return Str::afterLast(get_class($job ?? $this), '\\');
     }
