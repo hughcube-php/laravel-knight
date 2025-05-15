@@ -9,6 +9,8 @@
 
 namespace HughCube\Laravel\Knight\Support;
 
+use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Throwable;
@@ -38,19 +40,19 @@ class Helper
     public static function convertExceptionToArray(Throwable $e): array
     {
         $array = [
-            'Code'       => $e->getCode(),
-            'Exception'  => get_class($e),
-            'Message'    => $e->getMessage(),
-            'File'       => sprintf('%s(%s)', $e->getFile(), $e->getLine()),
-            'StackTrace' => $e->getTrace(),
+            'code' => $e->getCode(),
+            'exception' => get_class($e),
+            'message' => $e->getMessage(),
+            'file' => sprintf('%s(%s)', $e->getFile(), $e->getLine()),
+            'trace' => (new Collection($e->getTrace()))->map(fn($trace) => Arr::except($trace, ['args']))->all(),
         ];
 
         if ($e instanceof ValidationException) {
-            $array['Errors'] = $e->errors();
+            $array['errors'] = $e->errors();
         }
 
         if (($prev = $e->getPrevious()) !== null) {
-            $array['Previous'] = static::convertExceptionToArray($prev);
+            $array['previous'] = static::convertExceptionToArray($prev);
         }
 
         return $array;
