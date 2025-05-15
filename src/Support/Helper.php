@@ -40,11 +40,11 @@ class Helper
     public static function convertExceptionToArray(Throwable $e): array
     {
         $array = [
-            'code' => $e->getCode(),
+            'code'      => $e->getCode(),
             'exception' => get_class($e),
-            'message' => $e->getMessage(),
-            'file' => sprintf('%s(%s)', $e->getFile(), $e->getLine()),
-            'trace' => (new Collection($e->getTrace()))->map(fn($trace) => Arr::except($trace, ['args']))->all(),
+            'message'   => $e->getMessage(),
+            'file'      => sprintf('%s(%s)', $e->getFile(), $e->getLine()),
+            'trace'     => (new Collection($e->getTrace()))->map(fn ($trace) => Arr::except($trace, ['args']))->all(),
         ];
 
         if ($e instanceof ValidationException) {
