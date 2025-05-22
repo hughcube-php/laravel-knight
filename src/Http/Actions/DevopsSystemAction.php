@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * Created by PhpStorm.
+ * User: hugh.li
+ * Date: 2021/12/17
+ * Time: 21:36.
+ */
+
+namespace HughCube\Laravel\Knight\Http\Actions;
+
+use HughCube\Laravel\Knight\Routing\Controller;
+use Symfony\Component\HttpFoundation\Response;
+
+class DevopsSystemAction extends Controller
+{
+    /**
+     * @return Response
+     */
+    protected function action(): Response
+    {
+        return $this->asResponse([
+            'os' => php_uname(),
+            'php_version' => PHP_VERSION,
+            'php_extensions' => get_loaded_extensions(),
+            'current_memory_usage' => $this->asFileSize(memory_get_usage()),
+            'peak_memory_usage' => $this->asFileSize(memory_get_peak_usage()),
+        ]);
+    }
+
+    protected function asFileSize(int $bytes, int $precision = 2): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        $bytes = max($bytes, 0);
+        $pow = $bytes > 0 ? floor(log($bytes, 1024)) : 0;
+        $pow = min($pow, count($units) - 1);
+        $bytes /= (1024 ** $pow);
+
+        return round($bytes, $precision) . ' ' . $units[$pow];
+    }
+}

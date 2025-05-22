@@ -17,6 +17,7 @@ use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\KRTest;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
+use HughCube\Laravel\Knight\Http\Actions\DevopsSystemAction;
 use HughCube\Laravel\Knight\Http\Actions\PhpInfoAction;
 use HughCube\Laravel\Knight\Http\Actions\PingAction;
 use HughCube\Laravel\Knight\Http\Actions\RequestLogAction;
@@ -85,10 +86,12 @@ class ServiceProvider extends IlluminateServiceProvider
             ]);
         }
 
+        $this->bootDevops();
         $this->bootOpCache();
         $this->bootRequest();
         $this->bootPhpInfo();
         $this->bootHealthCheck();
+
         $this->configureAuthUserProvider();
 
         $this->registerRefreshModelCacheEvent();
@@ -169,6 +172,20 @@ class ServiceProvider extends IlluminateServiceProvider
                     '/phpinfo',
                     $config->get('knight.phpinfo.action.phpinfo', PhpInfoAction::class)
                 )->name('knight.phpinfo');
+            });
+        }
+    }
+
+    protected function bootDevops()
+    {
+        /** @var Repository $config */
+        $config = $this->app->make('config');
+        if (!$this->hasRoutesCache() && false !== ($prefix = $config->get('knight.devops.route_prefix', false))) {
+            Route::group(['prefix' => $prefix], function () use ($config) {
+                Route::any(
+                    '/devops/system',
+                    $config->get('knight.devops.action.system', DevopsSystemAction::class)
+                )->name('knight.devops.system');
             });
         }
     }
