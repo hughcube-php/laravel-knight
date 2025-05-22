@@ -237,7 +237,7 @@ class Str extends \Illuminate\Support\Str
      */
     public static function isChineseName($string): bool
     {
-        return 0 < preg_match('/^([\xe4-\xe9][\x80-\xbf]{2}){2,15}$/', $string);
+        return 0 < preg_match('/^\p{Han}[\p{Han}·]{0,10}\p{Han}$/u', $string);
     }
 
     /**
@@ -245,7 +245,7 @@ class Str extends \Illuminate\Support\Str
      */
     public static function hasChinese($string): bool
     {
-        return 0 < preg_match('/[\x{4e00}-\x{9fa5}]/u', $string);
+        return 0 < preg_match('/\p{Han}/u', $string);
     }
 
     /**
@@ -253,7 +253,7 @@ class Str extends \Illuminate\Support\Str
      */
     public static function isChinese($string): bool
     {
-        return 0 < preg_match('/^[\x{4e00}-\x{9fa5}]+$/u', $string);
+        return 0 < preg_match('/^\p{Han}+$/u', $string);
     }
 
     /**
