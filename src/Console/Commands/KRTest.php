@@ -59,7 +59,7 @@ class KRTest extends Command
 
         $this->info(
             sprintf(
-                '<info>总耗时:</info><comment>%s</comment><info>秒, 平均耗时:</info><comment>%s</comment><info>微妙</info>',
+                '<info>总耗时:</info><comment>%s</comment><info>秒, 平均耗时:</info><comment>%s</comment><info>微秒</info>',
                 round($expendTime / 1000000, 2),
                 round($expendTime / $number, 2)
             )
