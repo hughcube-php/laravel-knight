@@ -25,8 +25,6 @@ class DevopsSystemActionTest extends TestCase
         /** @var DevopsSystemAction $action */
         $action = $this->app->make(DevopsSystemAction::class);
 
-        var_dump($action()->getData());
-
         $this->assertInstanceOf(JsonResponse::class, $action());
     }
 }
