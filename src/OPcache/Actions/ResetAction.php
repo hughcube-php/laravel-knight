@@ -29,6 +29,6 @@ class ResetAction extends Controller
             throw new Exception('Failed to reset OPcache.');
         }
 
-        return $this->asResponse();
+        return $this->asSuccess();
     }
 }

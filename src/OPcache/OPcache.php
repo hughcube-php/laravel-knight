@@ -84,7 +84,7 @@ class OPcache
 
         $results = json_decode($response->getBody()->getContents(), true);
 
-        return $results['data']['scripts'];
+        return $results['Data']['scripts'];
     }
 
     public function getUrl($url = null, $useAppHost = true): ?PUrl

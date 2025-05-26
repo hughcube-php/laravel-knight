@@ -19,7 +19,7 @@ class DevopsSystemAction extends Controller
      */
     protected function action(): Response
     {
-        return $this->asResponse([
+        return $this->asSuccess([
             'os' => php_uname(),
             'php_version' => PHP_VERSION,
             'current_memory_usage' => $this->asFileSize(memory_get_usage()),

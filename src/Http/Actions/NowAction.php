@@ -22,7 +22,7 @@ class NowAction extends Controller
     {
         $now = Carbon::now();
 
-        return $this->asResponse([
+        return $this->asSuccess([
             /** @phpstan-ignore-next-line */
             'timestamp' => $now->getTimestampAsFloat(),
             /** @phpstan-ignore-next-line */

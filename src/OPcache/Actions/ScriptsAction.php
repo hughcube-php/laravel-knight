@@ -28,7 +28,7 @@ class ScriptsAction extends Controller
     {
         $scripts = OPcache::i()->getScripts();
 
-        return $this->asResponse([
+        return $this->asSuccess([
             'count'   => count($scripts),
             'scripts' => array_keys($scripts),
         ]);

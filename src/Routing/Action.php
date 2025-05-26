@@ -184,6 +184,10 @@ trait Action
         return $this->asResponse($data, $code);
     }
 
+    /**
+     * @deprecated It's a name change.
+     * @see static::asSuccess()
+     */
     protected function asResponse(array $data = [], int $code = 200): Response
     {
         return new JsonResponse([
@@ -191,6 +195,15 @@ trait Action
             'message' => 'success',
             'data'    => $data ?: new stdClass(),
         ]);
+    }
+
+    protected function asSuccess(array $data = [], int $statusCode = 200): Response
+    {
+        return new JsonResponse([
+            'Code' => 'Success',
+            'Message' => 'Success',
+            'Data' => $data ?: new stdClass()
+        ], $statusCode);
     }
 
     /**

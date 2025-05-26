@@ -44,7 +44,7 @@ class StatesAction extends Controller
         }
 
         if ($this->isAsJson()) {
-            return $this->asResponse(opcache_get_status());
+            return $this->asSuccess(opcache_get_status());
         }
 
         return new Response($this->renderView(dirname(__DIR__).'/Views/opcache.php'));

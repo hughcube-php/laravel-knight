@@ -9,40 +9,13 @@
 
 namespace HughCube\Laravel\Knight\Routing;
 
-use Illuminate\Database\Eloquent\Builder;
-
 /**
  * @mixin Action
+ *
+ * @deprecated Will be removed in a future version.
+ * @see ListQuery
  */
 trait SimpleListQuery
 {
-    use SimplePaginateQuery;
-
-    protected function rules(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return int|null
-     */
-    protected function getPage(): ?int
-    {
-        return null;
-    }
-
-    /**
-     * @param Builder|mixed $query
-     *
-     * @return null|int
-     */
-    protected function queryCount($query): ?int
-    {
-        return null;
-    }
-
-    /**
-     * @return Builder|null
-     */
-    abstract protected function makeQuery(): ?Builder;
+    use ListQuery;
 }

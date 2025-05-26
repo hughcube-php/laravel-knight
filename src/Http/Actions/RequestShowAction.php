@@ -19,7 +19,7 @@ class RequestShowAction extends Controller
      */
     protected function action(): Response
     {
-        return $this->asResponse([
+        return $this->asSuccess([
             'uri'     => $this->getRequest()->getUri(),
             'https'   => $this->getRequest()->isSecure(),
             'method'  => $this->getRequest()->getMethod(),
