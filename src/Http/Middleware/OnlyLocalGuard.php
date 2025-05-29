@@ -10,20 +10,17 @@
 namespace HughCube\Laravel\Knight\Http\Middleware;
 
 use Closure;
-use HughCube\Laravel\Knight\Traits\Container;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\IpUtils;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class OnlyLocalGuard
 {
-    use Container;
-
     protected function allowIps(): array
     {
         $ips = ['127.0.0.1'];
 
-        if ($this->isContainerLocalEnv()) {
+        if (app()->environment('local')) {
             $ips[] = '0.0.0.0/0';
         }
 

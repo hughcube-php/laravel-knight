@@ -10,17 +10,14 @@
 namespace HughCube\Laravel\Knight\Http\Middleware;
 
 use Closure;
-use HughCube\Laravel\Knight\Traits\Container;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class OnlyProdEnvGuard
 {
-    use Container;
-
     public function handle(Request $request, Closure $next)
     {
-        if (!$this->isContainerProdEnv()) {
+        if (!app()->environment('prod')) {
             throw new AccessDeniedHttpException('Only accessible in prod env!');
         }
 

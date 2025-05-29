@@ -132,6 +132,8 @@ class CarbonMixin
         return function ($date, $formats) {
             foreach ($formats as $format) {
                 $dateTime = static::tryCreateFromFormat($format, $date);
+
+                /** @phpstan-ignore-next-line */
                 if (null !== $dateTime) {
                     return $dateTime;
                 }

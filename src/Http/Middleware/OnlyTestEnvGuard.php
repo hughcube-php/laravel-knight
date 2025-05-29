@@ -10,17 +10,14 @@
 namespace HughCube\Laravel\Knight\Http\Middleware;
 
 use Closure;
-use HughCube\Laravel\Knight\Traits\Container;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class OnlyTestEnvGuard
 {
-    use Container;
-
     public function handle(Request $request, Closure $next)
     {
-        if (!$this->isContainerTestEnv()) {
+        if (!app()->environment('test')) {
             throw new AccessDeniedHttpException('Only accessible in test env!');
         }
 

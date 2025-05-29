@@ -10,17 +10,14 @@
 namespace HughCube\Laravel\Knight\Http\Middleware;
 
 use Closure;
-use HughCube\Laravel\Knight\Traits\Container;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class OnlyDebugModeGuard
 {
-    use Container;
-
     public function handle(Request $request, Closure $next)
     {
-        if (!$this->isContainerDebug()) {
+        if (!app()->hasDebugModeEnabled()) {
             throw new AccessDeniedHttpException('Only accessible in debug mode!');
         }
 

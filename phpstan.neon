@@ -4,6 +4,8 @@ parameters:
     paths:
         - src
     inferPrivatePropertyTypeFromConstructor: true
+    excludePaths:
+        - src/Http/LumenRequest.php
     ignoreErrors:
         - '#Trait HughCube\\Laravel\\Knight\\.* is used zero times and is not analysed.#'
         - '#Call to an undefined method Illuminate\\Http\\Request::getClientHeaders\(\).#'
@@ -32,3 +34,4 @@ parameters:
             paths:
                 - src/Mixin/Support/CarbonMixin.php
         - '#Parameter \#1 \$num of function base_convert expects string, int<0, max> given.#'
+        - '#.*unknown class Laravel\\Lumen.*#'

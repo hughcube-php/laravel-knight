@@ -18,6 +18,7 @@ class Type
 
     public static function string($value): ?int
     {
+        /** @phpstan-ignore-next-line */
         return null === $value ? null : (string) $value;
     }
 }

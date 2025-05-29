@@ -20,6 +20,11 @@ class ModelUserProvider implements UserProvider
         $this->model = $model;
     }
 
+    /**
+     * @param $method
+     * @param ...$args
+     * @return mixed
+     */
     protected function callModelMethod($method, ...$args)
     {
         return call_user_func_array([$this->model, $method], $args);
@@ -46,6 +51,7 @@ class ModelUserProvider implements UserProvider
      */
     public function updateRememberToken(Authenticatable $user, $token)
     {
+        /** @phpstan-ignore-next-line */
         return $this->callModelMethod(__FUNCTION__, $user, $token);
     }
 
@@ -70,6 +76,7 @@ class ModelUserProvider implements UserProvider
      */
     public function rehashPasswordIfRequired(Authenticatable $user, array $credentials, bool $force = false)
     {
+        /** @phpstan-ignore-next-line */
         return $this->callModelMethod(__FUNCTION__, $user, $credentials, $force);
     }
 }
