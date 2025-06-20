@@ -488,4 +488,10 @@ class Str extends \Illuminate\Support\Str
     {
         return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT));
     }
+
+    public static function generalCiEq($a, $b, $model = 'rnask'): bool
+    {
+        return strtolower(mb_convert_kana($a, $model, 'UTF-8'))
+            == strtolower(mb_convert_kana($b, $model, 'UTF-8'));
+    }
 }
