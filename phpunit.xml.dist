@@ -6,7 +6,8 @@
          stopOnError="false"
          stopOnFailure="false"
          cacheDirectory=".phpunit.cache"
-         backupStaticProperties="false">
+         backupStaticProperties="false"
+         bootstrap="vendor/autoload.php">
     <testsuites>
         <testsuite name="Laravel Test Suite">
             <directory suffix="Test.php">./tests</directory>
