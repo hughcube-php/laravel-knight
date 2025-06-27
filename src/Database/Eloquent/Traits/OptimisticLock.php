@@ -12,7 +12,6 @@ namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 use HughCube\Laravel\Knight\Exceptions\OptimisticLockException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
-use Illuminate\Support\Str;
 
 /**
  * Trait OptimisticLocking.
@@ -23,15 +22,9 @@ trait OptimisticLock
 {
     protected bool $enableOptimisticLock = true;
 
-    public static function genModelVersion(): int
-    {
-        return abs(crc32(serialize([Str::random(100), microtime()])));
-    }
-
     protected static function bootOptimisticLock()
     {
         static::creating(function ($model) {
-
             if (null === $model->{$model->lockDataVersionColumn()}) {
                 $model->{$model->lockDataVersionColumn()} = $model->defaultModelDataVersion();
             }
@@ -42,7 +35,7 @@ trait OptimisticLock
 
     public static function lockDataVersionColumn(): string
     {
-        return 'data_version';
+        return defined(static::class . '::DATA_VERSION') ? static::DATA_VERSION : 'data_version';
     }
 
     public static function defaultModelDataVersion(): int
@@ -55,6 +48,18 @@ trait OptimisticLock
         $this->enableOptimisticLock = true;
 
         return $this;
+    }
+
+    public function disableOptimisticLock()
+    {
+        $this->enableOptimisticLock = false;
+
+        return $this;
+    }
+
+    public function optimisticLockEnabled(): bool
+    {
+        return $this->enableOptimisticLock === true;
     }
 
     protected function performUpdate(Builder $query)
@@ -90,7 +95,9 @@ trait OptimisticLock
                     ->update($dirty);
 
                 if ($affected === 0) {
-                    throw new OptimisticLockException('Optimistic lock failed: The record has been modified by another process.');
+                    throw new OptimisticLockException(
+                        'Optimistic lock failed: The record has been modified by another process.'
+                    );
                 }
 
                 $this->{$this->lockDataVersionColumn()} = $newVersion; // Update model instance
@@ -104,17 +111,5 @@ trait OptimisticLock
         }
 
         return true;
-    }
-
-    protected function optimisticLockEnabled(): bool
-    {
-        return $this->enableOptimisticLock === true;
-    }
-
-    public function disableOptimisticLock()
-    {
-        $this->enableOptimisticLock = false;
-
-        return $this;
     }
 }
