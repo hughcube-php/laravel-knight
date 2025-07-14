@@ -341,7 +341,7 @@ class CollectionMixin
      * /[,，]/
      * /\s+/.
      */
-    public function split(): Closure
+    public function splitWhitespace(): Closure
     {
         return function (string $separator, string $pattern = '/\s+/', int $limit = -1) {
             return static::make(preg_split($pattern, $separator, $limit) ?: []);
@@ -357,4 +357,15 @@ class CollectionMixin
             return static::make(preg_split($pattern, $separator, $limit) ?: []);
         };
     }
+
+    /**
+     * split \/／
+     */
+    public function splitSlash(): Closure
+    {
+        return function (string $separator, string $pattern = '/[\/／]', int $limit = -1) {
+            return static::make(preg_split($pattern, $separator, $limit) ?: []);
+        };
+    }
+
 }
