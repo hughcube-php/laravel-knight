@@ -344,7 +344,7 @@ class CollectionMixin
     public function split(): Closure
     {
         return function (string $separator, string $pattern = '/\s+/', int $limit = -1) {
-            return static::make(preg_split($separator, $pattern, $limit) ?: []);
+            return static::make(preg_split($pattern, $separator, $limit) ?: []);
         };
     }
 
@@ -354,7 +354,7 @@ class CollectionMixin
     public function splitComma(): Closure
     {
         return function (string $separator, string $pattern = '/[,，]/', int $limit = -1) {
-            return static::make(preg_split($separator, $pattern, $limit) ?: []);
+            return static::make(preg_split($pattern, $separator, $limit) ?: []);
         };
     }
 }
