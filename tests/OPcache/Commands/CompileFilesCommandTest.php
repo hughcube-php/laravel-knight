@@ -15,6 +15,11 @@ class CompileFilesCommandTest extends TestCase
 {
     public function testRun()
     {
+        if (!extension_loaded('Zend OPcache')) {
+            $this->markTestSkipped('OPcache extension is not loaded');
+            return;
+        }
+
         $this->artisan('opcache:compile-files')->assertExitCode(0);
     }
 }

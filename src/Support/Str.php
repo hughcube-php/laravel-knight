@@ -257,6 +257,51 @@ class Str extends \Illuminate\Support\Str
     }
 
     /**
+     * 是否是车牌号.
+     */
+    public static function isCnCarLicensePlate($string): bool
+    {
+        if (!is_string($string) || empty($string)) {
+            return false;
+        }
+
+        $patterns = [
+            // 普通车牌格式：省份简称 + 地区代码 + 5位数字字母组合
+            '/^[京津冀晋蒙辽吉黑沪苏浙皖闽赣鲁豫鄂湘粤桂琼渝川贵云藏陕甘青宁新][A-HJ-NP-Z][0-9A-Z]{5}$/u',
+
+            // 新能源车牌格式：省份简称 + 地区代码 + 6位数字字母组合
+            '/^[京津冀晋蒙辽吉黑沪苏浙皖闽赣鲁豫鄂湘粤桂琼渝川贵云藏陕甘青宁新][A-HJ-NP-Z][0-9A-Z]{6}$/u',
+
+            // 特殊车牌格式：包含警、学、使、领、港、澳、挂、试、超等特殊标识
+            '/^[京津冀晋蒙辽吉黑沪苏浙皖闽赣鲁豫鄂湘粤桂琼渝川贵云藏陕甘青宁新][A-HJ-NP-Z].*[警学使领港澳挂试超].*$/u',
+
+            // 应急救援车牌格式
+            '/^[京津冀晋蒙辽吉黑沪苏浙皖闽赣鲁豫鄂湘粤桂琼渝川贵云藏陕甘青宁新][A-HJ-NP-Z].*应急$/u',
+
+            // 武警车牌格式：WJ + 地区 + 数字
+            '/^WJ[京津冀晋蒙辽吉黑沪苏浙皖闽赣鲁豫鄂湘粤桂琼渝川贵云藏陕甘青宁新]?[·\-]?[0-9A-Z]{4,5}[A-Z]?$/u',
+
+            // 武警总部车牌格式
+            '/^WJ[·\-]?[0-9]{4,5}$/u',
+
+            // 军车车牌格式
+            '/^[A-Z]{1,2}[0-9]{4,5}[A-Z]?$/',
+
+            // 临时车牌格式：包含"临时"标识
+            '/^[京津冀晋蒙辽吉黑沪苏浙皖闽赣鲁豫鄂湘粤桂琼渝川贵云藏陕甘青宁新][A-HJ-NP-Z].*临时.*$/u',
+        ];
+
+        // 循环检查各种格式
+        foreach ($patterns as $pattern) {
+            if (1 === preg_match($pattern, $string)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * 改变字符的编码
      */
     public static function convEncoding($contents, $from = 'gbk', $to = 'utf-8'): string
@@ -307,7 +352,7 @@ class Str extends \Illuminate\Support\Str
             $slice = join('', array_slice($match[0], $start, $length));
         }
 
-        return $slice.$suffix;
+        return $slice . $suffix;
     }
 
     /**
