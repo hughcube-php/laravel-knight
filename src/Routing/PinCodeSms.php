@@ -43,7 +43,7 @@ trait PinCodeSms
             $this->send($mobile, $iddCode, $pinCode);
         }
 
-        return $this->asResponse();
+        return $this->makeResponse();
     }
 
     protected function enableSend(): bool
