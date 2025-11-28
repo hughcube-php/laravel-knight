@@ -44,6 +44,8 @@ class PingDatabaseJob extends Job
     {
         if ('mysql' === $connection->getDriverName()) {
             return 'SELECT CONNECTION_ID()';
+        } elseif ('pgsql' === $connection->getDriverName()) {
+            return 'SELECT pg_backend_pid()';
         }
 
         return 'SELECT 1';
@@ -54,7 +56,7 @@ class PingDatabaseJob extends Job
         $sql = $this->prepareSql($connection);
 
         $now = Carbon::now();
-        $result = Collection::wrap((array) $connection->selectOne($sql, [], $useReadPdo))->first();
+        $result = Collection::wrap((array)$connection->selectOne($sql, [], $useReadPdo))->first();
         $duration = $now->diffInMilliseconds(Carbon::now());
 
         return sprintf('conn#%s#%sms', $result, $duration);
