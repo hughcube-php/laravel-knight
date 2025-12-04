@@ -67,6 +67,11 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     protected ?FlowJobDescribe $flowJobDescribe = null;
 
     /**
+     * @var int
+     */
+    private static int $__jobCounter = 0;
+
+    /**
      * Create a new job instance.
      *
      * @return void
@@ -74,12 +79,14 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     public function __construct(array $data = [])
     {
         $this->data = $data;
+
+        self::$__jobCounter++;
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function handle(): void
     {
@@ -139,9 +146,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
         return $this->getOrSet(__METHOD__, function () {
             $hostname = base_convert(Base::toString(abs(crc32(gethostname()))), 10, 36);
             $pid = base_convert(Base::toString(getmypid()), 10, 36);
-            $random = base_convert(Base::toString(abs(crc32(random_bytes(10)))), 10, 36);
+            $counter = base_convert(Base::toString(self::$__jobCounter), 10, 36);
 
-            return sprintf('%s-%s-%s', $hostname, $pid, $random);
+            return sprintf('%s-%s-%s', $hostname, $pid, $counter);
         });
     }
 
@@ -220,9 +227,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function log($level, string $message, array $context = [])
     {
@@ -243,7 +250,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     /**
      * @param string $key
-     * @param null   $default
+     * @param null $default
      *
      * @return mixed
      *
@@ -268,7 +275,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     /**
      * @param string $key
-     * @param mixed  $value
+     * @param mixed $value
      *
      * @return $this
      *
