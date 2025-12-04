@@ -69,7 +69,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     /**
      * @var int
      */
-    private static int $__jobCounter = 0;
+    protected static int $__jobCounter = 0;
 
     /**
      * Create a new job instance.
@@ -80,7 +80,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     {
         $this->data = $data;
 
-        self::$__jobCounter++;
+        static::$__jobCounter++;
     }
 
     /**
@@ -146,7 +146,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
         return $this->getOrSet(__METHOD__, function () {
             $hostname = base_convert(Base::toString(abs(crc32(gethostname()))), 10, 36);
             $pid = base_convert(Base::toString(getmypid()), 10, 36);
-            $counter = base_convert(Base::toString(self::$__jobCounter), 10, 36);
+            $counter = base_convert(Base::toString(static::$__jobCounter), 10, 36);
 
             return sprintf('%s-%s-%s', $hostname, $pid, $counter);
         });
