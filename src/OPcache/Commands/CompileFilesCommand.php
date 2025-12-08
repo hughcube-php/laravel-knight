@@ -31,14 +31,15 @@ class CompileFilesCommand extends Command
      * @inheritdoc
      */
     protected $signature = 'opcache:compile-files
-                            {--with_remote_cached_scripts }
-                            {--with_app_files : Whether to include app files }
-                            {--with_composer_files : Whether to include composer class files }';
+                            {--with-remote-scripts : Fetch file list from remote interface }
+                            {--with-app-files=1 : Include app files (default: 1) }
+                            {--with-composer-files=1 : Include composer class files (default: 1) }
+                            {--without-vendor : Exclude vendor files when using composer files }';
 
     /**
      * @inheritdoc
      */
-    protected $description = 'opcache compile file';
+    protected $description = 'Compile PHP files into OPcache for better performance';
 
     /**
      * @param Schedule $schedule
@@ -51,7 +52,35 @@ class CompileFilesCommand extends Command
     {
         $start = Carbon::now();
 
-        $scripts = $this->getFiles();
+        // 收集各来源的文件并显示统计
+        $appFiles = $this->getAppFiles();
+        $composerFiles = $this->getComposerFiles();
+        $prodFiles = $this->getProdFiles();
+
+        $this->info('Collecting files to compile...');
+        $this->info(sprintf('  - App files: %d', count($appFiles)));
+        $this->info(sprintf('  - Composer files: %d', count($composerFiles)));
+        if (!empty($prodFiles)) {
+            $this->info(sprintf('  - Remote cached files: %d', count($prodFiles)));
+        }
+
+        $scripts = array_values(array_unique(array_merge($appFiles, $composerFiles, $prodFiles)));
+
+        // 过滤不存在的文件
+        foreach ($scripts as $index => $script) {
+            if (!is_file($script)) {
+                unset($scripts[$index]);
+            }
+        }
+        $scripts = array_values($scripts);
+
+        if (empty($scripts)) {
+            $this->warn('No files to compile!');
+            return;
+        }
+
+        $this->info(sprintf('Total unique files to compile: %d', count($scripts)));
+
         $file = storage_path('opcache_compile_files.json');
         file_put_contents($file, json_encode($scripts));
         while (is_file($file)) {
@@ -68,7 +97,7 @@ class CompileFilesCommand extends Command
         $end = Carbon::now();
 
         $this->info(sprintf(
-            'opcache compile file count: %s, duration: %ss',
+            'Successfully compiled %s files in %.2fs',
             count($scripts),
             /** @phpstan-ignore-next-line */
             $end->getTimestampAsFloat() - $start->getTimestampAsFloat()
@@ -91,41 +120,54 @@ class CompileFilesCommand extends Command
         return $code;
     }
 
-    /**
-     * @throws Exception
-     *
-     * @return array
-     */
-    protected function getFiles(): array
-    {
-        $files = array_values(array_unique(array_merge(
-            $this->getAppFiles(),
-            $this->getComposerFiles(),
-            $this->getProdFiles()
-        )));
-
-        foreach ($files as $index => $file) {
-            if (!is_file($file)) {
-                unset($files[$index]);
-            }
-        }
-
-        return $files;
-    }
-
     protected function getComposerFiles(): array
     {
-        if (!$this->option('with_composer_files')) {
+        if (!$this->option('with-composer-files')) {
             return [];
         }
 
         $files = [];
 
+        // 加载 Composer 的 classmap
         $file = base_path('vendor/composer/autoload_classmap.php');
-        $files = array_merge($files, array_values(is_file($file) ? require $file : []));
+        if (is_file($file)) {
+            $files = array_merge($files, array_values(require $file));
+        }
 
+        // 加载 Composer 的 autoload files
         $file = base_path('vendor/composer/autoload_files.php');
-        $files = array_merge($files, array_values(is_file($file) ? require $file : []));
+        if (is_file($file)) {
+            $files = array_merge($files, array_values(require $file));
+        }
+
+        // 加载 PSR-4 自动加载的命名空间路径
+        $file = base_path('vendor/composer/autoload_psr4.php');
+        if (is_file($file)) {
+            $psr4 = require $file;
+            foreach ($psr4 as $paths) {
+                foreach ((array)$paths as $path) {
+                    if (is_dir($path)) {
+                        $finder = Finder::create()
+                            ->in($path)
+                            ->name('*.php')
+                            ->ignoreUnreadableDirs()
+                            ->followLinks();
+
+                        foreach ($finder->files() as $phpFile) {
+                            $files[] = strval($phpFile);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 如果设置了排除 vendor,过滤掉 vendor 目录下的文件
+        if ($this->option('without-vendor')) {
+            $vendorPath = base_path('vendor/');
+            $files = array_filter($files, function ($file) use ($vendorPath) {
+                return strpos($file, $vendorPath) !== 0;
+            });
+        }
 
         return array_values(array_filter(array_unique($files)));
     }
@@ -135,19 +177,39 @@ class CompileFilesCommand extends Command
      */
     protected function getAppFiles(): array
     {
-        if (!$this->option('with_app_files')) {
+        if (!$this->option('with-app-files')) {
+            return [];
+        }
+
+        $directories = [];
+
+        // 核心应用目录
+        if (is_dir(base_path('app/'))) {
+            $directories[] = base_path('app/');
+        }
+        if (is_dir(base_path('bootstrap/'))) {
+            $directories[] = base_path('bootstrap/');
+        }
+
+        // 配置和路由目录(包含应用逻辑)
+        if (is_dir(base_path('config/'))) {
+            $directories[] = base_path('config/');
+        }
+        if (is_dir(base_path('routes/'))) {
+            $directories[] = base_path('routes/');
+        }
+
+        // 数据库迁移和 seeders
+        if (is_dir(base_path('database/'))) {
+            $directories[] = base_path('database/');
+        }
+
+        if (empty($directories)) {
             return [];
         }
 
         $finder = Finder::create()
-            ->in([
-                base_path('app/'),
-                base_path('bootstrap/'),
-                //base_path('config/'),
-                //base_path('public/'),
-                //base_path('routes/'),
-                //base_path('vendor/'),
-            ])
+            ->in($directories)
             ->name('*.php')
             ->ignoreUnreadableDirs()
             ->followLinks();
@@ -162,7 +224,7 @@ class CompileFilesCommand extends Command
 
     protected function getProdFiles(): array
     {
-        if (empty($this->option('with_remote_cached_scripts'))) {
+        if (empty($this->option('with-remote-scripts'))) {
             return [];
         }
 

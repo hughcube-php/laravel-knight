@@ -23,7 +23,7 @@ class ClearCliCacheCommand extends Command
     /**
      * @inheritdoc
      */
-    protected $description = 'clear opcache cli';
+    protected $description = 'Clear OPcache for CLI environment';
 
     /**
      * @param Schedule $schedule

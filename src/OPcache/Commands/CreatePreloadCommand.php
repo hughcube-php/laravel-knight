@@ -2,6 +2,7 @@
 
 namespace HughCube\Laravel\Knight\OPcache\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
@@ -9,42 +10,55 @@ use Symfony\Component\Process\Process;
 class CreatePreloadCommand extends Command
 {
     /**
-     * The console command name.
-     *
-     * @var string
+     * @inheritdoc
      */
     protected $signature = 'opcache:create-preload
-                            {--with_remote_scripts }';
+                            {--output= : Output file path (default: base_path/preload.php) }
+                            {--with-remote-scripts : Include remote cached scripts in preload file }
+                            {--skip-bootstrap : Skip Laravel application bootstrap }';
 
     /**
-     * The console command description.
-     *
-     * @var string
+     * @inheritdoc
      */
-    protected $description = 'Create the php preload file.';
+    protected $description = 'Create PHP preload file for OPcache optimization';
 
     /**
      * Execute the console command.
      *
      * @return void
+     * @throws Exception
      */
     public function handle()
     {
+        $outputPath = $this->option('output') ?: base_path('preload.php');
+
+        $this->info('Creating OPcache preload file...');
+        $this->info(sprintf('Output: %s', $outputPath));
+
         $process = new Process(
             $this->serverCommand(),
-            public_path(),
+            base_path(),
             [
-                'WITH_REMOTE_SCRIPTS' => strval(intval($this->option('with_remote_scripts'))),
+                'WITH_REMOTE_SCRIPTS' => strval(intval($this->option('with-remote-scripts'))),
+                'SKIP_BOOTSTRAP' => strval(intval($this->option('skip-bootstrap'))),
+                'OUTPUT_PATH' => $outputPath,
             ]
         );
 
-        $process->mustRun(function ($type, $buffer) {
-            if (Process::ERR === $type) {
-                echo 'ERR > '.$buffer;
-            } else {
-                echo 'OUT > '.$buffer;
-            }
-        });
+        try {
+            $process->mustRun(function ($type, $buffer) {
+                if (Process::ERR === $type) {
+                    $this->error(trim($buffer));
+                } else {
+                    $this->line(trim($buffer));
+                }
+            });
+
+            $this->info('Preload file created successfully!');
+        } catch (Exception $e) {
+            $this->error('Failed to create preload file: ' . $e->getMessage());
+            throw $e;
+        }
     }
 
     /**

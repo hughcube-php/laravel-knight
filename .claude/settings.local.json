@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan opcache:compile-files:*)",
+      "Bash(./vendor/bin/phpcs:*)",
+      "Bash(git tag:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
