@@ -85,6 +85,7 @@ class CompileFilesCommand extends Command
         file_put_contents($file, json_encode($scripts));
         while (is_file($file)) {
             $process = new PhpProcess(sprintf('<?php %s ?>', $this->compileProcessCode($file)));
+            $process->setTimeout(null); // 移除超时限制
             $process->start();
             $process->wait();
             $remainScripts = json_decode(file_get_contents($file), true);
