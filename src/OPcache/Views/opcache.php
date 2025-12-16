@@ -22,7 +22,13 @@ if (!class_exists(OpCacheDataModel::class)) {
 
         public function getPageTitle()
         {
-            return 'PHP '.phpversion()." with OpCache {$this->_configuration['version']['version']} (PID: ".getmypid().")";
+            return sprintf(
+                'PHP %s | OpCache %s | Host: %s | PID: %d',
+                phpversion(),
+                $this->_configuration['version']['version'],
+                gethostname(),
+                getmypid()
+            );
         }
 
         public function getStatusDataRows()
