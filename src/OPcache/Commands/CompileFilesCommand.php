@@ -44,42 +44,63 @@ class CompileFilesCommand extends Command
     /**
      * @param Schedule $schedule
      *
+     * @return void
      * @throws Exception
      *
-     * @return void
      */
     public function handle(Schedule $schedule)
     {
         $start = Carbon::now();
 
         // 收集各来源的文件并显示统计
-        $appFiles = $this->getAppFiles();
-        $composerFiles = $this->getComposerFiles();
-        $prodFiles = $this->getProdFiles();
+        $scripts = Collection::empty()
+            ->merge(
+                $appFiles = Collection::make($this->getAppFiles())
+                    ->filter(fn($file) => is_file($file))
+                    ->values()
+            )
+            ->merge(
+                $composerFiles = Collection::make($this->getComposerFiles())
+                    ->filter(fn($file) => is_file($file))
+                    ->values()
+            )
+            ->merge(
+                $prodFiles = Collection::make($this->getProdFiles())
+                    ->filter(fn($file) => is_file($file))
+                    ->values()
+            )
+            ->merge(
+                $vendorBinFiles = Collection::make($this->getVendorBinFiles())
+                    ->filter(fn($file) => is_file($file))
+                    ->values()
+            )
+            ->merge(
+                $octaneFiles = Collection::make($this->getOctaneFiles())
+                    ->filter(fn($file) => is_file($file))
+                    ->values()
+            )
+            ->unique()->values();
 
         $this->info('Collecting files to compile...');
-        $this->info(sprintf('  - App files: %d', count($appFiles)));
-        $this->info(sprintf('  - Composer files: %d', count($composerFiles)));
-        if (!empty($prodFiles)) {
-            $this->info(sprintf('  - Remote cached files: %d', count($prodFiles)));
+        $this->info(sprintf('  - App files: %d', $appFiles->count()));
+        $this->info(sprintf('  - Composer files: %d', $composerFiles->count()));
+        if ($prodFiles->isNotEmpty()) {
+            $this->info(sprintf('  - Remote cached files: %d', $prodFiles->count()));
         }
-
-        $scripts = array_values(array_unique(array_merge($appFiles, $composerFiles, $prodFiles)));
-
-        // 过滤不存在的文件
-        foreach ($scripts as $index => $script) {
-            if (!is_file($script)) {
-                unset($scripts[$index]);
-            }
+        if ($vendorBinFiles->isNotEmpty()) {
+            $this->info(sprintf('  - Vendor bin files: %d', $vendorBinFiles->count()));
         }
-        $scripts = array_values($scripts);
+        if ($octaneFiles->isNotEmpty()) {
+            $this->info(sprintf('  - Octane files: %d', $octaneFiles->count()));
+        }
+        $this->info(sprintf('Total unique files to compile: %d', $scripts->count()));
+
+        $scripts = $scripts->toArray();
 
         if (empty($scripts)) {
             $this->warn('No files to compile!');
             return;
         }
-
-        $this->info(sprintf('Total unique files to compile: %d', count($scripts)));
 
         $file = storage_path('opcache_compile_files.json');
         file_put_contents($file, json_encode($scripts));
@@ -240,5 +261,68 @@ class CompileFilesCommand extends Command
         return Collection::make($scripts)->map(function ($script) {
             return base_path($script);
         })->values()->toArray();
+    }
+
+    /**
+     * 获取 vendor/bin 目录下的 PHP 脚本文件
+     *
+     * @return array
+     */
+    protected function getVendorBinFiles(): array
+    {
+        return $this->findPhpScripts(base_path('vendor/bin/'));
+    }
+
+    /**
+     * 获取 vendor/laravel/octane 目录下的所有 PHP 文件
+     * 包括 bin 目录下的 PHP 脚本（即使没有 .php 后缀）
+     *
+     * @return array
+     */
+    protected function getOctaneFiles(): array
+    {
+        return $this->findPhpScripts(base_path('vendor/laravel/octane/'), true);
+    }
+
+    /**
+     * 查找指定目录下的所有 PHP 脚本文件
+     * 包括 .php 文件和包含 PHP shebang 的可执行脚本
+     *
+     * @param string $path 要搜索的目录路径
+     * @param bool $followLinks 是否跟随符号链接（默认 false）
+     * @return array
+     */
+    protected function findPhpScripts(string $path, bool $followLinks = false): array
+    {
+        if (!is_dir($path)) {
+            return [];
+        }
+
+        $finder = Finder::create()
+            ->in($path)
+            ->files()
+            ->ignoreUnreadableDirs();
+
+        if ($followLinks) {
+            $finder = $finder->followLinks();
+        }
+
+        return Collection::make($finder)
+            ->filter(function ($file) {
+                // 允许 .php 文件
+                if ($file->getExtension() === 'php') {
+                    return true;
+                }
+
+                // 允许首行包含 #!/usr/bin/env php 或类似 shebang 的文件
+                if ($file->isReadable() && ($handle = fopen($file->getRealPath(), 'r'))) {
+                    $firstLine = fgets($handle);
+                    fclose($handle);
+                    return !empty($firstLine) && preg_match('/^#!.*php/', $firstLine);
+                }
+
+                return false;
+            })
+            ->map(fn($file) => $file->getRealPath())->unique()->values()->all();
     }
 }
