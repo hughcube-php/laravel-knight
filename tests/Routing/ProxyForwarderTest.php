@@ -8,9 +8,9 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Psr\Http\Message\ResponseInterface;
 
-class ProxyTest extends TestCase
+class ProxyForwarderTest extends TestCase
 {
     public function testAction()
     {
@@ -21,20 +21,19 @@ class ProxyTest extends TestCase
         $handlerStack = HandlerStack::create($mock);
         $client = new Client(['handler' => $handlerStack]);
 
-        $action = new ProxyAction();
+        $action = new ProxyForwarderAction();
         $action->setClient($client);
 
         $request = Request::create('/test', 'GET');
         $this->app->instance('request', $request);
 
-        /** @var StreamedResponse $response */
+        /** @var GuzzleResponse $response */
         $response = $this->callMethod($action, 'action');
 
-        $this->assertInstanceOf(StreamedResponse::class, $response);
+        $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('Bar', $response->headers->get('X-Foo'));
+        $this->assertSame(['Bar'], $response->getHeader('X-Foo'));
 
-        $this->expectOutputString('Hello, World');
-        $response->sendContent();
+        $this->assertSame('Hello, World', $response->getBody()->getContents());
     }
 }

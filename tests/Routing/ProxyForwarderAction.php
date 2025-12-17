@@ -4,12 +4,12 @@ namespace HughCube\Laravel\Knight\Tests\Routing;
 
 use GuzzleHttp\Client;
 use HughCube\Laravel\Knight\Routing\Action;
-use HughCube\Laravel\Knight\Routing\Proxy;
+use HughCube\Laravel\Knight\Routing\ProxyForwarder;
 
-class ProxyAction
+class ProxyForwarderAction
 {
     use Action;
-    use Proxy;
+    use ProxyForwarder;
 
     protected $externalClient;
 

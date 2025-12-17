@@ -5,22 +5,20 @@ namespace HughCube\Laravel\Knight\Routing;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use HughCube\GuzzleHttp\HttpClientTrait;
-use Illuminate\Support\Collection;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * @mixin Action
  */
-trait Proxy
+trait ProxyForwarder
 {
     use HttpClientTrait;
 
     /**
-     * @return Response
+     * @return ResponseInterface
      * @throws GuzzleException
      */
-    protected function action(): Response
+    protected function action(): ResponseInterface
     {
         $response = $this->getHttpClient()->request(
             $this->getProxyMethod(),
@@ -28,15 +26,11 @@ trait Proxy
             $this->getProxyRequestOptions()
         );
 
-        return new StreamedResponse(function () use ($response) {
-            $body = $response->getBody();
-            if ($body->isSeekable()) {
-                $body->rewind();
-            }
-            while (!$body->eof()) {
-                echo $body->read(1024 * 8);
-            }
-        }, $response->getStatusCode(), Collection::make($response->getHeaders())->filter(fn($v, $k) => !$this->isIgnoreProxyHeader(strval($k)))->all());
+        foreach ($this->getIgnoreProxyHeaders() as $name) {
+            $response = $response->withoutHeader($name);
+        }
+
+        return $response;
     }
 
     /**
@@ -63,7 +57,7 @@ trait Proxy
             RequestOptions::QUERY => $this->getProxyQuery(),
             RequestOptions::HTTP_ERRORS => false,
             RequestOptions::ALLOW_REDIRECTS => false,
-            RequestOptions::STREAM => true,
+            RequestOptions::STREAM => $this->getProxyStream(),
         ];
     }
 
@@ -83,6 +77,11 @@ trait Proxy
         return $this->getRequest()->query->all();
     }
 
+    protected function getProxyStream(): bool
+    {
+        return false;
+    }
+
     /**
      * @return array
      */
@@ -99,12 +98,17 @@ trait Proxy
         return $headers;
     }
 
+    protected function getIgnoreProxyHeaders(): array
+    {
+        return ['host', 'content-length', 'transfer-encoding', 'connection'];
+    }
+
     /**
      * @param string $name
      * @return bool
      */
     protected function isIgnoreProxyHeader(string $name): bool
     {
-        return in_array(strtolower($name), ['host', 'content-length', 'transfer-encoding', 'connection']);
+        return in_array(strtoupper($name), $this->getIgnoreProxyHeaders());
     }
 }
