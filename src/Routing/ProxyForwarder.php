@@ -56,6 +56,7 @@ trait ProxyForwarder
             RequestOptions::BODY => $this->getProxyBody(),
             RequestOptions::QUERY => $this->getProxyQuery(),
             RequestOptions::HTTP_ERRORS => false,
+            RequestOptions::VERIFY => false,
             RequestOptions::ALLOW_REDIRECTS => false,
             RequestOptions::STREAM => $this->getProxyStream(),
         ];
@@ -109,6 +110,6 @@ trait ProxyForwarder
      */
     protected function isIgnoreProxyHeader(string $name): bool
     {
-        return in_array(strtoupper($name), $this->getIgnoreProxyHeaders());
+        return in_array(strtolower($name), $this->getIgnoreProxyHeaders());
     }
 }
