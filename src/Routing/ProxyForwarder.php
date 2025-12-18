@@ -52,14 +52,14 @@ trait ProxyForwarder
     protected function getProxyRequestOptions(): array
     {
         return [
-            RequestOptions::VERIFY => false,
-            RequestOptions::HTTP_ERRORS => false,
-            RequestOptions::ALLOW_REDIRECTS => false,
             RequestOptions::BODY => $this->getProxyBody(),
             RequestOptions::QUERY => $this->getProxyQuery(),
             RequestOptions::PROXY => $this->getProxyProxy(),
             RequestOptions::STREAM => $this->getProxyStream(),
+            RequestOptions::VERIFY => $this->getProxyVerify(),
             RequestOptions::HEADERS => $this->getProxyHeaders(),
+            RequestOptions::HTTP_ERRORS => $this->getProxyHttpErrors(),
+            RequestOptions::ALLOW_REDIRECTS => $this->getProxyAllowRedirects(),
         ];
     }
 
@@ -71,9 +71,27 @@ trait ProxyForwarder
         return $this->getRequest()->getContent();
     }
 
-    protected function getProxyProxy()
+    protected function getProxyProxy(): ?string
     {
         return null;
+    }
+
+    protected function getProxyHttpErrors(): bool
+    {
+        return true;
+    }
+
+    protected function getProxyVerify(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getProxyAllowRedirects()
+    {
+        return false;
     }
 
     /**
