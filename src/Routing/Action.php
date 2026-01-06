@@ -207,7 +207,7 @@ trait Action
         ], $statusCode);
     }
 
-    protected function asFailure(string $code, string $message = null, array $data = [], int $statusCode = 200): Response
+    protected function asFailure(string $code, ?string $message = null, array $data = [], int $statusCode = 200): Response
     {
         return new KJsonResponse([
             'Code'    => $code ?: 'Failure',

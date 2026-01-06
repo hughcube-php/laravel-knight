@@ -156,4 +156,34 @@ class ActionTest extends TestCase
         ]));
         $this->assertSame(1, $count);
     }
+
+    public function testAsSuccess()
+    {
+        $action = new Action();
+        $data = ['key' => 'value'];
+
+        $response = $this->callMethod($action, 'asSuccess', [$data]);
+
+        $this->assertInstanceOf(\HughCube\Laravel\Knight\Http\JsonResponse::class, $response);
+        $content = $response->getData(true);
+        $this->assertSame('Success', $content['Code']);
+        $this->assertSame('Success', $content['Message']);
+        $this->assertSame($data, $content['Data']);
+    }
+
+    public function testAsFailure()
+    {
+        $action = new Action();
+        $data = ['error' => 'details'];
+        $code = 'Error code';
+        $message = 'Error message';
+
+        $response = $this->callMethod($action, 'asFailure', [$code, $message, $data]);
+
+        $this->assertInstanceOf(\HughCube\Laravel\Knight\Http\JsonResponse::class, $response);
+        $content = $response->getData(true);
+        $this->assertSame($code, $content['Code']);
+        $this->assertSame($message, $content['Message']);
+        $this->assertSame($data, $content['Data']);
+    }
 }
