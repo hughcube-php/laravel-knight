@@ -18,4 +18,14 @@ namespace HughCube\Laravel\Knight\Routing;
 trait SimpleListQuery
 {
     use ListQuery;
+
+    /**
+     * @param mixed $results
+     *
+     * @return mixed
+     */
+    protected function createResponse($results)
+    {
+        return $this->asResponse($results);
+    }
 }
