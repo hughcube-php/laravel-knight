@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use stdClass;
 use Symfony\Component\HttpFoundation\Response;
+use HughCube\Laravel\Knight\Http\JsonResponse as KJsonResponse;
 
 trait Action
 {
@@ -199,10 +200,19 @@ trait Action
 
     protected function asSuccess(array $data = [], int $statusCode = 200): Response
     {
-        return new JsonResponse([
-            'Code' => 'Success',
+        return new KJsonResponse([
+            'Code'    => 'Success',
             'Message' => 'Success',
-            'Data' => $data ?: new stdClass()
+            'Data'    => $data ?: new stdClass()
+        ], $statusCode);
+    }
+
+    protected function asFailure(string $code, string $message = null, array $data = [], int $statusCode = 200): Response
+    {
+        return new KJsonResponse([
+            'Code'    => $code ?: 'Failure',
+            'Message' => $message ?: 'Failure',
+            'Data'    => $data ?: new stdClass()
         ], $statusCode);
     }
 
