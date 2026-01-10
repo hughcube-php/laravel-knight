@@ -16,7 +16,7 @@ class Type
         return null === $value ? null : (int) $value;
     }
 
-    public static function string($value): ?int
+    public static function string($value): ?string
     {
         /** @phpstan-ignore-next-line */
         return null === $value ? null : (string) $value;

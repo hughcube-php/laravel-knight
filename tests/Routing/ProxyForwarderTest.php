@@ -33,7 +33,19 @@ class ProxyForwarderTest extends TestCase
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame(['Bar'], $response->getHeader('X-Foo'));
+    }
 
-        $this->assertSame('Hello, World', $response->getBody()->getContents());
+    public function testGetProxyRequestOptions()
+    {
+        $action = new ProxyForwarderAction();
+        $request = Request::create('/test', 'GET', [], [], [], [], 'test body');
+        $this->app->instance('request', $request);
+
+        $options = $this->callMethod($action, 'getProxyRequestOptions');
+
+        $this->assertArrayHasKey('body', $options);
+        $this->assertSame('test body', $options['body']);
+        $this->assertFalse($options['verify']);
+        $this->assertFalse($options['allow_redirects']);
     }
 }

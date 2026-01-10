@@ -31,6 +31,7 @@ class TestCase extends OrchestraTestCase
     {
         return [
             DatabaseServiceProvider::class,
+            \HughCube\Laravel\Validation\ServiceProvider::class,
             ServiceProvider::class,
         ];
     }
