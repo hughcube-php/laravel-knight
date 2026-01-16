@@ -30,7 +30,7 @@ class BuilderTest extends TestCase
         });
     }
 
-    public function testWhereLike()
+    public function testWhereLikeMatchesPattern()
     {
         $keyword = __FUNCTION__;
 
@@ -41,21 +41,61 @@ class BuilderTest extends TestCase
         /** @var User $user */
         $user = User::query()->whereLike('nickname', sprintf('%%%s%%', $keyword))->first();
         $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testWhereLikeDoesNotAutoAddWildcards()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s%s%%', Str::random(), $keyword, Str::random());
+        $user->save();
 
         /** @var User $user */
         $user = User::query()->whereLike('nickname', $keyword)->first();
         $this->assertNull($user);
+    }
+
+    public function testWhereEscapeLikeMatchesEscapedValue()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s%s%%', Str::random(), $keyword, Str::random());
+        $user->save();
 
         /** @var User $user */
         $user = User::query()->whereEscapeLike('nickname', $keyword)->first();
         $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testWhereRawLikeMatchesAny()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s%s%%', Str::random(), $keyword, Str::random());
+        $user->save();
 
         /** @var User $user */
         $user = User::query()->whereRaw("nickname LIKE '%%%'")->first();
         $this->assertInstanceOf(User::class, $user);
     }
 
-    public function testWhereLeftLike()
+    public function testWhereLeftLikeMatchesPrefix()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s', $keyword, Str::random());
+        $user->save();
+
+        /** @var User $user */
+        $user = User::query()->whereLeftLike('nickname', $keyword)->first();
+        $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testWhereEscapeLeftLikeMatchesEscapedPrefix()
     {
         $keyword = __FUNCTION__;
 
@@ -68,7 +108,20 @@ class BuilderTest extends TestCase
         $this->assertInstanceOf(User::class, $user);
     }
 
-    public function testWhereRightLike()
+    public function testWhereRightLikeMatchesSuffix()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s', Str::random(), $keyword);
+        $user->save();
+
+        /** @var User $user */
+        $user = User::query()->whereRightLike('nickname', $keyword)->first();
+        $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testWhereEscapeRightLikeMatchesEscapedSuffix()
     {
         $keyword = __FUNCTION__;
 
@@ -81,7 +134,7 @@ class BuilderTest extends TestCase
         $this->assertInstanceOf(User::class, $user);
     }
 
-    public function testOrWhereLike()
+    public function testOrWhereLikeMatchesPattern()
     {
         $keyword = __FUNCTION__;
 
@@ -90,11 +143,46 @@ class BuilderTest extends TestCase
         $user->save();
 
         /** @var User $user */
-        $user = User::query()->orWhereEscapeLike('nickname', $keyword)->first();
+        $user = User::query()
+            ->where('id', 0)
+            ->orWhereLike('nickname', sprintf('%%%s%%', $keyword))
+            ->first();
         $this->assertInstanceOf(User::class, $user);
     }
 
-    public function testOrWhereLeftLike()
+    public function testOrWhereLikeDoesNotAutoAddWildcards()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s%s', Str::random(), $keyword, Str::random());
+        $user->save();
+
+        /** @var User $user */
+        $user = User::query()
+            ->where('id', 0)
+            ->orWhereLike('nickname', $keyword)
+            ->first();
+        $this->assertNull($user);
+    }
+
+    public function testOrWhereEscapeLikeMatchesEscapedValue()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s%s', Str::random(), $keyword, Str::random());
+        $user->save();
+
+        /** @var User $user */
+        $user = User::query()
+            ->where('id', 0)
+            ->orWhereEscapeLike('nickname', $keyword)
+            ->first();
+        $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testOrWhereLeftLikeMatchesPrefix()
     {
         $keyword = __FUNCTION__;
 
@@ -103,11 +191,30 @@ class BuilderTest extends TestCase
         $user->save();
 
         /** @var User $user */
-        $user = User::query()->orWhereEscapeLeftLike('nickname', $keyword)->first();
+        $user = User::query()
+            ->where('id', 0)
+            ->orWhereLeftLike('nickname', $keyword)
+            ->first();
         $this->assertInstanceOf(User::class, $user);
     }
 
-    public function testOrWhereRightLike()
+    public function testOrWhereEscapeLeftLikeMatchesEscapedPrefix()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s', $keyword, Str::random());
+        $user->save();
+
+        /** @var User $user */
+        $user = User::query()
+            ->where('id', 0)
+            ->orWhereEscapeLeftLike('nickname', $keyword)
+            ->first();
+        $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testOrWhereRightLikeMatchesSuffix()
     {
         $keyword = __FUNCTION__;
 
@@ -116,7 +223,26 @@ class BuilderTest extends TestCase
         $user->save();
 
         /** @var User $user */
-        $user = User::query()->orWhereEscapeRightLike('nickname', $keyword)->first();
+        $user = User::query()
+            ->where('id', 0)
+            ->orWhereRightLike('nickname', $keyword)
+            ->first();
+        $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testOrWhereEscapeRightLikeMatchesEscapedSuffix()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s', Str::random(), $keyword);
+        $user->save();
+
+        /** @var User $user */
+        $user = User::query()
+            ->where('id', 0)
+            ->orWhereEscapeRightLike('nickname', $keyword)
+            ->first();
         $this->assertInstanceOf(User::class, $user);
     }
 
