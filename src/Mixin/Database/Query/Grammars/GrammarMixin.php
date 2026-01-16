@@ -56,11 +56,13 @@ class GrammarMixin
     {
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
-            /** @phpstan-ignore-next-line */
+
             $column = $this->wrap($where['column']);
+
             /** @phpstan-ignore-next-line */
             $arrayExpr = $this->compilePgArrayExpression($where['value'], $where['arrayType'] ?? null);
 
+            /** @phpstan-ignore-next-line */
             return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
         };
     }
@@ -86,11 +88,13 @@ class GrammarMixin
     {
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
-            /** @phpstan-ignore-next-line */
+
             $column = $this->wrap($where['column']);
+
             /** @phpstan-ignore-next-line */
             $arrayExpr = $this->compilePgArrayExpression($where['value'], $where['arrayType'] ?? null);
 
+            /** @phpstan-ignore-next-line */
             return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
         };
     }
@@ -116,11 +120,13 @@ class GrammarMixin
     {
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
-            /** @phpstan-ignore-next-line */
+
             $column = $this->wrap($where['column']);
+
             /** @phpstan-ignore-next-line */
             $arrayExpr = $this->compilePgArrayExpression($where['value'], $where['arrayType'] ?? null);
 
+            /** @phpstan-ignore-next-line */
             return $not . '(' . $column . ' && ' . $arrayExpr . ')';
         };
     }

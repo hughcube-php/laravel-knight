@@ -3,8 +3,6 @@
 namespace HughCube\Laravel\Knight\Tests\ServiceProvider;
 
 use Closure;
-use HughCube\Laravel\Knight\Database\Query\Grammars\PostgresGrammar as KnightPostgresGrammar;
-use HughCube\Laravel\Knight\ServiceProvider;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Database\Connection;
 use Illuminate\Database\MySqlConnection;
@@ -32,6 +30,8 @@ class PostgresJsonOverlapsGrammarTest extends TestCase
 
     private function makeMySqlConnection(): MySqlConnection
     {
+        $this->assertTrue(true);
+
         return new MySqlConnection($this->makePdoResolver(), '', '', ['driver' => 'mysql']);
     }
 
