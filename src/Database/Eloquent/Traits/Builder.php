@@ -134,11 +134,11 @@ trait Builder
      *
      * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
-     * @throws
-     *
      * @return KnightCollection
      *
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function findUniqueRows($ids): KnightCollection
     {
@@ -201,7 +201,7 @@ trait Builder
                 }
 
                 /** 联合唯一健, 但是只有一个In操作的 */
-                if (1 === $condition->filter(fn ($v) => is_array($v) && 1 < count($v))->count()) {
+                if (1 === $condition->filter(fn($v) => is_array($v) && 1 < count($v))->count()) {
                     foreach ($condition as $name => $values) {
                         if (is_array($values)) {
                             $query->whereIn($name, array_values(array_unique($values)));
@@ -259,10 +259,10 @@ trait Builder
     }
 
     /**
-     * @param bool|int     $when
+     * @param bool|int $when
      * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param string|int $key
+     * @param callable $callable
      *
      * @return $this
      */
@@ -279,8 +279,8 @@ trait Builder
 
     /**
      * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param string|int $key
+     * @param callable $callable
      *
      * @return $this
      *
@@ -293,8 +293,8 @@ trait Builder
 
     /**
      * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param string|int $key
+     * @param callable $callable
      *
      * @return $this
      *
@@ -307,8 +307,8 @@ trait Builder
 
     /**
      * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param string|int $key
+     * @param callable $callable
      *
      * @return $this
      *
@@ -321,8 +321,8 @@ trait Builder
 
     /**
      * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param string|int $key
+     * @param callable $callable
      *
      * @return $this
      *
@@ -335,8 +335,8 @@ trait Builder
 
     /**
      * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param string|int $key
+     * @param callable $callable
      *
      * @return $this
      *
@@ -349,8 +349,8 @@ trait Builder
 
     /**
      * @param ParameterBag $bag
-     * @param string|int   $key
-     * @param callable     $callable
+     * @param string|int $key
+     * @param callable $callable
      *
      * @return $this
      *
@@ -390,124 +390,197 @@ trait Builder
     }
 
     /**
-     * 模糊查询：匹配包含指定值的记录 (前后模糊).
+     * 模糊查询：使用 LIKE 模式匹配.
+     *
+     * 注意:
+     *   - $value 是完整的 LIKE pattern, 不会自动添加通配符
+     *   - 如需自动转义通配符请使用 whereEscapeLike*
      *
      * 示例:
-     *   $query->whereLike('name', 'test');
-     *   // 生成: WHERE name LIKE '%test%'
-     *
-     * 安全说明:
-     *   - 自动转义用户输入中的 LIKE 通配符 (%, _, \)
-     *   - 使用 Laravel 参数绑定防止 SQL 注入
+     *   $query->whereLike('name', '%test%');
      *
      * @param string $column 列名
-     * @param string $value  搜索值（会自动转义特殊字符）
+     * @param string $value LIKE 模式
      *
      * @return static
      */
-    public function whereLike(string $column, string $value)
+    public function whereLike(string $column, string $value, bool $caseSensitive = false, string $boolean = 'and', bool $not = false)
     {
-        return $this->where($column, 'LIKE', sprintf('%%%s%%', $this->escapeLikeValue($value)));
+        $query = $this->getQuery();
+
+        // Prefer native/macro whereLike on the underlying Query Builder to match Laravel's semantics when available.
+        if (method_exists($query, 'whereLike') || (method_exists($query, 'hasMacro') && $query->hasMacro('whereLike'))) {
+            /** @phpstan-ignore-next-line */
+            $query->whereLike($column, $value, $caseSensitive, $boolean, $not);
+
+            return $this;
+        }
+
+        $operator = $not ? 'NOT LIKE' : 'LIKE';
+
+        return $this->where($column, $operator, $value, $boolean);
     }
 
     /**
-     * 左模糊查询：匹配以指定值开头的记录.
+     * 左模糊查询：匹配以指定模式开头的记录.
+     *
+     * 注意: 不会转义通配符，如需转义请使用 whereEscapeLeftLike.
      *
      * 示例:
      *   $query->whereLeftLike('name', 'test');
      *   // 生成: WHERE name LIKE 'test%'
      *
-     * 安全说明:
-     *   - 自动转义用户输入中的 LIKE 通配符 (%, _, \)
-     *   - 使用 Laravel 参数绑定防止 SQL 注入
-     *
      * @param string $column 列名
-     * @param string $value  搜索值（会自动转义特殊字符）
+     * @param string $value 模式值
      *
      * @return static
      */
-    public function whereLeftLike(string $column, string $value)
+    public function whereLeftLike(string $column, string $value, bool $caseSensitive = false, string $boolean = 'and', bool $not = false)
     {
-        return $this->where($column, 'LIKE', sprintf('%s%%', $this->escapeLikeValue($value)));
+        return $this->whereLike($column, sprintf('%s%%', $value), $caseSensitive, $boolean, $not);
     }
 
     /**
-     * 右模糊查询：匹配以指定值结尾的记录.
+     * 右模糊查询：匹配以指定模式结尾的记录.
+     *
+     * 注意: 不会转义通配符，如需转义请使用 whereEscapeRightLike.
      *
      * 示例:
      *   $query->whereRightLike('name', 'test');
      *   // 生成: WHERE name LIKE '%test'
      *
-     * 安全说明:
-     *   - 自动转义用户输入中的 LIKE 通配符 (%, _, \)
-     *   - 使用 Laravel 参数绑定防止 SQL 注入
-     *
      * @param string $column 列名
-     * @param string $value  搜索值（会自动转义特殊字符）
+     * @param string $value 模式值
      *
      * @return static
      */
-    public function whereRightLike(string $column, string $value)
+    public function whereRightLike(string $column, string $value, bool $caseSensitive = false, string $boolean = 'and', bool $not = false)
     {
-        return $this->where($column, 'LIKE', sprintf('%%%s', $this->escapeLikeValue($value)));
+        return $this->whereLike($column, sprintf('%%%s', $value), $caseSensitive, $boolean, $not);
     }
 
     /**
-     * OR 模糊查询：匹配包含指定值的记录 (前后模糊).
-     *
-     * 示例:
-     *   $query->where('status', 1)->orWhereLike('name', 'test');
-     *   // 生成: WHERE status = 1 OR name LIKE '%test%'
+     * OR 模糊查询：使用 LIKE 模式匹配.
      *
      * @param string $column 列名
-     * @param string $value  搜索值（会自动转义特殊字符）
+     * @param string $value LIKE 模式
      *
      * @return static
      */
-    public function orWhereLike(string $column, string $value)
+    public function orWhereLike(string $column, string $value, bool $caseSensitive = false)
     {
-        return $this->orWhere($column, 'LIKE', sprintf('%%%s%%', $this->escapeLikeValue($value)));
+        return $this->whereLike($column, $value, $caseSensitive, 'or');
     }
 
     /**
-     * OR 左模糊查询：匹配以指定值开头的记录.
-     *
-     * 示例:
-     *   $query->where('status', 1)->orWhereLeftLike('name', 'test');
-     *   // 生成: WHERE status = 1 OR name LIKE 'test%'
+     * OR 左模糊查询：匹配以指定模式开头的记录.
      *
      * @param string $column 列名
-     * @param string $value  搜索值（会自动转义特殊字符）
+     * @param string $value 模式值
      *
      * @return static
      */
-    public function orWhereLeftLike(string $column, string $value)
+    public function orWhereLeftLike(string $column, string $value, bool $caseSensitive = false)
     {
-        return $this->orWhere($column, 'LIKE', sprintf('%s%%', $this->escapeLikeValue($value)));
+        return $this->whereLeftLike($column, $value, $caseSensitive, 'or');
     }
 
     /**
-     * OR 右模糊查询：匹配以指定值结尾的记录.
-     *
-     * 示例:
-     *   $query->where('status', 1)->orWhereRightLike('name', 'test');
-     *   // 生成: WHERE status = 1 OR name LIKE '%test'
+     * OR 右模糊查询：匹配以指定模式结尾的记录.
      *
      * @param string $column 列名
-     * @param string $value  搜索值（会自动转义特殊字符）
+     * @param string $value 模式值
      *
      * @return static
      */
-    public function orWhereRightLike(string $column, string $value)
+    public function orWhereRightLike(string $column, string $value, bool $caseSensitive = false)
     {
-        return $this->orWhere($column, 'LIKE', sprintf('%%%s', $this->escapeLikeValue($value)));
+        return $this->whereRightLike($column, $value, $caseSensitive, 'or');
     }
 
     /**
-     * @param string   $column
+     * 模糊查询：转义通配符并进行包含匹配.
+     *
+     * @param string $column 列名
+     * @param string $value 搜索值（会自动转义特殊字符）
+     *
+     * @return static
+     */
+    public function whereEscapeLike(string $column, string $value, bool $caseSensitive = false, string $boolean = 'and', bool $not = false)
+    {
+        return $this->whereLike($column, sprintf('%%%s%%', $this->escapeLikeValue($value)), $caseSensitive, $boolean, $not);
+    }
+
+    /**
+     * OR 模糊查询：转义通配符并进行包含匹配.
+     *
+     * @param string $column 列名
+     * @param string $value 搜索值（会自动转义特殊字符）
+     *
+     * @return static
+     */
+    public function orWhereEscapeLike(string $column, string $value, bool $caseSensitive = false)
+    {
+        return $this->whereEscapeLike($column, $value, $caseSensitive, 'or');
+    }
+
+    /**
+     * 左模糊查询：转义通配符并匹配以指定值开头的记录.
+     *
+     * @param string $column 列名
+     * @param string $value 搜索值（会自动转义特殊字符）
+     *
+     * @return static
+     */
+    public function whereEscapeLeftLike(string $column, string $value, bool $caseSensitive = false, string $boolean = 'and', bool $not = false)
+    {
+        return $this->whereLike($column, sprintf('%s%%', $this->escapeLikeValue($value)), $caseSensitive, $boolean, $not);
+    }
+
+    /**
+     * OR 左模糊查询：转义通配符并匹配以指定值开头的记录.
+     *
+     * @param string $column 列名
+     * @param string $value 搜索值（会自动转义特殊字符）
+     *
+     * @return static
+     */
+    public function orWhereEscapeLeftLike(string $column, string $value, bool $caseSensitive = false)
+    {
+        return $this->whereEscapeLeftLike($column, $value, $caseSensitive, 'or');
+    }
+
+    /**
+     * 右模糊查询：转义通配符并匹配以指定值结尾的记录.
+     *
+     * @param string $column 列名
+     * @param string $value 搜索值（会自动转义特殊字符）
+     *
+     * @return static
+     */
+    public function whereEscapeRightLike(string $column, string $value, bool $caseSensitive = false, string $boolean = 'and', bool $not = false)
+    {
+        return $this->whereLike($column, sprintf('%%%s', $this->escapeLikeValue($value)), $caseSensitive, $boolean, $not);
+    }
+
+    /**
+     * OR 右模糊查询：转义通配符并匹配以指定值结尾的记录.
+     *
+     * @param string $column 列名
+     * @param string $value 搜索值（会自动转义特殊字符）
+     *
+     * @return static
+     */
+    public function orWhereEscapeRightLike(string $column, string $value, bool $caseSensitive = false)
+    {
+        return $this->whereEscapeRightLike($column, $value, $caseSensitive, 'or');
+    }
+
+    /**
+     * @param string $column
      * @param iterable $values
-     * @param string   $boolean
-     * @param bool     $not
+     * @param string $boolean
+     * @param bool $not
      *
      * @return $this
      */
@@ -518,7 +591,7 @@ trait Builder
         }
 
         $values = Collection::make(
-            /** @phpstan-ignore-next-line */
+        /** @phpstan-ignore-next-line */
             $values instanceof CarbonPeriod ? [$values->start, $values->end] : $values
         )->values()->slice(0, 2)->toArray();
 
@@ -535,7 +608,7 @@ trait Builder
     }
 
     /**
-     * @param string   $column
+     * @param string $column
      * @param iterable $values
      *
      * @return $this
@@ -546,7 +619,7 @@ trait Builder
     }
 
     /**
-     * @param string   $column
+     * @param string $column
      * @param iterable $values
      *
      * @return $this
@@ -557,7 +630,7 @@ trait Builder
     }
 
     /**
-     * @param string   $column
+     * @param string $column
      * @param iterable $values
      *
      * @return $this

@@ -150,11 +150,14 @@ class Order extends Model
 }
 
 // Usage:
-// Find orders with 'keyword' in their name (case-insensitive like)
-$orders = Order::query()->whereLike('name', 'keyword')->get();
+// Find orders with LIKE pattern (no auto wildcards)
+$orders = Order::query()->whereLike('name', '%keyword%')->get();
 
-// Find orders with name starting with 'prefix'
-$orders = Order::query()->whereLeftLike('name', 'prefix')->get();
+// Find orders with escaped "contains" match
+$orders = Order::query()->whereEscapeLike('name', 'keyword')->get();
+
+// Find orders with escaped prefix match
+$orders = Order::query()->whereEscapeLeftLike('name', 'prefix')->get();
 
 // Find orders created within a date range
 $startDate = '2023-01-01';

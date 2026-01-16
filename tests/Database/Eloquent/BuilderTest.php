@@ -39,12 +39,16 @@ class BuilderTest extends TestCase
         $user->save();
 
         /** @var User $user */
-        $user = User::query()->whereLike('nickname', $keyword)->first();
+        $user = User::query()->whereLike('nickname', sprintf('%%%s%%', $keyword))->first();
         $this->assertInstanceOf(User::class, $user);
 
         /** @var User $user */
-        $user = User::query()->whereLike('nickname1', '%')->first();
+        $user = User::query()->whereLike('nickname', $keyword)->first();
         $this->assertNull($user);
+
+        /** @var User $user */
+        $user = User::query()->whereEscapeLike('nickname', $keyword)->first();
+        $this->assertInstanceOf(User::class, $user);
 
         /** @var User $user */
         $user = User::query()->whereRaw("nickname LIKE '%%%'")->first();
@@ -60,7 +64,7 @@ class BuilderTest extends TestCase
         $user->save();
 
         /** @var User $user */
-        $user = User::query()->whereLeftLike('nickname', $keyword)->first();
+        $user = User::query()->whereEscapeLeftLike('nickname', $keyword)->first();
         $this->assertInstanceOf(User::class, $user);
     }
 
@@ -73,7 +77,7 @@ class BuilderTest extends TestCase
         $user->save();
 
         /** @var User $user */
-        $user = User::query()->whereRightLike('nickname', $keyword)->first();
+        $user = User::query()->whereEscapeRightLike('nickname', $keyword)->first();
         $this->assertInstanceOf(User::class, $user);
     }
 
@@ -86,7 +90,7 @@ class BuilderTest extends TestCase
         $user->save();
 
         /** @var User $user */
-        $user = User::query()->orWhereLike('nickname', $keyword)->first();
+        $user = User::query()->orWhereEscapeLike('nickname', $keyword)->first();
         $this->assertInstanceOf(User::class, $user);
     }
 
@@ -99,7 +103,7 @@ class BuilderTest extends TestCase
         $user->save();
 
         /** @var User $user */
-        $user = User::query()->orWhereLeftLike('nickname', $keyword)->first();
+        $user = User::query()->orWhereEscapeLeftLike('nickname', $keyword)->first();
         $this->assertInstanceOf(User::class, $user);
     }
 
@@ -112,7 +116,7 @@ class BuilderTest extends TestCase
         $user->save();
 
         /** @var User $user */
-        $user = User::query()->orWhereRightLike('nickname', $keyword)->first();
+        $user = User::query()->orWhereEscapeRightLike('nickname', $keyword)->first();
         $this->assertInstanceOf(User::class, $user);
     }
 

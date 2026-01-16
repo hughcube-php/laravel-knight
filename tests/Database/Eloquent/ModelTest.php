@@ -607,21 +607,21 @@ class ModelTest extends TestCase
         $user->save();
 
         $keyword = substr(substr($user->nickname, 10), -10);
-        $queryUser = User::query()->whereLike('nickname', $keyword)->first();
+        $queryUser = User::query()->whereEscapeLike('nickname', $keyword)->first();
         $this->assertSame($user->id, $queryUser->id);
 
         $keyword = md5(random_bytes(1000)).$user->nickname;
-        $queryUser = User::query()->whereLike('nickname', $keyword)->first();
+        $queryUser = User::query()->whereEscapeLike('nickname', $keyword)->first();
         $this->assertNull($queryUser);
 
         $keyword = substr($user->nickname, 0, 10);
         $this->assertTrue(Str::startsWith($user->nickname, $keyword));
-        $queryUser = User::query()->whereLeftLike('nickname', $keyword)->first();
+        $queryUser = User::query()->whereEscapeLeftLike('nickname', $keyword)->first();
         $this->assertSame($user->id, $queryUser->id);
 
         $keyword = substr($user->nickname, -10);
         $this->assertTrue(Str::endsWith($user->nickname, $keyword));
-        $queryUser = User::query()->whereRightLike('nickname', $keyword)->first();
+        $queryUser = User::query()->whereEscapeRightLike('nickname', $keyword)->first();
         $this->assertSame($user->id, $queryUser->id);
     }
 
