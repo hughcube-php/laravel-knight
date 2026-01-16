@@ -10,6 +10,7 @@
 namespace HughCube\Laravel\Knight\Tests;
 
 use Exception;
+use HughCube\Laravel\Knight\Database\Query\Grammars\PostgresGrammar as KnightPostgresGrammar;
 use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\ServiceProvider;
 use Illuminate\Config\Repository;
@@ -22,6 +23,20 @@ use ReflectionMethod;
 
 class TestCase extends OrchestraTestCase
 {
+    protected static bool $postgresGrammarRegistered = false;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        if (!self::$postgresGrammarRegistered) {
+            KnightPostgresGrammar::registerConnectionResolver();
+            self::$postgresGrammarRegistered = true;
+        }
+
+        KnightPostgresGrammar::applyToExistingConnections();
+    }
+
     /**
      * @param Application $app
      *
