@@ -10,6 +10,7 @@
 namespace HughCube\Laravel\Knight\Tests\Console\Commands;
 
 use HughCube\Laravel\Knight\Tests\TestCase;
+use Symfony\Component\VarDumper\VarDumper;
 
 class ConfigTest extends TestCase
 {
@@ -18,6 +19,14 @@ class ConfigTest extends TestCase
      */
     public function testRun()
     {
-        $this->artisan('knight:config')->assertExitCode(0);
+        $previousHandler = VarDumper::setHandler(static function ($var, $label = null) {
+            // Silence VarDumper output for this test.
+        });
+
+        try {
+            $this->artisan('knight:config')->assertExitCode(0);
+        } finally {
+            VarDumper::setHandler($previousHandler);
+        }
     }
 }

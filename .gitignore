@@ -9,3 +9,6 @@ composer.lock
 .phpunit.result.cache
 composer
 /.phpunit.cache/
+/test_*.php
+/test_*.txt
+phpunit.xml

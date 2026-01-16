@@ -7,7 +7,20 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(./vendor/bin/phpunit:*)",
+      "Bash(composer test:*)",
+      "Bash(php vendor/bin/phpunit:*)",
+      "Bash(php vendor/bin/phpstan:*)",
+      "Bash(php -l:*)",
+      "Bash(composer phpstan:*)",
+      "Bash(composer check-style:*)",
+      "Bash(PGPASSWORD=\"Oom7ieph\" psql:*)",
+      "Bash(psql:*)",
+      "Bash(echo:*)",
+      "Bash(php:*)",
+      "Bash(/c/Users/hugh.li/AppData/Local/Php/bin/php vendor/bin/phpunit:*)",
+      "Bash(tee:*)"
     ],
     "deny": [],
     "ask": []

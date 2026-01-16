@@ -43,8 +43,8 @@ class BuilderTest extends TestCase
         $this->assertInstanceOf(User::class, $user);
 
         /** @var User $user */
-        $user = User::query()->whereLike('nickname', '%')->first();
-        $this->assertInstanceOf(User::class, $user);
+        $user = User::query()->whereLike('nickname1', '%')->first();
+        $this->assertNull($user);
 
         /** @var User $user */
         $user = User::query()->whereRaw("nickname LIKE '%%%'")->first();

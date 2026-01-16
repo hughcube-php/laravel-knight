@@ -259,94 +259,12 @@ trait Builder
     }
 
     /**
-     * @param mixed $value
-     *
-     * @return static
-     */
-    public function whereDeletedAtColumn($value = null)
-    {
-        if (null === $value) {
-            return $this->whereNull($this->getModel()->getDeletedAtColumn());
-        }
-
-        return $this->whereNull($this->getModel()->getDeletedAtColumn(), $value);
-    }
-
-    /**
-     * @param string $column
-     * @param string $value
-     *
-     * @return static
-     */
-    public function whereLike(string $column, string $value)
-    {
-        return $this->where($column, 'LIKE', sprintf('%%%s%%', $value));
-    }
-
-    /**
-     * @param string $column
-     * @param string $value
-     *
-     * @return static
-     */
-    public function whereLeftLike(string $column, string $value)
-    {
-        return $this->where($column, 'LIKE', sprintf('%s%%', $value));
-    }
-
-    /**
-     * @param string $column
-     * @param string $value
-     *
-     * @return static
-     */
-    public function whereRightLike(string $column, string $value)
-    {
-        return $this->where($column, 'LIKE', sprintf('%%%s', $value));
-    }
-
-    /**
-     * @param string $column
-     * @param string $value
-     *
-     * @return static
-     */
-    public function orWhereLike(string $column, string $value)
-    {
-        return $this->orWhere($column, 'LIKE', sprintf('%%%s%%', $value));
-    }
-
-    /**
-     * @param string $column
-     * @param string $value
-     *
-     * @return static
-     */
-    public function orWhereLeftLike(string $column, string $value)
-    {
-        return $this->orWhere($column, 'LIKE', sprintf('%s%%', $value));
-    }
-
-    /**
-     * @param string $column
-     * @param string $value
-     *
-     * @return static
-     */
-    public function orWhereRightLike(string $column, string $value)
-    {
-        return $this->orWhere($column, 'LIKE', sprintf('%%%s', $value));
-    }
-
-    /**
      * @param bool|int     $when
      * @param ParameterBag $bag
      * @param string|int   $key
      * @param callable     $callable
      *
      * @return $this
-     *
-     * @deprecated
      */
     public function whenParameterBag($when, ParameterBag $bag, $key, callable $callable)
     {
@@ -441,6 +359,148 @@ trait Builder
     public function whenParameterBagNotEmpty(ParameterBag $bag, $key, callable $callable)
     {
         return $this->whenParameterBag(!$bag->isEmpty($key), $bag, $key, $callable);
+    }
+
+    /**
+     * @param mixed $value
+     *
+     * @return static
+     */
+    public function whereDeletedAtColumn($value = null)
+    {
+        if (null === $value) {
+            return $this->whereNull($this->getModel()->getDeletedAtColumn());
+        }
+
+        return $this->where($this->getModel()->getDeletedAtColumn(), $value);
+    }
+
+    /**
+     * 转义 LIKE 查询中的特殊字符 (%, _, \).
+     *
+     * 防止用户输入的通配符影响查询结果，避免 LIKE 通配符注入攻击。
+     *
+     * @param string $value 需要转义的值
+     *
+     * @return string 转义后的值
+     */
+    protected function escapeLikeValue(string $value): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
+    }
+
+    /**
+     * 模糊查询：匹配包含指定值的记录 (前后模糊).
+     *
+     * 示例:
+     *   $query->whereLike('name', 'test');
+     *   // 生成: WHERE name LIKE '%test%'
+     *
+     * 安全说明:
+     *   - 自动转义用户输入中的 LIKE 通配符 (%, _, \)
+     *   - 使用 Laravel 参数绑定防止 SQL 注入
+     *
+     * @param string $column 列名
+     * @param string $value  搜索值（会自动转义特殊字符）
+     *
+     * @return static
+     */
+    public function whereLike(string $column, string $value)
+    {
+        return $this->where($column, 'LIKE', sprintf('%%%s%%', $this->escapeLikeValue($value)));
+    }
+
+    /**
+     * 左模糊查询：匹配以指定值开头的记录.
+     *
+     * 示例:
+     *   $query->whereLeftLike('name', 'test');
+     *   // 生成: WHERE name LIKE 'test%'
+     *
+     * 安全说明:
+     *   - 自动转义用户输入中的 LIKE 通配符 (%, _, \)
+     *   - 使用 Laravel 参数绑定防止 SQL 注入
+     *
+     * @param string $column 列名
+     * @param string $value  搜索值（会自动转义特殊字符）
+     *
+     * @return static
+     */
+    public function whereLeftLike(string $column, string $value)
+    {
+        return $this->where($column, 'LIKE', sprintf('%s%%', $this->escapeLikeValue($value)));
+    }
+
+    /**
+     * 右模糊查询：匹配以指定值结尾的记录.
+     *
+     * 示例:
+     *   $query->whereRightLike('name', 'test');
+     *   // 生成: WHERE name LIKE '%test'
+     *
+     * 安全说明:
+     *   - 自动转义用户输入中的 LIKE 通配符 (%, _, \)
+     *   - 使用 Laravel 参数绑定防止 SQL 注入
+     *
+     * @param string $column 列名
+     * @param string $value  搜索值（会自动转义特殊字符）
+     *
+     * @return static
+     */
+    public function whereRightLike(string $column, string $value)
+    {
+        return $this->where($column, 'LIKE', sprintf('%%%s', $this->escapeLikeValue($value)));
+    }
+
+    /**
+     * OR 模糊查询：匹配包含指定值的记录 (前后模糊).
+     *
+     * 示例:
+     *   $query->where('status', 1)->orWhereLike('name', 'test');
+     *   // 生成: WHERE status = 1 OR name LIKE '%test%'
+     *
+     * @param string $column 列名
+     * @param string $value  搜索值（会自动转义特殊字符）
+     *
+     * @return static
+     */
+    public function orWhereLike(string $column, string $value)
+    {
+        return $this->orWhere($column, 'LIKE', sprintf('%%%s%%', $this->escapeLikeValue($value)));
+    }
+
+    /**
+     * OR 左模糊查询：匹配以指定值开头的记录.
+     *
+     * 示例:
+     *   $query->where('status', 1)->orWhereLeftLike('name', 'test');
+     *   // 生成: WHERE status = 1 OR name LIKE 'test%'
+     *
+     * @param string $column 列名
+     * @param string $value  搜索值（会自动转义特殊字符）
+     *
+     * @return static
+     */
+    public function orWhereLeftLike(string $column, string $value)
+    {
+        return $this->orWhere($column, 'LIKE', sprintf('%s%%', $this->escapeLikeValue($value)));
+    }
+
+    /**
+     * OR 右模糊查询：匹配以指定值结尾的记录.
+     *
+     * 示例:
+     *   $query->where('status', 1)->orWhereRightLike('name', 'test');
+     *   // 生成: WHERE status = 1 OR name LIKE '%test'
+     *
+     * @param string $column 列名
+     * @param string $value  搜索值（会自动转义特殊字符）
+     *
+     * @return static
+     */
+    public function orWhereRightLike(string $column, string $value)
+    {
+        return $this->orWhere($column, 'LIKE', sprintf('%%%s', $this->escapeLikeValue($value)));
     }
 
     /**
