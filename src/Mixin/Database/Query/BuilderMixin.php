@@ -35,7 +35,7 @@ class BuilderMixin
      * 添加 JSON_OVERLAPS 查询条件.
      *
      * 检查 JSON 数组字段是否与给定的数组有重叠元素（交集）。
-     * 需要 MySQL 8.0.17+ 版本支持。
+     * MySQL 8.0.17+ or PostgreSQL (jsonb emulation).
      *
      * 示例:
      *   // 基本用法 - 查找标签包含 php 或 laravel 的记录
@@ -44,7 +44,7 @@ class BuilderMixin
      *
      *   // 支持 JSON 路径语法
      *   $query->whereJsonOverlaps('data->settings->tags', ['option1', 'option2']);
-     *   // SQL: WHERE JSON_OVERLAPS(`data`->'$.settings.tags', '["option1","option2"]')
+     *   // SQL: WHERE JSON_OVERLAPS(JSON_EXTRACT(`data`, '$.settings.tags'), '["option1","option2"]')
      *
      * @return Closure(string $column, mixed $value, string $boolean = 'and', bool $not = false): static
      */
@@ -84,6 +84,32 @@ class BuilderMixin
     }
 
     /**
+     * Add a "where JSON not overlap" clause to the query.
+     *
+     * @return Closure(string $column, mixed $value, string $boolean = 'and'): static
+     */
+    public function whereJsonDoesntOverlap(): Closure
+    {
+        return function ($column, $value, $boolean = 'and') {
+            /** @phpstan-ignore-next-line */
+            return $this->whereJsonOverlaps($column, $value, $boolean, true);
+        };
+    }
+
+    /**
+     * Add an "or where JSON not overlap" clause to the query.
+     *
+     * @return Closure(string $column, mixed $value): static
+     */
+    public function orWhereJsonDoesntOverlap(): Closure
+    {
+        return function ($column, $value) {
+            /** @phpstan-ignore-next-line */
+            return $this->whereJsonDoesntOverlap($column, $value, 'or');
+        };
+    }
+
+    /**
      * 添加 NOT JSON_OVERLAPS 查询条件.
      *
      * 检查 JSON 数组字段与给定数组没有重叠元素。
@@ -98,7 +124,7 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and') {
             /** @phpstan-ignore-next-line */
-            return $this->whereJsonOverlaps($column, $value, $boolean, true);
+            return $this->whereJsonDoesntOverlap($column, $value, $boolean);
         };
     }
 
@@ -116,7 +142,7 @@ class BuilderMixin
     {
         return function ($column, $value) {
             /** @phpstan-ignore-next-line */
-            return $this->whereJsonOverlaps($column, $value, 'or', true);
+            return $this->orWhereJsonDoesntOverlap($column, $value);
         };
     }
 

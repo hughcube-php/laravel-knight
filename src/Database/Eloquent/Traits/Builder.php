@@ -426,6 +426,8 @@ trait Builder
      *
      * 注意: 不会转义通配符，如需转义请使用 whereEscapeLeftLike.
      *
+     * @deprecated 使用 whereEscapeLeftLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
+     *
      * 示例:
      *   $query->whereLeftLike('name', 'test');
      *   // 生成: WHERE name LIKE 'test%'
@@ -444,6 +446,8 @@ trait Builder
      * 右模糊查询：匹配以指定模式结尾的记录.
      *
      * 注意: 不会转义通配符，如需转义请使用 whereEscapeRightLike.
+     *
+     * @deprecated 使用 whereEscapeRightLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
      *
      * 示例:
      *   $query->whereRightLike('name', 'test');
@@ -465,6 +469,8 @@ trait Builder
      * @param string $column 列名
      * @param string $value LIKE 模式
      *
+     * @deprecated 使用 orWhereEscapeLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
+     *
      * @return static
      */
     public function orWhereLike(string $column, string $value, bool $caseSensitive = false)
@@ -478,6 +484,8 @@ trait Builder
      * @param string $column 列名
      * @param string $value 模式值
      *
+     * @deprecated 使用 orWhereEscapeLeftLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
+     *
      * @return static
      */
     public function orWhereLeftLike(string $column, string $value, bool $caseSensitive = false)
@@ -490,6 +498,8 @@ trait Builder
      *
      * @param string $column 列名
      * @param string $value 模式值
+     *
+     * @deprecated 使用 orWhereEscapeRightLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
      *
      * @return static
      */

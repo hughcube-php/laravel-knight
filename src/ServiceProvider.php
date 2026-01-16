@@ -17,6 +17,7 @@ use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\KRTest;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
+use HughCube\Laravel\Knight\Database\Query\Grammars\PostgresGrammar as KnightPostgresGrammar;
 use HughCube\Laravel\Knight\Http\Actions\DevopsSystemAction;
 use HughCube\Laravel\Knight\Http\Actions\PhpInfoAction;
 use HughCube\Laravel\Knight\Http\Actions\PingAction;
@@ -35,8 +36,10 @@ use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand as OPcacheCompi
 use HughCube\Laravel\Knight\OPcache\Commands\CreatePreloadCommand as OPcacheCreatePreloadCommand;
 use Illuminate\Config\Repository;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
+use Illuminate\Database\PostgresConnection;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Grammars\Grammar;
 use Illuminate\Foundation\Application as LaravelApplication;
@@ -67,6 +70,7 @@ class ServiceProvider extends IlluminateServiceProvider
         Grammar::mixin(new GrammarMixin(), false);
         Builder::mixin(new BuilderMixin(), false);
         EloquentCollection::mixin(new EloquentCollectionMixin(), false);
+        $this->registerPostgresJsonOverlapsGrammar();
 
         /** Carbon */
         Carbon::mixin(new CarbonMixin());
@@ -92,6 +96,8 @@ class ServiceProvider extends IlluminateServiceProvider
         $this->bootRequest();
         $this->bootPhpInfo();
         $this->bootHealthCheck();
+
+        $this->applyPostgresJsonOverlapsGrammar();
 
         $this->configureAuthUserProvider();
 
@@ -224,5 +230,58 @@ class ServiceProvider extends IlluminateServiceProvider
                 return new ModelUserProvider($config['model']);
             });
         });
+    }
+
+    protected function registerPostgresJsonOverlapsGrammar(): void
+    {
+        if (!class_exists(PostgresConnection::class) || !class_exists(KnightPostgresGrammar::class)) {
+            return;
+        }
+
+        if (!method_exists(Connection::class, 'resolverFor')) {
+            return;
+        }
+
+        $existingResolver = method_exists(Connection::class, 'getResolver')
+            ? Connection::getResolver('pgsql')
+            : null;
+
+        Connection::resolverFor('pgsql', function ($connection, $database, $prefix, $config) use ($existingResolver) {
+            $resolvedConnection = $existingResolver
+                ? $existingResolver($connection, $database, $prefix, $config)
+                : new PostgresConnection($connection, $database, $prefix, $config);
+
+            if (method_exists($resolvedConnection, 'setQueryGrammar')) {
+                $resolvedConnection->setQueryGrammar(new KnightPostgresGrammar($resolvedConnection));
+            }
+
+            return $resolvedConnection;
+        });
+    }
+
+    protected function applyPostgresJsonOverlapsGrammar(): void
+    {
+        if (!class_exists(KnightPostgresGrammar::class)) {
+            return;
+        }
+
+        if (!$this->app->resolved('db')) {
+            return;
+        }
+
+        $db = $this->app->make('db');
+        if (!method_exists($db, 'getConnections')) {
+            return;
+        }
+
+        foreach ($db->getConnections() as $connection) {
+            if (
+                method_exists($connection, 'getDriverName')
+                && $connection->getDriverName() === 'pgsql'
+                && method_exists($connection, 'setQueryGrammar')
+            ) {
+                $connection->setQueryGrammar(new KnightPostgresGrammar($connection));
+            }
+        }
     }
 }

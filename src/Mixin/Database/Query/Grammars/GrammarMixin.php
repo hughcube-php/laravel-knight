@@ -12,6 +12,7 @@ namespace HughCube\Laravel\Knight\Mixin\Database\Query\Grammars;
 use Closure;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Grammars\Grammar;
+use RuntimeException;
 
 /**
  * Laravel SQL Grammar 的扩展 Mixin.
@@ -27,7 +28,7 @@ use Illuminate\Database\Query\Grammars\Grammar;
  *   - 遵循 Laravel 的标准 Grammar 编译模式
  *
  * @mixin Grammar
- *
+ * @property-read Grammar $connection
  * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin 对应的 Builder 扩展
  */
 class GrammarMixin
@@ -37,7 +38,7 @@ class GrammarMixin
      *
      * 此方法由 Laravel 的查询编译器自动调用，将 where 条件数组编译为 SQL。
      * 方法名必须为 "where{Type}"，其中 Type 对应 Builder 中设置的 type 值。
-     * 需要 MySQL 8.0.17+ 版本支持。
+     * MySQL 8.0.17+ or PostgreSQL (jsonb emulation).
      *
      * JSON_OVERLAPS() 函数用于检查两个 JSON 数组是否有重叠元素（交集）。
      *
@@ -46,7 +47,7 @@ class GrammarMixin
      *     => json_overlaps(`tags`, ?)
      *
      *   - whereJsonOverlaps('data->tags', ['a'], 'and', true)
-     *     => not json_overlaps(`data`->'$.tags', ?)
+     *     => not json_overlaps(json_extract(`data`, '$.tags'), ?)
      *
      * @return Closure(Builder $query, array $where): string
      *
@@ -58,7 +59,7 @@ class GrammarMixin
             $not = $where['not'] ? 'not ' : '';
 
             /** @phpstan-ignore-next-line */
-            return $not.$this->compileJsonOverlaps($where['column'], $this->parameter($where['value']));
+            return $not . $this->compileJsonOverlaps($where['column'], $this->parameter($where['value']));
         };
     }
 
@@ -69,18 +70,49 @@ class GrammarMixin
      *
      * JSON 路径处理:
      *   - 'column'           => json_overlaps(`column`, ?)
-     *   - 'column->key'      => json_overlaps(`column`->'$.key', ?)
-     *   - 'column->a->b'     => json_overlaps(`column`->'$.a.b', ?)
+     *   - 'column->key'      => json_overlaps(json_extract(`column`, '$.key'), ?)
+     *   - 'column->a->b'     => json_overlaps(json_extract(`column`, '$.a.b'), ?)
      *
      * @return Closure(string $column, string $value): string
      */
     public function compileJsonOverlaps(): Closure
     {
         return function ($column, $value) {
-            /** @phpstan-ignore-next-line */
-            [$field, $path] = $this->wrapJsonFieldAndPath($column);
+            $driver = null;
+            if (isset($this->connection) && method_exists($this->connection, 'getDriverName')) {
+                $driver = $this->connection->getDriverName();
+            }
 
-            return 'json_overlaps('.$field.$path.', '.$value.')';
+            if ($driver === 'pgsql') {
+                $column = str_replace('->>', '->', $this->wrap($column));
+                $lhs = '(' . $column . ')::jsonb';
+                $rhs = $value . '::jsonb';
+                $alias = 'json_overlaps_values';
+
+                return 'exists (select 1 from (select ' . $rhs . ' as v, ' . $lhs . ' as lhs) as ' . $alias . ' where case'
+                    . " when jsonb_typeof({$alias}.lhs) = 'object' and jsonb_typeof({$alias}.v) = 'object' then "
+                    . 'exists (select 1 from jsonb_each(' . $alias . '.lhs) l join jsonb_each(' . $alias . '.v) r on l.key = r.key and l.value = r.value)'
+                    . " when jsonb_typeof({$alias}.lhs) = 'array' and jsonb_typeof({$alias}.v) = 'array' then "
+                    . 'exists (select 1 from jsonb_array_elements(' . $alias . '.lhs) l join jsonb_array_elements(' . $alias . '.v) r on l = r)'
+                    . " when jsonb_typeof({$alias}.lhs) = 'array' then "
+                    . 'exists (select 1 from jsonb_array_elements(' . $alias . '.lhs) l where l = ' . $alias . '.v)'
+                    . " when jsonb_typeof({$alias}.v) = 'array' then "
+                    . 'exists (select 1 from jsonb_array_elements(' . $alias . '.v) r where r = ' . $alias . '.lhs)'
+                    . ' else ' . $alias . '.lhs = ' . $alias . '.v end)';
+            }
+
+            if ($driver === 'mysql' || $driver === 'mariadb') {
+                /** @phpstan-ignore-next-line */
+                [$field, $path] = $this->wrapJsonFieldAndPath($column);
+
+                if ($path !== '') {
+                    $field = 'json_extract(' . $field . $path . ')';
+                }
+
+                return 'json_overlaps(' . $field . ', ' . $value . ')';
+            }
+
+            throw new RuntimeException('This database engine does not support JSON overlaps operations.');
         };
     }
 
@@ -113,7 +145,7 @@ class GrammarMixin
             /** @phpstan-ignore-next-line */
             $arrayExpr = $this->compilePgArrayExpression($where['value'], $where['arrayType'] ?? null);
 
-            return $not.'('.$column.' @> '.$arrayExpr.')';
+            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
         };
     }
 
@@ -143,7 +175,7 @@ class GrammarMixin
             /** @phpstan-ignore-next-line */
             $arrayExpr = $this->compilePgArrayExpression($where['value'], $where['arrayType'] ?? null);
 
-            return $not.'('.$column.' <@ '.$arrayExpr.')';
+            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
         };
     }
 
@@ -173,7 +205,7 @@ class GrammarMixin
             /** @phpstan-ignore-next-line */
             $arrayExpr = $this->compilePgArrayExpression($where['value'], $where['arrayType'] ?? null);
 
-            return $not.'('.$column.' && '.$arrayExpr.')';
+            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
         };
     }
 
@@ -196,7 +228,7 @@ class GrammarMixin
             if ($count === 0) {
                 $type = $arrayType ?? 'text';
 
-                return 'ARRAY[]::'.$type.'[]';
+                return 'ARRAY[]::' . $type . '[]';
             }
 
             $placeholders = implode(', ', array_fill(0, $count, '?'));
@@ -214,7 +246,7 @@ class GrammarMixin
                 }
             }
 
-            return 'ARRAY['.$placeholders.']::'.$arrayType.'[]';
+            return 'ARRAY[' . $placeholders . ']::' . $arrayType . '[]';
         };
     }
 }
