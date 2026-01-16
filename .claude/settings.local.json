@@ -20,7 +20,9 @@
       "Bash(echo:*)",
       "Bash(php:*)",
       "Bash(/c/Users/hugh.li/AppData/Local/Php/bin/php vendor/bin/phpunit:*)",
-      "Bash(tee:*)"
+      "Bash(tee:*)",
+      "Bash(./vendor/bin/phpstan analyse:*)",
+      "Bash(vendor/bin/phpunit:*)"
     ],
     "deny": [],
     "ask": []

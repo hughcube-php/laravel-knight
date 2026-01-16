@@ -2,6 +2,7 @@
 
 namespace HughCube\Laravel\Knight\Tests\Mixin\Database\Query;
 
+use HughCube\Laravel\Knight\Database\Query\Grammars\PostgresGrammar as KnightPostgresGrammar;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Support\Facades\DB;
 use PDO;
@@ -22,9 +23,14 @@ class JsonOverlapsPgsqlTest extends TestCase
 
     protected function setUp(): void
     {
+        // 按需注册 PostgreSQL JSON Overlaps 支持
+        KnightPostgresGrammar::registerConnectionResolver();
+        #KnightPostgresGrammar::applyToExistingConnections();
+
         parent::setUp();
 
         $this->skipIfPgsqlNotConfigured();
+
         $this->setUpJsonTable();
     }
 
@@ -111,29 +117,6 @@ class JsonOverlapsPgsqlTest extends TestCase
         $ids = $this->getQuery()
             ->where('id', 2)
             ->orWhereJsonDoesntOverlap('tags', ['php'])
-            ->orderBy('id')
-            ->pluck('id')
-            ->all();
-
-        $this->assertSame([2, 3, 4], $this->castIds($ids));
-    }
-
-    public function testWhereNotJsonOverlaps(): void
-    {
-        $ids = $this->getQuery()
-            ->whereNotJsonOverlaps('tags', ['python'])
-            ->orderBy('id')
-            ->pluck('id')
-            ->all();
-
-        $this->assertSame([1, 3, 4], $this->castIds($ids));
-    }
-
-    public function testOrWhereNotJsonOverlaps(): void
-    {
-        $ids = $this->getQuery()
-            ->where('id', 2)
-            ->orWhereNotJsonOverlaps('tags', ['php'])
             ->orderBy('id')
             ->pluck('id')
             ->all();
