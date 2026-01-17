@@ -7,6 +7,7 @@ use HughCube\Laravel\Knight\Ide\Database\Query\KIdeBuilder;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Database\MySqlConnection;
 use Illuminate\Database\PostgresConnection;
+use Illuminate\Database\Query\Builder;
 use RuntimeException;
 
 class JsonOverlapsTest extends TestCase
@@ -30,6 +31,8 @@ class JsonOverlapsTest extends TestCase
 
     public function testWhereJsonDoesntOverlapAddsNotClause(): void
     {
+        $this->skipIfBuilderJsonDoesntOverlapNotSupported();
+
         $query = $this->makeMySqlConnection()->table('knight_json_test');
         $query->whereJsonDoesntOverlap('tags', ['php']);
 
@@ -44,6 +47,8 @@ class JsonOverlapsTest extends TestCase
 
     public function testOrWhereJsonDoesntOverlapAddsOrClause(): void
     {
+        $this->skipIfBuilderOrWhereJsonDoesntOverlapNotSupported();
+
         $query = $this->makeMySqlConnection()->table('knight_json_test');
         $query->where('id', 1)->orWhereJsonDoesntOverlap('tags', ['php']);
 
@@ -72,5 +77,21 @@ class JsonOverlapsTest extends TestCase
 
         $this->assertNull($builder->whereJsonDoesntOverlap('tags', ['php']));
         $this->assertNull($builder->orWhereJsonDoesntOverlap('tags', ['php']));
+    }
+
+    private function skipIfBuilderJsonDoesntOverlapNotSupported(): void
+    {
+        if (!method_exists(Builder::class, 'whereJsonDoesntOverlap')
+            || !method_exists(Builder::class, 'whereJsonOverlaps')
+        ) {
+            $this->markTestSkipped('Query builder does not support whereJsonDoesntOverlap (Laravel version too old).');
+        }
+    }
+
+    private function skipIfBuilderOrWhereJsonDoesntOverlapNotSupported(): void
+    {
+        if (!method_exists(Builder::class, 'orWhereJsonDoesntOverlap')) {
+            $this->markTestSkipped('Query builder does not support orWhereJsonDoesntOverlap (Laravel version too old).');
+        }
     }
 }
