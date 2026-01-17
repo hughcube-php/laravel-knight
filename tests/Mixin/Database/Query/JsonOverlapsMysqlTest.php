@@ -3,6 +3,7 @@
 namespace HughCube\Laravel\Knight\Tests\Mixin\Database\Query;
 
 use HughCube\Laravel\Knight\Tests\TestCase;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use PDO;
 
@@ -27,13 +28,14 @@ class JsonOverlapsMysqlTest extends TestCase
         parent::setUp();
 
         $this->skipIfMysqlNotConfigured();
-        $this->skipIfMysqlJsonOverlapsNotSupported();
 
         $this->setUpJsonTable();
     }
 
     public function testWhereJsonOverlapsWithArray(): void
     {
+        $this->skipIfMysqlJsonOverlapsUnavailable();
+
         $ids = $this->getQuery()
             ->whereJsonOverlaps('tags', ['php'])
             ->orderBy('id')
@@ -45,6 +47,8 @@ class JsonOverlapsMysqlTest extends TestCase
 
     public function testWhereJsonOverlapsWithObject(): void
     {
+        $this->skipIfMysqlJsonOverlapsUnavailable();
+
         $ids = $this->getQuery()
             ->whereJsonOverlaps('meta', ['role' => 'admin'])
             ->orderBy('id')
@@ -56,6 +60,8 @@ class JsonOverlapsMysqlTest extends TestCase
 
     public function testWhereJsonOverlapsWithScalar(): void
     {
+        $this->skipIfMysqlJsonOverlapsUnavailable();
+
         $ids = $this->getQuery()
             ->whereJsonOverlaps('scalar', 'php')
             ->orderBy('id')
@@ -67,6 +73,7 @@ class JsonOverlapsMysqlTest extends TestCase
 
     public function testWhereJsonOverlapsWithPath(): void
     {
+        $this->skipIfMysqlJsonOverlapsUnavailable();
         $this->skipIfMysqlJsonOverlapsPathNotSupported();
 
         $ids = $this->getQuery()
@@ -80,6 +87,8 @@ class JsonOverlapsMysqlTest extends TestCase
 
     public function testWhereJsonDoesntOverlap(): void
     {
+        $this->skipIfMysqlJsonOverlapsUnavailable();
+
         $ids = $this->getQuery()
             ->whereJsonDoesntOverlap('tags', ['php'])
             ->orderBy('id')
@@ -91,6 +100,7 @@ class JsonOverlapsMysqlTest extends TestCase
 
     public function testWhereJsonDoesntOverlapWithPath(): void
     {
+        $this->skipIfMysqlJsonOverlapsUnavailable();
         $this->skipIfMysqlJsonOverlapsPathNotSupported();
 
         $ids = $this->getQuery()
@@ -104,6 +114,8 @@ class JsonOverlapsMysqlTest extends TestCase
 
     public function testOrWhereJsonOverlaps(): void
     {
+        $this->skipIfMysqlJsonOverlapsUnavailable();
+
         $ids = $this->getQuery()
             ->where('id', 2)
             ->orWhereJsonOverlaps('tags', ['php'])
@@ -116,6 +128,8 @@ class JsonOverlapsMysqlTest extends TestCase
 
     public function testOrWhereJsonDoesntOverlap(): void
     {
+        $this->skipIfMysqlJsonOverlapsUnavailable();
+
         $ids = $this->getQuery()
             ->where('id', 2)
             ->orWhereJsonDoesntOverlap('tags', ['php'])
@@ -264,6 +278,13 @@ class JsonOverlapsMysqlTest extends TestCase
         }
     }
 
+    private function skipIfBuilderJsonOverlapsNotSupported(): void
+    {
+        if (!method_exists(Builder::class, 'whereJsonOverlaps')) {
+            $this->markTestSkipped('Query builder does not support whereJsonOverlaps (Laravel version too old).');
+        }
+    }
+
     private function skipIfMysqlJsonOverlapsNotSupported(): void
     {
         try {
@@ -271,6 +292,12 @@ class JsonOverlapsMysqlTest extends TestCase
         } catch (\Throwable $exception) {
             $this->markTestSkipped('MySQL JSON_OVERLAPS is not supported: '.$exception->getMessage());
         }
+    }
+
+    private function skipIfMysqlJsonOverlapsUnavailable(): void
+    {
+        $this->skipIfBuilderJsonOverlapsNotSupported();
+        $this->skipIfMysqlJsonOverlapsNotSupported();
     }
 
     private function skipIfMysqlJsonOverlapsPathNotSupported(): void
