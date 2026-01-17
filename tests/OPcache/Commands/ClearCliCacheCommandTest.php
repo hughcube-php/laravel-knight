@@ -42,8 +42,6 @@ use HughCube\Laravel\Knight\Tests\OPcache\OpcacheTestOverrides;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Console\OutputStyle;
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Support\Facades\Log;
-use Monolog\Handler\TestHandler;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 
@@ -125,34 +123,6 @@ class ClearCliCacheCommandTest extends TestCase
         } else {
             $this->assertTrue(true, 'Log handler not available, skipping log assertion');
         }
-    }
-
-    private function setupTestLogHandler(): ?TestHandler
-    {
-        $handler = new TestHandler();
-
-        try {
-            $driver = Log::driver();
-
-            // Laravel 5.6+ uses Illuminate\Log\Logger which wraps Monolog
-            if (method_exists($driver, 'getLogger')) {
-                $logger = $driver->getLogger();
-                if (method_exists($logger, 'pushHandler')) {
-                    $logger->pushHandler($handler);
-                    return $handler;
-                }
-            }
-
-            // Fallback: try to push directly if driver is Monolog
-            if (method_exists($driver, 'pushHandler')) {
-                $driver->pushHandler($handler);
-                return $handler;
-            }
-        } catch (\Throwable $e) {
-            // If we can't set up the handler, return null
-        }
-
-        return null;
     }
 
     private function makeCommand(): ClearCliCacheCommand
