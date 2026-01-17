@@ -36,7 +36,7 @@ jobs:
       - name: Install dependencies
         run: |
           echo "has_deps=false" >> "$GITHUB_ENV"
-          composer require laravel/framework:^${{ matrix.laravel }} --dev --no-update --prefer-stable --prefer-dist --no-interaction --no-progress
+          composer require laravel/framework:^${{ matrix.laravel }}@stable --dev --no-update --prefer-stable --prefer-dist --no-interaction --no-progress
           composer update --prefer-stable --prefer-dist --no-interaction --no-progress
           echo "has_deps=true" >> "$GITHUB_ENV"
         continue-on-error: true

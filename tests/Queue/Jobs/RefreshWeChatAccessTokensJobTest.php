@@ -7,10 +7,11 @@ use EasyWeChat\MiniApp\Contracts\Account as MiniAppAccount;
 use EasyWeChat\OfficialAccount\Application as OfficialAccount;
 use EasyWeChat\OfficialAccount\Contracts\Account as OfficialAccountAccount;
 use EasyWeChat\Kernel\Contracts\AccessToken as AccessTokenInterface;
-use GuzzleHttp\ClientInterface;
+use GuzzleHttp\ClientInterface as GuzzleClientInterface;
 use HughCube\Laravel\Knight\Queue\Jobs\RefreshWeChatMiniAppAccessTokensJob;
 use HughCube\Laravel\Knight\Queue\Jobs\RefreshWeChatOfficialAccountAccessTokensJob;
 use HughCube\Laravel\Knight\Tests\TestCase;
+use Symfony\Contracts\HttpClient\HttpClientInterface as SymfonyHttpClientInterface;
 
 class RefreshWeChatAccessTokensJobTest extends TestCase
 {
@@ -43,10 +44,7 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
         $job = new RefreshWeChatMiniAppAccessTokensJob(['proxy' => 'http://proxy']);
         $this->callMethod($job, 'loadParameters');
 
-        $httpClient = $this->createMock(ClientInterface::class);
-        $httpClient->expects($this->once())
-            ->method('getConfig')
-            ->willReturn([]);
+        $httpClient = $this->createHttpClientMockForTest();
 
         $app = $this->createWeChatAppMock(MiniApp::class, ['getHttpClient', 'setHttpClient']);
 
@@ -71,10 +69,7 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
         $job = new RefreshWeChatOfficialAccountAccessTokensJob(['proxy' => 'http://proxy']);
         $this->callMethod($job, 'loadParameters');
 
-        $httpClient = $this->createMock(ClientInterface::class);
-        $httpClient->expects($this->once())
-            ->method('getConfig')
-            ->willReturn([]);
+        $httpClient = $this->createHttpClientMockForTest();
 
         $app = $this->createWeChatAppMock(OfficialAccount::class, ['getHttpClient', 'setHttpClient']);
 
@@ -169,10 +164,7 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
             return $app;
         }
 
-        $httpClient = $this->createMock(ClientInterface::class);
-        $httpClient->expects($this->once())
-            ->method('getConfig')
-            ->willReturn([]);
+        $httpClient = $this->createHttpClientMockForTest();
 
         $app->expects($this->once())->method('getHttpClient')->willReturn($httpClient);
         $app->expects($this->once())
@@ -202,10 +194,7 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
             return $app;
         }
 
-        $httpClient = $this->createMock(ClientInterface::class);
-        $httpClient->expects($this->once())
-            ->method('getConfig')
-            ->willReturn([]);
+        $httpClient = $this->createHttpClientMockForTest();
 
         $app->expects($this->once())->method('getHttpClient')->willReturn($httpClient);
         $app->expects($this->once())
@@ -282,9 +271,59 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
 
     private function skipIfHttpClientMissing(): void
     {
-        if (!interface_exists(ClientInterface::class)) {
-            $this->markTestSkipped('Guzzle ClientInterface is not available.');
+        if (!$this->isGuzzleHttpClient() && !$this->isSymfonyHttpClient()) {
+            $this->markTestSkipped('Neither Guzzle nor Symfony HTTP client interface is available.');
         }
+    }
+
+    private function isGuzzleHttpClient(): bool
+    {
+        return interface_exists(GuzzleClientInterface::class);
+    }
+
+    private function isSymfonyHttpClient(): bool
+    {
+        return interface_exists(SymfonyHttpClientInterface::class);
+    }
+
+    private function usesSymfonyHttpClient(): bool
+    {
+        if (!class_exists(MiniApp::class)) {
+            return false;
+        }
+
+        if (!method_exists(MiniApp::class, 'getHttpClient')) {
+            return false;
+        }
+
+        try {
+            $method = new \ReflectionMethod(MiniApp::class, 'getHttpClient');
+            $returnType = $method->getReturnType();
+            if ($returnType instanceof \ReflectionNamedType) {
+                return $returnType->getName() === SymfonyHttpClientInterface::class;
+            }
+        } catch (\ReflectionException $e) {
+            // ignore
+        }
+
+        return false;
+    }
+
+    private function createHttpClientMockForTest()
+    {
+        if ($this->usesSymfonyHttpClient()) {
+            $httpClient = $this->createMock(SymfonyHttpClientInterface::class);
+            $httpClient->expects($this->once())
+                ->method('withOptions')
+                ->willReturnSelf();
+            return $httpClient;
+        }
+
+        $httpClient = $this->createMock(GuzzleClientInterface::class);
+        $httpClient->expects($this->once())
+            ->method('getConfig')
+            ->willReturn([]);
+        return $httpClient;
     }
 
     private function createWeChatAppMock(string $className, array $methods)
@@ -317,15 +356,21 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
     private function proxyClientMatcher(string $proxy): callable
     {
         return function ($client) use ($proxy) {
-            if (!$client instanceof ClientInterface) {
-                return false;
+            // For Symfony HTTP Client (EasyWeChat 6.x)
+            if ($client instanceof SymfonyHttpClientInterface) {
+                return true;
             }
 
-            if (!method_exists($client, 'getConfig')) {
-                return false;
+            // For Guzzle HTTP Client (EasyWeChat 5.x)
+            if ($client instanceof GuzzleClientInterface) {
+                if (!method_exists($client, 'getConfig')) {
+                    return false;
+                }
+
+                return $client->getConfig('proxy') === $proxy;
             }
 
-            return $client->getConfig('proxy') === $proxy;
+            return false;
         };
     }
 }
