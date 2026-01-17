@@ -2,10 +2,10 @@
 
 namespace HughCube\Laravel\Knight\Tests\Support;
 
+use GuzzleHttp\RequestOptions;
 use HughCube\GuzzleHttp\Client;
 use HughCube\Laravel\Knight\Support\Downloader;
 use HughCube\Laravel\Knight\Tests\TestCase;
-use GuzzleHttp\RequestOptions;
 
 class DownloaderFakeClientTest extends TestCase
 {

@@ -24,7 +24,7 @@ class CompileFilesCommandHelperTest extends TestCase
 
         file_put_contents($phpFile, "<?php echo 'a';");
         file_put_contents($shebangFile, "#!/usr/bin/env php\n<?php echo 'b';");
-        file_put_contents($textFile, "nope");
+        file_put_contents($textFile, 'nope');
 
         try {
             $command = new CompileFilesCommand();
@@ -159,7 +159,7 @@ class CompileFilesCommandHelperTest extends TestCase
 
             $command = $this->makeCommand([
                 'with-composer-files' => 1,
-                'without-vendor' => 1,
+                'without-vendor'      => 1,
             ]);
 
             $files = array_map('realpath', $this->callMethod($command, 'getComposerFiles'));
@@ -549,8 +549,8 @@ class CompileFilesCommandHelperTest extends TestCase
         return [
             'classmap' => $classmapFile,
             'autoload' => $autoloadFile,
-            'psr4' => $psr4File,
-            'vendor' => $vendorFile,
+            'psr4'     => $psr4File,
+            'vendor'   => $vendorFile,
         ];
     }
 

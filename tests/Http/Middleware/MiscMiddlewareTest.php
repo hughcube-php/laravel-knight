@@ -2,6 +2,7 @@
 
 namespace HughCube\Laravel\Knight\Tests\Http\Middleware;
 
+use Fruitcake\Cors\CorsService;
 use HughCube\Laravel\Knight\Contracts\Support\GetUserLoginAccessSecret;
 use HughCube\Laravel\Knight\Http\Middleware\HandleAllPathCors;
 use HughCube\Laravel\Knight\Http\Middleware\LogRequest;
@@ -13,7 +14,6 @@ use HughCube\Laravel\Knight\Http\Middleware\TrustIps;
 use HughCube\Laravel\Knight\Http\Middleware\TrustProxies;
 use HughCube\Laravel\Knight\Http\Request as KnightRequest;
 use HughCube\Laravel\Knight\Tests\TestCase;
-use Fruitcake\Cors\CorsService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -69,9 +69,9 @@ class MiscMiddlewareTest extends TestCase
             '/signed',
             'POST',
             [
-                'Date' => 'Mon, 02 Jan 2006 15:04:05 GMT',
+                'Date'         => 'Mon, 02 Jan 2006 15:04:05 GMT',
                 'Content-Type' => 'application/json',
-                'Nonce' => '1234567890',
+                'Nonce'        => '1234567890',
             ],
             '{"a":1}'
         );
@@ -102,10 +102,10 @@ class MiscMiddlewareTest extends TestCase
             '/signed',
             'POST',
             [
-                'Date' => 'Mon, 02 Jan 2006 15:04:05 GMT',
+                'Date'         => 'Mon, 02 Jan 2006 15:04:05 GMT',
                 'Content-Type' => 'application/json',
-                'Nonce' => '1234567890',
-                'Signature' => 'invalid',
+                'Nonce'        => '1234567890',
+                'Signature'    => 'invalid',
             ],
             '{"a":1}'
         );
@@ -156,7 +156,7 @@ class MiscMiddlewareTest extends TestCase
     {
         $middleware = new RequestSignatureValidate();
         $request = $this->makeSignedRequest('/signed', 'GET', [
-            'Nonce' => 'short',
+            'Nonce'     => 'short',
             'Signature' => 'any',
         ], '');
 

@@ -5,8 +5,8 @@ namespace HughCube\Laravel\Knight\Tests\Queue;
 use HughCube\Laravel\Knight\Queue\FlowJobDescribe;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Queue\DatabaseQueue;
+use Illuminate\Support\Facades\Schema;
 
 class FlowJobDescribeTest extends TestCase
 {
@@ -16,9 +16,9 @@ class FlowJobDescribeTest extends TestCase
 
         $app['config']->set('queue.default', 'sync');
         $app['config']->set('queue.connections.database', [
-            'driver' => 'database',
-            'table' => 'jobs',
-            'queue' => 'default',
+            'driver'      => 'database',
+            'table'       => 'jobs',
+            'queue'       => 'default',
             'retry_after' => 90,
         ]);
     }

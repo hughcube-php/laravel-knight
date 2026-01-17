@@ -35,7 +35,7 @@ trait OptimisticLock
 
     public static function lockDataVersionColumn(): string
     {
-        return defined(static::class . '::DATA_VERSION') ? static::DATA_VERSION : 'data_version';
+        return defined(static::class.'::DATA_VERSION') ? static::DATA_VERSION : 'data_version';
     }
 
     public static function defaultModelDataVersion(): int

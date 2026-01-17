@@ -45,6 +45,7 @@ class Authenticate extends Middleware
                 if (is_string($optional)) {
                     return ltrim($optional, '/');
                 }
+
                 return $optional;
             })
             ->values()->all();

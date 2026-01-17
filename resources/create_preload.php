@@ -5,20 +5,20 @@ use Illuminate\Support\Collection;
 use PhpParser\ParserFactory;
 
 $basePath = getcwd();
-$preloadFile = getenv('OUTPUT_PATH') ?: $basePath . '/preload.php';
+$preloadFile = getenv('OUTPUT_PATH') ?: $basePath.'/preload.php';
 $skipBootstrap = '1' === getenv('SKIP_BOOTSTRAP');
 
 // 用户可以通过 preload-config.php 自定义排除规则
 $excludes = [];
 
 // 加载用户自定义配置
-$configFile = $basePath . '/preload-config.php';
+$configFile = $basePath.'/preload-config.php';
 if (is_file($configFile)) {
     $userConfig = require $configFile;
     if (isset($userConfig['exclude_classes'])) {
         $excludes = array_merge($excludes, $userConfig['exclude_classes']);
     }
-    echo "Loaded custom preload config", PHP_EOL;
+    echo 'Loaded custom preload config', PHP_EOL;
 }
 
 $classes = array_merge(
@@ -35,26 +35,27 @@ call_user_func(function () {
 /** Bootstrap Laravel Application */
 call_user_func(function () use ($basePath, $skipBootstrap) {
     if ($skipBootstrap) {
-        echo "Skipping Laravel application bootstrap...", PHP_EOL;
+        echo 'Skipping Laravel application bootstrap...', PHP_EOL;
+
         return;
     }
 
-    echo "Bootstrapping Laravel application...", PHP_EOL;
+    echo 'Bootstrapping Laravel application...', PHP_EOL;
 
     // 查找 public/index.php 或直接使用 bootstrap
-    $indexFile = $basePath . '/public/index.php';
+    $indexFile = $basePath.'/public/index.php';
     if (!is_file($indexFile)) {
         // Lumen 或其他结构
-        $indexFile = $basePath . '/index.php';
+        $indexFile = $basePath.'/index.php';
     }
 
     if (is_file($indexFile)) {
         ob_start();
         require $indexFile;
         ob_clean();
-        echo "Application bootstrapped successfully.", PHP_EOL;
+        echo 'Application bootstrapped successfully.', PHP_EOL;
     } else {
-        fwrite(STDERR, "Warning: index.php not found, skipping bootstrap." . PHP_EOL);
+        fwrite(STDERR, 'Warning: index.php not found, skipping bootstrap.'.PHP_EOL);
     }
 });
 
@@ -64,24 +65,24 @@ call_user_func(function () use ($basePath) {
 
     // 1. Remote Scripts
     if ('1' === getenv('WITH_REMOTE_SCRIPTS')) {
-        echo "Loading remote scripts...", PHP_EOL;
+        echo 'Loading remote scripts...', PHP_EOL;
+
         try {
             $opcache = OPcache::i();
             $remoteScripts = $opcache->getRemoteScripts();
             foreach ($remoteScripts as $script) {
                 $filesToLoad->push(base_path($script));
             }
-            echo sprintf("  Added %d remote scripts", count($remoteScripts)), PHP_EOL;
+            echo sprintf('  Added %d remote scripts', count($remoteScripts)), PHP_EOL;
         } catch (Throwable $e) {
-            fwrite(STDERR, "Warning: Failed to fetch remote scripts: " . $e->getMessage() . PHP_EOL);
+            fwrite(STDERR, 'Warning: Failed to fetch remote scripts: '.$e->getMessage().PHP_EOL);
         }
     }
-
 
     // Parse and load all classes from collected files
     if ($filesToLoad->isNotEmpty()) {
         $uniqueFiles = $filesToLoad->unique();
-        echo sprintf("Parsing %d unique files to extract classes...", $uniqueFiles->count()), PHP_EOL;
+        echo sprintf('Parsing %d unique files to extract classes...', $uniqueFiles->count()), PHP_EOL;
 
         $parser = (new ParserFactory())->createForNewestSupportedVersion();
         $opcache = OPcache::i();
@@ -125,24 +126,24 @@ call_user_func(function () use ($basePath) {
                             $loadedClasses++;
                         }
                     } catch (Throwable $classError) {
-                        fwrite(STDERR, sprintf("Warning: Failed to load class '%s': %s", $class, $classError->getMessage()) . PHP_EOL);
+                        fwrite(STDERR, sprintf("Warning: Failed to load class '%s': %s", $class, $classError->getMessage()).PHP_EOL);
                     }
                 }
             } catch (\PhpParser\Error $parseError) {
                 $failedFiles++;
-                $relativeFile = str_replace($basePath . '/', '', $file);
-                fwrite(STDERR, sprintf("Warning: Parse error in '%s': %s", $relativeFile, $parseError->getMessage()) . PHP_EOL);
+                $relativeFile = str_replace($basePath.'/', '', $file);
+                fwrite(STDERR, sprintf("Warning: Parse error in '%s': %s", $relativeFile, $parseError->getMessage()).PHP_EOL);
             } catch (Throwable $e) {
                 $failedFiles++;
             }
         }
 
-        echo sprintf("  Successfully loaded %d classes/interfaces/traits", $loadedClasses), PHP_EOL;
+        echo sprintf('  Successfully loaded %d classes/interfaces/traits', $loadedClasses), PHP_EOL;
         if ($skippedFiles > 0) {
-            echo sprintf("  Skipped %d files (no classes or empty)", $skippedFiles), PHP_EOL;
+            echo sprintf('  Skipped %d files (no classes or empty)', $skippedFiles), PHP_EOL;
         }
         if ($failedFiles > 0) {
-            echo sprintf("  Failed to parse %d files (syntax errors)", $failedFiles), PHP_EOL;
+            echo sprintf('  Failed to parse %d files (syntax errors)', $failedFiles), PHP_EOL;
         }
     }
 });
@@ -167,13 +168,13 @@ $loads = Collection::empty()
 
         // 获取文件路径(相对于 base_path)
         $file = $reflection->getFileName();
-        $relativeFile = $file ? str_replace(base_path() . '/', '', $file) : 'unknown';
+        $relativeFile = $file ? str_replace(base_path().'/', '', $file) : 'unknown';
 
         return [
-            'class' => $class,
-            'file' => $relativeFile,
+            'class'        => $class,
+            'file'         => $relativeFile,
             'is_interface' => $reflection->isInterface(),
-            'is_trait' => $reflection->isTrait(),
+            'is_trait'     => $reflection->isTrait(),
         ];
     })
     /** 按类型排序: Interface -> Trait -> Class */
@@ -193,22 +194,22 @@ $loads = Collection::empty()
 
 // 统计信息
 $stats = [
-    'interfaces' => $loads->filter(fn($i) => $i['is_interface'])->count(),
-    'traits' => $loads->filter(fn($i) => $i['is_trait'])->count(),
-    'classes' => $loads->filter(fn($i) => !$i['is_interface'] && !$i['is_trait'])->count(),
+    'interfaces' => $loads->filter(fn ($i) => $i['is_interface'])->count(),
+    'traits'     => $loads->filter(fn ($i) => $i['is_trait'])->count(),
+    'classes'    => $loads->filter(fn ($i) => !$i['is_interface'] && !$i['is_trait'])->count(),
 ];
 
-echo sprintf("Collected %d items: %d interfaces, %d traits, %d classes", $loads->count(), $stats['interfaces'], $stats['traits'], $stats['classes']), PHP_EOL;
+echo sprintf('Collected %d items: %d interfaces, %d traits, %d classes', $loads->count(), $stats['interfaces'], $stats['traits'], $stats['classes']), PHP_EOL;
 
 // 生成 preload 文件内容
 $contents = "<?php\n";
 $contents .= "/**\n";
 $contents .= " * OPcache Preload File\n";
-$contents .= " * Generated at: " . date('Y-m-d H:i:s') . "\n";
-$contents .= " * Total items: " . $loads->count() . "\n";
-$contents .= " *   - Interfaces: " . $stats['interfaces'] . "\n";
-$contents .= " *   - Traits: " . $stats['traits'] . "\n";
-$contents .= " *   - Classes: " . $stats['classes'] . "\n";
+$contents .= ' * Generated at: '.date('Y-m-d H:i:s')."\n";
+$contents .= ' * Total items: '.$loads->count()."\n";
+$contents .= ' *   - Interfaces: '.$stats['interfaces']."\n";
+$contents .= ' *   - Traits: '.$stats['traits']."\n";
+$contents .= ' *   - Classes: '.$stats['classes']."\n";
 $contents .= " */\n\n";
 $contents .= "require_once __DIR__.'/vendor/autoload.php';\n\n";
 

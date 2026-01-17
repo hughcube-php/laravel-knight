@@ -106,18 +106,18 @@ class PgArrayTest extends TestCase
         $password = getenv($prefix.'_PASSWORD');
 
         return [
-            'driver' => 'pgsql',
-            'host' => $host,
-            'port' => ($port === false || $port === '') ? 5432 : (int) $port,
+            'driver'   => 'pgsql',
+            'host'     => $host,
+            'port'     => ($port === false || $port === '') ? 5432 : (int) $port,
             'database' => $database,
             'username' => $username,
             'password' => ($password === false) ? null : $password,
-            'charset' => 'utf8',
-            'prefix' => '',
-            'schema' => 'public',
-            'options' => [
-                PDO::ATTR_PERSISTENT => true,
-                PDO::ATTR_EMULATE_PREPARES => true
+            'charset'  => 'utf8',
+            'prefix'   => '',
+            'schema'   => 'public',
+            'options'  => [
+                PDO::ATTR_PERSISTENT       => true,
+                PDO::ATTR_EMULATE_PREPARES => true,
             ],
         ];
     }
@@ -201,36 +201,36 @@ class PgArrayTest extends TestCase
     {
         return [
             [
-                'id' => 1,
-                'name' => 'record1',
-                'tags' => ['php', 'laravel', 'mysql'],
+                'id'     => 1,
+                'name'   => 'record1',
+                'tags'   => ['php', 'laravel', 'mysql'],
                 'scores' => [80, 90],
                 'prices' => [1.5, 2.5],
-                'flags' => ['true', 'false'],
+                'flags'  => ['true', 'false'],
             ],
             [
-                'id' => 2,
-                'name' => 'record2',
-                'tags' => ['java', 'spring'],
+                'id'     => 2,
+                'name'   => 'record2',
+                'tags'   => ['java', 'spring'],
                 'scores' => [95, 100],
                 'prices' => [3.5],
-                'flags' => ['true'],
+                'flags'  => ['true'],
             ],
             [
-                'id' => 3,
-                'name' => 'record3',
-                'tags' => ['php', 'symfony', 'django'],
+                'id'     => 3,
+                'name'   => 'record3',
+                'tags'   => ['php', 'symfony', 'django'],
                 'scores' => [70, 85],
                 'prices' => [4.0],
-                'flags' => ['false'],
+                'flags'  => ['false'],
             ],
             [
-                'id' => 4,
-                'name' => 'record4',
-                'tags' => ['php', 'laravel'],
+                'id'     => 4,
+                'name'   => 'record4',
+                'tags'   => ['php', 'laravel'],
                 'scores' => [1, 2, 3],
                 'prices' => [1.0, 2.0],
-                'flags' => ['true', 'false'],
+                'flags'  => ['true', 'false'],
             ],
         ];
     }
@@ -915,9 +915,9 @@ class PgArrayTest extends TestCase
     {
         // Injection attempt with multiple values
         $overlaps = [
-            "normal",
+            'normal',
             "test' OR '1'='1",
-            "test\"; DROP TABLE users; --",
+            'test"; DROP TABLE users; --',
         ];
 
         $results = Collection::make(
@@ -935,14 +935,14 @@ class PgArrayTest extends TestCase
     public function testBindingsAreProperlyEscaped()
     {
         $query = $this->getTestQuery(false)
-            ->whereArrayContains('tags', ["test'; DROP TABLE users; --", "normal"]);
+            ->whereArrayContains('tags', ["test'; DROP TABLE users; --", 'normal']);
 
         $bindings = $query->getBindings();
 
         // Each value should be a separate binding
         $this->assertCount(2, $bindings);
         $this->assertEquals("test'; DROP TABLE users; --", $bindings[0]);
-        $this->assertEquals("normal", $bindings[1]);
+        $this->assertEquals('normal', $bindings[1]);
     }
 
     // ==================== Type coercion tests ====================
