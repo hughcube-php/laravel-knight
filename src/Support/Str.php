@@ -241,6 +241,10 @@ class Str extends \Illuminate\Support\Str
             return false;
         }
 
+        if (substr_count($string, '·') > 1) {
+            return false;
+        }
+
         return 0 < preg_match('/^(?=.{2,12}$)[\p{Han}]+(?:\x{00B7}[\p{Han}]+)?$/u', $string);
     }
 
