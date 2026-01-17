@@ -237,7 +237,16 @@ class Str extends \Illuminate\Support\Str
      */
     public static function isChineseName($string): bool
     {
-        return 0 < preg_match('/^(?=.{2,12}$)[\p{Han}]+(?:\x{00B7}[\p{Han}]+)?$/u', $string);
+        // CJK Unified Ideographs (Base + Ext A-I) + Compatibility
+        $han = '\x{3400}-\x{4DBF}\x{4E00}-\x{9FFF}\x{F900}-\x{FAFF}' // Base + Ext A + Compat
+            . '\x{20000}-\x{2A6DF}\x{2A700}-\x{2B73F}\x{2B740}-\x{2B81F}' // Ext B, C, D
+            . '\x{2B820}-\x{2CEAF}\x{2CEB0}-\x{2EBEF}\x{30000}-\x{3134F}' // Ext E, F, G
+            . '\x{31350}-\x{323AF}\x{2EBF0}-\x{2EE5F}' // Ext H, I (新增)
+            . '\x{2F800}-\x{2FA1F}'; // Compat Supplement
+
+        $pattern = '/^[' . $han . '](?:[' . $han . ']|\x{00B7}){0,10}[' . $han . ']$/u';
+
+        return 0 < preg_match($pattern, $string);
     }
 
     /**
