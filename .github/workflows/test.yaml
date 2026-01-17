@@ -2,48 +2,6 @@ name: Test
 
 on: [ push, pull_request ]
 
-x-matrix: &matrix
-  php: [ 7.4, 8.0, 8.1, 8.2, 8.3, 8.4, 8.5 ]
-  laravel: [ 8, 9, 10, 11, 12 ]
-
-x-common-steps: &common_steps
-  - name: Checkout
-    uses: actions/checkout@master
-
-  - name: Setup PHP
-    uses: shivammathur/setup-php@master
-    with:
-      php-version: ${{ matrix.php }}
-      extensions: mbstring, xdebug, opcache, fileinfo, mcrypt, pdo_mysql, pdo_pgsql #optional, setup extensions
-      tools: composer:v2
-      ini-values: post_max_size=256M, short_open_tag=On, opcache.enable_cli=1 #optional, setup php.ini configuration
-
-  - name: System Setting
-    run: |
-      php -v
-      composer -V
-      php -m
-
-  - name: Validate composer.json and composer.lock
-    run: composer validate
-
-  - name: Install dependencies
-    run: |
-      echo "has_deps=false" >> "$GITHUB_ENV"
-      composer config --no-plugins audit.block-insecure false
-      composer require laravel/framework:^${{ matrix.laravel }} --dev --no-update --prefer-stable
-      composer update --prefer-stable --prefer-dist --no-interaction --no-progress
-      echo "has_deps=true" >> "$GITHUB_ENV"
-    continue-on-error: true
-
-  - name: Composer Info
-    if: ${{ 'true' == env.has_deps }}
-    run: composer info
-
-  - name: Run PHPUnit
-    if: ${{ 'true' == env.has_deps }}
-    run: composer run-script test -- -c phpunit.xml.dist
-
 jobs:
   run-linux:
     runs-on: ubuntu-latest
@@ -86,7 +44,9 @@ jobs:
           --health-retries=5
     strategy:
       max-parallel: 15
-      matrix: *matrix
+      matrix: &matrix
+        php: [ 7.4, 8.0, 8.1, 8.2, 8.3, 8.4, 8.5 ]
+        laravel: [ 8, 9, 10, 11, 12 ]
     name: PHP ${{ matrix.php }} Laravel ${{ matrix.laravel }} Test on ubuntu-latest
     env:
       TEST_PGSQL_HOST: 127.0.0.1
@@ -101,7 +61,43 @@ jobs:
       TEST_MYSQL_PASSWORD: knight
       REDIS_HOST: 127.0.0.1
       REDIS_PORT: 6379
-    steps: *common_steps
+    steps: &common_steps
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@master
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, xdebug, opcache, fileinfo, mcrypt, pdo_mysql, pdo_pgsql #optional, setup extensions
+          tools: composer:v2
+          ini-values: post_max_size=256M, short_open_tag=On, opcache.enable_cli=1 #optional, setup php.ini configuration
+
+      - name: System Setting
+        run: |
+          php -v
+          composer -V
+          php -m
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+
+      - name: Install dependencies
+        run: |
+          echo "has_deps=false" >> "$GITHUB_ENV"
+          composer config --no-plugins audit.block-insecure false
+          composer require laravel/framework:^${{ matrix.laravel }} --dev --no-update --prefer-stable
+          composer update --prefer-stable --prefer-dist --no-interaction --no-progress
+          echo "has_deps=true" >> "$GITHUB_ENV"
+        continue-on-error: true
+
+      - name: Composer Info
+        if: ${{ 'true' == env.has_deps }}
+        run: composer info
+
+      - name: Run PHPUnit
+        if: ${{ 'true' == env.has_deps }}
+        run: composer run-script test -- -c phpunit.xml.dist
 
   run-macos:
     runs-on: macOS-latest
