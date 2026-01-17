@@ -41,6 +41,10 @@ jobs:
           echo "has_deps=true" >> "$GITHUB_ENV"
         continue-on-error: true
 
+      - name: Composer Info
+        if: ${{ 'true' == env.has_deps }}
+        run: composer info
+
       - name: Run PHPUnit
         if: ${{ 'true' == env.has_deps }}
         run: |
