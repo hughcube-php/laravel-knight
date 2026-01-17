@@ -35,6 +35,11 @@ class ScheduleJobTest extends TestCase
         $jobsDir = $baseDir.DIRECTORY_SEPARATOR.'Jobs';
         mkdir($jobsDir, 0777, true);
 
+        // Use realpath to resolve symlinks (e.g., /var -> /private/var on macOS)
+        // This ensures $baseDir matches the path returned by SplFileInfo::getRealPath()
+        $baseDir = realpath($baseDir);
+        $jobsDir = realpath($jobsDir);
+
         $file = $jobsDir.DIRECTORY_SEPARATOR.'DemoJob.php';
         file_put_contents($file, "<?php\nnamespace Jobs;\nclass DemoJob {}\n");
         require_once $file;

@@ -237,7 +237,8 @@ class Str extends \Illuminate\Support\Str
      */
     public static function isChineseName($string): bool
     {
-        return 0 < preg_match('/^\p{Han}[\p{Han}·]{0,10}\p{Han}$/u', $string);
+        // Use Unicode escape \x{00B7} for middle dot to avoid encoding ambiguity
+        return 0 < preg_match('/^\p{Han}[\p{Han}\x{00B7}]{0,10}\p{Han}$/u', $string);
     }
 
     /**
