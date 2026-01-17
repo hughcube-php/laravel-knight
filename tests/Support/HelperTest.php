@@ -11,6 +11,20 @@ use stdClass;
 
 class HelperTest extends TestCase
 {
+    private function setLogPathEnv(?string $value): void
+    {
+        if ($value === null) {
+            putenv('LOG_PATH');
+            unset($_ENV['LOG_PATH'], $_SERVER['LOG_PATH']);
+
+            return;
+        }
+
+        putenv('LOG_PATH='.$value);
+        $_ENV['LOG_PATH'] = $value;
+        $_SERVER['LOG_PATH'] = $value;
+    }
+
     public function testAssertClassExists()
     {
         $helper = new Helper();
@@ -69,5 +83,67 @@ class HelperTest extends TestCase
         
         $this->assertArrayHasKey('errors', $array);
         $this->assertSame($exception->errors(), $array['errors']);
+    }
+
+    public function testLogPathUsesLoggingConfig()
+    {
+        $original = getenv('LOG_PATH');
+
+        try {
+            $this->setLogPathEnv('env_logs');
+            config(['logging.path' => 'logs_base']);
+            config(['app.log_path' => 'app_logs']);
+
+            $this->assertSame('logs_base', log_path());
+            $this->assertSame('logs_base'.DIRECTORY_SEPARATOR.'app.log', log_path('app.log'));
+        } finally {
+            $this->setLogPathEnv($original === false ? null : $original);
+        }
+    }
+
+    public function testLogPathUsesEnvWhenNoLoggingConfig()
+    {
+        $original = getenv('LOG_PATH');
+
+        try {
+            $this->setLogPathEnv('env_logs');
+            config(['logging.path' => null]);
+            config(['app.log_path' => 'app_logs']);
+
+            $this->assertSame('env_logs', log_path());
+            $this->assertSame('env_logs'.DIRECTORY_SEPARATOR.'sub/dir', log_path('/sub/dir'));
+        } finally {
+            $this->setLogPathEnv($original === false ? null : $original);
+        }
+    }
+
+    public function testLogPathUsesAppLogPathWhenNoLoggingOrEnv()
+    {
+        $original = getenv('LOG_PATH');
+
+        try {
+            $this->setLogPathEnv(null);
+            config(['logging.path' => null]);
+            config(['app.log_path' => 'app_logs']);
+
+            $this->assertSame('app_logs', log_path());
+        } finally {
+            $this->setLogPathEnv($original === false ? null : $original);
+        }
+    }
+
+    public function testLogPathFallsBackToStoragePath()
+    {
+        $original = getenv('LOG_PATH');
+
+        try {
+            $this->setLogPathEnv(null);
+            config(['logging.path' => null]);
+            config(['app.log_path' => null]);
+
+            $this->assertSame(storage_path('logs'), log_path());
+        } finally {
+            $this->setLogPathEnv($original === false ? null : $original);
+        }
     }
 }

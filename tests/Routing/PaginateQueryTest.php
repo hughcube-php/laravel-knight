@@ -22,7 +22,7 @@ class PaginateQueryActionStub
         $this->builderMock = $builderMock;
     }
 
-    protected function makeQuery(): ?\Illuminate\Contracts\Database\Query\Builder
+    protected function makeQuery(): ?Builder
     {
         return $this->builderMock;
     }

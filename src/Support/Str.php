@@ -237,7 +237,15 @@ class Str extends \Illuminate\Support\Str
      */
     public static function isChineseName($string): bool
     {
-        return 0 < preg_match('/^\p{Han}[\p{Han}·]{0,10}\p{Han}$/u', $string);
+        if (str_starts_with($string, '·') || str_ends_with($string, '·')) {
+            return false;
+        }
+
+        if (substr_count($string, '·') > 1) {
+            return false;
+        }
+
+        return 0 < preg_match('/^(?=.{2,12}$)[\p{Han}]+(?:\x{00B7}[\p{Han}]+)?$/u', $string);
     }
 
     /**
@@ -371,7 +379,7 @@ class Str extends \Illuminate\Support\Str
         $char = substr($string, $index, 1);
 
         /** @phpstan-ignore-next-line */
-        return false === $char ? null : $char;
+        return false === $char ? '' : $char;
     }
 
     /**
@@ -490,8 +498,7 @@ class Str extends \Illuminate\Support\Str
         $match_length = 0;
         $keyword_length = mb_strlen($keyword);
         while (true) {
-            if (
-                $match_length >= $keyword_length
+            if ($match_length >= $keyword_length
                 || false === mb_strpos($text, mb_substr($keyword, 0, $match_length + 1))
             ) {
                 break;
@@ -507,8 +514,7 @@ class Str extends \Illuminate\Support\Str
         $match_length = 0;
         $keyword_length = mb_strlen($keyword);
         while (true) {
-            if (
-                $match_length >= $keyword_length
+            if ($match_length >= $keyword_length
                 || false === mb_strpos($text, mb_substr($keyword, 0 - ($match_length + 1)))
             ) {
                 break;

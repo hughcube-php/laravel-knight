@@ -5,8 +5,6 @@
          processIsolation="false"
          stopOnError="false"
          stopOnFailure="false"
-         cacheDirectory=".phpunit.cache"
-         backupStaticProperties="false"
          bootstrap="vendor/autoload.php">
     <testsuites>
         <testsuite name="Laravel Test Suite">
@@ -17,8 +15,20 @@
         <ini name="date.timezone" value="UTC" />
         <ini name="intl.default_locale" value="C.UTF-8" />
         <ini name="memory_limit" value="2048M" />
-        <env name="DB_CONNECTION" value="testing" />
         <!--
+        <env name="DB_CONNECTION" value="" />
+        <env name="TEST_PGSQL_HOST" value="127.0.0.1" />
+        <env name="TEST_PGSQL_PORT" value="5432" />
+        <env name="TEST_PGSQL_DATABASE" value="knight_test" />
+        <env name="TEST_PGSQL_USERNAME" value="knight" />
+        <env name="TEST_PGSQL_PASSWORD" value="knight" />
+
+        <env name="TEST_MYSQL_HOST" value="127.0.0.1" />
+        <env name="TEST_MYSQL_PORT" value="3306" />
+        <env name="TEST_MYSQL_DATABASE" value="knight_test" />
+        <env name="TEST_MYSQL_USERNAME" value="knight" />
+        <env name="TEST_MYSQL_PASSWORD" value="knight" />
+
         <env name="REDIS_HOST" value="127.0.0.1" />
         <env name="REDIS_PORT" value="6379" />
         -->

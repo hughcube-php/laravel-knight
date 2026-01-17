@@ -30,7 +30,20 @@ class BuilderTest extends TestCase
         });
     }
 
-    public function testWhereLike()
+    public function testWhereLikeMatchesPattern()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s%s%%', Str::random(), $keyword, Str::random());
+        $user->save();
+
+        /** @var User $user */
+        $user = User::query()->whereLike('nickname', sprintf('%%%s%%', $keyword))->first();
+        $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testWhereLikeDoesNotAutoAddWildcards()
     {
         $keyword = __FUNCTION__;
 
@@ -40,18 +53,36 @@ class BuilderTest extends TestCase
 
         /** @var User $user */
         $user = User::query()->whereLike('nickname', $keyword)->first();
-        $this->assertInstanceOf(User::class, $user);
+        $this->assertNull($user);
+    }
+
+    public function testWhereEscapeLikeMatchesEscapedValue()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s%s%%', Str::random(), $keyword, Str::random());
+        $user->save();
 
         /** @var User $user */
-        $user = User::query()->whereLike('nickname', '%')->first();
+        $user = User::query()->whereEscapeLike('nickname', $keyword)->first();
         $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testWhereRawLikeMatchesAny()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s%s%%', Str::random(), $keyword, Str::random());
+        $user->save();
 
         /** @var User $user */
         $user = User::query()->whereRaw("nickname LIKE '%%%'")->first();
         $this->assertInstanceOf(User::class, $user);
     }
 
-    public function testWhereLeftLike()
+    public function testWhereLeftLikeMatchesPrefix()
     {
         $keyword = __FUNCTION__;
 
@@ -64,7 +95,20 @@ class BuilderTest extends TestCase
         $this->assertInstanceOf(User::class, $user);
     }
 
-    public function testWhereRightLike()
+    public function testWhereEscapeLeftLikeMatchesEscapedPrefix()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s', $keyword, Str::random());
+        $user->save();
+
+        /** @var User $user */
+        $user = User::query()->whereEscapeLeftLike('nickname', $keyword)->first();
+        $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testWhereRightLikeMatchesSuffix()
     {
         $keyword = __FUNCTION__;
 
@@ -77,33 +121,7 @@ class BuilderTest extends TestCase
         $this->assertInstanceOf(User::class, $user);
     }
 
-    public function testOrWhereLike()
-    {
-        $keyword = __FUNCTION__;
-
-        $user = new User();
-        $user->nickname = sprintf('%s%s%s', Str::random(), $keyword, Str::random());
-        $user->save();
-
-        /** @var User $user */
-        $user = User::query()->orWhereLike('nickname', $keyword)->first();
-        $this->assertInstanceOf(User::class, $user);
-    }
-
-    public function testOrWhereLeftLike()
-    {
-        $keyword = __FUNCTION__;
-
-        $user = new User();
-        $user->nickname = sprintf('%s%s', $keyword, Str::random());
-        $user->save();
-
-        /** @var User $user */
-        $user = User::query()->orWhereLeftLike('nickname', $keyword)->first();
-        $this->assertInstanceOf(User::class, $user);
-    }
-
-    public function testOrWhereRightLike()
+    public function testWhereEscapeRightLikeMatchesEscapedSuffix()
     {
         $keyword = __FUNCTION__;
 
@@ -112,7 +130,119 @@ class BuilderTest extends TestCase
         $user->save();
 
         /** @var User $user */
-        $user = User::query()->orWhereRightLike('nickname', $keyword)->first();
+        $user = User::query()->whereEscapeRightLike('nickname', $keyword)->first();
+        $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testOrWhereLikeMatchesPattern()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s%s', Str::random(), $keyword, Str::random());
+        $user->save();
+
+        /** @var User $user */
+        $user = User::query()
+            ->where('id', 0)
+            ->orWhereLike('nickname', sprintf('%%%s%%', $keyword))
+            ->first();
+        $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testOrWhereLikeDoesNotAutoAddWildcards()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s%s', Str::random(), $keyword, Str::random());
+        $user->save();
+
+        /** @var User $user */
+        $user = User::query()
+            ->where('id', 0)
+            ->orWhereLike('nickname', $keyword)
+            ->first();
+        $this->assertNull($user);
+    }
+
+    public function testOrWhereEscapeLikeMatchesEscapedValue()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s%s', Str::random(), $keyword, Str::random());
+        $user->save();
+
+        /** @var User $user */
+        $user = User::query()
+            ->where('id', 0)
+            ->orWhereEscapeLike('nickname', $keyword)
+            ->first();
+        $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testOrWhereLeftLikeMatchesPrefix()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s', $keyword, Str::random());
+        $user->save();
+
+        /** @var User $user */
+        $user = User::query()
+            ->where('id', 0)
+            ->orWhereLeftLike('nickname', $keyword)
+            ->first();
+        $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testOrWhereEscapeLeftLikeMatchesEscapedPrefix()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s', $keyword, Str::random());
+        $user->save();
+
+        /** @var User $user */
+        $user = User::query()
+            ->where('id', 0)
+            ->orWhereEscapeLeftLike('nickname', $keyword)
+            ->first();
+        $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testOrWhereRightLikeMatchesSuffix()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s', Str::random(), $keyword);
+        $user->save();
+
+        /** @var User $user */
+        $user = User::query()
+            ->where('id', 0)
+            ->orWhereRightLike('nickname', $keyword)
+            ->first();
+        $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testOrWhereEscapeRightLikeMatchesEscapedSuffix()
+    {
+        $keyword = __FUNCTION__;
+
+        $user = new User();
+        $user->nickname = sprintf('%s%s', Str::random(), $keyword);
+        $user->save();
+
+        /** @var User $user */
+        $user = User::query()
+            ->where('id', 0)
+            ->orWhereEscapeRightLike('nickname', $keyword)
+            ->first();
         $this->assertInstanceOf(User::class, $user);
     }
 
@@ -133,7 +263,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(1, 10),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
 
         $rows = User::query()
@@ -142,7 +272,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(11, 20),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
 
         $rows = User::query()
@@ -151,7 +281,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(1, 20),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
 
         $rows = User::query()
@@ -160,7 +290,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(20, 100),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
     }
 
@@ -181,7 +311,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(1, 100),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
 
         $rows = User::query()
@@ -190,7 +320,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(1, 100),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
     }
 
@@ -211,7 +341,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(11, 100),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
 
         $rows = User::query()
@@ -220,7 +350,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(1, 90),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
     }
 
@@ -241,7 +371,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(1, 100),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
 
         $rows = User::query()
@@ -250,7 +380,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(1, 100),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
     }
 }

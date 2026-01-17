@@ -10,9 +10,11 @@
 namespace HughCube\Laravel\Knight\Tests\OPcache\Actions;
 
 use HughCube\Laravel\Knight\OPcache\Actions\ScriptsAction;
+use HughCube\Laravel\Knight\OPcache\OPcache;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
+use ReflectionProperty;
 
 /**
  * @requires function opcache_reset
@@ -39,8 +41,42 @@ class ScriptsActionTest extends TestCase
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertJson($response->content());
 
-        $this->assertArrayHasKey('code', $response->getData(true));
-        $this->assertSame(200, Arr::get($response->getData(true), 'code'));
-        $this->assertIsArray(Arr::get($response->getData(true), 'data.scripts'));
+        $payload = $response->getData(true);
+
+        $this->assertArrayHasKey('Code', $payload);
+        $this->assertSame('Success', Arr::get($payload, 'Code'));
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertIsArray(Arr::get($payload, 'Data.scripts'));
+    }
+
+    public function testActionUsesStubbedOpcacheInstance()
+    {
+        $property = new ReflectionProperty(OPcache::class, 'instance');
+        $property->setAccessible(true);
+        $previous = $property->getValue();
+
+        $stub = new class() extends OPcache {
+            public function getScripts(): array
+            {
+                return [
+                    'a.php' => time(),
+                    'b.php' => time(),
+                ];
+            }
+        };
+
+        $property->setValue(null, $stub);
+
+        try {
+            $action = new ScriptsAction();
+            $response = $this->callMethod($action, 'action');
+
+            $this->assertInstanceOf(JsonResponse::class, $response);
+            $data = $response->getData(true);
+            $this->assertSame('Success', Arr::get($data, 'Code'));
+            $this->assertSame(2, Arr::get($data, 'Data.count'));
+        } finally {
+            $property->setValue(null, $previous);
+        }
     }
 }

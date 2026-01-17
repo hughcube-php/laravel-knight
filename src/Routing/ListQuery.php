@@ -9,7 +9,8 @@
 
 namespace HughCube\Laravel\Knight\Routing;
 
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
 /**
  * @mixin Action
@@ -32,7 +33,7 @@ trait ListQuery
     }
 
     /**
-     * @param Builder|mixed $query
+     * @param EloquentBuilder|mixed $query
      *
      * @return null|int
      */
@@ -42,7 +43,7 @@ trait ListQuery
     }
 
     /**
-     * @return Builder|null
+     * @return EloquentBuilder|QueryBuilder|null
      */
-    abstract protected function makeQuery(): ?Builder;
+    abstract protected function makeQuery(): ?object;
 }

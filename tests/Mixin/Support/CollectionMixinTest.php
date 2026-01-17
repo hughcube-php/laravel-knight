@@ -145,4 +145,79 @@ class CollectionMixinTest extends TestCase
             $collection->onlyColumnValues(['a', 1], 'b', true)->toArray()
         );
     }
+
+    public function testHasAnyAndAllValues()
+    {
+        /** @var KIdeCollection $collection */
+        $collection = Collection::make([1, 2, 3]);
+
+        $this->assertTrue($collection->hasAnyValues([3, 9]));
+        $this->assertFalse($collection->hasAnyValues([9]));
+        $this->assertTrue($collection->hasAnyValues([], true));
+
+        $this->assertTrue($collection->hasAllValues([1, 2, 3]));
+        $this->assertFalse($collection->hasAllValues([1, 4]));
+        $this->assertTrue($collection->hasAllValues([], true));
+
+        $this->assertFalse(Collection::make()->hasAnyValues([1]));
+        $this->assertFalse(Collection::make()->hasAllValues([1]));
+    }
+
+    public function testHasValue()
+    {
+        /** @var KIdeCollection $collection */
+        $collection = Collection::make([1, 2, 3]);
+
+        $this->assertTrue($collection->hasValue('2'));
+        $this->assertFalse($collection->hasValue('2', true));
+    }
+
+    public function testAfterItems()
+    {
+        /** @var KIdeCollection $collection */
+        $collection = Collection::make([1, 2, 3, 2, 4]);
+
+        $this->assertSame([3, 2, 4], $collection->afterFirstItems(2)->values()->toArray());
+        $this->assertSame([2, 3, 2, 4], $collection->afterFirstItems(2, true)->values()->toArray());
+        $this->assertSame([3, 2, 4], $collection->afterLastItems(2)->values()->toArray());
+        $this->assertSame([2, 3, 2, 4], $collection->afterLastItems(2, true)->values()->toArray());
+    }
+
+    public function testWhenFilter()
+    {
+        /** @var KIdeCollection $collection */
+        $collection = Collection::make([1, 2, 3]);
+
+        $this->assertSame([2, 3], $collection->whenFilter(true, function ($item) {
+            return $item > 1;
+        })->values()->toArray());
+
+        $this->assertSame([1, 2, 3], $collection->whenFilter(false, function () {
+            return false;
+        })->values()->toArray());
+    }
+
+    public function testMapIntAndString()
+    {
+        /** @var KIdeCollection $collection */
+        $collection = Collection::make(['1', 2, '3']);
+
+        $this->assertSame([1, 2, 3], $collection->mapInt()->values()->toArray());
+
+        /** @var KIdeCollection $collection */
+        $collection = Collection::make([1, 2]);
+
+        $this->assertSame(['1', '2'], $collection->mapString()->values()->toArray());
+    }
+
+    public function testSplitHelpers()
+    {
+        /** @var KIdeCollection $collection */
+        $collection = Collection::make();
+
+        $this->assertSame(['a', 'b', 'c'], $collection->explode(',', 'a,b,c')->toArray());
+        $this->assertSame(['a', 'b', 'c'], $collection->splitWhitespace('a  b   c')->toArray());
+        $this->assertSame(['a', 'b', 'c'], $collection->splitComma('a,b,c')->toArray());
+        $this->assertSame(['a', 'b', 'c'], $collection->splitSlash('a/b/c')->toArray());
+    }
 }

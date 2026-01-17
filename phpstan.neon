@@ -35,3 +35,4 @@ parameters:
                 - src/Mixin/Support/CarbonMixin.php
         - '#Parameter \#1 \$num of function base_convert expects string, int<0, max> given.#'
         - '#.*unknown class Laravel\\Lumen.*#'
+        - '#Call to function method_exists\(\) .* will always evaluate to true.*#'

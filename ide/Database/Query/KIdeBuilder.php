@@ -37,4 +37,24 @@ class KIdeBuilder
     {
         return null;
     }
+
+    /**
+     * @return null|Builder|KnightBuilder
+     *
+     * @see BuilderMixin::whereJsonDoesntOverlap()
+     */
+    public function whereJsonDoesntOverlap($column, $value, $boolean = 'and')
+    {
+        return null;
+    }
+
+    /**
+     * @return null|Builder|KnightBuilder
+     *
+     * @see BuilderMixin::orWhereJsonDoesntOverlap()
+     */
+    public function orWhereJsonDoesntOverlap($column, $value)
+    {
+        return null;
+    }
 }

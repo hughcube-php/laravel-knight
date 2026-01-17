@@ -13,12 +13,11 @@ class Type
 {
     public static function int($value): ?int
     {
-        return null === $value ? null : (int) $value;
+        return null === $value ? null : intval($value);
     }
 
     public static function string($value): ?string
     {
-        /** @phpstan-ignore-next-line */
-        return null === $value ? null : (string) $value;
+        return null === $value ? null : strval($value);
     }
 }

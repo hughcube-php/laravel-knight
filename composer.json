@@ -64,12 +64,12 @@
         "fix-style": "phpcbf -p --standard=PSR2 src/ -v"
     },
     "config": {
+        "platform-check": false,
         "allow-plugins": {
             "easywechat-composer/easywechat-composer": true
         },
         "preferred-install": "dist"
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "platform-check": false
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }
