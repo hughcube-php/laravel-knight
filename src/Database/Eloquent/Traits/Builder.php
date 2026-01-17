@@ -605,7 +605,9 @@ trait Builder
             $values instanceof CarbonPeriod ? [$values->start, $values->end] : $values
         )->values()->slice(0, 2)->toArray();
 
-        return $this->{$not ? 'whereNot' : 'where'}(function ($builder) use ($values, $column) {
+        $boolean = $not ? $boolean.' not' : $boolean;
+
+        return $this->where(function ($builder) use ($values, $column) {
             if (isset($values[0])) {
                 $builder->where($column, '>=', $values[0]);
             }
