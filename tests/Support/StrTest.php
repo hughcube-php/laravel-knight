@@ -153,4 +153,107 @@ class StrTest extends TestCase
         $this->assertFalse(Str::isCnCarLicensePlate(null)); // null值
         $this->assertFalse(Str::isCnCarLicensePlate(123)); // 数字类型
     }
+
+    public function testCheckMobileAndMasking()
+    {
+        $this->assertTrue(Str::checkMobile('13800138000'));
+        $this->assertFalse(Str::checkMobile('not-a-number'));
+        $this->assertTrue(Str::checkMobile('12345', 1));
+
+        $this->assertSame('138****8000', Str::maskMobile('13800138000'));
+        $this->assertSame('123456********5678', Str::maskChinaIdCode('123456789012345678'));
+    }
+
+    public function testWhitespaceSplitAndOffsets()
+    {
+        $this->assertSame(['one', 'two', 'three'], Str::splitWhitespace("one\t two \nthree"));
+        $this->assertSame('b', Str::offsetGet('abc', 1));
+        $this->assertSame('', Str::offsetGet('abc', 9));
+    }
+
+    public function testStringChecks()
+    {
+        $this->assertTrue(Str::isUtf8(null));
+        $this->assertTrue(Str::isUtf8('plain'));
+        $this->assertFalse(Str::isUtf8("\xB1\x31"));
+
+        $this->assertFalse(Str::isOctal('127'));
+        $this->assertTrue(Str::isOctal('128'));
+
+        $this->assertFalse(Str::isBinary('101'));
+        $this->assertTrue(Str::isBinary('102'));
+
+        $this->assertFalse(Str::isHex('abc123'));
+        $this->assertTrue(Str::isHex('abc123z'));
+
+        $this->assertTrue(Str::isAlnum('abc123'));
+        $this->assertFalse(Str::isAlnum('abc-123'));
+
+        $this->assertTrue(Str::isAlpha('abc'));
+        $this->assertFalse(Str::isAlpha('abc1'));
+
+        $this->assertTrue(Str::isNaming('name_1'));
+        $this->assertFalse(Str::isNaming('1name'));
+
+        $this->assertTrue(Str::isWhitespace("\n"));
+        $this->assertFalse(Str::isWhitespace(' '));
+
+        $this->assertTrue(Str::isDigit('123'));
+        $this->assertFalse(Str::isDigit('12.3'));
+    }
+
+    public function testNetworkAndPortChecks()
+    {
+        $this->assertTrue(Str::isEmail('user@example.com'));
+        $this->assertFalse(Str::isEmail('invalid'));
+
+        $this->assertTrue(Str::isTel('010-12345678'));
+        $this->assertFalse(Str::isTel('abc'));
+
+        $this->assertTrue(Str::isIp('127.0.0.1'));
+        $this->assertTrue(Str::isIp4('127.0.0.1'));
+        $this->assertTrue(Str::isIp6('2001:db8::1'));
+        $this->assertFalse(Str::isIp4('2001:db8::1'));
+
+        $this->assertTrue(Str::isPrivateIp('192.168.1.1'));
+        $this->assertFalse(Str::isPublicIp('192.168.1.1'));
+        $this->assertTrue(Str::isPublicIp('8.8.8.8'));
+
+        $this->assertTrue(Str::isPort('80'));
+        $this->assertFalse(Str::isPort('0'));
+        $this->assertFalse(Str::isPort('70000'));
+    }
+
+    public function testMiscStringUtilities()
+    {
+        $this->assertTrue(Str::isTrue(true));
+        $this->assertTrue(Str::isTrue('true'));
+        $this->assertFalse(Str::isTrue('false'));
+
+        $this->assertSame('plain', Str::convEncoding('plain', 'utf-8', 'utf-8'));
+        $this->assertSame('', Str::convEncoding('', 'utf-8', 'gbk'));
+        $this->assertSame('123', Str::convEncoding('123', 'gbk', 'utf-8'));
+
+        $this->assertSame('abc', Str::msubstr('abc', 0, 2));
+        $this->assertSame('ab...', Str::msubstr('abcdefghij', 0, 2));
+
+        $this->assertSame(3, Str::countWords('one two  three'));
+        $this->assertSame('abc', Str::filterPartialUTF8('abc'));
+
+        $this->assertSame(0, Str::versionCompare('1.2.3', '1.2.3'));
+        $this->assertSame(-1, Str::versionCompare('1.2.3', '1.2.4'));
+        $this->assertSame(0, Str::versionCompare('1.2.3', '1.2.4', null, 2));
+        $this->assertSame(1, Str::versionCompare('1.2.3', '1.2.4', '<'));
+
+        $this->assertSame(['ab', 'cd'], Str::mbSplit('abcd', 2));
+        $this->assertSame(['a', 'b', 'c'], Str::mbSplit('abc'));
+
+        $this->assertSame(3, Str::matchKeywordPrefix('hello world', 'help'));
+        $this->assertSame(5, Str::matchKeywordSuffix('hello world', 'world'));
+        $this->assertSame(5, Str::matchKeywordExact('hello world', 'world'));
+        $this->assertSame(0, Str::matchKeywordExact('hello world', 'nope'));
+
+        $this->assertTrue(Str::generalCiEq('Test', 'test'));
+        $this->assertFalse(Str::generalCiEq('Test', 'toast'));
+    }
 }

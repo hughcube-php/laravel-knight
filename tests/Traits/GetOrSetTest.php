@@ -98,4 +98,32 @@ class GetOrSetTest extends TestCase
             },
         ]));
     }
+
+    /**
+     * @throws ReflectionException
+     */
+    public function testGetOrSetWithArrayKey()
+    {
+        $mock = new class() {
+            use GetOrSet;
+        };
+
+        $key = ['a' => 1, 'b' => 2];
+
+        $first = $this->callMethod($mock, 'getOrSet', [
+            $key,
+            function () {
+                return Str::random();
+            },
+        ]);
+
+        $second = $this->callMethod($mock, 'getOrSet', [
+            $key,
+            function () {
+                return Str::random();
+            },
+        ]);
+
+        $this->assertSame($first, $second);
+    }
 }

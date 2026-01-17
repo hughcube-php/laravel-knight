@@ -130,6 +130,51 @@ class MiscMiddlewareTest extends TestCase
         $this->assertSame('ok', $response->getContent());
     }
 
+    public function testRequestSignatureValidateFailsOnMissingSignature()
+    {
+        $middleware = new RequestSignatureValidate();
+        $request = $this->makeSignedRequest('/signed', 'GET', [
+            'Nonce' => '1234567890',
+        ], '');
+
+        $this->expectException(\HughCube\Laravel\Knight\Exceptions\ValidateSignatureException::class);
+        $middleware->handle($request, function () {
+            return new Response('ok');
+        });
+    }
+
+    public function testRequestSignatureValidateFailsOnShortNonce()
+    {
+        $middleware = new RequestSignatureValidate();
+        $request = $this->makeSignedRequest('/signed', 'GET', [
+            'Nonce' => 'short',
+            'Signature' => 'any',
+        ], '');
+
+        $this->expectException(\HughCube\Laravel\Knight\Exceptions\ValidateSignatureException::class);
+        $middleware->handle($request, function () {
+            return new Response('ok');
+        });
+    }
+
+    public function testParseRequestDatePrefersClientDate()
+    {
+        $middleware = new RequestSignatureValidate();
+
+        $request = new class() extends KnightRequest {
+            public function getClientHeaderPrefix(): string
+            {
+                return 'X-Client-';
+            }
+        };
+        $request->headers->set('X-Client-Date', 'Mon, 02 Jan 2006 15:04:05 GMT');
+        $request->headers->set('Date', 'Tue, 03 Jan 2006 15:04:05 GMT');
+
+        $date = $this->callMethod($middleware, 'parseRequestDate', [$request]);
+
+        $this->assertSame('Mon, 02 Jan 2006 15:04:05 GMT', $date);
+    }
+
     public function testSetHstsHeaderAlwaysSetsHeader()
     {
         $middleware = new SetHstsHeader();

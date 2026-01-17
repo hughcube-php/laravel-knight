@@ -52,4 +52,11 @@ class LogQuerySqlTest extends TestCase
 
         Log::shouldNotHaveReceived('debug');
     }
+
+    public function testIsEnableReturnsTrue()
+    {
+        $listener = new LogQuerySql();
+
+        $this->assertTrue(self::callMethod($listener, 'isEnable'));
+    }
 }

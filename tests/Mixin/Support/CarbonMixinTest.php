@@ -76,4 +76,28 @@ class CarbonMixinTest extends TestCase
         $datetime = Carbon::tryParseDate(null);
         $this->assertNull($datetime);
     }
+
+    public function testTryHelpers()
+    {
+        $this->assertSame('ok', Carbon::try(function () {
+            return 'ok';
+        }, 'fallback'));
+
+        $this->assertSame('fallback', Carbon::try(function () {
+            throw new \Exception('boom');
+        }, 'fallback'));
+    }
+
+    public function testTryCreateFromFormatHelpers()
+    {
+        $date = Carbon::tryCreateFromFormat('Y-m-d', '2023-07-31');
+        $this->assertSame('2023-07-31', $date->format('Y-m-d'));
+
+        $this->assertNull(Carbon::tryCreateFromFormat('Y-m-d', 'invalid'));
+
+        $date = Carbon::tryCreateFromFormats('2023/07/31', ['Y-m-d', 'Y/m/d']);
+        $this->assertSame('2023-07-31', $date->format('Y-m-d'));
+
+        $this->assertNull(Carbon::tryCreateFromFormats('invalid', ['Y-m-d']));
+    }
 }

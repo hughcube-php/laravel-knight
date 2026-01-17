@@ -49,4 +49,18 @@ class AuthenticateTest extends TestCase
             return new Response('ok');
         });
     }
+
+    public function testOptionalFullUrlSkipsAuthenticationException()
+    {
+        config(['authenticate.optional' => ['https://example.test/optional']]);
+
+        $middleware = $this->makeMiddleware([]);
+        $request = Request::create('https://example.test/optional', 'GET');
+
+        $response = $middleware->handle($request, function () {
+            return new Response('ok');
+        });
+
+        $this->assertSame('ok', $response->getContent());
+    }
 }

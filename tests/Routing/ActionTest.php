@@ -9,6 +9,7 @@
 
 namespace HughCube\Laravel\Knight\Tests\Routing;
 
+use BadMethodCallException;
 use Dotenv\Exception\ValidationException;
 use Exception;
 use HughCube\Laravel\Knight\Support\ParameterBag;
@@ -185,5 +186,27 @@ class ActionTest extends TestCase
         $this->assertSame($code, $content['Code']);
         $this->assertSame($message, $content['Message']);
         $this->assertSame($data, $content['Data']);
+    }
+
+    public function testMagicGetAndCall()
+    {
+        $action = new Action();
+
+        $uuid = md5(random_bytes(100));
+        $request = Request::create(
+            '/test',
+            'GET',
+            [],
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode(['uuid' => $uuid])
+        );
+        $this->app->instance('request', $request);
+
+        $this->assertSame($uuid, $action->uuid);
+
+        $this->expectException(BadMethodCallException::class);
+        $action->missingMethod();
     }
 }

@@ -13,3 +13,7 @@ composer
 /test_*.txt
 phpunit.xml
 /.claude/
+/coverage.txt
+/coverage1.txt
+/coverage.html
+/coverage1.html

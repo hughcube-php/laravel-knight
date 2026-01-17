@@ -105,4 +105,53 @@ class RequestTest extends TestCase
 
         $this->assertFalse($request->isGtClientVersion('2.0.0'));
     }
+
+    public function testClientHeadersAndDates()
+    {
+        $request = new class() extends Request {
+            public function getClientHeaderPrefix(): string
+            {
+                return 'X-Client-';
+            }
+        };
+
+        $request->headers->set('X-Client-Version', '1.2.3');
+        $request->headers->set('X-Client-Nonce', 'nonce');
+        $request->headers->set('X-Client-Signature', 'sig');
+        $request->headers->set('X-Client-Date', 'Mon, 02 Jan 2006 15:04:05 GMT');
+        $request->headers->set('Date', 'Tue, 03 Jan 2006 15:04:05 GMT');
+        $request->headers->set('Other', 'value');
+
+        $this->assertSame('1.2.3', $request->getClientVersion());
+        $this->assertSame('nonce', $request->getClientNonce());
+        $this->assertSame('sig', $request->getClientSignature());
+        $this->assertSame('Mon, 02 Jan 2006 15:04:05 GMT', $request->getClientDate());
+        $this->assertSame('Tue, 03 Jan 2006 15:04:05 GMT', $request->getDate());
+
+        $headers = $request->getClientHeaders()->all();
+        $this->assertArrayHasKey('x-client-version', $headers);
+        $this->assertArrayHasKey('x-client-nonce', $headers);
+        $this->assertArrayHasKey('x-client-signature', $headers);
+        $this->assertArrayHasKey('x-client-date', $headers);
+        $this->assertArrayNotHasKey('other', $headers);
+    }
+
+    public function testUserAgentFlagsAndLastDirectory()
+    {
+        $wechat = Request::create('/foo/bar', 'GET', [], [], [], [
+            'HTTP_USER_AGENT' => 'MicroMessenger miniProgram',
+            'HTTP_HOST' => 'example.test:8080',
+        ]);
+
+        $this->assertTrue($wechat->isWeChat());
+        $this->assertTrue($wechat->isWeChatMiniProgram());
+        $this->assertSame('bar', $wechat->getLastDirectory());
+        $this->assertSame(8080, $wechat->getPort());
+
+        $postman = Request::create('/api', 'GET', [], [], [], [
+            'HTTP_USER_AGENT' => 'PostmanRuntime/7.32.3',
+        ]);
+
+        $this->assertTrue($postman->isPostmen());
+    }
 }

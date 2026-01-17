@@ -18,4 +18,25 @@ class CreatePreloadCommandTest extends TestCase
         $this->assertNotEmpty($serverCommand[0]);
         $this->assertTrue(str_ends_with($serverCommand[1], 'create_preload.php'));
     }
+
+    public function testServerCommandPrefersLocalCreatePreloadFile()
+    {
+        $path = base_path('create_preload.php');
+        $existed = file_exists($path);
+
+        if (!$existed) {
+            file_put_contents($path, '<?php echo "ok";');
+        }
+
+        try {
+            $command = new CreatePreloadCommand();
+            $serverCommand = $this->callMethod($command, 'serverCommand');
+
+            $this->assertSame($path, $serverCommand[1]);
+        } finally {
+            if (!$existed && file_exists($path)) {
+                unlink($path);
+            }
+        }
+    }
 }

@@ -40,4 +40,40 @@ class QueueFlowJobTest extends TestCase
         $this->assertNotEmpty($job->logs);
         $this->assertStringContainsString('推送任务2个', $job->logs[0][1]);
     }
+
+    public function testGetMaxTimeUsesDefaultAndProvidedValue()
+    {
+        $job = new QueueFlowJobStub([
+            'from_connection' => 'sync',
+            'to_connection' => 'sync',
+        ]);
+        $this->callMethod($job, 'loadParameters');
+        $this->assertSame(60, $this->callMethod($job, 'getMaxTime'));
+
+        $job = new QueueFlowJobStub([
+            'from_connection' => 'sync',
+            'to_connection' => 'sync',
+            'max_time' => 5,
+        ]);
+        $this->callMethod($job, 'loadParameters');
+        $this->assertSame(5, $this->callMethod($job, 'getMaxTime'));
+    }
+
+    public function testParseJobReturnsUnserializedObject()
+    {
+        $job = new QueueFlowJobStub([
+            'from_connection' => 'sync',
+            'to_connection' => 'sync',
+        ]);
+
+        $payload = json_encode([
+            'data' => [
+                'command' => serialize(new \stdClass()),
+            ],
+        ]);
+
+        $parsed = $this->callMethod($job, 'parseJob', [$payload]);
+
+        $this->assertInstanceOf(\stdClass::class, $parsed);
+    }
 }
