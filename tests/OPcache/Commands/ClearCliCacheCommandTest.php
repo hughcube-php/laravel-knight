@@ -43,6 +43,8 @@ use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Console\OutputStyle;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Log;
+use Monolog\Handler\TestHandler;
+use Monolog\Logger;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 
@@ -60,26 +62,32 @@ class ClearCliCacheCommandTest extends TestCase
 
     public function testHandleLogsWhenExtensionMissing()
     {
-        $logMessages = $this->captureLogMessages();
+        $handler = $this->setupTestLogHandler();
 
         OpcacheTestOverrides::$extensionLoaded = false;
         OpcacheTestOverrides::$opcacheStatusEnabled = false;
 
         $this->makeCommand()->handle(new Schedule($this->app));
 
-        $this->assertLogContains($logMessages, 'warning', 'extension not loaded');
+        $this->assertTrue(
+            $handler->hasWarningThatContains('extension not loaded'),
+            'Expected warning log containing "extension not loaded"'
+        );
     }
 
     public function testHandleLogsWhenOpcacheDisabled()
     {
-        $logMessages = $this->captureLogMessages();
+        $handler = $this->setupTestLogHandler();
 
         OpcacheTestOverrides::$extensionLoaded = true;
         OpcacheTestOverrides::$opcacheStatusEnabled = false;
 
         $this->makeCommand()->handle(new Schedule($this->app));
 
-        $this->assertLogContains($logMessages, 'warning', 'not enabled');
+        $this->assertTrue(
+            $handler->hasWarningThatContains('not enabled'),
+            'Expected warning log containing "not enabled"'
+        );
     }
 
     public function testHandleThrowsWhenResetFails()
@@ -96,7 +104,7 @@ class ClearCliCacheCommandTest extends TestCase
 
     public function testHandleLogsWhenResetSucceeds()
     {
-        $logMessages = $this->captureLogMessages();
+        $handler = $this->setupTestLogHandler();
 
         OpcacheTestOverrides::$extensionLoaded = true;
         OpcacheTestOverrides::$opcacheStatusEnabled = true;
@@ -105,33 +113,20 @@ class ClearCliCacheCommandTest extends TestCase
         $command = $this->makeCommand();
         $command->handle(new Schedule($this->app));
 
-        $this->assertLogContains($logMessages, 'info', 'OPcache CLI cleared');
+        $this->assertTrue(
+            $handler->hasInfoThatContains('OPcache CLI cleared'),
+            'Expected info log containing "OPcache CLI cleared"'
+        );
     }
 
-    private function captureLogMessages(): array
+    private function setupTestLogHandler(): TestHandler
     {
-        $messages = [];
+        $handler = new TestHandler();
+        $logger = new Logger('test', [$handler]);
 
-        Log::listen(function ($event) use (&$messages) {
-            $messages[] = [
-                'level' => $event->level,
-                'message' => $event->message,
-            ];
-        });
+        Log::swap($logger);
 
-        return $messages;
-    }
-
-    private function assertLogContains(array &$messages, string $level, string $needle): void
-    {
-        foreach ($messages as $log) {
-            if ($log['level'] === $level && str_contains($log['message'], $needle)) {
-                $this->assertTrue(true);
-                return;
-            }
-        }
-
-        $this->fail("Expected log message containing '{$needle}' at level '{$level}' was not found.");
+        return $handler;
     }
 
     private function makeCommand(): ClearCliCacheCommand
