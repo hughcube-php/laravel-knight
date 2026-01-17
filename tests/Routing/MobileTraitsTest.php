@@ -144,6 +144,16 @@ class MobileTraitsTest extends TestCase
         $this->callMethod($action, 'invalidMobileResponse');
     }
 
+    public function testCheckMobileValidatesWithIddCode()
+    {
+        $action = new MobileTraitsGetMobileAction();
+        $action->request = Request::create('/', 'GET');
+
+        $this->assertTrue($this->callMethod($action, 'checkMobile', ['13800138000', 86]));
+        $this->assertFalse($this->callMethod($action, 'checkMobile', ['abc', 86]));
+        $this->assertTrue($this->callMethod($action, 'checkMobile', ['abc', 1]));
+    }
+
     public function testPinCodeSmsActionSendsWhenValid()
     {
         $action = new PinCodeSmsAction();

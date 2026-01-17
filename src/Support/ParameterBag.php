@@ -11,7 +11,8 @@ namespace HughCube\Laravel\Knight\Support;
 
 use ArrayIterator;
 use HughCube\Base\Base;
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 class ParameterBag
 {
@@ -344,57 +345,57 @@ class ParameterBag
     }
 
     /**
-     * @param bool       $when
-     * @param int|string $key
-     * @param Builder    $query
-     * @param callable   $callable
+     * @param bool                         $when
+     * @param int|string                   $key
+     * @param QueryBuilder|EloquentBuilder $query
+     * @param callable                     $callable
      *
      * @return void
      */
-    public function queryWhen(bool $when, $key, Builder $query, callable $callable)
+    public function queryWhen(bool $when, $key, $query, callable $callable)
     {
         if (!$when) {
             return;
         }
 
         $value = $this->get($key);
-        $query->where(function (Builder $query) use ($key, $value, $callable) {
+        $query->where(function ($query) use ($key, $value, $callable) {
             $callable($query, $value, $key, $this);
         });
     }
 
     /**
-     * @param Builder    $query
-     * @param string|int $key
-     * @param callable   $callable
+     * @param QueryBuilder|EloquentBuilder $query
+     * @param string|int                   $key
+     * @param callable                     $callable
      *
      * @return void
      */
-    public function queryWhenHas($key, Builder $query, callable $callable)
+    public function queryWhenHas($key, $query, callable $callable)
     {
         $this->queryWhen($this->has($key), $key, $query, $callable);
     }
 
     /**
-     * @param Builder    $query
-     * @param string|int $key
-     * @param callable   $callable
+     * @param QueryBuilder|EloquentBuilder $query
+     * @param string|int                   $key
+     * @param callable                     $callable
      *
      * @return void
      */
-    public function queryWhenNotNull($key, Builder $query, callable $callable)
+    public function queryWhenNotNull($key, $query, callable $callable)
     {
         $this->queryWhen(!$this->isNull($key), $key, $query, $callable);
     }
 
     /**
-     * @param Builder    $query
-     * @param string|int $key
-     * @param callable   $callable
+     * @param QueryBuilder|EloquentBuilder $query
+     * @param string|int                   $key
+     * @param callable                     $callable
      *
      * @return void
      */
-    public function queryWhenNotEmpty($key, Builder $query, callable $callable)
+    public function queryWhenNotEmpty($key, $query, callable $callable)
     {
         $this->queryWhen(!$this->isEmpty($key), $key, $query, $callable);
     }

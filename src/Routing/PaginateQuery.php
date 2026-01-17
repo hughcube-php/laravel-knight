@@ -9,7 +9,8 @@
 
 namespace HughCube\Laravel\Knight\Routing;
 
-use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Collection;
 
 /**
@@ -86,46 +87,62 @@ trait PaginateQuery
     }
 
     /**
-     * @return Builder|null
+     * @return QueryBuilder|EloquentBuilder|null
      */
-    abstract protected function makeQuery(): ?Builder;
+    abstract protected function makeQuery(): ?object;
 
     /**
-     * @param Builder|mixed $query
+     * @param mixed $query
+     */
+    protected function isBuilder($query): bool
+    {
+        if ($query instanceof QueryBuilder || $query instanceof EloquentBuilder) {
+            return true;
+        }
+
+        if (interface_exists(\Illuminate\Contracts\Database\Query\Builder::class)) {
+            return $query instanceof \Illuminate\Contracts\Database\Query\Builder;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param QueryBuilder|EloquentBuilder|mixed $query
      *
      * @return null|int
      */
     protected function queryCount($query): ?int
     {
-        if ($query instanceof Builder) {
-            return $query->count();
+        if (!$this->isBuilder($query)) {
+            return 0;
         }
 
-        return 0;
+        return $query->count();
     }
 
     /**
-     * @param Builder|mixed $query
-     * @param int|null      $offset
-     * @param int|null      $limit
+     * @param QueryBuilder|EloquentBuilder|mixed $query
+     * @param int|null                          $offset
+     * @param int|null                          $limit
      *
      * @return Collection|array
      */
     protected function queryCollection($query, ?int $offset, ?int $limit)
     {
-        if ($query instanceof Builder && is_int($limit)) {
+        if (!$this->isBuilder($query)) {
+            return Collection::make();
+        }
+
+        if (is_int($limit)) {
             $query->limit($limit);
         }
 
-        if ($query instanceof Builder && is_int($offset)) {
+        if (is_int($offset)) {
             $query->offset($offset);
         }
 
-        if ($query instanceof Builder) {
-            return $query->get();
-        }
-
-        return Collection::make();
+        return $query->get();
     }
 
     /**

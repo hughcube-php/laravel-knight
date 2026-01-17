@@ -135,4 +135,14 @@ class QueryTraitsTest extends TestCase
         $this->assertSame(5, $payload['data']['count']);
         $this->assertCount(2, $payload['data']['list']);
     }
+
+    public function testListQueryDefaultHelpersReturnNull()
+    {
+        $action = new ListQueryAction();
+        $action->request = Request::create('/', 'GET');
+
+        $this->assertSame([], $this->callMethod($action, 'rules'));
+        $this->assertNull($this->callMethod($action, 'getPage'));
+        $this->assertNull($this->callMethod($action, 'queryCount', [QueryItem::query()]));
+    }
 }
