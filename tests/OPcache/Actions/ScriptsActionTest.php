@@ -41,9 +41,12 @@ class ScriptsActionTest extends TestCase
         $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertJson($response->content());
 
-        $this->assertArrayHasKey('code', $response->getData(true));
-        $this->assertSame(200, Arr::get($response->getData(true), 'code'));
-        $this->assertIsArray(Arr::get($response->getData(true), 'data.scripts'));
+        $payload = $response->getData(true);
+
+        $this->assertArrayHasKey('Code', $payload);
+        $this->assertSame('Success', Arr::get($payload, 'Code'));
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertIsArray(Arr::get($payload, 'Data.scripts'));
     }
 
     public function testActionUsesStubbedOpcacheInstance()

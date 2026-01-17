@@ -49,6 +49,7 @@ class CleanFilesJob extends Job
                 ->in($existDirs->all())
                 ->name($patterns->all())
                 ->notName($excludes->all())
+                ->ignoreUnreadableDirs()
                 ->files();
         }
 

@@ -17,7 +17,10 @@ class OpcacheViewTest extends TestCase
             $this->markTestSkipped('OPcache is not enabled for CLI.');
         }
 
-        $path = base_path('src/OPcache/Views/opcache.php');
+        $path = realpath(dirname(__DIR__, 3).'/src/OPcache/Views/opcache.php');
+        if ($path === false) {
+            $this->markTestSkipped('OPcache view file not found.');
+        }
         $cwd = getcwd();
 
         ob_start();

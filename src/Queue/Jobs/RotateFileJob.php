@@ -59,6 +59,7 @@ class RotateFileJob extends Job
                 ->in($existDirs->all())
                 ->name($patterns->all())
                 ->notName($excludes->all())
+                ->ignoreUnreadableDirs()
                 ->files();
         }
 
