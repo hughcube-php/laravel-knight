@@ -7,10 +7,10 @@ use EasyWeChat\MiniApp\Contracts\Account as MiniAppAccount;
 use EasyWeChat\OfficialAccount\Application as OfficialAccount;
 use EasyWeChat\OfficialAccount\Contracts\Account as OfficialAccountAccount;
 use EasyWeChat\Kernel\Contracts\AccessToken as AccessTokenInterface;
+use GuzzleHttp\ClientInterface;
 use HughCube\Laravel\Knight\Queue\Jobs\RefreshWeChatMiniAppAccessTokensJob;
 use HughCube\Laravel\Knight\Queue\Jobs\RefreshWeChatOfficialAccountAccessTokensJob;
 use HughCube\Laravel\Knight\Tests\TestCase;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class RefreshWeChatAccessTokensJobTest extends TestCase
 {
@@ -23,10 +23,7 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
         $job = new RefreshWeChatMiniAppAccessTokensJob(['proxy' => null]);
         $this->callMethod($job, 'loadParameters');
 
-        $app = $this->getMockBuilder(MiniApp::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getHttpClient', 'setHttpClient'])
-            ->getMock();
+        $app = $this->createWeChatAppMock(MiniApp::class, ['getHttpClient', 'setHttpClient']);
 
         $app->expects($this->never())->method('getHttpClient');
         $app->expects($this->never())->method('setHttpClient');
@@ -46,19 +43,18 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
         $job = new RefreshWeChatMiniAppAccessTokensJob(['proxy' => 'http://proxy']);
         $this->callMethod($job, 'loadParameters');
 
-        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient = $this->createMock(ClientInterface::class);
         $httpClient->expects($this->once())
-            ->method('withOptions')
-            ->with(['proxy' => 'http://proxy'])
-            ->willReturn($httpClient);
+            ->method('getConfig')
+            ->willReturn([]);
 
-        $app = $this->getMockBuilder(MiniApp::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getHttpClient', 'setHttpClient'])
-            ->getMock();
+        $app = $this->createWeChatAppMock(MiniApp::class, ['getHttpClient', 'setHttpClient']);
 
         $app->expects($this->once())->method('getHttpClient')->willReturn($httpClient);
-        $app->expects($this->once())->method('setHttpClient')->with($httpClient)->willReturn($app);
+        $app->expects($this->once())
+            ->method('setHttpClient')
+            ->with($this->callback($this->proxyClientMatcher('http://proxy')))
+            ->willReturn($app);
 
         $result = $this->callMethod($job, 'resetHttpClient', [$app]);
 
@@ -75,19 +71,18 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
         $job = new RefreshWeChatOfficialAccountAccessTokensJob(['proxy' => 'http://proxy']);
         $this->callMethod($job, 'loadParameters');
 
-        $httpClient = $this->createMock(HttpClientInterface::class);
+        $httpClient = $this->createMock(ClientInterface::class);
         $httpClient->expects($this->once())
-            ->method('withOptions')
-            ->with(['proxy' => 'http://proxy'])
-            ->willReturn($httpClient);
+            ->method('getConfig')
+            ->willReturn([]);
 
-        $app = $this->getMockBuilder(OfficialAccount::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getHttpClient', 'setHttpClient'])
-            ->getMock();
+        $app = $this->createWeChatAppMock(OfficialAccount::class, ['getHttpClient', 'setHttpClient']);
 
         $app->expects($this->once())->method('getHttpClient')->willReturn($httpClient);
-        $app->expects($this->once())->method('setHttpClient')->with($httpClient)->willReturn($app);
+        $app->expects($this->once())
+            ->method('setHttpClient')
+            ->with($this->callback($this->proxyClientMatcher('http://proxy')))
+            ->willReturn($app);
 
         $result = $this->callMethod($job, 'resetHttpClient', [$app]);
 
@@ -148,10 +143,10 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
     {
         $account = $this->makeMiniAppAccount($appId);
 
-        $app = $this->getMockBuilder(MiniApp::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getAccount', 'getAccessToken', 'getHttpClient', 'setHttpClient'])
-            ->getMock();
+        $app = $this->createWeChatAppMock(
+            MiniApp::class,
+            ['getAccount', 'getAccessToken', 'getHttpClient', 'setHttpClient']
+        );
 
         $app->method('getAccount')->willReturn($account);
 
@@ -164,18 +159,26 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
         }
 
         $token = $token ?? new FakeAccessToken();
-        $httpClient = $this->createMock(HttpClientInterface::class);
-
-        if ($proxy !== null) {
-            $httpClient->expects($this->once())
-                ->method('withOptions')
-                ->with(['proxy' => $proxy])
-                ->willReturn($httpClient);
-        }
 
         $app->expects($this->once())->method('getAccessToken')->willReturn($token);
+
+        if (empty($proxy)) {
+            $app->expects($this->never())->method('getHttpClient');
+            $app->expects($this->never())->method('setHttpClient');
+
+            return $app;
+        }
+
+        $httpClient = $this->createMock(ClientInterface::class);
+        $httpClient->expects($this->once())
+            ->method('getConfig')
+            ->willReturn([]);
+
         $app->expects($this->once())->method('getHttpClient')->willReturn($httpClient);
-        $app->expects($this->once())->method('setHttpClient')->with($httpClient)->willReturn($app);
+        $app->expects($this->once())
+            ->method('setHttpClient')
+            ->with($this->callback($this->proxyClientMatcher($proxy)))
+            ->willReturn($app);
 
         return $app;
     }
@@ -184,24 +187,31 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
     {
         $account = $this->makeOfficialAccountAccount($appId);
 
-        $app = $this->getMockBuilder(OfficialAccount::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getAccount', 'getAccessToken', 'getHttpClient', 'setHttpClient'])
-            ->getMock();
-
-        $httpClient = $this->createMock(HttpClientInterface::class);
-
-        if ($proxy !== null) {
-            $httpClient->expects($this->once())
-                ->method('withOptions')
-                ->with(['proxy' => $proxy])
-                ->willReturn($httpClient);
-        }
+        $app = $this->createWeChatAppMock(
+            OfficialAccount::class,
+            ['getAccount', 'getAccessToken', 'getHttpClient', 'setHttpClient']
+        );
 
         $app->method('getAccount')->willReturn($account);
         $app->expects($this->once())->method('getAccessToken')->willReturn($token);
+
+        if (empty($proxy)) {
+            $app->expects($this->never())->method('getHttpClient');
+            $app->expects($this->never())->method('setHttpClient');
+
+            return $app;
+        }
+
+        $httpClient = $this->createMock(ClientInterface::class);
+        $httpClient->expects($this->once())
+            ->method('getConfig')
+            ->willReturn([]);
+
         $app->expects($this->once())->method('getHttpClient')->willReturn($httpClient);
-        $app->expects($this->once())->method('setHttpClient')->with($httpClient)->willReturn($app);
+        $app->expects($this->once())
+            ->method('setHttpClient')
+            ->with($this->callback($this->proxyClientMatcher($proxy)))
+            ->willReturn($app);
 
         return $app;
     }
@@ -272,9 +282,51 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
 
     private function skipIfHttpClientMissing(): void
     {
-        if (!interface_exists(HttpClientInterface::class)) {
-            $this->markTestSkipped('Symfony HttpClientInterface is not available.');
+        if (!interface_exists(ClientInterface::class)) {
+            $this->markTestSkipped('Guzzle ClientInterface is not available.');
         }
+    }
+
+    private function createWeChatAppMock(string $className, array $methods)
+    {
+        $builder = $this->getMockBuilder($className)
+            ->disableOriginalConstructor();
+
+        $existing = [];
+        $missing = [];
+
+        foreach ($methods as $method) {
+            if (method_exists($className, $method)) {
+                $existing[] = $method;
+            } else {
+                $missing[] = $method;
+            }
+        }
+
+        if (!empty($existing)) {
+            $builder->onlyMethods($existing);
+        }
+
+        if (!empty($missing)) {
+            $builder->addMethods($missing);
+        }
+
+        return $builder->getMock();
+    }
+
+    private function proxyClientMatcher(string $proxy): callable
+    {
+        return function ($client) use ($proxy) {
+            if (!$client instanceof ClientInterface) {
+                return false;
+            }
+
+            if (!method_exists($client, 'getConfig')) {
+                return false;
+            }
+
+            return $client->getConfig('proxy') === $proxy;
+        };
     }
 }
 

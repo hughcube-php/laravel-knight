@@ -3,6 +3,7 @@
 namespace HughCube\Laravel\Knight\Queue\Jobs;
 
 use EasyWeChat\OfficialAccount\Application as OfficialAccount;
+use GuzzleHttp\Client;
 use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\WeChat\WeChat;
 
@@ -44,9 +45,20 @@ class RefreshWeChatOfficialAccountAccessTokensJob extends Job
             return $app;
         }
 
-        $httpClient = $app->getHttpClient()->withOptions([
-            'proxy' => $this->p('proxy'),
-        ]);
+        $httpClient = $app->getHttpClient();
+
+        if (method_exists($httpClient, 'withOptions')) {
+            $httpClient = $httpClient->withOptions([
+                'proxy' => $proxy,
+            ]);
+        } elseif (method_exists($httpClient, 'getConfig')) {
+            $config = $httpClient->getConfig();
+            $config = is_array($config) ? $config : [];
+            $config['proxy'] = $proxy;
+            $httpClient = new Client($config);
+        } else {
+            return $app;
+        }
 
         return $app->setHttpClient($httpClient);
     }
