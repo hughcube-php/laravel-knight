@@ -3,15 +3,51 @@ name: Test
 on: [ push, pull_request ]
 
 jobs:
-  run:
-    runs-on: ${{ matrix.system }}
+  run-linux:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: knight_test
+          MYSQL_USER: knight
+          MYSQL_PASSWORD: knight
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -u knight -pknight"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: knight_test
+          POSTGRES_USER: knight
+          POSTGRES_PASSWORD: knight
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U knight -d knight_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     strategy:
       max-parallel: 15
       matrix:
-        system: [ ubuntu-latest, macOS-latest ]
         php: [ 7.4, 8.0, 8.1, 8.2, 8.3, 8.4, 8.5 ]
         laravel: [ 8, 9, 10, 11, 12 ]
-    name: PHP ${{ matrix.php }} Laravel ${{ matrix.laravel }} Test on ${{ matrix.system }}
+    name: PHP ${{ matrix.php }} Laravel ${{ matrix.laravel }} Test on ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@master
@@ -20,7 +56,7 @@ jobs:
         uses: shivammathur/setup-php@master
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring, xdebug, opcache, fileinfo, mcrypt #optional, setup extensions
+          extensions: mbstring, xdebug, opcache, fileinfo, mcrypt, pdo_mysql, pdo_pgsql #optional, setup extensions
           tools: composer:v2
           ini-values: post_max_size=256M, short_open_tag=On, opcache.enable_cli=1 #optional, setup php.ini configuration
 
@@ -48,5 +84,63 @@ jobs:
 
       - name: Run PHPUnit
         if: ${{ 'true' == env.has_deps }}
+        run: composer run-script test -- -c phpunit.xml.dist
+
+  run-macos:
+    runs-on: macOS-latest
+    strategy:
+      max-parallel: 15
+      matrix:
+        php: [ 7.4, 8.0, 8.1, 8.2, 8.3, 8.4, 8.5 ]
+        laravel: [ 8, 9, 10, 11, 12 ]
+    env:
+      TEST_PGSQL_HOST: ""
+      TEST_PGSQL_PORT: ""
+      TEST_PGSQL_DATABASE: ""
+      TEST_PGSQL_USERNAME: ""
+      TEST_PGSQL_PASSWORD: ""
+      TEST_MYSQL_HOST: ""
+      TEST_MYSQL_PORT: ""
+      TEST_MYSQL_DATABASE: ""
+      TEST_MYSQL_USERNAME: ""
+      TEST_MYSQL_PASSWORD: ""
+      REDIS_HOST: ""
+      REDIS_PORT: ""
+    name: PHP ${{ matrix.php }} Laravel ${{ matrix.laravel }} Test on macOS-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@master
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, xdebug, opcache, fileinfo, mcrypt, pdo_mysql, pdo_pgsql #optional, setup extensions
+          tools: composer:v2
+          ini-values: post_max_size=256M, short_open_tag=On, opcache.enable_cli=1 #optional, setup php.ini configuration
+
+      - name: System Setting
         run: |
-          composer run-script test
+          php -v
+          composer -V
+          php -m
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+
+      - name: Install dependencies
+        run: |
+          echo "has_deps=false" >> "$GITHUB_ENV"
+          composer config --no-plugins audit.block-insecure false
+          composer require laravel/framework:^${{ matrix.laravel }} --dev --no-update --prefer-stable
+          composer update --prefer-stable --prefer-dist --no-interaction --no-progress
+          echo "has_deps=true" >> "$GITHUB_ENV"
+        continue-on-error: true
+
+      - name: Composer Info
+        if: ${{ 'true' == env.has_deps }}
+        run: composer info
+
+      - name: Run PHPUnit
+        if: ${{ 'true' == env.has_deps }}
+        run: composer run-script test -- -c phpunit.xml.dist
