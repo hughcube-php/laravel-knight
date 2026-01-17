@@ -360,7 +360,7 @@ class Str extends \Illuminate\Support\Str
             $slice = join('', array_slice($match[0], $start, $length));
         }
 
-        return $slice . $suffix;
+        return $slice.$suffix;
     }
 
     /**

@@ -27,7 +27,9 @@ use Illuminate\Database\Query\Grammars\Grammar;
  *   - 遵循 Laravel 的标准 Grammar 编译模式
  *
  * @mixin Grammar
+ *
  * @property-read Grammar $connection
+ *
  * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin 对应的 Builder 扩展
  */
 class GrammarMixin
@@ -63,7 +65,7 @@ class GrammarMixin
             $arrayExpr = $this->compilePgArrayExpression($where['value'], $where['arrayType'] ?? null);
 
             /** @phpstan-ignore-next-line */
-            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
+            return $not.'('.$column.' @> '.$arrayExpr.')';
         };
     }
 
@@ -95,7 +97,7 @@ class GrammarMixin
             $arrayExpr = $this->compilePgArrayExpression($where['value'], $where['arrayType'] ?? null);
 
             /** @phpstan-ignore-next-line */
-            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
+            return $not.'('.$column.' <@ '.$arrayExpr.')';
         };
     }
 
@@ -127,7 +129,7 @@ class GrammarMixin
             $arrayExpr = $this->compilePgArrayExpression($where['value'], $where['arrayType'] ?? null);
 
             /** @phpstan-ignore-next-line */
-            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
+            return $not.'('.$column.' && '.$arrayExpr.')';
         };
     }
 
@@ -150,7 +152,7 @@ class GrammarMixin
             if ($count === 0) {
                 $type = $arrayType ?? 'text';
 
-                return 'ARRAY[]::' . $type . '[]';
+                return 'ARRAY[]::'.$type.'[]';
             }
 
             $placeholders = implode(', ', array_fill(0, $count, '?'));
@@ -168,7 +170,7 @@ class GrammarMixin
                 }
             }
 
-            return 'ARRAY[' . $placeholders . ']::' . $arrayType . '[]';
+            return 'ARRAY['.$placeholders.']::'.$arrayType.'[]';
         };
     }
 }

@@ -48,7 +48,7 @@ class JobTest extends TestCase
             protected function rules(): array
             {
                 return [
-                    'name' => ['string'],
+                    'name'  => ['string'],
                     'count' => ['integer'],
                 ];
             }

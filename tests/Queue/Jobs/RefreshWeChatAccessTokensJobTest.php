@@ -2,11 +2,11 @@
 
 namespace HughCube\Laravel\Knight\Tests\Queue\Jobs;
 
+use EasyWeChat\Kernel\Contracts\AccessToken as AccessTokenInterface;
 use EasyWeChat\MiniApp\Application as MiniApp;
 use EasyWeChat\MiniApp\Contracts\Account as MiniAppAccount;
 use EasyWeChat\OfficialAccount\Application as OfficialAccount;
 use EasyWeChat\OfficialAccount\Contracts\Account as OfficialAccountAccount;
-use EasyWeChat\Kernel\Contracts\AccessToken as AccessTokenInterface;
 use GuzzleHttp\ClientInterface as GuzzleClientInterface;
 use HughCube\Laravel\Knight\Queue\Jobs\RefreshWeChatMiniAppAccessTokensJob;
 use HughCube\Laravel\Knight\Queue\Jobs\RefreshWeChatOfficialAccountAccessTokensJob;
@@ -316,6 +316,7 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
             $httpClient->expects($this->once())
                 ->method('withOptions')
                 ->willReturnSelf();
+
             return $httpClient;
         }
 
@@ -323,6 +324,7 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
         $httpClient->expects($this->once())
             ->method('getConfig')
             ->willReturn([]);
+
         return $httpClient;
     }
 

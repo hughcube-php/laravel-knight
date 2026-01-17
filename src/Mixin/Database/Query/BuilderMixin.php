@@ -48,6 +48,7 @@ class BuilderMixin
      *   // SQL: WHERE "ids" @> ARRAY[?, ?, ?]::bigint[]
      *
      * @phpstan-ignore-next-line
+     *
      * @return Closure(string $column, array $value, string $boolean = 'and', bool $not = false, string|null $arrayType = null): static
      */
     public function whereArrayContains(): Closure
@@ -59,7 +60,7 @@ class BuilderMixin
             $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not', 'arrayType');
 
             if (!$value instanceof Expression) {
-                foreach ((array)$value as $val) {
+                foreach ((array) $value as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -77,6 +78,7 @@ class BuilderMixin
      *   // SQL: WHERE status = 'active' OR ("tags" @> '{vip}')
      *
      * @phpstan-ignore-next-line
+     *
      * @return Closure(string $column, array $value, string|null $arrayType = null): static
      */
     public function orWhereArrayContains(): Closure
@@ -97,6 +99,7 @@ class BuilderMixin
      *   // SQL: WHERE NOT ("tags" @> '{banned}')
      *
      * @phpstan-ignore-next-line
+     *
      * @return Closure(string $column, array $value, string $boolean = 'and', string|null $arrayType = null): static
      */
     public function whereNotArrayContains(): Closure
@@ -116,6 +119,7 @@ class BuilderMixin
      *   // SQL: WHERE status = 'active' OR NOT ("tags" @> '{banned}')
      *
      * @phpstan-ignore-next-line
+     *
      * @return Closure(string $column, array $value, string|null $arrayType = null): static
      */
     public function orWhereNotArrayContains(): Closure
@@ -139,6 +143,7 @@ class BuilderMixin
      *   // SQL: WHERE "tags" <@ ARRAY[?, ?, ?]::text[]
      *
      * @phpstan-ignore-next-line
+     *
      * @return Closure(string $column, array $value, string $boolean = 'and', bool $not = false, string|null $arrayType = null): static
      */
     public function whereArrayContainedBy(): Closure
@@ -150,7 +155,7 @@ class BuilderMixin
             $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not', 'arrayType');
 
             if (!$value instanceof Expression) {
-                foreach ((array)$value as $val) {
+                foreach ((array) $value as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -168,6 +173,7 @@ class BuilderMixin
      *   // SQL: WHERE status = 'active' OR ("tags" <@ '{php,laravel}')
      *
      * @phpstan-ignore-next-line
+     *
      * @return Closure(string $column, array $value, string|null $arrayType = null): static
      */
     public function orWhereArrayContainedBy(): Closure
@@ -186,6 +192,7 @@ class BuilderMixin
      *   // SQL: WHERE NOT ("tags" <@ '{php}')
      *
      * @phpstan-ignore-next-line
+     *
      * @return Closure(string $column, array $value, string $boolean = 'and', string|null $arrayType = null): static
      */
     public function whereNotArrayContainedBy(): Closure
@@ -205,6 +212,7 @@ class BuilderMixin
      *   // SQL: WHERE status = 'active' OR NOT ("tags" <@ '{php}')
      *
      * @phpstan-ignore-next-line
+     *
      * @return Closure(string $column, array $value, string|null $arrayType = null): static
      */
     public function orWhereNotArrayContainedBy(): Closure
@@ -231,6 +239,7 @@ class BuilderMixin
      *   $query->whereArrayOverlaps('permissions', ['admin', 'moderator']);
      *
      * @phpstan-ignore-next-line
+     *
      * @return Closure(string $column, array $value, string $boolean = 'and', bool $not = false, string|null $arrayType = null): static
      */
     public function whereArrayOverlaps(): Closure
@@ -242,7 +251,7 @@ class BuilderMixin
             $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not', 'arrayType');
 
             if (!$value instanceof Expression) {
-                foreach ((array)$value as $val) {
+                foreach ((array) $value as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -260,6 +269,7 @@ class BuilderMixin
      *   // SQL: WHERE status = 'active' OR ("tags" && '{vip,premium}')
      *
      * @phpstan-ignore-next-line
+     *
      * @return Closure(string $column, array $value, string|null $arrayType = null): static
      */
     public function orWhereArrayOverlaps(): Closure
@@ -280,6 +290,7 @@ class BuilderMixin
      *   // SQL: WHERE NOT ("tags" && '{banned,deprecated}')
      *
      * @phpstan-ignore-next-line
+     *
      * @return Closure(string $column, array $value, string $boolean = 'and', string|null $arrayType = null): static
      */
     public function whereNotArrayOverlaps(): Closure
@@ -299,6 +310,7 @@ class BuilderMixin
      *   // SQL: WHERE status = 'active' OR NOT ("tags" && '{banned}')
      *
      * @phpstan-ignore-next-line
+     *
      * @return Closure(string $column, array $value, string|null $arrayType = null): static
      */
     public function orWhereNotArrayOverlaps(): Closure

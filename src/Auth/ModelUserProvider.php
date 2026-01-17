@@ -23,6 +23,7 @@ class ModelUserProvider implements UserProvider
     /**
      * @param $method
      * @param ...$args
+     *
      * @return mixed
      */
     protected function callModelMethod($method, ...$args)

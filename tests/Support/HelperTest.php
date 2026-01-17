@@ -2,11 +2,11 @@
 
 namespace HughCube\Laravel\Knight\Tests\Support;
 
+use Exception;
 use HughCube\Laravel\Knight\Support\Helper;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
-use Exception;
 use stdClass;
 
 class HelperTest extends TestCase
@@ -28,7 +28,7 @@ class HelperTest extends TestCase
     public function testAssertClassExists()
     {
         $helper = new Helper();
-        
+
         $helper->assertClassExists(stdClass::class);
         $this->assertTrue(true);
 
@@ -66,7 +66,7 @@ class HelperTest extends TestCase
     {
         $previous = new Exception('Previous message', 456);
         $exception = new Exception('Test message', 123, $previous);
-        
+
         $array = Helper::convertExceptionToArray($exception);
 
         $this->assertArrayHasKey('previous', $array);
@@ -78,9 +78,9 @@ class HelperTest extends TestCase
     {
         $validator = \Illuminate\Support\Facades\Validator::make([], []);
         $exception = new ValidationException($validator);
-        
+
         $array = Helper::convertExceptionToArray($exception);
-        
+
         $this->assertArrayHasKey('errors', $array);
         $this->assertSame($exception->errors(), $array['errors']);
     }

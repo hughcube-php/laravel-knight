@@ -25,8 +25,9 @@ class CreatePreloadCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return void
      * @throws Exception
+     *
+     * @return void
      */
     public function handle()
     {
@@ -40,8 +41,8 @@ class CreatePreloadCommand extends Command
             base_path(),
             [
                 'WITH_REMOTE_SCRIPTS' => strval(intval($this->option('with-remote-scripts'))),
-                'SKIP_BOOTSTRAP' => strval(intval($this->option('skip-bootstrap'))),
-                'OUTPUT_PATH' => $outputPath,
+                'SKIP_BOOTSTRAP'      => strval(intval($this->option('skip-bootstrap'))),
+                'OUTPUT_PATH'         => $outputPath,
             ]
         );
 
@@ -56,7 +57,8 @@ class CreatePreloadCommand extends Command
 
             $this->info('Preload file created successfully!');
         } catch (Exception $e) {
-            $this->error('Failed to create preload file: ' . $e->getMessage());
+            $this->error('Failed to create preload file: '.$e->getMessage());
+
             throw $e;
         }
     }

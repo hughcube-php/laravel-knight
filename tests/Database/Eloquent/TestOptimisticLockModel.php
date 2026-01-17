@@ -2,8 +2,8 @@
 
 namespace HughCube\Laravel\Knight\Tests\Database\Eloquent;
 
-use Illuminate\Database\Eloquent\Model;
 use HughCube\Laravel\Knight\Database\Eloquent\Traits\OptimisticLock;
+use Illuminate\Database\Eloquent\Model;
 
 class TestOptimisticLockModel extends Model
 {

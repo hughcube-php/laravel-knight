@@ -9,6 +9,7 @@
 
 namespace HughCube\Laravel\Knight\Tests\Support;
 
+use Exception;
 use GuzzleHttp\RequestOptions;
 use HughCube\GuzzleHttp\Client;
 use HughCube\Laravel\Knight\Support\Downloader;
@@ -17,7 +18,6 @@ use HughCube\StaticInstanceInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
-use Exception;
 
 class DownloaderTest extends TestCase
 {

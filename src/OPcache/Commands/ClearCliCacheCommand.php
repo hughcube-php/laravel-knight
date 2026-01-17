@@ -29,9 +29,9 @@ class ClearCliCacheCommand extends Command
     /**
      * @param Schedule $schedule
      *
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function handle(Schedule $schedule)
     {

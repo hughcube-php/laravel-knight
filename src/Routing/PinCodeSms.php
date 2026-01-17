@@ -20,9 +20,9 @@ trait PinCodeSms
     use GetMobile;
 
     /**
-     * @return mixed|void
      * @throws UserException
      *
+     * @return mixed|void
      */
     protected function action()
     {
@@ -62,7 +62,7 @@ trait PinCodeSms
     /**
      * @param int|string $mobile
      * @param int|string $iddCode
-     * @param mixed $pinCode
+     * @param mixed      $pinCode
      *
      * @return void
      */

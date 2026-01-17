@@ -2,9 +2,9 @@
 
 namespace HughCube\Laravel\Knight\Tests\Exceptions;
 
-use HughCube\Laravel\Knight\Exceptions\ExceptionWithData;
 use HughCube\Laravel\Knight\Exceptions\AuthUserInstanceExpectException;
 use HughCube\Laravel\Knight\Exceptions\AuthUserNotAvailableException;
+use HughCube\Laravel\Knight\Exceptions\ExceptionWithData;
 use HughCube\Laravel\Knight\Exceptions\MobileEmptyException;
 use HughCube\Laravel\Knight\Exceptions\MobileInvalidException;
 use HughCube\Laravel\Knight\Exceptions\NotCloseTransactionException;

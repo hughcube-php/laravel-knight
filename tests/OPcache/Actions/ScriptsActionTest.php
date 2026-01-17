@@ -25,11 +25,13 @@ class ScriptsActionTest extends TestCase
     {
         if (!extension_loaded('Zend OPcache') || !function_exists('opcache_reset')) {
             $this->markTestSkipped('OPcache extension is not loaded or opcache_reset function is not available');
+
             return;
         }
 
         if (!opcache_reset()) {
             $this->markTestSkipped('Failed to reset OPcache');
+
             return;
         }
 

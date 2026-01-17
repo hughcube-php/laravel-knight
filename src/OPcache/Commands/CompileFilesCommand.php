@@ -44,9 +44,9 @@ class CompileFilesCommand extends Command
     /**
      * @param Schedule $schedule
      *
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function handle(Schedule $schedule)
     {
@@ -56,27 +56,27 @@ class CompileFilesCommand extends Command
         $scripts = Collection::empty()
             ->merge(
                 $appFiles = Collection::make($this->getAppFiles())
-                    ->filter(fn($file) => is_file($file))
+                    ->filter(fn ($file) => is_file($file))
                     ->values()
             )
             ->merge(
                 $composerFiles = Collection::make($this->getComposerFiles())
-                    ->filter(fn($file) => is_file($file))
+                    ->filter(fn ($file) => is_file($file))
                     ->values()
             )
             ->merge(
                 $prodFiles = Collection::make($this->getProdFiles())
-                    ->filter(fn($file) => is_file($file))
+                    ->filter(fn ($file) => is_file($file))
                     ->values()
             )
             ->merge(
                 $vendorBinFiles = Collection::make($this->getVendorBinFiles())
-                    ->filter(fn($file) => is_file($file))
+                    ->filter(fn ($file) => is_file($file))
                     ->values()
             )
             ->merge(
                 $octaneFiles = Collection::make($this->getOctaneFiles())
-                    ->filter(fn($file) => is_file($file))
+                    ->filter(fn ($file) => is_file($file))
                     ->values()
             )
             ->unique()->values();
@@ -99,6 +99,7 @@ class CompileFilesCommand extends Command
 
         if (empty($scripts)) {
             $this->warn('No files to compile!');
+
             return;
         }
 
@@ -167,7 +168,7 @@ class CompileFilesCommand extends Command
         if (is_file($file)) {
             $psr4 = require $file;
             foreach ($psr4 as $paths) {
-                foreach ((array)$paths as $path) {
+                foreach ((array) $paths as $path) {
                     if (is_dir($path)) {
                         $finder = Finder::create()
                             ->in($path)
@@ -264,7 +265,7 @@ class CompileFilesCommand extends Command
     }
 
     /**
-     * 获取 vendor/bin 目录下的 PHP 脚本文件
+     * 获取 vendor/bin 目录下的 PHP 脚本文件.
      *
      * @return array
      */
@@ -275,7 +276,7 @@ class CompileFilesCommand extends Command
 
     /**
      * 获取 vendor/laravel/octane 目录下的所有 PHP 文件
-     * 包括 bin 目录下的 PHP 脚本（即使没有 .php 后缀）
+     * 包括 bin 目录下的 PHP 脚本（即使没有 .php 后缀）.
      *
      * @return array
      */
@@ -286,10 +287,11 @@ class CompileFilesCommand extends Command
 
     /**
      * 查找指定目录下的所有 PHP 脚本文件
-     * 包括 .php 文件和包含 PHP shebang 的可执行脚本
+     * 包括 .php 文件和包含 PHP shebang 的可执行脚本.
      *
-     * @param string $path 要搜索的目录路径
-     * @param bool $followLinks 是否跟随符号链接（默认 false）
+     * @param string $path        要搜索的目录路径
+     * @param bool   $followLinks 是否跟随符号链接（默认 false）
+     *
      * @return array
      */
     protected function findPhpScripts(string $path, bool $followLinks = false): array
@@ -318,11 +320,12 @@ class CompileFilesCommand extends Command
                 if ($file->isReadable() && ($handle = fopen($file->getRealPath(), 'r'))) {
                     $firstLine = fgets($handle);
                     fclose($handle);
+
                     return !empty($firstLine) && preg_match('/^#!.*php/', $firstLine);
                 }
 
                 return false;
             })
-            ->map(fn($file) => $file->getRealPath())->unique()->values()->all();
+            ->map(fn ($file) => $file->getRealPath())->unique()->values()->all();
     }
 }

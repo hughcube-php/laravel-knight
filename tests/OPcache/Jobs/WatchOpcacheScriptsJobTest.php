@@ -2,8 +2,8 @@
 
 namespace HughCube\Laravel\Knight\Tests\OPcache\Jobs;
 
-use HughCube\Laravel\Knight\OPcache\OPcache;
 use HughCube\Laravel\Knight\OPcache\Jobs\WatchOpcacheScriptsJob;
+use HughCube\Laravel\Knight\OPcache\OPcache;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use HughCube\PUrl\Url;
 
@@ -68,7 +68,7 @@ class WatchOpcacheScriptsJobTest extends TestCase
         $this->setOpcacheInstance($fake);
 
         $job = new WatchOpcacheScriptsJobStub([
-            'timeout' => 1,
+            'timeout'     => 1,
             'use_app_url' => 0,
         ]);
         $this->callMethod($job, 'loadParameters');

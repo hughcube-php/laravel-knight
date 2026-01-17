@@ -359,7 +359,7 @@ class CollectionMixin
     }
 
     /**
-     * split \/／
+     * split \/／.
      */
     public function splitSlash(): Closure
     {

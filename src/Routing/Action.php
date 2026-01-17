@@ -10,6 +10,7 @@
 namespace HughCube\Laravel\Knight\Routing;
 
 use BadMethodCallException;
+use HughCube\Laravel\Knight\Http\JsonResponse as KJsonResponse;
 use HughCube\Laravel\Knight\Http\Request as KnightRequest;
 use HughCube\Laravel\Knight\Ide\Http\KIdeRequest;
 use HughCube\Laravel\Knight\Support\ParameterBag;
@@ -25,7 +26,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use stdClass;
 use Symfony\Component\HttpFoundation\Response;
-use HughCube\Laravel\Knight\Http\JsonResponse as KJsonResponse;
 
 trait Action
 {
@@ -203,7 +203,7 @@ trait Action
         return new KJsonResponse([
             'Code'    => 'Success',
             'Message' => 'Success',
-            'Data'    => $data ?: new stdClass()
+            'Data'    => $data ?: new stdClass(),
         ], $statusCode);
     }
 
@@ -212,7 +212,7 @@ trait Action
         return new KJsonResponse([
             'Code'    => $code,
             'Message' => $message,
-            'Data'    => $data ?: new stdClass()
+            'Data'    => $data ?: new stdClass(),
         ], $statusCode);
     }
 

@@ -26,7 +26,7 @@ class JsonOverlapsPgsqlTest extends TestCase
     {
         // 按需注册 PostgreSQL JSON Overlaps 支持
         KnightPostgresGrammar::registerConnectionResolver();
-        #KnightPostgresGrammar::applyToExistingConnections();
+        //KnightPostgresGrammar::applyToExistingConnections();
 
         parent::setUp();
 
@@ -163,32 +163,32 @@ class JsonOverlapsPgsqlTest extends TestCase
     {
         return [
             [
-                'id' => 1,
-                'tags' => $this->encodeJson(['php', 'laravel']),
-                'meta' => $this->encodeJson(['role' => 'admin', 'team' => 'alpha']),
+                'id'      => 1,
+                'tags'    => $this->encodeJson(['php', 'laravel']),
+                'meta'    => $this->encodeJson(['role' => 'admin', 'team' => 'alpha']),
                 'payload' => $this->encodeJson(['settings' => ['tags' => ['php', 'mysql']], 'status' => 'active']),
-                'scalar' => $this->encodeJson('php'),
+                'scalar'  => $this->encodeJson('php'),
             ],
             [
-                'id' => 2,
-                'tags' => $this->encodeJson(['python', 'django']),
-                'meta' => $this->encodeJson(['role' => 'user', 'team' => 'beta']),
+                'id'      => 2,
+                'tags'    => $this->encodeJson(['python', 'django']),
+                'meta'    => $this->encodeJson(['role' => 'user', 'team' => 'beta']),
                 'payload' => $this->encodeJson(['settings' => ['tags' => ['python']], 'status' => 'inactive']),
-                'scalar' => $this->encodeJson('python'),
+                'scalar'  => $this->encodeJson('python'),
             ],
             [
-                'id' => 3,
-                'tags' => $this->encodeJson(['go', 'rust']),
-                'meta' => $this->encodeJson(['role' => 'admin', 'team' => 'beta', 'flag' => true]),
+                'id'      => 3,
+                'tags'    => $this->encodeJson(['go', 'rust']),
+                'meta'    => $this->encodeJson(['role' => 'admin', 'team' => 'beta', 'flag' => true]),
                 'payload' => $this->encodeJson(['settings' => ['tags' => ['rust', 'php']], 'status' => 'active']),
-                'scalar' => $this->encodeJson('go'),
+                'scalar'  => $this->encodeJson('go'),
             ],
             [
-                'id' => 4,
-                'tags' => $this->encodeJson([]),
-                'meta' => $this->encodeJson(['role' => 'guest']),
+                'id'      => 4,
+                'tags'    => $this->encodeJson([]),
+                'meta'    => $this->encodeJson(['role' => 'guest']),
                 'payload' => $this->encodeJson(['settings' => ['tags' => []], 'status' => 'disabled']),
-                'scalar' => $this->encodeJson(null),
+                'scalar'  => $this->encodeJson(null),
             ],
         ];
     }
@@ -234,17 +234,17 @@ class JsonOverlapsPgsqlTest extends TestCase
         $password = getenv($prefix.'_PASSWORD');
 
         return [
-            'driver' => 'pgsql',
-            'host' => $host,
-            'port' => ($port === false || $port === '') ? 5432 : (int) $port,
+            'driver'   => 'pgsql',
+            'host'     => $host,
+            'port'     => ($port === false || $port === '') ? 5432 : (int) $port,
             'database' => $database,
             'username' => $username,
             'password' => ($password === false) ? null : $password,
-            'charset' => 'utf8',
-            'prefix' => '',
-            'schema' => 'public',
-            'options' => [
-                PDO::ATTR_PERSISTENT => true,
+            'charset'  => 'utf8',
+            'prefix'   => '',
+            'schema'   => 'public',
+            'options'  => [
+                PDO::ATTR_PERSISTENT       => true,
                 PDO::ATTR_EMULATE_PREPARES => true,
             ],
         ];

@@ -15,8 +15,9 @@ trait ProxyForwarder
     use HttpClientTrait;
 
     /**
-     * @return ResponseInterface
      * @throws GuzzleException
+     *
+     * @return ResponseInterface
      */
     protected function action(): ResponseInterface
     {
@@ -52,13 +53,13 @@ trait ProxyForwarder
     protected function getProxyRequestOptions(): array
     {
         return [
-            RequestOptions::BODY => $this->getProxyBody(),
-            RequestOptions::QUERY => $this->getProxyQuery(),
-            RequestOptions::PROXY => $this->getProxyProxy(),
-            RequestOptions::STREAM => $this->getProxyStream(),
-            RequestOptions::VERIFY => $this->getProxyVerify(),
-            RequestOptions::HEADERS => $this->getProxyHeaders(),
-            RequestOptions::HTTP_ERRORS => $this->getProxyHttpErrors(),
+            RequestOptions::BODY            => $this->getProxyBody(),
+            RequestOptions::QUERY           => $this->getProxyQuery(),
+            RequestOptions::PROXY           => $this->getProxyProxy(),
+            RequestOptions::STREAM          => $this->getProxyStream(),
+            RequestOptions::VERIFY          => $this->getProxyVerify(),
+            RequestOptions::HEADERS         => $this->getProxyHeaders(),
+            RequestOptions::HTTP_ERRORS     => $this->getProxyHttpErrors(),
             RequestOptions::ALLOW_REDIRECTS => $this->getProxyAllowRedirects(),
         ];
     }
@@ -130,6 +131,7 @@ trait ProxyForwarder
 
     /**
      * @param string $name
+     *
      * @return bool
      */
     protected function isIgnoreProxyHeader(string $name): bool

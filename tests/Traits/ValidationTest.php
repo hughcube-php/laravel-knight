@@ -35,14 +35,14 @@ class ValidationTest extends TestCase
             {
                 return [
                     'name' => ['required', 'string'],
-                    'age' => ['required', 'integer'],
+                    'age'  => ['required', 'integer'],
                 ];
             }
         };
 
         $request = Request::create('/validate', 'POST', [
             'name' => 'Bob',
-            'age' => 20,
+            'age'  => 20,
         ]);
 
         $data = $this->callMethod($instance, 'validate', [$request]);

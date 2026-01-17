@@ -45,7 +45,7 @@ class PaginateQueryTest extends TestCase
         $this->app->instance('request', $request);
 
         $response = $action();
-        
+
         $content = $response->getData(true);
         $this->assertSame('Success', $content['Code']);
         $this->assertSame(1, $content['Data']['page']);
