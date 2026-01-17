@@ -4,6 +4,7 @@ namespace HughCube\Laravel\Knight\Tests\Mixin\Database\Query;
 
 use HughCube\Laravel\Knight\Database\Query\Grammars\PostgresGrammar as KnightPostgresGrammar;
 use HughCube\Laravel\Knight\Tests\TestCase;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use PDO;
 
@@ -30,6 +31,7 @@ class JsonOverlapsPgsqlTest extends TestCase
         parent::setUp();
 
         $this->skipIfPgsqlNotConfigured();
+        $this->skipIfBuilderJsonOverlapsNotSupported();
 
         $this->setUpJsonTable();
     }
@@ -257,6 +259,13 @@ class JsonOverlapsPgsqlTest extends TestCase
     {
         if (!$this->isPgsqlConfigured()) {
             $this->markTestSkipped('PostgreSQL connection is not configured for JsonOverlapsPgsqlTest.');
+        }
+    }
+
+    private function skipIfBuilderJsonOverlapsNotSupported(): void
+    {
+        if (!method_exists(Builder::class, 'whereJsonOverlaps')) {
+            $this->markTestSkipped('Query builder does not support whereJsonOverlaps (Laravel version too old).');
         }
     }
 }
