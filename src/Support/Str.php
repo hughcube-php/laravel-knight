@@ -237,6 +237,10 @@ class Str extends \Illuminate\Support\Str
      */
     public static function isChineseName($string): bool
     {
+        if (str_starts_with($string, '·') || str_ends_with($string, '·')) {
+            return false;
+        }
+
         return 0 < preg_match('/^(?=.{2,12}$)[\p{Han}]+(?:\x{00B7}[\p{Han}]+)?$/u', $string);
     }
 
