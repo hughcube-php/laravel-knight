@@ -5,8 +5,6 @@
          processIsolation="false"
          stopOnError="false"
          stopOnFailure="false"
-         cacheDirectory=".phpunit.cache"
-         backupStaticProperties="false"
          bootstrap="vendor/autoload.php">
     <testsuites>
         <testsuite name="Laravel Test Suite">

@@ -2,7 +2,7 @@
 
 namespace HughCube\Laravel\Knight\Tests\OPcache\Views;
 
-use HughCube\Laravel\Knight\Tests\TestCase;
+use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use ReflectionProperty;
 
@@ -51,9 +51,6 @@ class OpCacheDataModelTest extends TestCase
         $this->assertNotEmpty($model->getD3Scripts());
     }
 
-    /**
-     * @runInSeparateProcess
-     */
     public function testPrivateHelpersWithoutThousandSeparator()
     {
         if (!defined('THOUSAND_SEPARATOR')) {

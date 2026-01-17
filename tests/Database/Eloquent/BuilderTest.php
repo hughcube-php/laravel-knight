@@ -263,7 +263,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(1, 10),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
 
         $rows = User::query()
@@ -272,7 +272,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(11, 20),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
 
         $rows = User::query()
@@ -281,7 +281,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(1, 20),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
 
         $rows = User::query()
@@ -290,7 +290,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(20, 100),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
     }
 
@@ -311,7 +311,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(1, 100),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
 
         $rows = User::query()
@@ -320,7 +320,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(1, 100),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
     }
 
@@ -341,7 +341,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(11, 100),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
 
         $rows = User::query()
@@ -350,7 +350,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(1, 90),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
     }
 
@@ -371,7 +371,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(1, 100),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
 
         $rows = User::query()
@@ -380,7 +380,7 @@ class BuilderTest extends TestCase
             ->get();
         $this->assertSame(
             range(1, 100),
-            $rows->pluck('range')->values()->toArray()
+            array_map('intval', $rows->pluck('range')->values()->toArray())
         );
     }
 }

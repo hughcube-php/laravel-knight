@@ -443,7 +443,7 @@ class StrMixin
             $char = substr($string, $index, 1);
 
             /** @phpstan-ignore-next-line */
-            return false === $char ? null : $char;
+            return false === $char ? '' : $char;
         };
     }
 

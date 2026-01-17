@@ -4,7 +4,6 @@ namespace HughCube\Laravel\Knight\Tests\Cache\Listeners;
 
 use HughCube\Laravel\Knight\Cache\Listeners\LogMissedKey;
 use HughCube\Laravel\Knight\Tests\TestCase;
-use Illuminate\Cache\Events\CacheMissed;
 use Illuminate\Support\Facades\Log;
 
 class LogMissedKeyTest extends TestCase
@@ -14,12 +13,18 @@ class LogMissedKeyTest extends TestCase
         Log::spy();
 
         $listener = new LogMissedKey();
-        $event = new CacheMissed('array', 'missing-key', ['tag-a', 'tag-b']);
+        $event = $this->newCacheEvent('array', 'missing-key', ['tag-a', 'tag-b']);
+        $storeName = property_exists($event, 'storeName') ? $event->storeName : null;
 
         $listener->handle($event);
 
         Log::shouldHaveReceived('debug')
             ->once()
-            ->with('cache missed: store: array, key: missing-key, tags: tag-a,tag-b');
+            ->with(sprintf(
+                'cache missed: store: %s, key: %s, tags: %s',
+                $storeName,
+                $event->key,
+                implode(',', $event->tags)
+            ));
     }
 }

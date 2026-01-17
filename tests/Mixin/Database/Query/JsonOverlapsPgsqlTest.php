@@ -126,25 +126,35 @@ class JsonOverlapsPgsqlTest extends TestCase
 
     private function getQuery()
     {
-        return DB::connection('pgsql')->table('knight_json_overlaps_test');
+        $query = DB::connection('pgsql')->table('knight_json_overlaps_test');
+
+        if (method_exists($query, 'useWritePdo')) {
+            $query->useWritePdo();
+        }
+
+        return $query;
     }
 
     private function setUpJsonTable(): void
     {
         $connection = DB::connection('pgsql');
 
-        $connection->statement('DROP TABLE IF EXISTS knight_json_overlaps_test');
-        $connection->statement(
-            'CREATE TABLE knight_json_overlaps_test (
-                id INTEGER PRIMARY KEY,
-                tags JSONB NULL,
-                meta JSONB NULL,
-                payload JSONB NULL,
-                scalar JSONB NULL
-            )'
-        );
+        try {
+            $connection->statement('DROP TABLE IF EXISTS knight_json_overlaps_test');
+            $connection->statement(
+                'CREATE TABLE knight_json_overlaps_test (
+                    id INTEGER PRIMARY KEY,
+                    tags JSONB NULL,
+                    meta JSONB NULL,
+                    payload JSONB NULL,
+                    scalar JSONB NULL
+                )'
+            );
 
-        $connection->table('knight_json_overlaps_test')->insert($this->seedRows());
+            $connection->table('knight_json_overlaps_test')->insert($this->seedRows());
+        } catch (\Throwable $exception) {
+            $this->markTestSkipped('PostgreSQL JSON overlaps setup failed: '.$exception->getMessage());
+        }
     }
 
     private function seedRows(): array

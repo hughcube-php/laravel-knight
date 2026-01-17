@@ -33,6 +33,10 @@ class MiscMiddlewareTest extends TestCase
 
     public function testHandleAllPathCorsMatchesAnyPath()
     {
+        if (!class_exists(CorsService::class)) {
+            $this->markTestSkipped('Fruitcake CorsService is not available.');
+        }
+
         $middleware = new HandleAllPathCors($this->app, new CorsService());
         $request = Request::create('/cors', 'GET');
 

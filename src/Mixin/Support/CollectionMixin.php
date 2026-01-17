@@ -252,7 +252,7 @@ class CollectionMixin
 
             foreach ($this->getIterator() as $key => $item) {
                 /** @phpstan-ignore-next-line */
-                if ($keys->hasValue($key)) {
+                if ($keys->hasValue($key, true)) {
                     $collection->put($key, $item);
                 }
             }

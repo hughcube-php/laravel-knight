@@ -17,7 +17,7 @@ class DbTest extends TestCase
             $attempts++;
 
             if ($attempts < 3) {
-                throw new QueryException('sqlite', 'select 1', [], new Exception('fail'));
+                throw $this->newQueryException('select 1', [], new Exception('fail'), 'sqlite');
             }
 
             return 'ok';
@@ -35,7 +35,7 @@ class DbTest extends TestCase
             DB::retryOnQueryException(function () use (&$attempts) {
                 $attempts++;
 
-                throw new QueryException('sqlite', 'select 1', [], new Exception('fail'));
+                throw $this->newQueryException('select 1', [], new Exception('fail'), 'sqlite');
             }, 2, 0);
 
             $this->fail('Expected QueryException was not thrown.');

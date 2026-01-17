@@ -88,7 +88,7 @@ class PersonalAccessToken extends \Laravel\Sanctum\PersonalAccessToken
 
     public function tokenable(): Attribute
     {
-        return Attribute::make(function ($value, $attributes) {
+        return new Attribute(function ($value, $attributes) {
             $class = $attributes['tokenable_type'];
 
             return $class::findById($attributes['tokenable_id']);

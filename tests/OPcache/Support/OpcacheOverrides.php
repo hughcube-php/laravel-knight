@@ -2,6 +2,8 @@
 
 namespace HughCube\Laravel\Knight\Tests\OPcache;
 
+use PHPUnit\Framework\Assert;
+
 class OpcacheTestOverrides
 {
     public static bool $extensionLoaded = true;
@@ -11,9 +13,7 @@ class OpcacheTestOverrides
     public static function resetDefaults(): void
     {
         if (!\function_exists('opcache_get_status')) {
-            throw new \PHPUnit\Framework\SkippedWithMessageException(
-                'opcache_get_status is not available.'
-            );
+            Assert::markTestSkipped('opcache_get_status is not available.');
         }
 
         self::$extensionLoaded = \extension_loaded('Zend OPcache');

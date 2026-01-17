@@ -13,17 +13,29 @@ use Exception;
 use HughCube\Laravel\Knight\Database\Query\Grammars\PostgresGrammar as KnightPostgresGrammar;
 use HughCube\Laravel\Knight\Queue\Job;
 use HughCube\Laravel\Knight\ServiceProvider;
+use Illuminate\Cache\Events\CacheEvent;
 use Illuminate\Config\Repository;
 use Illuminate\Database\DatabaseServiceProvider;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+use Throwable;
 
 class TestCase extends OrchestraTestCase
 {
     protected static bool $postgresGrammarRegistered = false;
+
+    public static function applicationBasePath()
+    {
+        $path = realpath(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'orchestra' . DIRECTORY_SEPARATOR . 'testbench-core' . DIRECTORY_SEPARATOR . 'laravel');
+
+        return $path !== false
+            ? $path
+            : __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'orchestra' . DIRECTORY_SEPARATOR . 'testbench-core' . DIRECTORY_SEPARATOR . 'laravel';
+    }
 
     protected function setUp(): void
     {
@@ -166,6 +178,57 @@ class TestCase extends OrchestraTestCase
         $property->setAccessible(true);
 
         $property->setValue($object, $value);
+    }
+
+    /**
+     * @param string $storeName
+     * @param string $key
+     * @param array  $tags
+     *
+     * @return CacheEvent
+     */
+    protected function newCacheEvent(string $storeName, string $key, array $tags): CacheEvent
+    {
+        return new class($storeName, $key, $tags) extends CacheEvent {
+            public function __construct($storeName, $key, array $tags)
+            {
+                if (property_exists($this, 'storeName')) {
+                    $this->storeName = $storeName;
+                }
+
+                if (property_exists($this, 'key')) {
+                    $this->key = $key;
+                }
+
+                if (property_exists($this, 'tags')) {
+                    $this->tags = $tags;
+                }
+            }
+        };
+    }
+
+    /**
+     * @param string    $sql
+     * @param array     $bindings
+     * @param Throwable $previous
+     * @param string    $connectionName
+     *
+     * @return QueryException
+     */
+    protected function newQueryException(
+        string $sql,
+        array $bindings,
+        Throwable $previous,
+        string $connectionName = 'sqlite'
+    ): QueryException
+    {
+        $constructor = (new ReflectionClass(QueryException::class))->getConstructor();
+
+        if (null !== $constructor && 4 <= $constructor->getNumberOfParameters()) {
+            return new QueryException($connectionName, $sql, $bindings, $previous);
+        }
+
+        return new QueryException($sql, $bindings, $previous);
     }
 
     protected function assertJob(Job $job)

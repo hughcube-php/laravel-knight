@@ -41,6 +41,7 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
         if (!class_exists(MiniApp::class)) {
             $this->markTestSkipped('MiniApp Application class is not available.');
         }
+        $this->skipIfHttpClientMissing();
 
         $job = new RefreshWeChatMiniAppAccessTokensJob(['proxy' => 'http://proxy']);
         $this->callMethod($job, 'loadParameters');
@@ -69,6 +70,7 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
         if (!class_exists(OfficialAccount::class)) {
             $this->markTestSkipped('OfficialAccount Application class is not available.');
         }
+        $this->skipIfHttpClientMissing();
 
         $job = new RefreshWeChatOfficialAccountAccessTokensJob(['proxy' => 'http://proxy']);
         $this->callMethod($job, 'loadParameters');
@@ -97,6 +99,10 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
         if (!class_exists(MiniApp::class)) {
             $this->markTestSkipped('MiniApp Application class is not available.');
         }
+        $this->skipIfHttpClientMissing();
+        if (!interface_exists(AccessTokenInterface::class)) {
+            $this->markTestSkipped('EasyWeChat AccessToken interface is not available.');
+        }
 
         config(['easywechat.mini_app' => ['empty' => [], 'valid' => []]]);
 
@@ -118,6 +124,10 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
     {
         if (!class_exists(OfficialAccount::class)) {
             $this->markTestSkipped('OfficialAccount Application class is not available.');
+        }
+        $this->skipIfHttpClientMissing();
+        if (!interface_exists(AccessTokenInterface::class)) {
+            $this->markTestSkipped('EasyWeChat AccessToken interface is not available.');
         }
 
         config(['easywechat.official_account' => ['main' => []]]);
@@ -259,26 +269,57 @@ class RefreshWeChatAccessTokensJobTest extends TestCase
             }
         };
     }
+
+    private function skipIfHttpClientMissing(): void
+    {
+        if (!interface_exists(HttpClientInterface::class)) {
+            $this->markTestSkipped('Symfony HttpClientInterface is not available.');
+        }
+    }
 }
 
-class FakeAccessToken implements AccessTokenInterface
-{
-    public int $refreshCalls = 0;
-
-    public function refresh(): string
+if (interface_exists(AccessTokenInterface::class)) {
+    class FakeAccessToken implements AccessTokenInterface
     {
-        $this->refreshCalls++;
+        public int $refreshCalls = 0;
 
-        return 'token-'.$this->refreshCalls;
+        public function refresh(): string
+        {
+            $this->refreshCalls++;
+
+            return 'token-'.$this->refreshCalls;
+        }
+
+        public function getToken(): string
+        {
+            return 'token';
+        }
+
+        public function toQuery(): array
+        {
+            return [];
+        }
     }
-
-    public function getToken(): string
+} else {
+    class FakeAccessToken
     {
-        return 'token';
-    }
+        public int $refreshCalls = 0;
 
-    public function toQuery(): array
-    {
-        return [];
+        public function refresh(): string
+        {
+            $this->refreshCalls++;
+
+            return 'token-'.$this->refreshCalls;
+        }
+
+        public function getToken(): string
+        {
+            return 'token';
+        }
+
+        public function toQuery(): array
+        {
+            return [];
+        }
     }
 }
