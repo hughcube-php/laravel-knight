@@ -237,8 +237,7 @@ class Str extends \Illuminate\Support\Str
      */
     public static function isChineseName($string): bool
     {
-        // Allow only Han and middle dot; forbid dot at the ends for cross-platform PCRE behavior.
-        return 0 < preg_match('/^(?!\x{00B7})[\p{Han}\x{00B7}]{2,12}(?<!\x{00B7})$/u', $string);
+        return 0 < preg_match('/^(?=.{2,12}$)[\p{Han}]+(?:\x{00B7}[\p{Han}]+)?$/u', $string);
     }
 
     /**
@@ -246,7 +245,7 @@ class Str extends \Illuminate\Support\Str
      */
     public static function hasChinese($string): bool
     {
-        return 0 < preg_match('/^[\p{Han}&&\p{L}](?:[\p{Han}&&\p{L}]|\x{00B7}){0,10}[\p{Han}&&\p{L}]$/u', $string);
+        return 0 < preg_match('/\p{Han}/u', $string);
     }
 
     /**

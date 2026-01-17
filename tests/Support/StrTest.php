@@ -70,6 +70,8 @@ class StrTest extends TestCase
         $this->assertTrue(!Str::isChineseName('·犇猋骉麤毳淼焱垚昍琰'));
         $this->assertTrue(Str::isChineseName('犇猋骉麤毳·淼焱垚昍琰'));
         $this->assertTrue(!Str::isChineseName('犇猋骉麤毳淼焱垚昍琰·'));
+
+        $this->assertFalse(Str::isChineseName('犇猋骉·麤毳·淼焱垚昍琰'));
     }
 
     public function testIsCnCarLicensePlate()
