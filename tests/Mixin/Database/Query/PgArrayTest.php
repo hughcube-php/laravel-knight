@@ -27,6 +27,8 @@ use PDO;
  */
 class PgArrayTest extends TestCase
 {
+    protected static bool $arrayTablePrepared = false;
+
     /**
      * @param Application $app
      *
@@ -59,6 +61,18 @@ class PgArrayTest extends TestCase
 
         $appConfig->set('database.default', 'pgsql');
         $appConfig->set('database.connections.pgsql', $pgsqlConfig);
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        if (!$this->isPgsqlConfigured() || self::$arrayTablePrepared) {
+            return;
+        }
+
+        $this->setUpArrayTable();
+        self::$arrayTablePrepared = true;
     }
 
     protected function resolvePgsqlConfig(): ?array
@@ -160,6 +174,103 @@ class PgArrayTest extends TestCase
         return array_map(function ($item) {
             return preg_replace('/\\\\(.)/', '$1', $item);
         }, $items);
+    }
+
+    protected function setUpArrayTable(): void
+    {
+        $connection = DB::connection('pgsql');
+
+        $connection->statement('DROP TABLE IF EXISTS knight_array_test');
+        $connection->statement(
+            'CREATE TABLE knight_array_test (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                tags TEXT[] NOT NULL,
+                scores INTEGER[] NOT NULL,
+                prices DOUBLE PRECISION[] NOT NULL,
+                flags BOOLEAN[] NOT NULL
+            )'
+        );
+
+        foreach ($this->seedRows() as $row) {
+            $this->insertRow($connection, $row);
+        }
+    }
+
+    protected function seedRows(): array
+    {
+        return [
+            [
+                'id' => 1,
+                'name' => 'record1',
+                'tags' => ['php', 'laravel', 'mysql'],
+                'scores' => [80, 90],
+                'prices' => [1.5, 2.5],
+                'flags' => ['true', 'false'],
+            ],
+            [
+                'id' => 2,
+                'name' => 'record2',
+                'tags' => ['java', 'spring'],
+                'scores' => [95, 100],
+                'prices' => [3.5],
+                'flags' => ['true'],
+            ],
+            [
+                'id' => 3,
+                'name' => 'record3',
+                'tags' => ['php', 'symfony', 'django'],
+                'scores' => [70, 85],
+                'prices' => [4.0],
+                'flags' => ['false'],
+            ],
+            [
+                'id' => 4,
+                'name' => 'record4',
+                'tags' => ['php', 'laravel'],
+                'scores' => [1, 2, 3],
+                'prices' => [1.0, 2.0],
+                'flags' => ['true', 'false'],
+            ],
+        ];
+    }
+
+    protected function insertRow($connection, array $row): void
+    {
+        [$tagsSql, $tagsBindings] = $this->buildArraySql($row['tags']);
+        [$scoresSql, $scoresBindings] = $this->buildArraySql($row['scores']);
+        [$pricesSql, $pricesBindings] = $this->buildArraySql($row['prices']);
+        [$flagsSql, $flagsBindings] = $this->buildArraySql($row['flags']);
+
+        $sql = sprintf(
+            'INSERT INTO knight_array_test (id, name, tags, scores, prices, flags)
+             VALUES (?, ?, %s::text[], %s::integer[], %s::double precision[], %s::boolean[])',
+            $tagsSql,
+            $scoresSql,
+            $pricesSql,
+            $flagsSql
+        );
+
+        $bindings = array_merge(
+            [$row['id'], $row['name']],
+            $tagsBindings,
+            $scoresBindings,
+            $pricesBindings,
+            $flagsBindings
+        );
+
+        $connection->statement($sql, $bindings);
+    }
+
+    protected function buildArraySql(array $values): array
+    {
+        if ($values === []) {
+            return ['ARRAY[]', []];
+        }
+
+        $placeholders = implode(', ', array_fill(0, count($values), '?'));
+
+        return ['ARRAY['.$placeholders.']', array_values($values)];
     }
 
     // ==================== whereArrayContains (@>) ====================
