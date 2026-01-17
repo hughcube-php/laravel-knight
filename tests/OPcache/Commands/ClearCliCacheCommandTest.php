@@ -53,34 +53,33 @@ class ClearCliCacheCommandTest extends TestCase
         parent::setUp();
 
         OpcacheTestOverrides::resetDefaults();
+
+        // Ensure LogManager is resolved before any test
+        $this->app->make('log');
     }
 
     public function testHandleLogsWhenExtensionMissing()
     {
-        Log::spy();
+        $logMessages = $this->captureLogMessages();
 
         OpcacheTestOverrides::$extensionLoaded = false;
         OpcacheTestOverrides::$opcacheStatusEnabled = false;
 
         $this->makeCommand()->handle(new Schedule($this->app));
 
-        Log::shouldHaveReceived('warning')->withArgs(function ($message) {
-            return is_string($message) && str_contains($message, 'extension not loaded');
-        });
+        $this->assertLogContains($logMessages, 'warning', 'extension not loaded');
     }
 
     public function testHandleLogsWhenOpcacheDisabled()
     {
-        Log::spy();
+        $logMessages = $this->captureLogMessages();
 
         OpcacheTestOverrides::$extensionLoaded = true;
         OpcacheTestOverrides::$opcacheStatusEnabled = false;
 
         $this->makeCommand()->handle(new Schedule($this->app));
 
-        Log::shouldHaveReceived('warning')->withArgs(function ($message) {
-            return is_string($message) && str_contains($message, 'not enabled');
-        });
+        $this->assertLogContains($logMessages, 'warning', 'not enabled');
     }
 
     public function testHandleThrowsWhenResetFails()
@@ -97,7 +96,7 @@ class ClearCliCacheCommandTest extends TestCase
 
     public function testHandleLogsWhenResetSucceeds()
     {
-        Log::spy();
+        $logMessages = $this->captureLogMessages();
 
         OpcacheTestOverrides::$extensionLoaded = true;
         OpcacheTestOverrides::$opcacheStatusEnabled = true;
@@ -106,9 +105,33 @@ class ClearCliCacheCommandTest extends TestCase
         $command = $this->makeCommand();
         $command->handle(new Schedule($this->app));
 
-        Log::shouldHaveReceived('info')->withArgs(function ($message) {
-            return is_string($message) && str_contains($message, 'OPcache CLI cleared');
+        $this->assertLogContains($logMessages, 'info', 'OPcache CLI cleared');
+    }
+
+    private function captureLogMessages(): array
+    {
+        $messages = [];
+
+        Log::listen(function ($event) use (&$messages) {
+            $messages[] = [
+                'level' => $event->level,
+                'message' => $event->message,
+            ];
         });
+
+        return $messages;
+    }
+
+    private function assertLogContains(array &$messages, string $level, string $needle): void
+    {
+        foreach ($messages as $log) {
+            if ($log['level'] === $level && str_contains($log['message'], $needle)) {
+                $this->assertTrue(true);
+                return;
+            }
+        }
+
+        $this->fail("Expected log message containing '{$needle}' at level '{$level}' was not found.");
     }
 
     private function makeCommand(): ClearCliCacheCommand

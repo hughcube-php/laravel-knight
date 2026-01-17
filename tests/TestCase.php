@@ -73,6 +73,33 @@ class TestCase extends OrchestraTestCase
         $app['config']->set('app.key', 'ZsZewWyUJ5FsKp9lMwv4tYbNlegQilM7');
 
         $this->setupEloquent($app);
+        $this->setupLogging($app);
+    }
+
+    /**
+     * @param Application $app
+     */
+    protected function setupLogging(Application $app)
+    {
+        /** @var Repository $appConfig */
+        $appConfig = $app['config'];
+
+        $appConfig->set('logging', [
+            'default' => 'null',
+            'channels' => [
+                'null' => [
+                    'driver' => 'monolog',
+                    'handler' => \Monolog\Handler\NullHandler::class,
+                ],
+                'stdout' => [
+                    'driver' => 'monolog',
+                    'handler' => \Monolog\Handler\StreamHandler::class,
+                    'with' => [
+                        'stream' => 'php://stdout',
+                    ],
+                ],
+            ],
+        ]);
     }
 
     /**
