@@ -94,8 +94,7 @@ class PostgresGrammar extends BasePostgresGrammar
         }
 
         foreach ($db->getConnections() as $connection) {
-            if (
-                method_exists($connection, 'getDriverName')
+            if (method_exists($connection, 'getDriverName')
                 && $connection->getDriverName() === 'pgsql'
                 && method_exists($connection, 'setQueryGrammar')
             ) {

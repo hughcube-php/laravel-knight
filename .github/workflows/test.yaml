@@ -97,7 +97,7 @@ jobs:
 
       - name: Run PHPUnit
         if: ${{ 'true' == env.has_deps }}
-        run: composer run-script test -- -c phpunit.xml.dist
+        run: composer run-script test -- -c phpunit.xml.dist --testdox
 
   run-macos:
     runs-on: macOS-latest

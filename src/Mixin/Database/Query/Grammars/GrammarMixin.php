@@ -132,55 +132,6 @@ class GrammarMixin
     }
 
     /**
-     * 编译 WHERE JSON overlaps 条件为 SQL 片段.
-     *
-     * @return Closure(Builder $query, array $where): string
-     */
-    public function whereJsonOverlaps(): Closure
-    {
-        return function (Builder $query, $where) {
-            $not = $where['not'] ? 'not ' : '';
-
-            return $not . $this->compileJsonOverlaps(
-                $where['column'],
-                $this->parameter($where['value'])
-            );
-        };
-    }
-
-    /**
-     * 编译 JSON overlaps 表达式.
-     *
-     * @return Closure(string $column, string $value): string
-     */
-    public function compileJsonOverlaps(): Closure
-    {
-        return function ($column, $value) {
-            if ($this->isJsonSelector($column)) {
-                [$field, $path] = $this->wrapJsonFieldAndPath($column);
-                $column = 'json_extract(' . $field . $path . ')';
-
-                return 'json_overlaps(' . $column . ', ' . $value . ')';
-            }
-
-            return 'json_overlaps(' . $this->wrap($column) . ', ' . $value . ')';
-        };
-    }
-
-    /**
-     * 准备 JSON overlaps 的绑定值.
-     *
-     * @return Closure(mixed $binding): string
-     */
-    public function prepareBindingForJsonOverlaps(): Closure
-    {
-        return function ($binding) {
-            /** @phpstan-ignore-next-line */
-            return $this->prepareBindingForJsonContains($binding);
-        };
-    }
-
-    /**
      * 编译 PostgreSQL ARRAY[?, ?, ?]::type[] 表达式.
      *
      * 根据值的 PHP 类型自动推断 PostgreSQL 数组类型：

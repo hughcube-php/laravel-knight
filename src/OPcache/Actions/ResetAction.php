@@ -35,8 +35,12 @@ class ResetAction extends Controller
 
         $duration = microtime(true) - $startTime;
 
-        Log::info(sprintf('OPcache reset - IP: %s, User-Agent: %s, Duration: %sms, URL: %s',
-            $request->ip(), $request->userAgent(), round($duration * 1000, 2), $request->fullUrl()
+        Log::info(sprintf(
+            'OPcache reset - IP: %s, User-Agent: %s, Duration: %sms, URL: %s',
+            $request->ip(),
+            $request->userAgent(),
+            round($duration * 1000, 2),
+            $request->fullUrl()
         ));
 
         return $this->asSuccess();

@@ -498,8 +498,7 @@ class Str extends \Illuminate\Support\Str
         $match_length = 0;
         $keyword_length = mb_strlen($keyword);
         while (true) {
-            if (
-                $match_length >= $keyword_length
+            if ($match_length >= $keyword_length
                 || false === mb_strpos($text, mb_substr($keyword, 0, $match_length + 1))
             ) {
                 break;
@@ -515,8 +514,7 @@ class Str extends \Illuminate\Support\Str
         $match_length = 0;
         $keyword_length = mb_strlen($keyword);
         while (true) {
-            if (
-                $match_length >= $keyword_length
+            if ($match_length >= $keyword_length
                 || false === mb_strpos($text, mb_substr($keyword, 0 - ($match_length + 1)))
             ) {
                 break;

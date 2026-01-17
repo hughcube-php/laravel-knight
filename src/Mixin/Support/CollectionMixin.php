@@ -367,5 +367,4 @@ class CollectionMixin
             return static::make(preg_split($pattern, $separator, $limit) ?: []);
         };
     }
-
 }

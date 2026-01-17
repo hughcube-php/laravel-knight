@@ -605,29 +605,7 @@ trait Builder
             $values instanceof CarbonPeriod ? [$values->start, $values->end] : $values
         )->values()->slice(0, 2)->toArray();
 
-        return $this->where(function ($builder) use ($values, $column, $not) {
-            /** @var \HughCube\Laravel\Knight\Database\Eloquent\Builder $builder */
-            if ($not) {
-                if (isset($values[0]) && isset($values[1])) {
-                    $builder->where($column, '<', $values[0])
-                        ->orWhere($column, '>', $values[1]);
-
-                    return;
-                }
-
-                if (isset($values[0])) {
-                    $builder->where($column, '<', $values[0]);
-
-                    return;
-                }
-
-                if (isset($values[1])) {
-                    $builder->where($column, '>', $values[1]);
-                }
-
-                return;
-            }
-
+        return $this->{$not ? 'whereNot' : 'where'}(function ($builder) use ($values, $column) {
             if (isset($values[0])) {
                 $builder->where($column, '>=', $values[0]);
             }

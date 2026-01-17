@@ -23,6 +23,9 @@ if (class_exists(\Illuminate\Http\Middleware\HandleCors::class)) {
 } else {
     abstract class HandleAllPathCorsBase
     {
+        /**
+         * @phpstan-ignore-next-line
+         */
         public function __construct(...$args)
         {
         }
