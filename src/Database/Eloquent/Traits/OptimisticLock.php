@@ -23,7 +23,7 @@ trait OptimisticLock
     /**
      * 是否启用乐观锁检查
      */
-    protected bool $optimisticLockEnabled = true;
+    protected bool $optimisticLockEnabled = false;
 
     protected static function bootOptimisticLock(): void
     {
