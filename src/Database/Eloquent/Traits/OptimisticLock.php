@@ -134,4 +134,43 @@ trait OptimisticLock
 
         return $this;
     }
+
+    /**
+     * 启用乐观锁检查并保存模型
+     *
+     * @param array $options
+     * @return bool
+     * @throws OptimisticLockException
+     */
+    public function useOptimisticLockSave(array $options = [])
+    {
+        $previous = $this->optimisticLockEnabled;
+        $this->optimisticLockEnabled = true;
+
+        try {
+            return $this->save($options);
+        } finally {
+            $this->optimisticLockEnabled = $previous;
+        }
+    }
+
+    /**
+     * 启用乐观锁检查并更新模型
+     *
+     * @param array $attributes
+     * @param array $options
+     * @return bool
+     * @throws OptimisticLockException
+     */
+    public function useOptimisticLockUpdate(array $attributes = [], array $options = [])
+    {
+        $previous = $this->optimisticLockEnabled;
+        $this->optimisticLockEnabled = true;
+
+        try {
+            return $this->update($attributes, $options);
+        } finally {
+            $this->optimisticLockEnabled = $previous;
+        }
+    }
 }
