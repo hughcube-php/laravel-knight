@@ -36,25 +36,6 @@ class PersonalAccessTokenGcJobTest extends TestCase
         PersonalAccessToken::query()->insert([
             [
                 'tokenable_type' => 'User',
-<<<<<<< HEAD
-                'tokenable_id' => 1,
-                'name' => 'expired',
-                'token' => hash('sha256', 'expired'),
-                'abilities' => json_encode([]),
-                'last_used_at' => $expired,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'tokenable_type' => 'User',
-                'tokenable_id' => 2,
-                'name' => 'fresh',
-                'token' => hash('sha256', 'fresh'),
-                'abilities' => json_encode([]),
-                'last_used_at' => $fresh,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-=======
                 'tokenable_id'   => 1,
                 'name'           => 'expired',
                 'token'          => hash('sha256', 'expired'),
@@ -72,7 +53,6 @@ class PersonalAccessTokenGcJobTest extends TestCase
                 'last_used_at'   => $fresh,
                 'created_at'     => Carbon::now(),
                 'updated_at'     => Carbon::now(),
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
             ],
         ]);
 

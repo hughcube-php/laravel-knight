@@ -21,21 +21,6 @@ class ServiceProviderTest extends TestCase
     public function testBootRegistersRoutes()
     {
         config([
-<<<<<<< HEAD
-            'knight.opcache.route_prefix' => 'knight-opcache',
-            'knight.opcache.action.scripts' => null,
-            'knight.opcache.action.states' => null,
-            'knight.opcache.action.reset' => null,
-            'knight.request.route_prefix' => 'knight-request',
-            'knight.request.action.log' => null,
-            'knight.request.action.show' => null,
-            'knight.healthcheck.route_prefix' => 'knight-health',
-            'knight.healthcheck.action.healthcheck' => null,
-            'knight.phpinfo.route_prefix' => 'knight-phpinfo',
-            'knight.phpinfo.action.phpinfo' => null,
-            'knight.devops.route_prefix' => 'knight-devops',
-            'knight.devops.action.system' => null,
-=======
             'knight.opcache.route_prefix'           => 'knight-opcache',
             'knight.opcache.action.scripts'         => null,
             'knight.opcache.action.states'          => null,
@@ -49,7 +34,6 @@ class ServiceProviderTest extends TestCase
             'knight.phpinfo.action.phpinfo'         => null,
             'knight.devops.route_prefix'            => 'knight-devops',
             'knight.devops.action.system'           => null,
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
         ]);
 
         $provider = new ServiceProvider($this->app);
@@ -66,10 +50,7 @@ class ServiceProviderTest extends TestCase
 
         if ($routesCached || Route::getFacadeRoot() === null) {
             $this->assertTrue(true);
-<<<<<<< HEAD
-=======
 
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
             return;
         }
 

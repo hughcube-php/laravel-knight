@@ -62,11 +62,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
             public function __construct(array $rows)
             {
                 $this->rows = $rows;
-<<<<<<< HEAD
-                $this->pdo = new class {
-=======
                 $this->pdo = new class() {
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
                     public array $execCalls = [];
 
                     public function exec($sql)

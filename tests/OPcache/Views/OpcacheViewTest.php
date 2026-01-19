@@ -24,10 +24,7 @@ class OpcacheViewTest extends TestCase
         $cwd = getcwd();
 
         ob_start();
-<<<<<<< HEAD
-=======
 
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
         try {
             chdir(dirname($path));
             include $path;

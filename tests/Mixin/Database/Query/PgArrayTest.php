@@ -106,20 +106,6 @@ class PgArrayTest extends TestCase
         $password = getenv($prefix.'_PASSWORD');
 
         return [
-<<<<<<< HEAD
-            'driver' => 'pgsql',
-            'host' => $host,
-            'port' => ($port === false || $port === '') ? 5432 : (int) $port,
-            'database' => $database,
-            'username' => $username,
-            'password' => ($password === false) ? null : $password,
-            'charset' => 'utf8',
-            'prefix' => '',
-            'schema' => 'public',
-            'options' => [
-                PDO::ATTR_PERSISTENT => true,
-                PDO::ATTR_EMULATE_PREPARES => true
-=======
             'driver'   => 'pgsql',
             'host'     => $host,
             'port'     => ($port === false || $port === '') ? 5432 : (int) $port,
@@ -132,7 +118,6 @@ class PgArrayTest extends TestCase
             'options'  => [
                 PDO::ATTR_PERSISTENT       => true,
                 PDO::ATTR_EMULATE_PREPARES => true,
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
             ],
         ];
     }
@@ -216,38 +201,6 @@ class PgArrayTest extends TestCase
     {
         return [
             [
-<<<<<<< HEAD
-                'id' => 1,
-                'name' => 'record1',
-                'tags' => ['php', 'laravel', 'mysql'],
-                'scores' => [80, 90],
-                'prices' => [1.5, 2.5],
-                'flags' => ['true', 'false'],
-            ],
-            [
-                'id' => 2,
-                'name' => 'record2',
-                'tags' => ['java', 'spring'],
-                'scores' => [95, 100],
-                'prices' => [3.5],
-                'flags' => ['true'],
-            ],
-            [
-                'id' => 3,
-                'name' => 'record3',
-                'tags' => ['php', 'symfony', 'django'],
-                'scores' => [70, 85],
-                'prices' => [4.0],
-                'flags' => ['false'],
-            ],
-            [
-                'id' => 4,
-                'name' => 'record4',
-                'tags' => ['php', 'laravel'],
-                'scores' => [1, 2, 3],
-                'prices' => [1.0, 2.0],
-                'flags' => ['true', 'false'],
-=======
                 'id'     => 1,
                 'name'   => 'record1',
                 'tags'   => ['php', 'laravel', 'mysql'],
@@ -278,7 +231,6 @@ class PgArrayTest extends TestCase
                 'scores' => [1, 2, 3],
                 'prices' => [1.0, 2.0],
                 'flags'  => ['true', 'false'],
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
             ],
         ];
     }
@@ -963,15 +915,9 @@ class PgArrayTest extends TestCase
     {
         // Injection attempt with multiple values
         $overlaps = [
-<<<<<<< HEAD
-            "normal",
-            "test' OR '1'='1",
-            "test\"; DROP TABLE users; --",
-=======
             'normal',
             "test' OR '1'='1",
             'test"; DROP TABLE users; --',
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
         ];
 
         $results = Collection::make(
@@ -989,22 +935,14 @@ class PgArrayTest extends TestCase
     public function testBindingsAreProperlyEscaped()
     {
         $query = $this->getTestQuery(false)
-<<<<<<< HEAD
-            ->whereArrayContains('tags', ["test'; DROP TABLE users; --", "normal"]);
-=======
             ->whereArrayContains('tags', ["test'; DROP TABLE users; --", 'normal']);
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
 
         $bindings = $query->getBindings();
 
         // Each value should be a separate binding
         $this->assertCount(2, $bindings);
         $this->assertEquals("test'; DROP TABLE users; --", $bindings[0]);
-<<<<<<< HEAD
-        $this->assertEquals("normal", $bindings[1]);
-=======
         $this->assertEquals('normal', $bindings[1]);
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
     }
 
     // ==================== Type coercion tests ====================

@@ -118,11 +118,7 @@ class MobileTraitsTest extends TestCase
     {
         $action = new MobileTraitsGetMobileAction();
         $action->request = Request::create('/', 'GET', [
-<<<<<<< HEAD
-            'mobile' => '13800138000',
-=======
             'mobile'   => '13800138000',
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
             'idd_code' => 86,
         ]);
 
@@ -162,11 +158,7 @@ class MobileTraitsTest extends TestCase
     {
         $action = new PinCodeSmsAction();
         $action->request = Request::create('/', 'POST', [
-<<<<<<< HEAD
-            'mobile' => '13800138000',
-=======
             'mobile'   => '13800138000',
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
             'idd_code' => 86,
         ]);
 
@@ -183,11 +175,7 @@ class MobileTraitsTest extends TestCase
         $action = new PinCodeSmsAction();
         $action->enableSendResult = false;
         $action->request = Request::create('/', 'POST', [
-<<<<<<< HEAD
-            'mobile' => '13800138000',
-=======
             'mobile'   => '13800138000',
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
             'idd_code' => 86,
         ]);
 
@@ -209,11 +197,7 @@ class MobileTraitsTest extends TestCase
         $action = new PinCodeSmsAction();
         $action->checkMobileResult = false;
         $action->request = Request::create('/', 'POST', [
-<<<<<<< HEAD
-            'mobile' => '13800138000',
-=======
             'mobile'   => '13800138000',
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
             'idd_code' => 86,
         ]);
 
@@ -225,11 +209,7 @@ class MobileTraitsTest extends TestCase
     {
         $action = new SendPinCodeSmsAction();
         $action->request = Request::create('/', 'POST', [
-<<<<<<< HEAD
-            'mobile' => '13800138000',
-=======
             'mobile'   => '13800138000',
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
             'idd_code' => 86,
         ]);
 
@@ -244,15 +224,9 @@ class MobileTraitsTest extends TestCase
     {
         $action = new ValidatePinCodeSmsAction();
         $action->request = Request::create('/', 'POST', [
-<<<<<<< HEAD
-            'mobile' => '13800138000',
-            'idd_code' => 86,
-            'pincode' => '1234',
-=======
             'mobile'   => '13800138000',
             'idd_code' => 86,
             'pincode'  => '1234',
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
         ]);
 
         $this->callMethod($action, 'validatePinCode', [true]);
@@ -264,15 +238,9 @@ class MobileTraitsTest extends TestCase
         $action = new ValidatePinCodeSmsAction();
         $action->validateResult = false;
         $action->request = Request::create('/', 'POST', [
-<<<<<<< HEAD
-            'mobile' => '13800138000',
-            'idd_code' => 86,
-            'pincode' => '1234',
-=======
             'mobile'   => '13800138000',
             'idd_code' => 86,
             'pincode'  => '1234',
->>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
         ]);
 
         $this->expectException(ValidatePinCodeException::class);
