@@ -426,16 +426,16 @@ trait Builder
      *
      * 注意: 不会转义通配符，如需转义请使用 whereEscapeLeftLike.
      *
+     * @param string $column 列名
+     * @param string $value 模式值
+     *
+     * @return static
      * @deprecated 使用 whereEscapeLeftLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
      *
      * 示例:
      *   $query->whereLeftLike('name', 'test');
      *   // 生成: WHERE name LIKE 'test%'
      *
-     * @param string $column 列名
-     * @param string $value 模式值
-     *
-     * @return static
      */
     public function whereLeftLike(string $column, string $value, bool $caseSensitive = false, string $boolean = 'and', bool $not = false)
     {
@@ -447,16 +447,16 @@ trait Builder
      *
      * 注意: 不会转义通配符，如需转义请使用 whereEscapeRightLike.
      *
+     * @param string $column 列名
+     * @param string $value 模式值
+     *
+     * @return static
      * @deprecated 使用 whereEscapeRightLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
      *
      * 示例:
      *   $query->whereRightLike('name', 'test');
      *   // 生成: WHERE name LIKE '%test'
      *
-     * @param string $column 列名
-     * @param string $value 模式值
-     *
-     * @return static
      */
     public function whereRightLike(string $column, string $value, bool $caseSensitive = false, string $boolean = 'and', bool $not = false)
     {
@@ -469,9 +469,9 @@ trait Builder
      * @param string $column 列名
      * @param string $value LIKE 模式
      *
+     * @return static
      * @deprecated 使用 orWhereEscapeLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
      *
-     * @return static
      */
     public function orWhereLike(string $column, string $value, bool $caseSensitive = false)
     {
@@ -484,9 +484,9 @@ trait Builder
      * @param string $column 列名
      * @param string $value 模式值
      *
+     * @return static
      * @deprecated 使用 orWhereEscapeLeftLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
      *
-     * @return static
      */
     public function orWhereLeftLike(string $column, string $value, bool $caseSensitive = false)
     {
@@ -499,9 +499,9 @@ trait Builder
      * @param string $column 列名
      * @param string $value 模式值
      *
+     * @return static
      * @deprecated 使用 orWhereEscapeRightLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
      *
-     * @return static
      */
     public function orWhereRightLike(string $column, string $value, bool $caseSensitive = false)
     {
@@ -605,7 +605,7 @@ trait Builder
             $values instanceof CarbonPeriod ? [$values->start, $values->end] : $values
         )->values()->slice(0, 2)->toArray();
 
-        $boolean = $not ? $boolean.' not' : $boolean;
+        $boolean = $not ? $boolean . ' not' : $boolean;
 
         return $this->where(function ($builder) use ($values, $column) {
             if (isset($values[0])) {
@@ -649,5 +649,24 @@ trait Builder
     public function orWhereNotRange(string $column, iterable $values)
     {
         return $this->whereRange($column, $values, 'or', true);
+    }
+
+    /**
+     * 重写 update 方法，检查乐观锁
+     *
+     * @param array $values
+     * @return int
+     */
+    public function update(array $values)
+    {
+        $affected = parent::update($values);
+
+        /** @var OptimisticLock $model */
+        $model = $this->getModel();
+        if (method_exists($model, 'checkOptimisticLockAfterUpdate')) {
+            $model->checkOptimisticLockAfterUpdate($affected);
+        }
+
+        return $affected;
     }
 }

@@ -20,98 +20,118 @@ use Illuminate\Database\Eloquent\Model as EloquentModel;
  */
 trait OptimisticLock
 {
-    protected bool $enableOptimisticLock = true;
+    /**
+     * 是否启用乐观锁检查
+     */
+    protected bool $optimisticLockEnabled = true;
 
-    protected static function bootOptimisticLock()
+    protected static function bootOptimisticLock(): void
     {
+        // 创建时自动设置默认版本号
         static::creating(function ($model) {
-            if (null === $model->{$model->lockDataVersionColumn()}) {
-                $model->{$model->lockDataVersionColumn()} = $model->defaultModelDataVersion();
+            /** @var static $model */
+            $column = $model->lockDataVersionColumn();
+            if (null === $model->{$column}) {
+                $model->{$column} = $model->defaultModelDataVersion();
             }
+        });
 
-            return $model;
+        // 更新时自动递增版本号
+        static::updating(function ($model) {
+            /** @var static $model */
+            if ($model->isAutoIncrementDataVersion()) {
+                $column = $model->lockDataVersionColumn();
+                $model->{$column} = $model->getOriginal($column) + 1;
+            }
         });
     }
 
-    public static function lockDataVersionColumn(): string
+    /**
+     * 更新后检查乐观锁（由 Builder::update 调用）
+     *
+     * 只在单个模型的 save() 操作时检查，不影响批量更新
+     *
+     * @param int $affectedRows 影响的行数
+     * @throws OptimisticLockException
+     */
+    public function checkOptimisticLockAfterUpdate(int $affectedRows): void
     {
-        return defined(static::class.'::DATA_VERSION') ? static::DATA_VERSION : 'data_version';
+        // exists 为 true 表示是单个模型的 save 操作，批量更新时 exists 为 false
+        if ($this->exists && $this->isOptimisticLockEnabled() && $affectedRows === 0) {
+            throw new OptimisticLockException(
+                sprintf('Optimistic lock failed for model [%s] with key [%s]. No rows affected.', static::class, $this->getKey())
+            );
+        }
     }
 
+    /**
+     * 重写 setKeysForSaveQuery 添加版本条件
+     *
+     * @param Builder $query
+     * @return Builder
+     */
+    protected function setKeysForSaveQuery($query)
+    {
+        $query = parent::setKeysForSaveQuery($query);
+
+        // 更新操作且启用乐观锁时，添加版本条件
+        if ($this->exists && $this->isOptimisticLockEnabled()) {
+            $column = $this->lockDataVersionColumn();
+            $query->where($column, $this->getOriginal($column));
+        }
+
+        return $query;
+    }
+
+    /**
+     * 获取版本号字段名
+     */
+    public static function lockDataVersionColumn(): string
+    {
+        return defined(static::class . '::DATA_VERSION') ? static::DATA_VERSION : 'data_version';
+    }
+
+    /**
+     * 获取默认版本号
+     */
     public static function defaultModelDataVersion(): int
     {
         return 1;
     }
 
-    public function enableOptimisticLock()
+    /**
+     * 是否自动递增版本号
+     */
+    public function isAutoIncrementDataVersion(): bool
     {
-        $this->enableOptimisticLock = true;
-
-        return $this;
+        return !defined(static::class . '::AUTO_INCREMENT_DATA_VERSION') || static::AUTO_INCREMENT_DATA_VERSION;
     }
 
+    /**
+     * 是否启用乐观锁检查
+     */
+    public function isOptimisticLockEnabled(): bool
+    {
+        return $this->optimisticLockEnabled;
+    }
+
+    /**
+     * 禁用乐观锁检查
+     */
     public function disableOptimisticLock()
     {
-        $this->enableOptimisticLock = false;
+        $this->optimisticLockEnabled = false;
 
         return $this;
     }
 
-    public function optimisticLockEnabled(): bool
+    /**
+     * 启用乐观锁检查
+     */
+    public function enableOptimisticLock()
     {
-        return $this->enableOptimisticLock === true;
-    }
+        $this->optimisticLockEnabled = true;
 
-    protected function performUpdate(Builder $query)
-    {
-        // If the updating event returns false, we will cancel the update operation so
-        // developers can hook Validation systems into their models and cancel this
-        // operation if the model does not pass validation. Otherwise, we update.
-        if ($this->fireModelEvent('updating') === false) {
-            return false;
-        }
-
-        // First we need to create a fresh query instance and touch the creation and
-        // update timestamp on the model which are maintained by us for developer
-        // convenience. Then we will just continue saving the model instances.
-        if ($this->usesTimestamps()) {
-            $this->updateTimestamps();
-        }
-
-        // Once we have run the update operation, we will fire the "updated" event for
-        // this model instance. This will allow developers to hook into these after
-        // models are updated, giving them a chance to do any special processing.
-        $dirty = method_exists($this, 'getDirtyForUpdate')
-            ? $this->getDirtyForUpdate()
-            : $this->getDirty();
-
-        if (count($dirty) > 0) {
-            if ($this->optimisticLockEnabled()) {
-                $oldVersion = $this->{$this->lockDataVersionColumn()};
-                $newVersion = $oldVersion + 1;
-
-                $dirty[$this->lockDataVersionColumn()] = $newVersion;
-
-                $affected = $this->setKeysForSaveQuery($query)
-                    ->where($this->lockDataVersionColumn(), $oldVersion)
-                    ->update($dirty);
-
-                if ($affected === 0) {
-                    throw new OptimisticLockException(
-                        'Optimistic lock failed: The record has been modified by another process.'
-                    );
-                }
-
-                $this->{$this->lockDataVersionColumn()} = $newVersion; // Update model instance
-            } else {
-                $this->setKeysForSaveQuery($query)->update($dirty);
-            }
-
-            $this->syncChanges();
-
-            $this->fireModelEvent('updated', false);
-        }
-
-        return true;
+        return $this;
     }
 }
