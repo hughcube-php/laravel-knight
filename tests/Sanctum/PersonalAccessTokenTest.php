@@ -48,7 +48,11 @@ class PersonalAccessTokenTest extends TestCase
         $token = new PersonalAccessToken();
         $token->abilities = [
             'access_secret' => 'secret',
+<<<<<<< HEAD
+            'source' => 'api',
+=======
             'source'        => 'api',
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
         ];
 
         $this->assertSame('secret', $token->getAccessSecret());
@@ -56,7 +60,11 @@ class PersonalAccessTokenTest extends TestCase
 
         $token->abilities = [
             'access_secret' => '',
+<<<<<<< HEAD
+            'source' => '',
+=======
             'source'        => '',
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
         ];
 
         $this->assertNull($token->getAccessSecret());
@@ -102,6 +110,17 @@ class PersonalAccessTokenTest extends TestCase
         $plain = 'plain-token';
 
         PersonalAccessToken::query()->insert([
+<<<<<<< HEAD
+            'id' => 10,
+            'tokenable_type' => TokenableStub::class,
+            'tokenable_id' => 5,
+            'name' => 'example',
+            'token' => hash('sha256', $plain),
+            'abilities' => json_encode(['access_secret' => 'secret', 'source' => 'web']),
+            'last_used_at' => Carbon::now()->subDay(),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+=======
             'id'             => 10,
             'tokenable_type' => TokenableStub::class,
             'tokenable_id'   => 5,
@@ -111,6 +130,7 @@ class PersonalAccessTokenTest extends TestCase
             'last_used_at'   => Carbon::now()->subDay(),
             'created_at'     => Carbon::now(),
             'updated_at'     => Carbon::now(),
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
         ]);
 
         $token = PersonalAccessToken::findToken($plain);
@@ -125,6 +145,17 @@ class PersonalAccessTokenTest extends TestCase
         $plain = 'split-token';
 
         PersonalAccessToken::query()->insert([
+<<<<<<< HEAD
+            'id' => 11,
+            'tokenable_type' => TokenableStub::class,
+            'tokenable_id' => 9,
+            'name' => 'split',
+            'token' => hash('sha256', $plain),
+            'abilities' => json_encode([]),
+            'last_used_at' => Carbon::now()->subDay(),
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now(),
+=======
             'id'             => 11,
             'tokenable_type' => TokenableStub::class,
             'tokenable_id'   => 9,
@@ -134,6 +165,7 @@ class PersonalAccessTokenTest extends TestCase
             'last_used_at'   => Carbon::now()->subDay(),
             'created_at'     => Carbon::now(),
             'updated_at'     => Carbon::now(),
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
         ]);
 
         $token = PersonalAccessToken::findToken('11|'.$plain);
@@ -152,7 +184,11 @@ class PersonalAccessTokenTest extends TestCase
         $token = new PersonalAccessToken();
         $token->setRawAttributes([
             'tokenable_type' => TokenableStub::class,
+<<<<<<< HEAD
+            'tokenable_id' => 42,
+=======
             'tokenable_id'   => 42,
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
         ]);
 
         $resolved = $token->tokenable;

@@ -132,7 +132,11 @@ class OpCacheDataModelTest extends TestCase
                 'version' => '1.2.3',
             ],
             'directives' => [
+<<<<<<< HEAD
+                'opcache.enable_cli' => false,
+=======
                 'opcache.enable_cli'         => false,
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
                 'opcache.memory_consumption' => 2048,
             ],
         ];
@@ -148,6 +152,40 @@ class OpCacheDataModelTest extends TestCase
 
         $status = [
             'memory_usage' => [
+<<<<<<< HEAD
+                'used_memory' => 10485760,
+                'free_memory' => 2048,
+                'wasted_memory' => 512,
+                'current_wasted_percentage' => 1.23,
+                'misc' => $resource,
+            ],
+            'opcache_statistics' => [
+                'num_cached_keys' => 10,
+                'max_cached_keys' => 100,
+                'misses' => 2,
+                'hits' => 8,
+                'oom_restarts' => 1,
+                'manual_restarts' => 0,
+                'hash_restarts' => 0,
+                'opcache_hit_rate' => 99.5,
+                'blacklist_miss_ratio' => 0.125,
+                'start_time' => 1000000000,
+                'last_restart_time' => 0,
+            ],
+            'bool_flag' => true,
+            'false_flag' => false,
+            'scripts' => [
+                $dirA.DIRECTORY_SEPARATOR.'a.php' => [
+                    'hits' => 1000,
+                    'memory_consumption' => 2048,
+                ],
+                $dirA.DIRECTORY_SEPARATOR.'b.php' => [
+                    'hits' => 2,
+                    'memory_consumption' => 1048576,
+                ],
+                $dirB.DIRECTORY_SEPARATOR.'c.php' => [
+                    'hits' => 5,
+=======
                 'used_memory'               => 10485760,
                 'free_memory'               => 2048,
                 'wasted_memory'             => 512,
@@ -180,6 +218,7 @@ class OpCacheDataModelTest extends TestCase
                 ],
                 $dirB.DIRECTORY_SEPARATOR.'c.php' => [
                     'hits'               => 5,
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
                     'memory_consumption' => 512,
                 ],
             ],

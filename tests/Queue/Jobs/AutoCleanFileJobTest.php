@@ -22,8 +22,13 @@ class AutoCleanFileJobTest extends TestCase
 
         try {
             $job = new AutoCleanFileJob([
+<<<<<<< HEAD
+                'dir' => $dir,
+                'pattern' => '*.log',
+=======
                 'dir'      => $dir,
                 'pattern'  => '*.log',
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
                 'max_days' => 1,
             ]);
             $job->handle();

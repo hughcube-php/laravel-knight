@@ -140,7 +140,7 @@ class RequestTest extends TestCase
     {
         $wechat = Request::create('/foo/bar', 'GET', [], [], [], [
             'HTTP_USER_AGENT' => 'MicroMessenger miniProgram',
-            'HTTP_HOST'       => 'example.test:8080',
+            'HTTP_HOST' => 'example.test:8080',
         ]);
 
         $this->assertTrue($wechat->isWeChat());

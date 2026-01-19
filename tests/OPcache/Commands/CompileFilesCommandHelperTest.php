@@ -24,7 +24,11 @@ class CompileFilesCommandHelperTest extends TestCase
 
         file_put_contents($phpFile, "<?php echo 'a';");
         file_put_contents($shebangFile, "#!/usr/bin/env php\n<?php echo 'b';");
+<<<<<<< HEAD
+        file_put_contents($textFile, "nope");
+=======
         file_put_contents($textFile, 'nope');
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
 
         try {
             $command = new CompileFilesCommand();
@@ -159,7 +163,11 @@ class CompileFilesCommandHelperTest extends TestCase
 
             $command = $this->makeCommand([
                 'with-composer-files' => 1,
+<<<<<<< HEAD
+                'without-vendor' => 1,
+=======
                 'without-vendor'      => 1,
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
             ]);
 
             $files = array_map('realpath', $this->callMethod($command, 'getComposerFiles'));
@@ -549,8 +557,13 @@ class CompileFilesCommandHelperTest extends TestCase
         return [
             'classmap' => $classmapFile,
             'autoload' => $autoloadFile,
+<<<<<<< HEAD
+            'psr4' => $psr4File,
+            'vendor' => $vendorFile,
+=======
             'psr4'     => $psr4File,
             'vendor'   => $vendorFile,
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
         ];
     }
 

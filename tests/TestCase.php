@@ -32,11 +32,11 @@ class TestCase extends OrchestraTestCase
 
     public static function applicationBasePath()
     {
-        $path = realpath(__DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'orchestra'.DIRECTORY_SEPARATOR.'testbench-core'.DIRECTORY_SEPARATOR.'laravel');
+        $path = realpath(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'orchestra' . DIRECTORY_SEPARATOR . 'testbench-core' . DIRECTORY_SEPARATOR . 'laravel');
 
         return $path !== false
             ? $path
-            : __DIR__.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR.'orchestra'.DIRECTORY_SEPARATOR.'testbench-core'.DIRECTORY_SEPARATOR.'laravel';
+            : __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'orchestra' . DIRECTORY_SEPARATOR . 'testbench-core' . DIRECTORY_SEPARATOR . 'laravel';
     }
 
     protected function setUp(): void
@@ -90,30 +90,30 @@ class TestCase extends OrchestraTestCase
         $appConfig = $app['config'];
 
         $appConfig->set('logging', [
-            'default'      => 'null',
+            'default' => 'null',
             'deprecations' => [
                 'channel' => 'null',
-                'trace'   => false,
+                'trace' => false,
             ],
             'channels' => [
                 'null' => [
-                    'driver'  => 'monolog',
+                    'driver' => 'monolog',
                     'handler' => \Monolog\Handler\NullHandler::class,
                 ],
                 'stack' => [
-                    'driver'            => 'stack',
-                    'channels'          => ['null'],
+                    'driver' => 'stack',
+                    'channels' => ['null'],
                     'ignore_exceptions' => false,
                 ],
                 'single' => [
                     'driver' => 'single',
-                    'path'   => storage_path('logs/laravel.log'),
-                    'level'  => 'debug',
+                    'path' => storage_path('logs/laravel.log'),
+                    'level' => 'debug',
                 ],
                 'stdout' => [
-                    'driver'  => 'monolog',
+                    'driver' => 'monolog',
                     'handler' => \Monolog\Handler\StreamHandler::class,
-                    'with'    => [
+                    'with' => [
                         'stream' => 'php://stdout',
                     ],
                 ],
@@ -266,7 +266,8 @@ class TestCase extends OrchestraTestCase
         array $bindings,
         Throwable $previous,
         string $connectionName = 'sqlite'
-    ): QueryException {
+    ): QueryException
+    {
         $constructor = (new ReflectionClass(QueryException::class))->getConstructor();
 
         if (null !== $constructor && 4 <= $constructor->getNumberOfParameters()) {
@@ -306,7 +307,6 @@ class TestCase extends OrchestraTestCase
                 $logger = $driver->getLogger();
                 if (method_exists($logger, 'pushHandler')) {
                     $logger->pushHandler($handler);
-
                     return $handler;
                 }
             }
@@ -314,7 +314,6 @@ class TestCase extends OrchestraTestCase
             // Fallback: try to push directly if driver is Monolog
             if (method_exists($driver, 'pushHandler')) {
                 $driver->pushHandler($handler);
-
                 return $handler;
             }
         } catch (Throwable $e) {
@@ -331,11 +330,10 @@ class TestCase extends OrchestraTestCase
     {
         if ($handler === null) {
             $this->assertTrue(true, 'Log handler not available, skipping log assertion');
-
             return;
         }
 
-        $method = 'has'.ucfirst($level).'ThatContains';
+        $method = 'has' . ucfirst($level) . 'ThatContains';
         if (method_exists($handler, $method)) {
             $this->assertTrue(
                 $handler->$method($needle),

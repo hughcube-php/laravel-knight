@@ -17,6 +17,7 @@ use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\KRTest;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
+use HughCube\Laravel\Knight\Database\Query\Grammars\PostgresGrammar as KnightPostgresGrammar;
 use HughCube\Laravel\Knight\Http\Actions\DevopsSystemAction;
 use HughCube\Laravel\Knight\Http\Actions\PhpInfoAction;
 use HughCube\Laravel\Knight\Http\Actions\PingAction;

@@ -2,7 +2,10 @@
 
 namespace HughCube\Laravel\Knight\Tests\Http\Middleware;
 
+<<<<<<< HEAD
+=======
 use Fruitcake\Cors\CorsService;
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
 use HughCube\Laravel\Knight\Contracts\Support\GetUserLoginAccessSecret;
 use HughCube\Laravel\Knight\Http\Middleware\HandleAllPathCors;
 use HughCube\Laravel\Knight\Http\Middleware\LogRequest;
@@ -14,6 +17,10 @@ use HughCube\Laravel\Knight\Http\Middleware\TrustIps;
 use HughCube\Laravel\Knight\Http\Middleware\TrustProxies;
 use HughCube\Laravel\Knight\Http\Request as KnightRequest;
 use HughCube\Laravel\Knight\Tests\TestCase;
+<<<<<<< HEAD
+use Fruitcake\Cors\CorsService;
+=======
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -69,9 +76,15 @@ class MiscMiddlewareTest extends TestCase
             '/signed',
             'POST',
             [
+<<<<<<< HEAD
+                'Date' => 'Mon, 02 Jan 2006 15:04:05 GMT',
+                'Content-Type' => 'application/json',
+                'Nonce' => '1234567890',
+=======
                 'Date'         => 'Mon, 02 Jan 2006 15:04:05 GMT',
                 'Content-Type' => 'application/json',
                 'Nonce'        => '1234567890',
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
             ],
             '{"a":1}'
         );
@@ -102,10 +115,17 @@ class MiscMiddlewareTest extends TestCase
             '/signed',
             'POST',
             [
+<<<<<<< HEAD
+                'Date' => 'Mon, 02 Jan 2006 15:04:05 GMT',
+                'Content-Type' => 'application/json',
+                'Nonce' => '1234567890',
+                'Signature' => 'invalid',
+=======
                 'Date'         => 'Mon, 02 Jan 2006 15:04:05 GMT',
                 'Content-Type' => 'application/json',
                 'Nonce'        => '1234567890',
                 'Signature'    => 'invalid',
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
             ],
             '{"a":1}'
         );
@@ -156,7 +176,11 @@ class MiscMiddlewareTest extends TestCase
     {
         $middleware = new RequestSignatureValidate();
         $request = $this->makeSignedRequest('/signed', 'GET', [
+<<<<<<< HEAD
+            'Nonce' => 'short',
+=======
             'Nonce'     => 'short',
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
             'Signature' => 'any',
         ], '');
 

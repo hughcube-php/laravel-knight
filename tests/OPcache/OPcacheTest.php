@@ -43,7 +43,11 @@ class OPcacheTest extends TestCase
     public function testCacheKeyAndHistoryScripts()
     {
         config([
+<<<<<<< HEAD
+            'cache.default' => 'array',
+=======
             'cache.default'      => 'array',
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
             'cache.stores.array' => ['driver' => 'array'],
         ]);
 
@@ -60,7 +64,11 @@ class OPcacheTest extends TestCase
     public function testGetScriptsFiltersOldEntriesAndCaches()
     {
         config([
+<<<<<<< HEAD
+            'cache.default' => 'array',
+=======
             'cache.default'      => 'array',
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
             'cache.stores.array' => ['driver' => 'array'],
         ]);
 
@@ -80,7 +88,11 @@ class OPcacheTest extends TestCase
             protected function getHistoryScripts(): array
             {
                 return [
+<<<<<<< HEAD
+                    'old.php' => $this->now - (181 * 24 * 3600),
+=======
                     'old.php'    => $this->now - (181 * 24 * 3600),
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
                     'recent.php' => $this->now - 60,
                 ];
             }

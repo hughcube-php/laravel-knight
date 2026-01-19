@@ -114,7 +114,6 @@ class MultipleHandlerTest extends TestCase
             protected function aHandler()
             {
                 $this->called[] = 'aHandler';
-
                 throw new \RuntimeException('boom');
             }
 

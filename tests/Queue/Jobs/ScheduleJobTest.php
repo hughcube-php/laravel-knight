@@ -72,14 +72,12 @@ class ScheduleJobTest extends TestCase
             public function dispatch($job)
             {
                 $this->dispatched[] = $job;
-
                 return 'job-id';
             }
 
             public function dispatchSync($command, $handler = null)
             {
                 $this->dispatchedSync[] = $command;
-
                 return 'sync-id';
             }
 

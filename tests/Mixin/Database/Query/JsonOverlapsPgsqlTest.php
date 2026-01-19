@@ -4,12 +4,20 @@ namespace HughCube\Laravel\Knight\Tests\Mixin\Database\Query;
 
 use HughCube\Laravel\Knight\Database\Query\Grammars\PostgresGrammar as KnightPostgresGrammar;
 use HughCube\Laravel\Knight\Tests\TestCase;
+<<<<<<< HEAD
+=======
 use Illuminate\Database\Query\Builder;
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
 use Illuminate\Support\Facades\DB;
 use PDO;
 
 class JsonOverlapsPgsqlTest extends TestCase
 {
+<<<<<<< HEAD
+    private static ?bool $jsonOverlapsBuilderSupported = null;
+
+=======
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
     protected function getEnvironmentSetUp($app)
     {
         parent::getEnvironmentSetUp($app);
@@ -26,7 +34,11 @@ class JsonOverlapsPgsqlTest extends TestCase
     {
         // 按需注册 PostgreSQL JSON Overlaps 支持
         KnightPostgresGrammar::registerConnectionResolver();
+<<<<<<< HEAD
+        #KnightPostgresGrammar::applyToExistingConnections();
+=======
         //KnightPostgresGrammar::applyToExistingConnections();
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
 
         parent::setUp();
 
@@ -163,6 +175,34 @@ class JsonOverlapsPgsqlTest extends TestCase
     {
         return [
             [
+<<<<<<< HEAD
+                'id' => 1,
+                'tags' => $this->encodeJson(['php', 'laravel']),
+                'meta' => $this->encodeJson(['role' => 'admin', 'team' => 'alpha']),
+                'payload' => $this->encodeJson(['settings' => ['tags' => ['php', 'mysql']], 'status' => 'active']),
+                'scalar' => $this->encodeJson('php'),
+            ],
+            [
+                'id' => 2,
+                'tags' => $this->encodeJson(['python', 'django']),
+                'meta' => $this->encodeJson(['role' => 'user', 'team' => 'beta']),
+                'payload' => $this->encodeJson(['settings' => ['tags' => ['python']], 'status' => 'inactive']),
+                'scalar' => $this->encodeJson('python'),
+            ],
+            [
+                'id' => 3,
+                'tags' => $this->encodeJson(['go', 'rust']),
+                'meta' => $this->encodeJson(['role' => 'admin', 'team' => 'beta', 'flag' => true]),
+                'payload' => $this->encodeJson(['settings' => ['tags' => ['rust', 'php']], 'status' => 'active']),
+                'scalar' => $this->encodeJson('go'),
+            ],
+            [
+                'id' => 4,
+                'tags' => $this->encodeJson([]),
+                'meta' => $this->encodeJson(['role' => 'guest']),
+                'payload' => $this->encodeJson(['settings' => ['tags' => []], 'status' => 'disabled']),
+                'scalar' => $this->encodeJson(null),
+=======
                 'id'      => 1,
                 'tags'    => $this->encodeJson(['php', 'laravel']),
                 'meta'    => $this->encodeJson(['role' => 'admin', 'team' => 'alpha']),
@@ -189,6 +229,7 @@ class JsonOverlapsPgsqlTest extends TestCase
                 'meta'    => $this->encodeJson(['role' => 'guest']),
                 'payload' => $this->encodeJson(['settings' => ['tags' => []], 'status' => 'disabled']),
                 'scalar'  => $this->encodeJson(null),
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
             ],
         ];
     }
@@ -234,6 +275,19 @@ class JsonOverlapsPgsqlTest extends TestCase
         $password = getenv($prefix.'_PASSWORD');
 
         return [
+<<<<<<< HEAD
+            'driver' => 'pgsql',
+            'host' => $host,
+            'port' => ($port === false || $port === '') ? 5432 : (int) $port,
+            'database' => $database,
+            'username' => $username,
+            'password' => ($password === false) ? null : $password,
+            'charset' => 'utf8',
+            'prefix' => '',
+            'schema' => 'public',
+            'options' => [
+                PDO::ATTR_PERSISTENT => true,
+=======
             'driver'   => 'pgsql',
             'host'     => $host,
             'port'     => ($port === false || $port === '') ? 5432 : (int) $port,
@@ -245,6 +299,7 @@ class JsonOverlapsPgsqlTest extends TestCase
             'schema'   => 'public',
             'options'  => [
                 PDO::ATTR_PERSISTENT       => true,
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
                 PDO::ATTR_EMULATE_PREPARES => true,
             ],
         ];
@@ -264,8 +319,52 @@ class JsonOverlapsPgsqlTest extends TestCase
 
     private function skipIfBuilderJsonOverlapsNotSupported(): void
     {
+<<<<<<< HEAD
+        if (!$this->isJsonOverlapsBuilderSupported()) {
+            $this->markTestSkipped('Query builder does not support JSON overlaps methods (Laravel version too old).');
+        }
+    }
+
+    private function isJsonOverlapsBuilderSupported(): bool
+    {
+        if (self::$jsonOverlapsBuilderSupported !== null) {
+            return self::$jsonOverlapsBuilderSupported;
+        }
+
+        $makeQuery = function () {
+            return DB::connection('pgsql')->table('knight_json_overlaps_test');
+        };
+
+        $supported = $this->probeJsonOverlapsWhere($makeQuery, 'whereJsonOverlaps', false, 'and')
+            && $this->probeJsonOverlapsWhere($makeQuery, 'whereJsonDoesntOverlap', true, 'and')
+            && $this->probeJsonOverlapsWhere($makeQuery, 'orWhereJsonOverlaps', false, 'or')
+            && $this->probeJsonOverlapsWhere($makeQuery, 'orWhereJsonDoesntOverlap', true, 'or');
+
+        self::$jsonOverlapsBuilderSupported = $supported;
+
+        return $supported;
+    }
+
+    private function probeJsonOverlapsWhere(callable $makeQuery, string $method, bool $not, string $boolean): bool
+    {
+        $query = $makeQuery();
+
+        try {
+            $query->$method('tags', ['php']);
+        } catch (\Throwable $exception) {
+            return false;
+        }
+
+        $where = $query->wheres[count($query->wheres) - 1] ?? null;
+
+        return ($where['type'] ?? null) === 'JsonOverlaps'
+            && ($where['not'] ?? null) === $not
+            && ($where['boolean'] ?? null) === $boolean;
+    }
+=======
         if (!method_exists(Builder::class, 'whereJsonOverlaps')) {
             $this->markTestSkipped('Query builder does not support whereJsonOverlaps (Laravel version too old).');
         }
     }
+>>>>>>> 8f22473b86b48b69738e0e53f6652b3510bd616f
 }
