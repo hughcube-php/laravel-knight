@@ -22,7 +22,7 @@ class Blueprint
     /**
      * @see BlueprintMixin::knightColumns()
      */
-    public function knightColumns(): Blueprint
+    public function knightColumns()
     {
         return $this;
     }
@@ -32,7 +32,7 @@ class Blueprint
      *
      * @param string|array $columns
      */
-    public function knightGin($columns, ?string $indexName = null): Blueprint
+    public function knightGin($columns, ?string $indexName = null)
     {
         return $this;
     }
@@ -42,7 +42,7 @@ class Blueprint
      *
      * @param string|array $columns
      */
-    public function knightUniqueWhere($columns, string $whereCondition, ?string $indexName = null): Blueprint
+    public function knightUniqueWhere($columns, string $whereCondition, ?string $indexName = null)
     {
         return $this;
     }
@@ -52,7 +52,7 @@ class Blueprint
      *
      * @param string|array $columns
      */
-    public function knightIndexWhere($columns, string $whereCondition, ?string $indexName = null): Blueprint
+    public function knightIndexWhere($columns, string $whereCondition, ?string $indexName = null)
     {
         return $this;
     }
@@ -66,7 +66,7 @@ class Blueprint
         $columns,
         ?string $indexName = null,
         string $deletedAtColumn = 'deleted_at'
-    ): Blueprint {
+    ) {
         return $this;
     }
 
@@ -79,7 +79,7 @@ class Blueprint
         $columns,
         ?string $indexName = null,
         string $deletedAtColumn = 'deleted_at'
-    ): Blueprint {
+    ) {
         return $this;
     }
 }
