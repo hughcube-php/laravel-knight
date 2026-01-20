@@ -46,7 +46,7 @@ class BlueprintMixin
             $this->timestamp('updated_at')->nullable()->default(null)->comment('Record last update timestamp');
             $this->timestamp('deleted_at')->nullable()->default(null)->comment('Soft delete timestamp');
             $this->bigInteger('data_version')->default(0)->comment('Data version for optimistic locking');
-            $this->string('ukey', 255)->nullable()->default(null)->comment('Unique key for composite unique index');
+            $this->string('ukey', 255)->nullable()->default('')->comment('Unique key for composite unique index');
             $this->jsonb('options')->default('{}')->comment('Extra options');
             $this->bigInteger('sort')->default(0)->comment('Sorting weight');
 
@@ -75,7 +75,7 @@ class BlueprintMixin
 
             $this->bigInteger('sort')->default(0)->comment('Sorting weight');
             $this->jsonb('options')->default('{}')->comment('Extra options');
-            $this->string('ukey', 255)->nullable()->default(null)->comment('Unique key for composite unique index');
+            $this->string('ukey', 255)->nullable()->default('')->comment('Unique key for composite unique index');
             $this->bigInteger('data_version')->default(0)->comment('Data version for optimistic locking');
             $this->timestamp('created_at')->nullable()->default(null)->comment('Record creation timestamp');
             $this->timestamp('updated_at')->nullable()->default(null)->comment('Record last update timestamp');
