@@ -61,6 +61,16 @@ class KIdeCollection
     /**
      * @return $this
      *
+     * @see CollectionMixin::pluckAndMergeArrayColumn()
+     */
+    public function pluckAndMergeArrayColumn($name): KIdeCollection
+    {
+        return $this;
+    }
+
+    /**
+     * @return $this
+     *
      * @see CollectionMixin::onlyArrayKeys()
      */
     public function onlyArrayKeys($keys = []): KIdeCollection

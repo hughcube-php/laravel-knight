@@ -69,4 +69,14 @@ class Carbon
     {
         return null;
     }
+
+    /**
+     * @see CarbonMixin::tryCreateFromFormats()
+     *
+     * @return null|static
+     */
+    public static function tryCreateFromFormats($date, $formats)
+    {
+        return null;
+    }
 }

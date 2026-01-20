@@ -242,6 +242,28 @@ class CollectionMixin
     }
 
     /**
+     * 合并指定列中的数组元素.
+     */
+    public function pluckAndMergeArrayColumn(): Closure
+    {
+        return function ($name) {
+            $merged = $this->make([]);
+
+            foreach ($this->pluck($name) as $items) {
+                if ($items instanceof Collection) {
+                    $merged = $merged->merge($items);
+                }elseif (is_array($items)){
+                    $merged = $merged->merge($items);
+                }else{
+                    $merged = $merged->merge($this->make($items));
+                }
+            }
+
+            return $merged;
+        };
+    }
+
+    /**
      * 收集指定数组keys, 组合成一个新的collection.
      */
     public function onlyArrayKeys(): Closure

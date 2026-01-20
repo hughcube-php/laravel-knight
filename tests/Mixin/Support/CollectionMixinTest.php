@@ -110,6 +110,37 @@ class CollectionMixinTest extends TestCase
         );
     }
 
+    public function testPluckAndMergeArrayColumn()
+    {
+        /** @var KIdeCollection $collection */
+        $collection = Collection::make([
+            ['a' => [1, 2, 3, 4]],
+            ['a' => [1, 2, 4]],
+        ]);
+
+        $this->assertSame(
+            [1, 2, 3, 4, 1, 2, 4],
+            $collection->pluckAndMergeArrayColumn('a')->toArray()
+        );
+    }
+
+    public function testPluckAndMergeArrayColumnHandlesMissingOrNonArray()
+    {
+        /** @var KIdeCollection $collection */
+        $collection = Collection::make([
+            ['a' => [1, 2]],
+            ['b' => [3]],
+            ['a' => '3'],
+            ['a' => null],
+            ['a' => Collection::make([4, 5])],
+        ]);
+
+        $this->assertSame(
+            [1, 2, '3', 4, 5],
+            $collection->pluckAndMergeArrayColumn('a')->toArray()
+        );
+    }
+
     /**
      * 收集指定数组keys, 组合成一个新的collection.
      */
