@@ -48,6 +48,7 @@ class BlueprintMixin
             $this->bigInteger('data_version')->default(0)->comment('Data version for optimistic locking');
             $this->string('ukey', 255)->nullable()->default(null)->comment('Unique key for composite unique index');
             $this->jsonb('options')->default('{}')->comment('Extra options');
+            $this->bigInteger('sort')->default(0)->comment('Sorting weight');
 
             return $this;
         };
@@ -72,6 +73,7 @@ class BlueprintMixin
         return function () {
             /** @var Blueprint $this */
 
+            $this->bigInteger('sort')->default(0)->comment('Sorting weight');
             $this->jsonb('options')->default('{}')->comment('Extra options');
             $this->string('ukey', 255)->nullable()->default(null)->comment('Unique key for composite unique index');
             $this->bigInteger('data_version')->default(0)->comment('Data version for optimistic locking');
