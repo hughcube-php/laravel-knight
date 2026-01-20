@@ -17,7 +17,8 @@ use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\KRTest;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
-use HughCube\Laravel\Knight\Database\Query\Grammars\PostgresGrammar as KnightPostgresGrammar;
+use HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin as MigrationBlueprintMixin;
+use HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin as MigrationPostgresGrammarMixin;
 use HughCube\Laravel\Knight\Http\Actions\DevopsSystemAction;
 use HughCube\Laravel\Knight\Http\Actions\PhpInfoAction;
 use HughCube\Laravel\Knight\Http\Actions\PingAction;
@@ -40,6 +41,8 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Grammars\Grammar;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Schema\Grammars\PostgresGrammar as SchemaPostgresGrammar;
 use Illuminate\Foundation\Application as LaravelApplication;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -71,6 +74,28 @@ class ServiceProvider extends IlluminateServiceProvider
 
         /** Carbon */
         Carbon::mixin(new CarbonMixin());
+
+        /** Migration Schema - 仅在 ide-helper 命令时注册 */
+        if ($this->isRunningIdeHelperCommand()) {
+            Blueprint::mixin(new MigrationBlueprintMixin(), false);
+            SchemaPostgresGrammar::mixin(new MigrationPostgresGrammarMixin(), false);
+        }
+    }
+
+    /**
+     * 检查是否正在运行 ide-helper 命令.
+     *
+     * artisan 命令格式: php artisan command:name [arguments]
+     * $_SERVER['argv'][0] = artisan 脚本路径
+     * $_SERVER['argv'][1] = 命令名称
+     */
+    protected function isRunningIdeHelperCommand(): bool
+    {
+        if (!$this->app->runningInConsole()) {
+            return false;
+        }
+
+        return str_starts_with($_SERVER['argv'][1] ?? '', 'ide-helper:');
     }
 
     /**
