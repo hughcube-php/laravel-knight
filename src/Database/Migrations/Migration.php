@@ -8,105 +8,75 @@
 
 namespace HughCube\Laravel\Knight\Database\Migrations;
 
-
+use HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin;
+use HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Migrations\Migration as IlluminateMigration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Schema\Grammars\PostgresGrammar as PostgresSchemaGrammar;
 use Illuminate\Support\Facades\DB;
+use ReflectionException;
 
 /**
  * 迁移文件基类
  *
- * @property string $table 表名
+ * 继承此类后，Blueprint 将自动获得以下扩展方法:
+ * - knightColumnsReversed(): 添加常用字段 (created_at, updated_at, deleted_at, ukey, data_version)
+ * - knightColumns(): 添加常用字段 (ukey, data_version, created_at, updated_at, deleted_at)
+ * - knightGin($columns, $indexName): 创建 GIN 索引，支持单列或多列 (PostgreSQL)
+ * - knightUniqueWhere($columns, $where, $indexName): 创建条件唯一索引 (PostgreSQL)
+ * - knightIndexWhere($columns, $where, $indexName): 创建条件索引 (PostgreSQL)
+ * - knightUniqueWhereNotDeleted($columns, $indexName): 创建未删除记录的唯一索引 (PostgreSQL)
+ * - knightIndexWhereNotDeleted($columns, $indexName): 创建未删除记录的索引 (PostgreSQL)
+ *
+ * 使用示例:
+ *   Schema::create('users', function (Blueprint $table) {
+ *       $table->id();
+ *       $table->string('name');
+ *       $table->knightColumns();       // 或 $table->knightColumnsReversed();
+ *       $table->knightUniqueWhereNotDeleted('email');
+ *       $table->knightGin(['tenant_id', 'tags']); // 多列 GIN 索引需要 btree_gin 扩展
+ *   });
  */
 class Migration extends IlluminateMigration
 {
+    protected static bool $mixinRegistered = false;
+
     /**
-     * 表名
+     * @throws ReflectionException
      */
-    protected string $table;
+    public function __construct()
+    {
+        static::registerMixin();
+    }
+
+    /**
+     * 注册 Migration Mixin
+     *
+     * @throws ReflectionException
+     */
+    protected static function registerMixin(): void
+    {
+        if (static::$mixinRegistered) {
+            return;
+        }
+
+        Blueprint::mixin(new BlueprintMixin());
+        PostgresSchemaGrammar::mixin(new PostgresGrammarMixin());
+
+        static::$mixinRegistered = true;
+    }
 
     /**
      * 获取数据库连接实例
+     *
+     * @return Connection
      */
     protected function getDB(): Connection
     {
-        return DB::connection($this->getConnection());
-    }
+        /** @var Connection $connection */
+        $connection = DB::connection($this->getConnection());
 
-    /**
-     * 创建 GIN 索引 (PostgreSQL)
-     *
-     * @param string $column 列名
-     * @param string|null $indexName 索引名称，默认自动生成
-     */
-    protected function createGinIndex(string $column, ?string $indexName = null): void
-    {
-        $indexName = $indexName ?? "idx_{$this->table}_{$column}_gin";
-
-        $this->getDB()->statement(
-            "CREATE INDEX {$indexName} ON {$this->table} USING GIN ({$column})"
-        );
-    }
-
-    /**
-     * 创建条件唯一索引 (PostgreSQL)
-     *
-     * @param string|array $columns 列名或列名数组
-     * @param string $whereCondition WHERE 条件
-     * @param string|null $indexName 索引名称，默认自动生成
-     */
-    protected function createUniqueIndexWhere($columns, string $whereCondition, ?string $indexName = null): void
-    {
-        $columns = is_array($columns) ? $columns : [$columns];
-        $columnStr = implode(', ', $columns);
-        $columnSuffix = implode('_', $columns);
-        $indexName = $indexName ?? "uk_{$this->table}_{$columnSuffix}";
-
-        $this->getDB()->statement(
-            "CREATE UNIQUE INDEX {$indexName} ON {$this->table} ({$columnStr}) WHERE {$whereCondition}"
-        );
-    }
-
-    /**
-     * 创建条件索引 (PostgreSQL)
-     *
-     * @param string|array $columns 列名或列名数组
-     * @param string $whereCondition WHERE 条件
-     * @param string|null $indexName 索引名称，默认自动生成
-     */
-    protected function createIndexWhere($columns, string $whereCondition, ?string $indexName = null): void
-    {
-        $columns = is_array($columns) ? $columns : [$columns];
-        $columnStr = implode(', ', $columns);
-        $columnSuffix = implode('_', $columns);
-        $indexName = $indexName ?? "idx_{$this->table}_{$columnSuffix}";
-
-        $this->getDB()->statement(
-            "CREATE INDEX {$indexName} ON {$this->table} ({$columnStr}) WHERE {$whereCondition}"
-        );
-    }
-
-    /**
-     * 创建条件唯一索引，仅对未软删除的记录生效 (PostgreSQL)
-     *
-     * @param string|array $columns 列名或列名数组
-     * @param string|null $indexName 索引名称，默认自动生成
-     * @param string $deletedAtColumn 软删除列名，默认 deleted_at
-     */
-    protected function createUniqueIndexWhereNotDeleted($columns, ?string $indexName = null, string $deletedAtColumn = 'deleted_at'): void
-    {
-        $this->createUniqueIndexWhere($columns, "{$deletedAtColumn} IS NULL", $indexName);
-    }
-
-    /**
-     * 创建条件索引，仅对未软删除的记录生效 (PostgreSQL)
-     *
-     * @param string|array $columns 列名或列名数组
-     * @param string|null $indexName 索引名称，默认自动生成
-     * @param string $deletedAtColumn 软删除列名，默认 deleted_at
-     */
-    protected function createIndexWhereNotDeleted($columns, ?string $indexName = null, string $deletedAtColumn = 'deleted_at'): void
-    {
-        $this->createIndexWhere($columns, "{$deletedAtColumn} IS NULL", $indexName);
+        return $connection;
     }
 }

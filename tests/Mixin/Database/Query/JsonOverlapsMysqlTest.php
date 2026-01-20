@@ -5,23 +5,10 @@ namespace HughCube\Laravel\Knight\Tests\Mixin\Database\Query;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
-use PDO;
 
 class JsonOverlapsMysqlTest extends TestCase
 {
     private static ?bool $mysqlJsonOverlapsPathSupported = null;
-
-    protected function getEnvironmentSetUp($app)
-    {
-        parent::getEnvironmentSetUp($app);
-
-        $mysqlConfig = $this->resolveMysqlConfig();
-
-        if ($mysqlConfig !== null) {
-            $app['config']->set('database.default', 'mysql');
-            $app['config']->set('database.connections.mysql', $mysqlConfig);
-        }
-    }
 
     protected function setUp(): void
     {
@@ -215,67 +202,6 @@ class JsonOverlapsMysqlTest extends TestCase
     private function castIds(array $ids): array
     {
         return array_map('intval', $ids);
-    }
-
-    private function resolveMysqlConfig(): ?array
-    {
-        $testConfig = $this->resolveMysqlConfigFromEnv('TEST_MYSQL');
-
-        if ($testConfig !== null) {
-            return $testConfig;
-        }
-
-        $dbConnection = getenv('DB_CONNECTION') ?: '';
-
-        if (strtolower($dbConnection) !== 'mysql') {
-            return null;
-        }
-
-        return $this->resolveMysqlConfigFromEnv('DB');
-    }
-
-    private function resolveMysqlConfigFromEnv(string $prefix): ?array
-    {
-        $host = getenv($prefix.'_HOST');
-        $database = getenv($prefix.'_DATABASE');
-        $username = getenv($prefix.'_USERNAME');
-
-        if ($host === false || $host === '' || $database === false || $database === '' || $username === false || $username === '') {
-            return null;
-        }
-
-        $port = getenv($prefix.'_PORT');
-        $password = getenv($prefix.'_PASSWORD');
-
-        return [
-            'driver'    => 'mysql',
-            'host'      => $host,
-            'port'      => ($port === false || $port === '') ? 3306 : (int) $port,
-            'database'  => $database,
-            'username'  => $username,
-            'password'  => ($password === false) ? null : $password,
-            'charset'   => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix'    => '',
-            'strict'    => true,
-            'engine'    => null,
-            'options'   => [
-                PDO::ATTR_PERSISTENT       => true,
-                PDO::ATTR_EMULATE_PREPARES => true,
-            ],
-        ];
-    }
-
-    private function isMysqlConfigured(): bool
-    {
-        return $this->resolveMysqlConfig() !== null;
-    }
-
-    private function skipIfMysqlNotConfigured(): void
-    {
-        if (!$this->isMysqlConfigured()) {
-            $this->markTestSkipped('MySQL connection is not configured for JsonOverlapsMysqlTest.');
-        }
     }
 
     private function skipIfBuilderJsonOverlapsNotSupported(): void

@@ -157,18 +157,194 @@ class TestCase extends OrchestraTestCase
         $file = sprintf('%s/%s-%s-database.sqlite', sys_get_temp_dir(), date('Y-m-d'), md5(random_bytes(100)));
         touch($file);
 
+        $connections = [
+            'sqlite' => [
+                'driver'                  => 'sqlite',
+                'url'                     => '',
+                'database'                => $file,
+                'prefix'                  => '',
+                'foreign_key_constraints' => true,
+            ],
+        ];
+
+        $pgsqlConfig = $this->resolvePgsqlConfig();
+        if ($pgsqlConfig !== null) {
+            $connections['pgsql'] = $pgsqlConfig;
+        }
+
+        $mysqlConfig = $this->resolveMysqlConfig();
+        if ($mysqlConfig !== null) {
+            $connections['mysql'] = $mysqlConfig;
+        }
+
         $appConfig->set('database', [
             'default'     => 'sqlite',
-            'connections' => [
-                'sqlite' => [
-                    'driver'                  => 'sqlite',
-                    'url'                     => '',
-                    'database'                => $file,
-                    'prefix'                  => '',
-                    'foreign_key_constraints' => true,
-                ],
-            ],
+            'connections' => $connections,
         ]);
+    }
+
+    /**
+     * Resolve PostgreSQL configuration from environment variables.
+     *
+     * @return array|null
+     */
+    protected function resolvePgsqlConfig(): ?array
+    {
+        $testConfig = $this->resolvePgsqlConfigFromEnv('TEST_PGSQL');
+
+        if ($testConfig !== null) {
+            return $testConfig;
+        }
+
+        $dbConnection = getenv('DB_CONNECTION') ?: '';
+
+        if (strtolower($dbConnection) !== 'pgsql') {
+            return null;
+        }
+
+        return $this->resolvePgsqlConfigFromEnv('DB');
+    }
+
+    /**
+     * Resolve PostgreSQL configuration from environment variable prefix.
+     *
+     * @param string $prefix
+     *
+     * @return array|null
+     */
+    protected function resolvePgsqlConfigFromEnv(string $prefix): ?array
+    {
+        $host = getenv($prefix.'_HOST');
+        $database = getenv($prefix.'_DATABASE');
+        $username = getenv($prefix.'_USERNAME');
+
+        if ($host === false || $host === '' || $database === false || $database === '' || $username === false || $username === '') {
+            return null;
+        }
+
+        $port = getenv($prefix.'_PORT');
+        $password = getenv($prefix.'_PASSWORD');
+
+        return [
+            'driver'   => 'pgsql',
+            'host'     => $host,
+            'port'     => ($port === false || $port === '') ? 5432 : (int) $port,
+            'database' => $database,
+            'username' => $username,
+            'password' => ($password === false) ? null : $password,
+            'charset'  => 'utf8',
+            'prefix'   => '',
+            'schema'   => 'public',
+            'options'  => [
+                \PDO::ATTR_PERSISTENT       => true,
+                \PDO::ATTR_EMULATE_PREPARES => true,
+            ],
+        ];
+    }
+
+    /**
+     * Check if PostgreSQL is configured.
+     *
+     * @return bool
+     */
+    protected function isPgsqlConfigured(): bool
+    {
+        return $this->resolvePgsqlConfig() !== null;
+    }
+
+    /**
+     * Skip test if PostgreSQL is not configured.
+     *
+     * @param string|null $testName
+     */
+    protected function skipIfPgsqlNotConfigured(?string $testName = null): void
+    {
+        if (!$this->isPgsqlConfigured()) {
+            $this->markTestSkipped('PostgreSQL connection is not configured'.($testName ? " for {$testName}" : '').'.');
+        }
+    }
+
+    /**
+     * Resolve MySQL configuration from environment variables.
+     *
+     * @return array|null
+     */
+    protected function resolveMysqlConfig(): ?array
+    {
+        $testConfig = $this->resolveMysqlConfigFromEnv('TEST_MYSQL');
+
+        if ($testConfig !== null) {
+            return $testConfig;
+        }
+
+        $dbConnection = getenv('DB_CONNECTION') ?: '';
+
+        if (strtolower($dbConnection) !== 'mysql') {
+            return null;
+        }
+
+        return $this->resolveMysqlConfigFromEnv('DB');
+    }
+
+    /**
+     * Resolve MySQL configuration from environment variable prefix.
+     *
+     * @param string $prefix
+     *
+     * @return array|null
+     */
+    protected function resolveMysqlConfigFromEnv(string $prefix): ?array
+    {
+        $host = getenv($prefix.'_HOST');
+        $database = getenv($prefix.'_DATABASE');
+        $username = getenv($prefix.'_USERNAME');
+
+        if ($host === false || $host === '' || $database === false || $database === '' || $username === false || $username === '') {
+            return null;
+        }
+
+        $port = getenv($prefix.'_PORT');
+        $password = getenv($prefix.'_PASSWORD');
+
+        return [
+            'driver'    => 'mysql',
+            'host'      => $host,
+            'port'      => ($port === false || $port === '') ? 3306 : (int) $port,
+            'database'  => $database,
+            'username'  => $username,
+            'password'  => ($password === false) ? null : $password,
+            'charset'   => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix'    => '',
+            'strict'    => true,
+            'engine'    => null,
+            'options'   => [
+                \PDO::ATTR_PERSISTENT       => true,
+                \PDO::ATTR_EMULATE_PREPARES => true,
+            ],
+        ];
+    }
+
+    /**
+     * Check if MySQL is configured.
+     *
+     * @return bool
+     */
+    protected function isMysqlConfigured(): bool
+    {
+        return $this->resolveMysqlConfig() !== null;
+    }
+
+    /**
+     * Skip test if MySQL is not configured.
+     *
+     * @param string|null $testName
+     */
+    protected function skipIfMysqlNotConfigured(?string $testName = null): void
+    {
+        if (!$this->isMysqlConfigured()) {
+            $this->markTestSkipped('MySQL connection is not configured'.($testName ? " for {$testName}" : '').'.');
+        }
     }
 
     /**

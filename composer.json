@@ -24,6 +24,7 @@
         "hughcube/laravel-service-support": "*"
     },
     "require-dev": {
+        "ext-pdo": "*",
         "ext-zend-opcache": "*",
         "laravel/sanctum": "*",
         "phpstan/phpstan": "*",

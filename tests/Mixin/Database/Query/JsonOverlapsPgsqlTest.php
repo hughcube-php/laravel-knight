@@ -6,22 +6,9 @@ use HughCube\Laravel\Knight\Database\Query\Grammars\PostgresGrammar as KnightPos
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
-use PDO;
 
 class JsonOverlapsPgsqlTest extends TestCase
 {
-    protected function getEnvironmentSetUp($app)
-    {
-        parent::getEnvironmentSetUp($app);
-
-        $pgsqlConfig = $this->resolvePgsqlConfig();
-
-        if ($pgsqlConfig !== null) {
-            $app['config']->set('database.default', 'pgsql');
-            $app['config']->set('database.connections.pgsql', $pgsqlConfig);
-        }
-    }
-
     protected function setUp(): void
     {
         // 按需注册 PostgreSQL JSON Overlaps 支持
@@ -201,65 +188,6 @@ class JsonOverlapsPgsqlTest extends TestCase
     private function castIds(array $ids): array
     {
         return array_map('intval', $ids);
-    }
-
-    private function resolvePgsqlConfig(): ?array
-    {
-        $testConfig = $this->resolvePgsqlConfigFromEnv('TEST_PGSQL');
-
-        if ($testConfig !== null) {
-            return $testConfig;
-        }
-
-        $dbConnection = getenv('DB_CONNECTION') ?: '';
-
-        if (strtolower($dbConnection) !== 'pgsql') {
-            return null;
-        }
-
-        return $this->resolvePgsqlConfigFromEnv('DB');
-    }
-
-    private function resolvePgsqlConfigFromEnv(string $prefix): ?array
-    {
-        $host = getenv($prefix.'_HOST');
-        $database = getenv($prefix.'_DATABASE');
-        $username = getenv($prefix.'_USERNAME');
-
-        if ($host === false || $host === '' || $database === false || $database === '' || $username === false || $username === '') {
-            return null;
-        }
-
-        $port = getenv($prefix.'_PORT');
-        $password = getenv($prefix.'_PASSWORD');
-
-        return [
-            'driver'   => 'pgsql',
-            'host'     => $host,
-            'port'     => ($port === false || $port === '') ? 5432 : (int) $port,
-            'database' => $database,
-            'username' => $username,
-            'password' => ($password === false) ? null : $password,
-            'charset'  => 'utf8',
-            'prefix'   => '',
-            'schema'   => 'public',
-            'options'  => [
-                PDO::ATTR_PERSISTENT       => true,
-                PDO::ATTR_EMULATE_PREPARES => true,
-            ],
-        ];
-    }
-
-    private function isPgsqlConfigured(): bool
-    {
-        return $this->resolvePgsqlConfig() !== null;
-    }
-
-    private function skipIfPgsqlNotConfigured(): void
-    {
-        if (!$this->isPgsqlConfigured()) {
-            $this->markTestSkipped('PostgreSQL connection is not configured for JsonOverlapsPgsqlTest.');
-        }
     }
 
     private function skipIfBuilderJsonOverlapsNotSupported(): void
