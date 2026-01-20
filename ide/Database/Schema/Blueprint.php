@@ -14,9 +14,8 @@ class Blueprint
     /**
      * @see BlueprintMixin::knightColumnsReversed()
      */
-    public function knightColumnsReversed(): Blueprint
+    public function knightColumnsReversed()
     {
-        return $this;
     }
 
     /**
@@ -24,62 +23,46 @@ class Blueprint
      */
     public function knightColumns()
     {
-        return $this;
     }
 
     /**
-     * @see BlueprintMixin::knightGin()
-     *
      * @param string|array $columns
+     * @see BlueprintMixin::knightGin()
      */
     public function knightGin($columns, ?string $indexName = null)
     {
-        return $this;
     }
 
     /**
-     * @see BlueprintMixin::knightUniqueWhere()
-     *
      * @param string|array $columns
+     * @see BlueprintMixin::knightUniqueWhere()
      */
     public function knightUniqueWhere($columns, string $whereCondition, ?string $indexName = null)
     {
-        return $this;
     }
 
     /**
+     * @param string|array $columns
      * @see BlueprintMixin::knightIndexWhere()
      *
-     * @param string|array $columns
      */
     public function knightIndexWhere($columns, string $whereCondition, ?string $indexName = null)
     {
-        return $this;
     }
 
     /**
+     * @param string|array $columns
      * @see BlueprintMixin::knightUniqueWhereNotDeleted()
-     *
-     * @param string|array $columns
      */
-    public function knightUniqueWhereNotDeleted(
-        $columns,
-        ?string $indexName = null,
-        string $deletedAtColumn = 'deleted_at'
-    ) {
-        return $this;
+    public function knightUniqueWhereNotDeleted($columns, ?string $indexName = null, string $deletedAtColumn = 'deleted_at')
+    {
     }
 
     /**
-     * @see BlueprintMixin::knightIndexWhereNotDeleted()
-     *
      * @param string|array $columns
+     * @see BlueprintMixin::knightIndexWhereNotDeleted()
      */
-    public function knightIndexWhereNotDeleted(
-        $columns,
-        ?string $indexName = null,
-        string $deletedAtColumn = 'deleted_at'
-    ) {
-        return $this;
+    public function knightIndexWhereNotDeleted($columns, ?string $indexName = null, string $deletedAtColumn = 'deleted_at')
+    {
     }
 }
