@@ -35,6 +35,22 @@ class Blueprint
 
     /**
      * @param string|array $columns
+     * @see BlueprintMixin::knightGinWhere()
+     */
+    public function knightGinWhere($columns, string $whereCondition, ?string $indexName = null)
+    {
+    }
+
+    /**
+     * @param string|array $columns
+     * @see BlueprintMixin::knightGinWhereNotDeleted()
+     */
+    public function knightGinWhereNotDeleted($columns, ?string $indexName = null, string $deletedAtColumn = 'deleted_at')
+    {
+    }
+
+    /**
+     * @param string|array $columns
      * @see BlueprintMixin::knightUniqueWhere()
      */
     public function knightUniqueWhere($columns, string $whereCondition, ?string $indexName = null)

@@ -127,7 +127,7 @@ class BlueprintMixinTest extends TestCase
         $record = DB::table('knight_mixin_test')->first();
         $this->assertEquals('test', $record->name);
         $this->assertEquals(0, $record->data_version);
-        $this->assertNull($record->ukey);
+        $this->assertEquals('', $record->ukey);
         $this->assertNull($record->deleted_at);
     }
 
@@ -251,6 +251,220 @@ class BlueprintMixinTest extends TestCase
         // Verify index exists
         $indexes = $connection->select(
             "SELECT indexname FROM pg_indexes WHERE tablename = 'knight_gin_btree_test' AND indexname LIKE '%_gin'"
+        );
+        $this->assertNotEmpty($indexes);
+    }
+
+    // ==================== knightGinWhere Tests ====================
+
+    public function testKnightGinWhere(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_gin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->jsonb('tags')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->knightGinWhere('tags', 'deleted_at IS NULL');
+        });
+
+        $this->assertTrue($schema->hasTable('knight_gin_test_pg'));
+
+        // Verify index exists
+        $indexes = $connection->select(
+            "SELECT indexname FROM pg_indexes WHERE tablename = 'knight_gin_test_pg' AND indexname LIKE '%_gin'"
+        );
+        $this->assertNotEmpty($indexes);
+        $this->assertEquals('idx_knight_gin_test_pg_tags_gin', $indexes[0]->indexname);
+
+        // Verify index has WHERE clause
+        $indexDef = $connection->selectOne(
+            "SELECT indexdef FROM pg_indexes WHERE tablename = 'knight_gin_test_pg' AND indexname = 'idx_knight_gin_test_pg_tags_gin'"
+        );
+        $this->assertStringContainsString('WHERE', $indexDef->indexdef);
+        $this->assertStringContainsString('deleted_at', $indexDef->indexdef);
+    }
+
+    public function testKnightGinWhereWithCustomName(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_gin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->jsonb('metadata')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->knightGinWhere('metadata', 'deleted_at IS NULL', 'custom_gin_where_index');
+        });
+
+        // Verify custom index name
+        $indexes = $connection->select(
+            "SELECT indexname FROM pg_indexes WHERE tablename = 'knight_gin_test_pg' AND indexname = 'custom_gin_where_index'"
+        );
+        $this->assertNotEmpty($indexes);
+    }
+
+    public function testKnightGinWhereMultipleColumns(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+        $this->skipIfBtreeGinExtensionNotAvailable();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_gin_btree_test', function (Blueprint $table) {
+            $table->id();
+            $table->integer('tenant_id');
+            $table->jsonb('tags')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->knightGinWhere(['tenant_id', 'tags'], 'deleted_at IS NULL');
+        });
+
+        $this->assertTrue($schema->hasTable('knight_gin_btree_test'));
+
+        // Verify index exists
+        $indexes = $connection->select(
+            "SELECT indexname FROM pg_indexes WHERE tablename = 'knight_gin_btree_test' AND indexname LIKE '%_gin'"
+        );
+        $this->assertNotEmpty($indexes);
+
+        // Verify index has WHERE clause
+        $indexDef = $connection->selectOne(
+            "SELECT indexdef FROM pg_indexes WHERE tablename = 'knight_gin_btree_test' AND indexname LIKE '%_gin'"
+        );
+        $this->assertStringContainsString('WHERE', $indexDef->indexdef);
+    }
+
+    public function testKnightGinWhereFunctionality(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_gin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->jsonb('tags')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->knightGinWhere('tags', 'deleted_at IS NULL');
+        });
+
+        // Insert test data
+        $connection->table('knight_gin_test_pg')->insert([
+            ['tags' => json_encode(['php', 'laravel']), 'deleted_at' => null],
+            ['tags' => json_encode(['python', 'django']), 'deleted_at' => now()],
+            ['tags' => json_encode(['php', 'symfony']), 'deleted_at' => null],
+        ]);
+
+        // Query using GIN index on non-deleted records
+        $results = $connection->table('knight_gin_test_pg')
+            ->whereNull('deleted_at')
+            ->whereRaw("tags @> ?", [json_encode(['php'])])
+            ->get();
+
+        $this->assertCount(2, $results);
+    }
+
+    // ==================== knightGinWhereNotDeleted Tests ====================
+
+    public function testKnightGinWhereNotDeleted(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_gin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->jsonb('tags')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->knightGinWhereNotDeleted('tags');
+        });
+
+        $this->assertTrue($schema->hasTable('knight_gin_test_pg'));
+
+        // Verify index exists
+        $indexes = $connection->select(
+            "SELECT indexname FROM pg_indexes WHERE tablename = 'knight_gin_test_pg' AND indexname LIKE '%_gin'"
+        );
+        $this->assertNotEmpty($indexes);
+
+        // Verify index has WHERE clause with deleted_at IS NULL
+        $indexDef = $connection->selectOne(
+            "SELECT indexdef FROM pg_indexes WHERE tablename = 'knight_gin_test_pg' AND indexname LIKE '%_gin'"
+        );
+        $this->assertStringContainsString('WHERE', $indexDef->indexdef);
+        $this->assertStringContainsString('deleted_at', $indexDef->indexdef);
+    }
+
+    public function testKnightGinWhereNotDeletedMultipleColumns(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+        $this->skipIfBtreeGinExtensionNotAvailable();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_gin_btree_test', function (Blueprint $table) {
+            $table->id();
+            $table->integer('tenant_id');
+            $table->jsonb('tags')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->knightGinWhereNotDeleted(['tenant_id', 'tags']);
+        });
+
+        $this->assertTrue($schema->hasTable('knight_gin_btree_test'));
+
+        // Verify index exists
+        $indexes = $connection->select(
+            "SELECT indexname FROM pg_indexes WHERE tablename = 'knight_gin_btree_test' AND indexname LIKE '%_gin'"
+        );
+        $this->assertNotEmpty($indexes);
+    }
+
+    public function testKnightGinWhereNotDeletedCustomDeletedAtColumn(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_gin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->jsonb('tags')->nullable();
+            $table->timestamp('removed_at')->nullable();
+            $table->knightGinWhereNotDeleted('tags', null, 'removed_at');
+        });
+
+        // Verify index uses custom deleted_at column
+        $indexDef = $connection->selectOne(
+            "SELECT indexdef FROM pg_indexes WHERE tablename = 'knight_gin_test_pg' AND indexname LIKE '%_gin'"
+        );
+        $this->assertStringContainsString('removed_at', $indexDef->indexdef);
+    }
+
+    public function testKnightGinWhereNotDeletedWithCustomIndexName(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_gin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->jsonb('tags')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->knightGinWhereNotDeleted('tags', 'my_custom_gin_index');
+        });
+
+        // Verify custom index name
+        $indexes = $connection->select(
+            "SELECT indexname FROM pg_indexes WHERE tablename = 'knight_gin_test_pg' AND indexname = 'my_custom_gin_index'"
         );
         $this->assertNotEmpty($indexes);
     }

@@ -113,6 +113,56 @@ class BlueprintMixin
     }
 
     /**
+     * 创建条件 GIN 索引 (PostgreSQL).
+     *
+     * 注意: 多列联合索引需要先安装 btree_gin 扩展: CREATE EXTENSION btree_gin;
+     *
+     * 示例:
+     *   $table->knightGinWhere('tags', 'deleted_at IS NULL');
+     *   $table->knightGinWhere(['tenant_id', 'tags'], 'deleted_at IS NULL');
+     *
+     * @return Closure(string|array $columns, string $whereCondition, string|null $indexName = null): static
+     */
+    public function knightGinWhere(): Closure
+    {
+        return function ($columns, string $whereCondition, ?string $indexName = null) {
+            /** @var Blueprint $this */
+            $tableName = $this->getTable();
+            $columns = is_array($columns) ? $columns : [$columns];
+            $columnSuffix = implode('_', $columns);
+            $indexName = $indexName ?? "idx_{$tableName}_{$columnSuffix}_gin";
+
+            $this->addCommand('knightGinIndexWhere', [
+                'columns' => $columns,
+                'where' => $whereCondition,
+                'indexName' => $indexName,
+            ]);
+
+            return $this;
+        };
+    }
+
+    /**
+     * 创建条件 GIN 索引，仅对未软删除的记录生效 (PostgreSQL).
+     *
+     * 注意: 多列联合索引需要先安装 btree_gin 扩展: CREATE EXTENSION btree_gin;
+     *
+     * 示例:
+     *   $table->knightGinWhereNotDeleted('tags');
+     *   $table->knightGinWhereNotDeleted(['tenant_id', 'tags']);
+     *
+     * @return Closure
+     */
+    public function knightGinWhereNotDeleted(): Closure
+    {
+        return function ($columns, ?string $indexName = null, string $deletedAtColumn = 'deleted_at') {
+            /** @var Blueprint $this */
+            /** @phpstan-ignore-next-line */
+            return $this->knightGinWhere($columns, "{$deletedAtColumn} IS NULL", $indexName);
+        };
+    }
+
+    /**
      * 创建条件唯一索引 (PostgreSQL).
      *
      * 示例:

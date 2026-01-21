@@ -79,4 +79,25 @@ class PostgresGrammarMixin
             return "CREATE INDEX {$indexName} ON {$tableName} ({$columns}) WHERE {$where}";
         };
     }
+
+    /**
+     * 编译条件 GIN 索引命令.
+     *
+     * 支持单列和多列条件 GIN 索引。
+     * 注意: 多列联合索引需要先安装 btree_gin 扩展: CREATE EXTENSION btree_gin;
+     *
+     * @return Closure(Blueprint, Fluent): string
+     */
+    public function compileKnightGinIndexWhere(): Closure
+    {
+        return function (Blueprint $blueprint, Fluent $command) {
+            /** @var \Illuminate\Database\Schema\Grammars\PostgresGrammar $this */
+            $tableName = $this->wrapTable($blueprint);
+            $indexName = $command->indexName;
+            $columns = $this->columnize($command->columns);
+            $where = $command->where;
+
+            return "CREATE INDEX {$indexName} ON {$tableName} USING GIN ({$columns}) WHERE {$where}";
+        };
+    }
 }
