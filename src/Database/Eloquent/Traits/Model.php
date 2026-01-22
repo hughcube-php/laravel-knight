@@ -53,7 +53,7 @@ trait Model
 
         if (empty($format)) {
             /** @phpstan-ignore-next-line */
-            return Carbon::tryParse($format, $date);
+            return Carbon::tryParse($date);
         }
 
         return Carbon::createFromFormat($format, $date) ?: null;
