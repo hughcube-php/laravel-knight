@@ -10,6 +10,7 @@
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
 use Carbon\CarbonPeriod;
+use HughCube\Laravel\Knight\Database\Eloquent\Builder as KnightEloquentBuilder;
 use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use HughCube\Laravel\Knight\Ide\Database\Query\KIdeBuilder;
@@ -27,9 +28,10 @@ use Traversable;
 /**
  * Trait Builder.
  *
- * @method Model            getModel()
- * @method Connection       getConnection()
- * @method KnightCollection get()
+ * @method KnightCollection                 get()
+ * @method Model                            getModel()
+ * @method KnightEloquentBuilder            kCanUsable()
+ * @method Connection                       getConnection()
  *
  * @mixin \Illuminate\Database\Eloquent\Builder
  * @mixin KIdeBuilder

@@ -21,6 +21,7 @@ use Traversable;
  *
  * @method static Builder query()
  * @method static Builder newQuery()
+ * @method static Builder kCanUsable()
  *
  * @mixin SoftDeletes
  * @mixin EloquentModel
@@ -39,7 +40,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|string|null $date
-     * @param string|null                             $format
+     * @param string|null $format
      *
      * @return Carbon|null
      */
@@ -61,7 +62,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|null $dateTime
-     * @param string                           $format
+     * @param string $format
      *
      * @return string|null
      */
@@ -483,5 +484,15 @@ trait Model
         }
 
         return true;
+    }
+
+    public function scopeKCanUsable($query)
+    {
+        return $query;
+    }
+
+    public function isKCanUsable(): bool
+    {
+        return $this->isAvailable();
     }
 }
