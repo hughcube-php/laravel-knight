@@ -82,26 +82,10 @@ class ServiceProvider extends IlluminateServiceProvider
         Carbon::mixin(new CarbonMixin());
 
         /** Migration Schema - 仅在 ide-helper 命令时注册 */
-        if ($this->isRunningIdeHelperCommand()) {
+        if ($this->app->runningInConsole() && str_starts_with($_SERVER['argv'][1] ?? '', 'ide-helper:')) {
             Blueprint::mixin(new MigrationBlueprintMixin(), false);
             SchemaPostgresGrammar::mixin(new MigrationPostgresGrammarMixin(), false);
         }
-    }
-
-    /**
-     * 检查是否正在运行 ide-helper 命令.
-     *
-     * artisan 命令格式: php artisan command:name [arguments]
-     * $_SERVER['argv'][0] = artisan 脚本路径
-     * $_SERVER['argv'][1] = 命令名称
-     */
-    protected function isRunningIdeHelperCommand(): bool
-    {
-        if (!$this->app->runningInConsole()) {
-            return false;
-        }
-
-        return str_starts_with($_SERVER['argv'][1] ?? '', 'ide-helper:');
     }
 
     /**
