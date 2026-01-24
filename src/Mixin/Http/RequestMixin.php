@@ -12,13 +12,12 @@ namespace HughCube\Laravel\Knight\Mixin\Http;
 use Closure;
 use HughCube\Laravel\Knight\Http\Request as KnightRequest;
 use HughCube\Laravel\Knight\Support\Version;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Jenssegers\Agent\Agent;
 use Symfony\Component\HttpFoundation\HeaderBag;
 
 /**
- * @mixin-target Request
+ * @mixin-target \Illuminate\Http\Request
  *
  * @method null|string getClientHeaderPrefix()
  *

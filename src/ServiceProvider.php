@@ -28,6 +28,7 @@ use HughCube\Laravel\Knight\Http\Actions\RequestShowAction;
 use HughCube\Laravel\Knight\Mixin\Database\Eloquent\CollectionMixin as EloquentCollectionMixin;
 use HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin;
 use HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin;
+use HughCube\Laravel\Knight\Mixin\Http\RequestMixin;
 use HughCube\Laravel\Knight\Mixin\Support\CarbonMixin;
 use HughCube\Laravel\Knight\Mixin\Support\CollectionMixin;
 use HughCube\Laravel\Knight\OPcache\Actions\ResetAction as OPcacheResetAction;
@@ -45,6 +46,7 @@ use Illuminate\Database\Query\Grammars\Grammar;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Schema\Grammars\PostgresGrammar as SchemaPostgresGrammar;
 use Illuminate\Foundation\Application as LaravelApplication;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -68,10 +70,13 @@ class ServiceProvider extends IlluminateServiceProvider
     {
         Collection::mixin(new CollectionMixin(), false);
 
-        /** 数据库 */
+        /** Database */
         Grammar::mixin(new GrammarMixin(), false);
         Builder::mixin(new BuilderMixin(), false);
         EloquentCollection::mixin(new EloquentCollectionMixin(), false);
+
+        /** Http */
+        Request::mixin(new RequestMixin(), false);
 
         /** Carbon */
         Carbon::mixin(new CarbonMixin());
