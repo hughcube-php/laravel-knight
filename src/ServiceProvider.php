@@ -59,8 +59,6 @@ use ReflectionException;
  */
 class ServiceProvider extends IlluminateServiceProvider
 {
-    protected ?bool $routesAreCached = null;
-
     /**
      * Register the provider.
      *
@@ -115,11 +113,6 @@ class ServiceProvider extends IlluminateServiceProvider
         $this->registerRefreshModelCacheEvent();
     }
 
-    protected function hasRoutesCache(): bool
-    {
-        return $this->routesAreCached ??= $this->app->routesAreCached();
-    }
-
     protected function bootOpCache()
     {
         if ($this->app->runningInConsole()) {
@@ -132,7 +125,7 @@ class ServiceProvider extends IlluminateServiceProvider
 
         /** @var Repository $config */
         $config = $this->app->make('config');
-        if (!$this->hasRoutesCache() && false !== ($prefix = $config->get('knight.opcache.route_prefix', false))) {
+        if (!$this->app->routesAreCached() && false !== ($prefix = $config->get('knight.opcache.route_prefix', false))) {
             Route::group(['prefix' => $prefix], function () use ($config) {
                 if (false !== ($action = $config->get('knight.opcache.action.scripts'))) {
                     Route::any('/opcache/scripts', $action ?: OPcacheScriptsAction::class)->name('knight.opcache.scripts');
@@ -153,7 +146,7 @@ class ServiceProvider extends IlluminateServiceProvider
     {
         /** @var Repository $config */
         $config = $this->app->make('config');
-        if (!$this->hasRoutesCache() && false !== ($prefix = $config->get('knight.request.route_prefix', false))) {
+        if (!$this->app->routesAreCached() && false !== ($prefix = $config->get('knight.request.route_prefix', false))) {
             Route::group(['prefix' => $prefix], function () use ($config) {
                 if (false !== ($action = $config->get('knight.request.action.log'))) {
                     Route::any('/request/log', $action ?: RequestLogAction::class)->name('knight.request.log');
@@ -170,7 +163,7 @@ class ServiceProvider extends IlluminateServiceProvider
     {
         /** @var Repository $config */
         $config = $this->app->make('config');
-        if (!$this->hasRoutesCache() && false !== ($prefix = $config->get('knight.healthcheck.route_prefix'))) {
+        if (!$this->app->routesAreCached() && false !== ($prefix = $config->get('knight.healthcheck.route_prefix'))) {
             Route::group(['prefix' => $prefix], function () use ($config) {
                 if (false !== ($action = $config->get('knight.healthcheck.action.healthcheck'))) {
                     Route::any('/healthcheck', $action ?: PingAction::class)->name('knight.healthcheck');
@@ -183,7 +176,7 @@ class ServiceProvider extends IlluminateServiceProvider
     {
         /** @var Repository $config */
         $config = $this->app->make('config');
-        if (!$this->hasRoutesCache() && false !== ($prefix = $config->get('knight.phpinfo.route_prefix', false))) {
+        if (!$this->app->routesAreCached() && false !== ($prefix = $config->get('knight.phpinfo.route_prefix', false))) {
             Route::group(['prefix' => $prefix], function () use ($config) {
                 if (false !== ($action = $config->get('knight.phpinfo.action.phpinfo'))) {
                     Route::any('/phpinfo', $action ?: PhpInfoAction::class)->name('knight.phpinfo');
@@ -196,7 +189,7 @@ class ServiceProvider extends IlluminateServiceProvider
     {
         /** @var Repository $config */
         $config = $this->app->make('config');
-        if (!$this->hasRoutesCache() && false !== ($prefix = $config->get('knight.devops.route_prefix', false))) {
+        if (!$this->app->routesAreCached() && false !== ($prefix = $config->get('knight.devops.route_prefix', false))) {
             Route::group(['prefix' => $prefix], function () use ($config) {
                 if (false !== ($action = $config->get('knight.devops.action.system'))) {
                     Route::any('/devops/system', $action ?: DevopsSystemAction::class)->name('knight.devops.system');
