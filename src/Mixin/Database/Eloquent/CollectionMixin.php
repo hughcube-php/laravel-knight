@@ -12,7 +12,7 @@ namespace HughCube\Laravel\Knight\Mixin\Database\Eloquent;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
- * @mixin Collection
+ * @mixin-target Collection
  */
 class CollectionMixin
 {

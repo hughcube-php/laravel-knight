@@ -9,7 +9,6 @@
 
 namespace HughCube\Laravel\Knight\Tests\Mixin\Support;
 
-use HughCube\Laravel\Knight\Ide\Support\KIdeCollection;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Support\Collection;
 
@@ -17,7 +16,6 @@ class CollectionMixinTest extends TestCase
 {
     public function testHasByCallable()
     {
-        /** @var KIdeCollection $collection */
         $collection = Collection::make([1, 2, 3, 4, 5]);
 
         $this->assertTrue($collection->hasByCallable(function ($item) {
@@ -31,22 +29,18 @@ class CollectionMixinTest extends TestCase
 
     public function testIsIndexed()
     {
-        /** @var KIdeCollection $collection */
         $collection = Collection::make([1, 2, 3, 4, 5]);
         $this->assertTrue($collection->isIndexed());
         $this->assertTrue($collection->isIndexed(false));
 
-        /** @var KIdeCollection $collection */
         $collection = Collection::make([10 => 1, 11 => 2, 3, 4, 5]);
         $this->assertFalse($collection->isIndexed());
         $this->assertTrue($collection->isIndexed(false));
 
-        /** @var KIdeCollection $collection */
         $collection = Collection::make(['10' => 1, 2, 3, 4, 5]);
         $this->assertFalse($collection->isIndexed());
         $this->assertTrue($collection->isIndexed(false));
 
-        /** @var KIdeCollection $collection */
         $collection = Collection::make(['a' => 1, 2, 3, 4, 5]);
         $this->assertFalse($collection->isIndexed());
         $this->assertFalse($collection->isIndexed(false));
@@ -54,7 +48,6 @@ class CollectionMixinTest extends TestCase
 
     public function testFilterWithStop()
     {
-        /** @var KIdeCollection $collection */
         $collection = Collection::make([1, 2, 3, 4, 5]);
         $this->assertSame(
             [3, 4, 5],
@@ -66,7 +59,6 @@ class CollectionMixinTest extends TestCase
                 ->toArray()
         );
 
-        /** @var KIdeCollection $collection */
         $collection = Collection::make([1, 2, 3, 4, 5]);
         $this->assertSame(
             [],
@@ -97,7 +89,6 @@ class CollectionMixinTest extends TestCase
 
     public function testPluckAndMergeSetColumn()
     {
-        /** @var KIdeCollection $collection */
         $collection = Collection::make([
             ['a' => '1,2,9', 'b' => 0],
             ['a' => '3,4,8,', 'b' => 0],
@@ -112,7 +103,6 @@ class CollectionMixinTest extends TestCase
 
     public function testPluckAndMergeArrayColumn()
     {
-        /** @var KIdeCollection $collection */
         $collection = Collection::make([
             ['a' => [1, 2, 3, 4]],
             ['a' => [1, 2, 4]],
@@ -126,7 +116,6 @@ class CollectionMixinTest extends TestCase
 
     public function testPluckAndMergeArrayColumnHandlesMissingOrNonArray()
     {
-        /** @var KIdeCollection $collection */
         $collection = Collection::make([
             ['a' => [1, 2]],
             ['b' => [3]],
@@ -146,7 +135,6 @@ class CollectionMixinTest extends TestCase
      */
     public function testOnlyArrayKeys()
     {
-        /** @var KIdeCollection $collection */
         $collection = Collection::make([1, 'a' => 2, 'b' => 3, 4, 5]);
 
         $this->assertSame(['a' => 2, 'b' => 3], $collection->onlyArrayKeys(['a', 'b', 'c', '$'])->toArray());
@@ -154,7 +142,6 @@ class CollectionMixinTest extends TestCase
 
     public function testOnlyColumnValues()
     {
-        /** @var KIdeCollection $collection */
         $collection = Collection::make([
             ['a' => '1,2,9', 'b' => 0.01],
             ['a' => '3,4,8,', 'b' => 'a'],
@@ -179,7 +166,6 @@ class CollectionMixinTest extends TestCase
 
     public function testHasAnyAndAllValues()
     {
-        /** @var KIdeCollection $collection */
         $collection = Collection::make([1, 2, 3]);
 
         $this->assertTrue($collection->hasAnyValues([3, 9]));
@@ -196,7 +182,6 @@ class CollectionMixinTest extends TestCase
 
     public function testHasValue()
     {
-        /** @var KIdeCollection $collection */
         $collection = Collection::make([1, 2, 3]);
 
         $this->assertTrue($collection->hasValue('2'));
@@ -205,7 +190,6 @@ class CollectionMixinTest extends TestCase
 
     public function testAfterItems()
     {
-        /** @var KIdeCollection $collection */
         $collection = Collection::make([1, 2, 3, 2, 4]);
 
         $this->assertSame([3, 2, 4], $collection->afterFirstItems(2)->values()->toArray());
@@ -216,7 +200,6 @@ class CollectionMixinTest extends TestCase
 
     public function testWhenFilter()
     {
-        /** @var KIdeCollection $collection */
         $collection = Collection::make([1, 2, 3]);
 
         $this->assertSame([2, 3], $collection->whenFilter(true, function ($item) {
@@ -230,12 +213,10 @@ class CollectionMixinTest extends TestCase
 
     public function testMapIntAndString()
     {
-        /** @var KIdeCollection $collection */
         $collection = Collection::make(['1', 2, '3']);
 
         $this->assertSame([1, 2, 3], $collection->mapInt()->values()->toArray());
 
-        /** @var KIdeCollection $collection */
         $collection = Collection::make([1, 2]);
 
         $this->assertSame(['1', '2'], $collection->mapString()->values()->toArray());
@@ -243,7 +224,6 @@ class CollectionMixinTest extends TestCase
 
     public function testSplitHelpers()
     {
-        /** @var KIdeCollection $collection */
         $collection = Collection::make();
 
         $this->assertSame(['a', 'b', 'c'], $collection->explode(',', 'a,b,c')->toArray());

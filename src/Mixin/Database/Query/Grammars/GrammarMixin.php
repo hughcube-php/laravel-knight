@@ -26,7 +26,7 @@ use Illuminate\Database\Query\Grammars\Grammar;
  *   - 列名通过 wrapJsonFieldAndPath() 正确转义处理
  *   - 遵循 Laravel 的标准 Grammar 编译模式
  *
- * @mixin Grammar
+ * @mixin-target Grammar
  * @property-read Grammar $connection
  * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin 对应的 Builder 扩展
  */

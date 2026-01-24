@@ -16,7 +16,7 @@ use HughCube\CNNumber\CNNumber;
 use Throwable;
 
 /**
- * @mixin Carbon
+ * @mixin-target Carbon
  */
 class CarbonMixin
 {

@@ -18,7 +18,7 @@ use Jenssegers\Agent\Agent;
 use Symfony\Component\HttpFoundation\HeaderBag;
 
 /**
- * @mixin Request
+ * @mixin-target Request
  *
  * @method null|string getClientHeaderPrefix()
  *

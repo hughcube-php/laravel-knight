@@ -25,7 +25,7 @@ use Illuminate\Database\Query\Expression;
  *   - 所有值都通过 Laravel 的参数绑定机制处理，防止 SQL 注入
  *   - 列名通过 Grammar 的标准方法转义处理
  *
- * @mixin Builder
+ * @mixin-target Builder
  *
  * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin 对应的 Grammar 扩展
  */

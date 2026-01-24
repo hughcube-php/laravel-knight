@@ -13,6 +13,8 @@ use Closure;
 use Illuminate\Support\Str;
 
 /**
+ * @mixin-target Str
+ *
  * @deprecated \HughCube\Laravel\Knight\Support\Str
  */
 class StrMixin

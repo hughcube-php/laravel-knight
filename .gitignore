@@ -17,3 +17,4 @@ phpunit.xml
 /coverage1.txt
 /coverage.html
 /coverage1.html
+/tests/.temp/

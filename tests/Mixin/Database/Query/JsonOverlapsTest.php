@@ -3,7 +3,6 @@
 namespace HughCube\Laravel\Knight\Tests\Mixin\Database\Query;
 
 use HughCube\Laravel\Knight\Database\Query\Grammars\PostgresGrammar as KnightPostgresGrammar;
-use HughCube\Laravel\Knight\Ide\Database\Query\KIdeBuilder;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Database\MySqlConnection;
 use Illuminate\Database\PostgresConnection;
@@ -69,14 +68,6 @@ class JsonOverlapsTest extends TestCase
         $this->assertStringContainsString('jsonb_array_elements', $sql);
         $this->assertStringContainsString('jsonb_each', $sql);
         $this->assertStringContainsString('::jsonb', $sql);
-    }
-
-    public function testKIdeBuilderJsonDoesntOverlapHelpersReturnNull(): void
-    {
-        $builder = new KIdeBuilder();
-
-        $this->assertNull($builder->whereJsonDoesntOverlap('tags', ['php']));
-        $this->assertNull($builder->orWhereJsonDoesntOverlap('tags', ['php']));
     }
 
     private function skipIfBuilderJsonDoesntOverlapNotSupported(): void

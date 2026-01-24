@@ -14,6 +14,7 @@ use HughCube\Laravel\Knight\Auth\ModelUserProvider;
 use HughCube\Laravel\Knight\Console\Commands\ClearModelCache;
 use HughCube\Laravel\Knight\Console\Commands\Config;
 use HughCube\Laravel\Knight\Console\Commands\Environment;
+use HughCube\Laravel\Knight\Console\Commands\GenerateMixinIdeHelperCommand;
 use HughCube\Laravel\Knight\Console\Commands\KRTest;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
@@ -110,6 +111,7 @@ class ServiceProvider extends IlluminateServiceProvider
                 PhpIniFile::class,
                 KRTest::class,
                 ClearModelCache::class,
+                GenerateMixinIdeHelperCommand::class,
             ]);
         }
 

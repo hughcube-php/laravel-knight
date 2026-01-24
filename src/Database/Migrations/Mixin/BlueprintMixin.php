@@ -19,7 +19,7 @@ use Illuminate\Database\Schema\Blueprint;
  * 此 Mixin 专门用于 Migration 场景，在 Migration 基类中自动注册。
  * 所有方法使用 knight 前缀以避免与框架冲突。
  *
- * @mixin Blueprint
+ * @mixin-target Blueprint
  */
 class BlueprintMixin
 {
