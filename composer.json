@@ -25,6 +25,7 @@
     },
     "require-dev": {
         "ext-pdo": "*",
+        "ext-bcmath": "*",
         "ext-zend-opcache": "*",
         "laravel/sanctum": "*",
         "phpstan/phpstan": "*",

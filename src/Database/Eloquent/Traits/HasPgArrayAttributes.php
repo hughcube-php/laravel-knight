@@ -12,8 +12,8 @@ use Illuminate\Support\Collection;
  *
  * 使用方式:
  * 1. 在 Model 中使用此 Trait
- * 2. 默认会从 $casts 中移除值为 'ARRAY' 的项(因为 PostgreSQL 原生数组不需要 Laravel 的 cast)
- * 3. 如需保留 'ARRAY' casts，可在 Model 中定义 shouldPreserveArrayCasts() 方法返回 true
+ * 2. 默认会从 $casts 中移除值为 'ARRAY' (全大写) 的项(因为 PostgreSQL 原生数组不需要 Laravel 的 cast)
+ * 3. 如需保留 'ARRAY' casts，可在 Model 中定义 shouldPreserveUppercaseArrayCast() 方法返回 true
  *
  * @mixin \Illuminate\Database\Eloquent\Model
  */
@@ -21,12 +21,12 @@ trait HasPgArrayAttributes
 {
     /**
      * 初始化 Trait，在 Model boot 时自动调用
-     * 默认移除 casts 中值为 'ARRAY' 的项
-     * 如 Model 定义了 shouldPreserveArrayCasts() 方法且返回 true 则跳过移除
+     * 默认移除 casts 中值为 'ARRAY' (全大写) 的项
+     * 如 Model 定义了 shouldPreserveUppercaseArrayCast() 方法且返回 true 则跳过移除
      */
     public function initializeHasPgArrayAttributes(): void
     {
-        if (!method_exists($this, 'shouldPreserveArrayCasts') || !$this->shouldPreserveArrayCasts()) {
+        if (!method_exists($this, 'shouldPreserveUppercaseArrayCast') || !$this->shouldPreserveUppercaseArrayCast()) {
             $this->casts = array_filter($this->casts, fn($cast) => $cast !== 'ARRAY');
         }
     }
@@ -44,12 +44,46 @@ trait HasPgArrayAttributes
         return Collection::make(explode(',', trim($value, '{}')))->map(function ($v) {
             $v = trim($v);
             // 检查是否在 PHP int 安全范围内
-            if (is_numeric($v) && $v >= PHP_INT_MIN && $v <= PHP_INT_MAX) {
+            if (is_numeric($v) && $this->isIntegerInPhpRange($v)) {
                 return (int) $v;
             }
             // bigint 超出范围时保持字符串，避免精度损失
             return $v;
         });
+    }
+
+    /**
+     * 判断数值字符串是否在 PHP int 范围内
+     * 兼容没有安装 BC Math 扩展的环境
+     */
+    protected function isIntegerInPhpRange(string $value): bool
+    {
+        // 优先使用 bccomp（如果可用）
+        if (function_exists('bccomp')) {
+            return bccomp($value, Base::toString(PHP_INT_MIN), 0) >= 0
+                && bccomp($value, Base::toString(PHP_INT_MAX), 0) <= 0;
+        }
+
+        // 回退方案：字符串比较
+        $value = ltrim($value, '+');
+        $isNegative = isset($value[0]) && $value[0] === '-';
+        $absValue = $isNegative ? substr($value, 1) : $value;
+        $absValue = ltrim($absValue, '0') ?: '0';
+
+        // PHP_INT_MIN 绝对值比 PHP_INT_MAX 大 1
+        $maxAbs = $isNegative ? substr(Base::toString(PHP_INT_MIN), 1) : Base::toString(PHP_INT_MAX);
+        $maxLen = strlen($maxAbs);
+
+        $absLen = strlen($absValue);
+        if ($absLen < $maxLen) {
+            return true;
+        }
+        if ($absLen > $maxLen) {
+            return false;
+        }
+
+        // 长度相同时按字符串比较
+        return strcmp($absValue, $maxAbs) <= 0;
     }
 
     /**

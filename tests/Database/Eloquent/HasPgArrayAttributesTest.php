@@ -47,17 +47,17 @@ class HasPgArrayAttributesTest extends TestCase
     {
         $model = new TestPgArrayModel();
 
-        // By default, model does not define shouldPreserveArrayCasts method
-        $this->assertFalse(method_exists($model, 'shouldPreserveArrayCasts'));
+        // By default, model does not define shouldPreserveUppercaseArrayCast method
+        $this->assertFalse(method_exists($model, 'shouldPreserveUppercaseArrayCast'));
     }
 
     public function testShouldPreserveArrayCastsMethodCanBeDefinedByModel()
     {
         $model = new TestPgArrayModelPreserveCasts();
 
-        // Model can define shouldPreserveArrayCasts method
-        $this->assertTrue(method_exists($model, 'shouldPreserveArrayCasts'));
-        $this->assertTrue($model->shouldPreserveArrayCasts());
+        // Model can define shouldPreserveUppercaseArrayCast method
+        $this->assertTrue(method_exists($model, 'shouldPreserveUppercaseArrayCast'));
+        $this->assertTrue($model->shouldPreserveUppercaseArrayCast());
     }
 
     // ==================== parsePgIntArray Tests ====================
@@ -179,6 +179,60 @@ class HasPgArrayAttributesTest extends TestCase
         $result = $this->invokeMethod($model, 'serializePgIntArray', [$bigints]);
 
         $this->assertEquals('{9223372036854775807,-9223372036854775808,9223372036854775808}', $result);
+    }
+
+    public function testIsIntegerInPhpRange()
+    {
+        $model = new TestPgArrayModel();
+
+        $phpIntMax = \HughCube\Base\Base::toString(PHP_INT_MAX);
+        $phpIntMin = \HughCube\Base\Base::toString(PHP_INT_MIN);
+
+        // 基本值测试
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', ['0']));
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', ['1']));
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', ['-1']));
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', ['123456789']));
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', ['-123456789']));
+
+        // 精确边界测试: PHP_INT_MAX 和 PHP_INT_MIN
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', [$phpIntMax]));
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', [$phpIntMin]));
+
+        // 边界 +1/-1 测试 (使用 bcadd)
+        $overMax = function_exists('bcadd') ? bcadd($phpIntMax, '1', 0) : '9223372036854775808';
+        $underMin = function_exists('bcsub') ? bcsub($phpIntMin, '1', 0) : '-9223372036854775809';
+        $this->assertFalse($this->invokeMethod($model, 'isIntegerInPhpRange', [$overMax]));
+        $this->assertFalse($this->invokeMethod($model, 'isIntegerInPhpRange', [$underMin]));
+
+        // 大数测试
+        $this->assertFalse($this->invokeMethod($model, 'isIntegerInPhpRange', ['99999999999999999999']));
+        $this->assertFalse($this->invokeMethod($model, 'isIntegerInPhpRange', ['-99999999999999999999']));
+
+        // 位数较少的值（一定在范围内）
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', ['999999999999999999']));   // 18位
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', ['-999999999999999999']));  // 18位
+
+        // 前导零和正号测试
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', ['0000123']));
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', ['+123']));
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', ['+0']));
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', ['-0']));
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', ['00000000000000000000'])); // 全零
+
+        // 19位但在范围内的值（小于边界值）
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', ['1000000000000000000']));  // 1后跟18个0
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', ['-1000000000000000000']));
+
+        // 19位但超出范围的值（大于边界值）
+        $this->assertFalse($this->invokeMethod($model, 'isIntegerInPhpRange', ['9999999999999999999'])); // 19个9
+        $this->assertFalse($this->invokeMethod($model, 'isIntegerInPhpRange', ['-9999999999999999999']));
+
+        // 边界值减1（仍在范围内）
+        $maxMinus1 = function_exists('bcsub') ? bcsub($phpIntMax, '1', 0) : '9223372036854775806';
+        $minPlus1 = function_exists('bcadd') ? bcadd($phpIntMin, '1', 0) : '-9223372036854775807';
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', [$maxMinus1]));
+        $this->assertTrue($this->invokeMethod($model, 'isIntegerInPhpRange', [$minPlus1]));
     }
 
     // ==================== parsePgSimpleTextArray Tests ====================
@@ -843,7 +897,7 @@ class TestPgArrayModel extends Model
 }
 
 /**
- * Test model that preserves ARRAY casts by defining shouldPreserveArrayCasts method
+ * Test model that preserves ARRAY casts by defining shouldPreserveUppercaseArrayCast method
  */
 class TestPgArrayModelPreserveCasts extends Model
 {
@@ -860,7 +914,7 @@ class TestPgArrayModelPreserveCasts extends Model
     /**
      * Override to preserve ARRAY casts
      */
-    public function shouldPreserveArrayCasts(): bool
+    public function shouldPreserveUppercaseArrayCast(): bool
     {
         return true;
     }
