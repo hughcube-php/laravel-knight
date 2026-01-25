@@ -191,6 +191,22 @@ namespace Illuminate\Database\Schema {
         public function knightJsonbArray(string $column): mixed
         {
         }
+
+        /**
+         * 添加 TSVECTOR 列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightTsVector()
+         */
+        public function knightTsVector(string $column): mixed
+        {
+        }
+
+        /**
+         * 添加 TSQUERY 列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightTsQuery()
+         */
+        public function knightTsQuery(string $column): mixed
+        {
+        }
     }
 }
 
@@ -334,6 +350,22 @@ namespace Illuminate\Database\Schema\Grammars {
          * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::typeKnightJsonbArray()
          */
         public function typeKnightJsonbArray(\Illuminate\Support\Fluent $column): mixed
+        {
+        }
+
+        /**
+         * 定义 TSVECTOR 列类型.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::typeKnightTsVector()
+         */
+        public function typeKnightTsVector(\Illuminate\Support\Fluent $column): mixed
+        {
+        }
+
+        /**
+         * 定义 TSQUERY 列类型.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::typeKnightTsQuery()
+         */
+        public function typeKnightTsQuery(\Illuminate\Support\Fluent $column): mixed
         {
         }
     }
@@ -1113,6 +1145,54 @@ namespace Illuminate\Database\Query {
         public function orWhereNotUuidArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
         {
         }
+
+        /**
+         * 添加 PostgreSQL 数组长度查询条件.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereArrayLength()
+         */
+        public function whereArrayLength($column, $operator, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 OR 条件的数组长度查询.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereArrayLength()
+         */
+        public function orWhereArrayLength($column, $operator, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL 数组为空查询条件.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereArrayIsEmpty()
+         */
+        public function whereArrayIsEmpty($column, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 OR 条件的数组为空查询.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereArrayIsEmpty()
+         */
+        public function orWhereArrayIsEmpty($column): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL 数组非空查询条件.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereArrayIsNotEmpty()
+         */
+        public function whereArrayIsNotEmpty($column, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 OR 条件的数组非空查询.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereArrayIsNotEmpty()
+         */
+        public function orWhereArrayIsNotEmpty($column): \Illuminate\Database\Query\Builder
+        {
+        }
     }
 }
 
@@ -1312,6 +1392,22 @@ namespace Illuminate\Database\Query\Grammars {
          * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereUuidArrayOverlaps()
          */
         public function whereUuidArrayOverlaps(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL 数组长度条件为 SQL 片段.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereArrayLength()
+         */
+        public function whereArrayLength(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL 数组空检查条件为 SQL 片段.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereArrayIsEmpty()
+         */
+        public function whereArrayIsEmpty(\Illuminate\Database\Query\Builder $query, $where): mixed
         {
         }
     }

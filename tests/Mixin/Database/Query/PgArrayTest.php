@@ -1523,4 +1523,189 @@ class PgArrayTest extends TestCase
         $this->assertStringContainsString('or not', strtolower($sql));
         $this->assertStringContainsString('&&', $sql);
     }
+
+    // ==================== Array Length Tests ====================
+
+    public function testWhereArrayLength()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereArrayLength('scores', '>', 2);
+
+        $sql = $query->toSql();
+        $bindings = $query->getBindings();
+
+        $this->assertStringContainsString('COALESCE(array_length(', $sql);
+        $this->assertStringContainsString(', 1), 0) > ?', $sql);
+        $this->assertEquals([2], $bindings);
+    }
+
+    public function testWhereArrayLengthEquals()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereArrayLength('tags', '=', 3);
+
+        $sql = $query->toSql();
+        $bindings = $query->getBindings();
+
+        $this->assertStringContainsString('COALESCE(array_length(', $sql);
+        $this->assertStringContainsString(', 1), 0) = ?', $sql);
+        $this->assertEquals([3], $bindings);
+    }
+
+    public function testWhereArrayLengthLessThan()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereArrayLength('scores', '<', 5);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('COALESCE(array_length(', $sql);
+        $this->assertStringContainsString(', 1), 0) < ?', $sql);
+    }
+
+    public function testWhereArrayLengthNotEquals()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereArrayLength('scores', '!=', 0);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('COALESCE(array_length(', $sql);
+        $this->assertStringContainsString(', 1), 0) != ?', $sql);
+    }
+
+    public function testOrWhereArrayLength()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereArrayLength('scores', '>=', 2);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('COALESCE(array_length(', $sql);
+        $this->assertStringContainsString(', 1), 0) >= ?', $sql);
+    }
+
+    public function testWhereArrayLengthWithRealDatabase()
+    {
+        $results = Collection::make(
+            $this->getTestQuery()
+                ->whereArrayLength('scores', '>', 2)
+                ->get()
+        );
+
+        $results->each(function ($item) {
+            $scores = $this->parsePgArray($item->scores);
+            $this->assertGreaterThan(2, count($scores));
+        });
+    }
+
+    public function testWhereArrayLengthEqualsWithRealDatabase()
+    {
+        $results = Collection::make(
+            $this->getTestQuery()
+                ->whereArrayLength('scores', '=', 2)
+                ->get()
+        );
+
+        $results->each(function ($item) {
+            $scores = $this->parsePgArray($item->scores);
+            $this->assertEquals(2, count($scores));
+        });
+    }
+
+    // ==================== Array Empty Check Tests ====================
+
+    public function testWhereArrayIsEmpty()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereArrayIsEmpty('tags');
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('cardinality(', $sql);
+        $this->assertStringContainsString(') = 0', $sql);
+        $this->assertStringContainsString('IS NULL', $sql);
+    }
+
+    public function testOrWhereArrayIsEmpty()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereArrayIsEmpty('tags');
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('cardinality(', $sql);
+    }
+
+    public function testWhereArrayIsNotEmpty()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereArrayIsNotEmpty('tags');
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('cardinality(', $sql);
+        $this->assertStringContainsString(') > 0', $sql);
+    }
+
+    public function testOrWhereArrayIsNotEmpty()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereArrayIsNotEmpty('tags');
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('cardinality(', $sql);
+        $this->assertStringContainsString(') > 0', $sql);
+    }
+
+    public function testWhereArrayIsNotEmptyWithRealDatabase()
+    {
+        $results = Collection::make(
+            $this->getTestQuery()
+                ->whereArrayIsNotEmpty('tags')
+                ->get()
+        );
+
+        $results->each(function ($item) {
+            $tags = $this->parsePgArray($item->tags);
+            $this->assertNotEmpty($tags);
+        });
+    }
+
+    // ==================== Combined Query Tests ====================
+
+    public function testCombinedArrayLengthAndIsEmpty()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereArrayLength('scores', '>', 1)
+            ->whereArrayIsNotEmpty('tags');
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('COALESCE(array_length(', $sql);
+        $this->assertStringContainsString('cardinality(', $sql);
+    }
+
+    public function testCombinedArrayMethodsWithOtherConditions()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereTextArrayContains('tags', ['php'])
+            ->whereArrayLength('scores', '>=', 2)
+            ->where('id', '>', 1);
+
+        $sql = $query->toSql();
+        $bindings = $query->getBindings();
+
+        $this->assertStringContainsString('@>', $sql);
+        $this->assertStringContainsString('COALESCE(array_length(', $sql);
+        $this->assertStringContainsString('"id" > ?', $sql);
+        $this->assertEquals(['php', 2, 1], $bindings);
+    }
 }

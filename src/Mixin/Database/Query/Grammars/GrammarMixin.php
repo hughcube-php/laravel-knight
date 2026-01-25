@@ -479,4 +479,53 @@ class GrammarMixin
             return $not . '(' . $column . ' && ' . $arrayExpr . ')';
         };
     }
+
+    // ==================== Array Length Grammar Methods ====================
+
+    /**
+     * 编译 WHERE PostgreSQL 数组长度条件为 SQL 片段.
+     *
+     * 使用 COALESCE 处理空数组返回 NULL 的情况。
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereArrayLength(): Closure
+    {
+        return function (Builder $query, $where) {
+            $column = $this->wrap($where['column']);
+            $operator = $where['operator'];
+
+            // Validate operator
+            $validOperators = ['=', '!=', '<>', '<', '>', '<=', '>='];
+            if (!in_array($operator, $validOperators, true)) {
+                $operator = '=';
+            }
+
+            return 'COALESCE(array_length(' . $column . ', 1), 0) ' . $operator . ' ?';
+        };
+    }
+
+    // ==================== Array Empty Check Grammar Methods ====================
+
+    /**
+     * 编译 WHERE PostgreSQL 数组空检查条件为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereArrayIsEmpty(): Closure
+    {
+        return function (Builder $query, $where) {
+            $column = $this->wrap($where['column']);
+            $not = $where['not'] ?? false;
+
+            if ($not) {
+                // 非空: cardinality > 0
+                return 'cardinality(' . $column . ') > 0';
+            }
+
+            // 为空: cardinality = 0 OR IS NULL
+            return '(cardinality(' . $column . ') = 0 OR ' . $column . ' IS NULL)';
+        };
+    }
+
 }

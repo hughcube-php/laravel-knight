@@ -272,4 +272,29 @@ class PostgresGrammarMixin
         };
     }
 
+    // ==================== PostgreSQL Full-Text Search Column Type Methods ====================
+
+    /**
+     * 定义 TSVECTOR 列类型.
+     *
+     * @return Closure(Fluent): string
+     */
+    public function typeKnightTsVector(): Closure
+    {
+        return function (Fluent $column) {
+            return 'tsvector';
+        };
+    }
+
+    /**
+     * 定义 TSQUERY 列类型.
+     *
+     * @return Closure(Fluent): string
+     */
+    public function typeKnightTsQuery(): Closure
+    {
+        return function (Fluent $column) {
+            return 'tsquery';
+        };
+    }
 }

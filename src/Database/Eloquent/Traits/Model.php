@@ -505,6 +505,8 @@ trait Model
      *   - {1,2,3}
      *   - {"a","b","c"}
      *   - {1,2,NULL,3}
+     *   - {"包含\"引号","包含\\反斜杠"}
+     *   - {"",""}  (空字符串)
      *
      * @param string $pgArray PostgreSQL 数组字符串
      *
@@ -514,17 +516,17 @@ trait Model
     {
         $pgArray = trim($pgArray);
 
-        // 空数组
+        // 空数组或空字符串
         if ($pgArray === '{}' || $pgArray === '') {
             return Collection::make();
         }
 
-        // 去除大括号
+        // 去除外层大括号
         if (str_starts_with($pgArray, '{') && str_ends_with($pgArray, '}')) {
             $pgArray = substr($pgArray, 1, -1);
         }
 
-        if ('' === $pgArray) {
+        if ($pgArray === '') {
             return Collection::make();
         }
 
@@ -536,11 +538,22 @@ trait Model
         for ($i = 0; $i < $length; $i++) {
             $char = $pgArray[$i];
 
-            if ($char === '"' && ($i === 0 || $pgArray[$i - 1] !== '\\')) {
-                $inQuotes = !$inQuotes;
+            // 处理转义字符：在引号内，反斜杠转义下一个字符
+            if ($inQuotes && $char === '\\' && $i + 1 < $length) {
+                // 保留转义序列，稍后在 parsePgArrayValue 中处理
+                $current .= $char . $pgArray[$i + 1];
+                $i++;
                 continue;
             }
 
+            // 处理引号：切换引号状态
+            if ($char === '"') {
+                $inQuotes = !$inQuotes;
+                $current .= $char;
+                continue;
+            }
+
+            // 处理分隔符：仅在引号外有效
             if ($char === ',' && !$inQuotes) {
                 $result[] = $this->parsePgArrayValue($current);
                 $current = '';
@@ -551,7 +564,7 @@ trait Model
         }
 
         // 添加最后一个元素
-        if ('' !== $current || count($result) > 0) {
+        if ($current !== '' || !empty($result)) {
             $result[] = $this->parsePgArrayValue($current);
         }
 
@@ -561,26 +574,30 @@ trait Model
     /**
      * 解析 PostgreSQL 数组中的单个值.
      *
-     * @param string $value
+     * @param string $value 原始值（可能包含引号和转义）
      *
-     * @return mixed
+     * @return string|null
      */
-    protected function parsePgArrayValue(string $value)
+    protected function parsePgArrayValue(string $value): ?string
     {
         $value = trim($value);
 
-        // NULL 值
-        if (strtoupper($value) === 'NULL') {
+        // NULL 值（未加引号的 NULL）
+        if (strcasecmp($value, 'NULL') === 0) {
             return null;
         }
 
-        // 去除引号
-        if (str_starts_with($value, '"') && str_ends_with($value, '"')) {
+        // 检查是否是带引号的字符串
+        if (str_starts_with($value, '"') && str_ends_with($value, '"') && strlen($value) >= 2) {
+            // 去除首尾引号
             $value = substr($value, 1, -1);
-        }
 
-        // 处理转义字符
-        $value = str_replace(['\\\\', '\\"'], ['\\', '"'], $value);
+            // 处理转义：\" → " 和 \\ → \
+            // 注意：必须先处理 \\，否则 \\\" 会被错误处理
+            $value = preg_replace_callback('/\\\\(.)/', function ($matches) {
+                return $matches[1];
+            }, $value);
+        }
 
         return $value;
     }
@@ -600,19 +617,57 @@ trait Model
 
         $elements = [];
         foreach ($array as $value) {
-            if (null === $value) {
-                $elements[] = 'NULL';
-            } elseif (is_bool($value)) {
-                $elements[] = $value ? 'true' : 'false';
-            } elseif (is_numeric($value)) {
-                $elements[] = (string)$value;
-            } else {
-                // 字符串需要转义和引用
-                $escaped = str_replace(['\\', '"'], ['\\\\', '\\"'], (string)$value);
-                $elements[] = '"' . $escaped . '"';
-            }
+            $elements[] = $this->formatPgArrayValue($value);
         }
 
         return '{' . implode(',', $elements) . '}';
+    }
+
+    /**
+     * 格式化单个值为 PostgreSQL 数组元素.
+     *
+     * PostgreSQL 数组元素需要引号的情况：
+     *   - 空字符串
+     *   - 包含特殊字符：{} , " \
+     *   - 包含空白字符
+     *   - 与 NULL 相同（不区分大小写）
+     *
+     * @param mixed $value
+     *
+     * @return string
+     */
+    protected function formatPgArrayValue($value): string
+    {
+        // NULL 值
+        if (null === $value) {
+            return 'NULL';
+        }
+
+        // 布尔值
+        if (is_bool($value)) {
+            return $value ? 't' : 'f';
+        }
+
+        // 数值类型直接返回
+        if (is_int($value) || is_float($value)) {
+            return (string) $value;
+        }
+
+        // 转为字符串
+        $str = (string) $value;
+
+        // 判断是否需要加引号
+        $needsQuotes = $str === ''
+            || strcasecmp($str, 'NULL') === 0
+            || preg_match('/[{},"\\\\\s]/', $str);
+
+        if (!$needsQuotes) {
+            return $str;
+        }
+
+        // 转义反斜杠和双引号，然后加引号
+        $escaped = str_replace(['\\', '"'], ['\\\\', '\\"'], $str);
+
+        return '"' . $escaped . '"';
     }
 }

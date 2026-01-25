@@ -1569,4 +1569,132 @@ class BuilderMixin
             return $this->whereUuidArrayOverlaps($column, $value, 'or', true);
         };
     }
+
+    // ==================== Array Length Methods ====================
+
+    /**
+     * 添加 PostgreSQL 数组长度查询条件.
+     *
+     * 使用 PostgreSQL 的 array_length() 函数查询数组长度。
+     *
+     * 示例:
+     *   假设 tags 字段存储 {'php', 'laravel', 'mysql'}
+     *   - whereArrayLength('tags', '>', 2)   -> 匹配 (长度3 > 2)
+     *   - whereArrayLength('tags', '=', 3)   -> 匹配 (长度3 = 3)
+     *   - whereArrayLength('tags', '<', 2)   -> 不匹配 (长度3 < 2)
+     *
+     * 注意: array_length() 对空数组返回 NULL，使用 COALESCE 处理
+     *
+     * SQL: WHERE COALESCE(array_length(col, 1), 0) > ?
+     *
+     * @return Closure(string $column, string $operator, int $value, string $boolean = 'and'): \Illuminate\Database\Query\Builder
+     */
+    public function whereArrayLength(): Closure
+    {
+        return function ($column, $operator, $value, $boolean = 'and'): Builder {
+            $type = 'ArrayLength';
+
+            $this->wheres[] = compact('type', 'column', 'operator', 'value', 'boolean');
+
+            if (!$value instanceof Expression) {
+                $this->addBinding($value);
+            }
+
+            return $this;
+        };
+    }
+
+    /**
+     * 添加 OR 条件的数组长度查询.
+     *
+     * @see whereArrayLength()
+     *
+     * @return Closure(string $column, string $operator, int $value): \Illuminate\Database\Query\Builder
+     */
+    public function orWhereArrayLength(): Closure
+    {
+        return function ($column, $operator, $value): Builder {
+            return $this->whereArrayLength($column, $operator, $value, 'or');
+        };
+    }
+
+    // ==================== Array Empty Check Methods ====================
+
+    /**
+     * 添加 PostgreSQL 数组为空查询条件.
+     *
+     * 使用 cardinality() 函数检查数组是否为空。
+     * 同时检查 NULL 和空数组两种情况。
+     *
+     * 示例:
+     *   - whereArrayIsEmpty('tags')  -> 匹配 NULL 或 {}
+     *
+     * SQL: WHERE (cardinality(col) = 0 OR col IS NULL)
+     *
+     * @return Closure(string $column, string $boolean = 'and'): \Illuminate\Database\Query\Builder
+     */
+    public function whereArrayIsEmpty(): Closure
+    {
+        return function ($column, $boolean = 'and'): Builder {
+            $type = 'ArrayIsEmpty';
+            $not = false;
+
+            $this->wheres[] = compact('type', 'column', 'boolean', 'not');
+
+            return $this;
+        };
+    }
+
+    /**
+     * 添加 OR 条件的数组为空查询.
+     *
+     * @see whereArrayIsEmpty()
+     *
+     * @return Closure(string $column): \Illuminate\Database\Query\Builder
+     */
+    public function orWhereArrayIsEmpty(): Closure
+    {
+        return function ($column): Builder {
+            return $this->whereArrayIsEmpty($column, 'or');
+        };
+    }
+
+    /**
+     * 添加 PostgreSQL 数组非空查询条件.
+     *
+     * 使用 cardinality() 函数检查数组是否非空。
+     *
+     * 示例:
+     *   - whereArrayIsNotEmpty('tags')  -> 匹配有元素的数组
+     *
+     * SQL: WHERE cardinality(col) > 0
+     *
+     * @return Closure(string $column, string $boolean = 'and'): \Illuminate\Database\Query\Builder
+     */
+    public function whereArrayIsNotEmpty(): Closure
+    {
+        return function ($column, $boolean = 'and'): Builder {
+            $type = 'ArrayIsEmpty';
+            $not = true;
+
+            $this->wheres[] = compact('type', 'column', 'boolean', 'not');
+
+            return $this;
+        };
+    }
+
+    /**
+     * 添加 OR 条件的数组非空查询.
+     *
+     * @see whereArrayIsNotEmpty()
+     *
+     * @return Closure(string $column): \Illuminate\Database\Query\Builder
+     */
+    public function orWhereArrayIsNotEmpty(): Closure
+    {
+        return function ($column): Builder {
+            return $this->whereArrayIsNotEmpty($column, 'or');
+        };
+    }
+
 }

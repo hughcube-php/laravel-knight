@@ -479,4 +479,44 @@ class BlueprintMixin
             return $this->addColumn('knightJsonbArray', $column);
         };
     }
+
+    // ==================== PostgreSQL Full-Text Search Column Methods ====================
+
+    /**
+     * 添加 TSVECTOR 列 (PostgreSQL).
+     *
+     * 用于存储全文搜索向量。通常与 GIN 索引配合使用。
+     *
+     * 示例:
+     *   $table->knightTsVector('search_vector');
+     *   $table->knightTsVector('search_vector')->nullable();
+     *
+     * @return Closure(string $column): \Illuminate\Database\Schema\ColumnDefinition
+     */
+    public function knightTsVector(): Closure
+    {
+        return function (string $column) {
+            /** @var Blueprint $this */
+            return $this->addColumn('knightTsVector', $column);
+        };
+    }
+
+    /**
+     * 添加 TSQUERY 列 (PostgreSQL).
+     *
+     * 用于存储全文搜索查询表达式。
+     *
+     * 示例:
+     *   $table->knightTsQuery('saved_query');
+     *   $table->knightTsQuery('saved_query')->nullable();
+     *
+     * @return Closure(string $column): \Illuminate\Database\Schema\ColumnDefinition
+     */
+    public function knightTsQuery(): Closure
+    {
+        return function (string $column) {
+            /** @var Blueprint $this */
+            return $this->addColumn('knightTsQuery', $column);
+        };
+    }
 }

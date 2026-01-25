@@ -1201,6 +1201,399 @@ class BlueprintMixinTest extends TestCase
         $this->assertNotEmpty($indexes);
     }
 
+    // ==================== knightColumnsReversed Tests ====================
+
+    public function testKnightColumnsReversedCreatesExpectedColumns(): void
+    {
+        Schema::create('knight_mixin_test', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->knightColumnsReversed();
+        });
+
+        $this->assertTrue(Schema::hasTable('knight_mixin_test'));
+        $this->assertTrue(Schema::hasColumn('knight_mixin_test', 'created_at'));
+        $this->assertTrue(Schema::hasColumn('knight_mixin_test', 'updated_at'));
+        $this->assertTrue(Schema::hasColumn('knight_mixin_test', 'deleted_at'));
+        $this->assertTrue(Schema::hasColumn('knight_mixin_test', 'ukey'));
+        $this->assertTrue(Schema::hasColumn('knight_mixin_test', 'data_version'));
+        $this->assertTrue(Schema::hasColumn('knight_mixin_test', 'options'));
+        $this->assertTrue(Schema::hasColumn('knight_mixin_test', 'sort'));
+    }
+
+    public function testKnightColumnsReversedWithPostgres(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->knightColumnsReversed();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'created_at'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'updated_at'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'deleted_at'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'ukey'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'data_version'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'options'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'sort'));
+    }
+
+    // ==================== knightVarcharArray with Custom Length Tests ====================
+
+    public function testKnightVarcharArrayWithCustomLength(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightVarcharArray('codes', 100)->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'codes'));
+
+        // Insert and verify data with values up to 100 chars
+        $longValue = str_repeat('A', 100);
+        $connection->statement("INSERT INTO knight_mixin_test_pg (codes) VALUES (ARRAY['{$longValue}']::varchar(100)[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    public function testKnightVarcharArrayWithDefaultLength(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightVarcharArray('tags')->nullable(); // Default length 255
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'tags'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (tags) VALUES (ARRAY['tag1', 'tag2']::varchar(255)[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    // ==================== knightNumericArray with Precision/Scale Tests ====================
+
+    public function testKnightNumericArrayWithPrecisionAndScale(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightNumericArray('amounts', 12, 4)->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'amounts'));
+
+        // Insert and verify data with precision 12 and scale 4
+        $connection->statement("INSERT INTO knight_mixin_test_pg (amounts) VALUES (ARRAY[12345678.1234, 87654321.4321]::numeric(12,4)[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    public function testKnightNumericArrayWithPrecisionOnly(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightNumericArray('values', 8)->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'values'));
+
+        // Insert and verify data with precision 8
+        $connection->statement("INSERT INTO knight_mixin_test_pg (values) VALUES (ARRAY[12345678, 87654321]::numeric(8)[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    public function testKnightNumericArrayWithoutParameters(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightNumericArray('numbers')->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'numbers'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (numbers) VALUES (ARRAY[123.456, 789.012]::numeric[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    // ==================== Full-Text Search Column Tests ====================
+
+    public function testKnightTsVector(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->text('content')->nullable();
+            $table->knightTsVector('search_vector')->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'search_vector'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (content, search_vector) VALUES ('hello world', to_tsvector('english', 'hello world'))");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+        $this->assertNotNull($record->search_vector);
+    }
+
+    public function testKnightTsQuery(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightTsQuery('saved_query')->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'saved_query'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (saved_query) VALUES (to_tsquery('english', 'hello & world'))");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+        $this->assertNotNull($record->saved_query);
+    }
+
+    public function testKnightTsVectorWithGinIndex(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->text('content')->nullable();
+            $table->knightTsVector('search_vector')->nullable();
+            $table->knightGin('search_vector');
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+
+        // Verify GIN index exists
+        $indexes = $connection->select(
+            "SELECT indexname FROM pg_indexes WHERE tablename = 'knight_mixin_test_pg' AND indexname LIKE '%_gin'"
+        );
+        $this->assertNotEmpty($indexes);
+
+        // Insert and test full-text search with GIN index
+        $connection->statement("INSERT INTO knight_mixin_test_pg (content, search_vector) VALUES ('PHP Laravel framework', to_tsvector('english', 'PHP Laravel framework'))");
+        $connection->statement("INSERT INTO knight_mixin_test_pg (content, search_vector) VALUES ('Python Django web', to_tsvector('english', 'Python Django web'))");
+
+        $results = $connection->select(
+            "SELECT * FROM knight_mixin_test_pg WHERE search_vector @@ plainto_tsquery('english', 'Laravel')"
+        );
+        $this->assertCount(1, $results);
+        $this->assertStringContainsString('Laravel', $results[0]->content);
+    }
+
+    public function testKnightTsVectorWithWhereGinIndex(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->text('content')->nullable();
+            $table->knightTsVector('search_vector')->nullable();
+            $table->timestamp('deleted_at')->nullable();
+            $table->knightGinWhere('search_vector', 'deleted_at IS NULL');
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+
+        // Verify GIN index exists with WHERE clause
+        $indexDef = $connection->selectOne(
+            "SELECT indexdef FROM pg_indexes WHERE tablename = 'knight_mixin_test_pg' AND indexname LIKE '%_gin'"
+        );
+        $this->assertNotNull($indexDef);
+        $this->assertStringContainsString('WHERE', $indexDef->indexdef);
+    }
+
+    // ==================== Index Drop Tests ====================
+
+    public function testDropGinIndex(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create table with GIN index
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->jsonb('tags')->nullable();
+            $table->knightGin('tags', 'idx_tags_gin');
+        });
+
+        // Verify index exists
+        $indexesBefore = $connection->select(
+            "SELECT indexname FROM pg_indexes WHERE tablename = 'knight_mixin_test_pg' AND indexname = 'idx_tags_gin'"
+        );
+        $this->assertNotEmpty($indexesBefore);
+
+        // Drop index manually
+        $connection->statement('DROP INDEX IF EXISTS idx_tags_gin');
+
+        // Verify index is dropped
+        $indexesAfter = $connection->select(
+            "SELECT indexname FROM pg_indexes WHERE tablename = 'knight_mixin_test_pg' AND indexname = 'idx_tags_gin'"
+        );
+        $this->assertEmpty($indexesAfter);
+    }
+
+    public function testDropConditionalUniqueIndex(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create table with conditional unique index
+        $schema->create('knight_unique_where_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('email');
+            $table->timestamp('deleted_at')->nullable();
+            $table->knightUniqueWhere('email', 'deleted_at IS NULL', 'uk_email_active');
+        });
+
+        // Verify index exists
+        $indexesBefore = $connection->select(
+            "SELECT indexname FROM pg_indexes WHERE tablename = 'knight_unique_where_test_pg' AND indexname = 'uk_email_active'"
+        );
+        $this->assertNotEmpty($indexesBefore);
+
+        // Drop index manually
+        $connection->statement('DROP INDEX IF EXISTS uk_email_active');
+
+        // Verify index is dropped
+        $indexesAfter = $connection->select(
+            "SELECT indexname FROM pg_indexes WHERE tablename = 'knight_unique_where_test_pg' AND indexname = 'uk_email_active'"
+        );
+        $this->assertEmpty($indexesAfter);
+    }
+
+    // ==================== Combined Features Tests ====================
+
+    public function testFullTextSearchWithArrayColumns(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->text('content')->nullable();
+            $table->knightTsVector('search_vector')->nullable();
+            $table->knightTextArray('tags')->nullable();
+            $table->knightGin('search_vector');
+            $table->knightGin('tags', 'idx_tags_gin');
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'search_vector'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'tags'));
+
+        // Verify both GIN indexes exist
+        $indexes = $connection->select(
+            "SELECT indexname FROM pg_indexes WHERE tablename = 'knight_mixin_test_pg' AND indexname LIKE '%_gin'"
+        );
+        $this->assertCount(2, $indexes);
+    }
+
+    public function testCompleteTableWithAllKnightFeatures(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->knightTsVector('search_vector')->nullable();
+            $table->knightTextArray('tags')->nullable();
+            $table->knightIntArray('scores')->nullable();
+            $table->knightColumns();
+            $table->knightGin('search_vector', 'idx_search_gin');
+            $table->knightGinWhereNotDeleted('tags', 'idx_tags_gin');
+            $table->knightUniqueWhereNotDeleted('name', 'uk_name');
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+
+        // Verify all columns exist
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'name'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'description'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'search_vector'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'tags'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'scores'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'created_at'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'deleted_at'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'data_version'));
+
+        // Verify indexes exist
+        $indexes = $connection->select(
+            "SELECT indexname FROM pg_indexes WHERE tablename = 'knight_mixin_test_pg'"
+        );
+        $indexNames = array_map(fn($i) => $i->indexname, $indexes);
+
+        $this->assertContains('idx_search_gin', $indexNames);
+        $this->assertContains('idx_tags_gin', $indexNames);
+        $this->assertContains('uk_name', $indexNames);
+    }
+
     // ==================== Helper Methods ====================
 
     protected function skipIfBtreeGinExtensionNotAvailable(): void
