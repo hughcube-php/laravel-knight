@@ -10,6 +10,7 @@
 namespace HughCube\Laravel\Knight\Mixin\Database\Query;
 
 use Closure;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Expression;
 
@@ -57,11 +58,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'IntArrayContains';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -132,11 +134,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'IntArrayContainedBy';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -209,11 +212,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'IntArrayOverlaps';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -279,11 +283,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'BigIntArrayContains';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -339,11 +344,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'BigIntArrayContainedBy';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -399,11 +405,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'BigIntArrayOverlaps';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -463,11 +470,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'SmallIntArrayContains';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -523,11 +531,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'SmallIntArrayContainedBy';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -583,11 +592,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'SmallIntArrayOverlaps';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -652,11 +662,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'TextArrayContains';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -712,11 +723,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'TextArrayContainedBy';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -779,11 +791,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'TextArrayOverlaps';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -843,11 +856,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'BooleanArrayContains';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -903,11 +917,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'BooleanArrayContainedBy';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -963,11 +978,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'BooleanArrayOverlaps';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -1027,11 +1043,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'DoubleArrayContains';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -1087,11 +1104,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'DoubleArrayContainedBy';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -1147,11 +1165,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'DoubleArrayOverlaps';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -1211,11 +1230,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'FloatArrayContains';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -1271,11 +1291,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'FloatArrayContainedBy';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -1331,11 +1352,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'FloatArrayOverlaps';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -1399,11 +1421,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'UuidArrayContains';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -1459,11 +1482,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'UuidArrayContainedBy';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }
@@ -1521,11 +1545,12 @@ class BuilderMixin
     {
         return function ($column, $value, $boolean = 'and', $not = false): Builder {
             $type = 'UuidArrayOverlaps';
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
 
-            $this->wheres[] = compact('type', 'column', 'value', 'boolean', 'not');
+            $this->wheres[] = ['type' => $type, 'column' => $column, 'value' => $valueArray, 'boolean' => $boolean, 'not' => $not];
 
             if (!$value instanceof Expression) {
-                foreach ((array) $value as $val) {
+                foreach ($valueArray as $val) {
                     $this->addBinding($val);
                 }
             }

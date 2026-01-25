@@ -10,6 +10,7 @@
 namespace HughCube\Laravel\Knight\Mixin\Database\Query\Grammars;
 
 use Closure;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\Grammars\Grammar;
 
@@ -44,7 +45,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::integer[]' : 'ARRAY[]::integer[]';
 
@@ -62,7 +65,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::integer[]' : 'ARRAY[]::integer[]';
 
@@ -80,7 +85,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::integer[]' : 'ARRAY[]::integer[]';
 
@@ -100,7 +107,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::bigint[]' : 'ARRAY[]::bigint[]';
 
@@ -118,7 +127,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::bigint[]' : 'ARRAY[]::bigint[]';
 
@@ -136,7 +147,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::bigint[]' : 'ARRAY[]::bigint[]';
 
@@ -156,7 +169,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::smallint[]' : 'ARRAY[]::smallint[]';
 
@@ -174,7 +189,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::smallint[]' : 'ARRAY[]::smallint[]';
 
@@ -192,7 +209,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::smallint[]' : 'ARRAY[]::smallint[]';
 
@@ -212,7 +231,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::text[]' : 'ARRAY[]::text[]';
 
@@ -230,7 +251,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::text[]' : 'ARRAY[]::text[]';
 
@@ -248,7 +271,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::text[]' : 'ARRAY[]::text[]';
 
@@ -268,7 +293,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::boolean[]' : 'ARRAY[]::boolean[]';
 
@@ -286,7 +313,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::boolean[]' : 'ARRAY[]::boolean[]';
 
@@ -304,7 +333,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::boolean[]' : 'ARRAY[]::boolean[]';
 
@@ -324,7 +355,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::double precision[]' : 'ARRAY[]::double precision[]';
 
@@ -342,7 +375,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::double precision[]' : 'ARRAY[]::double precision[]';
 
@@ -360,7 +395,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::double precision[]' : 'ARRAY[]::double precision[]';
 
@@ -380,7 +417,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::real[]' : 'ARRAY[]::real[]';
 
@@ -398,7 +437,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::real[]' : 'ARRAY[]::real[]';
 
@@ -416,7 +457,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::real[]' : 'ARRAY[]::real[]';
 
@@ -436,7 +479,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::uuid[]' : 'ARRAY[]::uuid[]';
 
@@ -454,7 +499,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::uuid[]' : 'ARRAY[]::uuid[]';
 
@@ -472,7 +519,9 @@ class GrammarMixin
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
             $column = $this->wrap($where['column']);
-            $count = count((array)$where['value']);
+            $value = $where['value'];
+            $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
+            $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
             $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::uuid[]' : 'ARRAY[]::uuid[]';
 

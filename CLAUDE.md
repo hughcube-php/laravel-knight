@@ -6,20 +6,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Laravel Knight 是一个 Laravel 扩展包,提供增强的 Eloquent 模型、查询构建器、控制器工具、缓存机制和乐观锁等功能。项目基于 PHP 和 Laravel 框架开发。
 
+## PHP 版本支持
+
+**项目需要支持 PHP 7.4+（包含 PHP 7.4）**
+
+开发时请注意以下兼容性要求：
+- 不要使用 PHP 8.0+ 的新特性（如命名参数、match 表达式、联合类型声明、nullsafe 操作符等）
+- 不要使用 PHPUnit 属性语法（如 `#[DataProvider()]`），使用 `@dataProvider` 注解或其他兼容方式
+- 类属性类型声明需谨慎（PHP 7.4 支持，但要确保兼容）
+- 箭头函数 `fn()` 在 PHP 7.4 中支持
+
 ## 开发命令
 
 ### 测试
 ```bash
 # 运行所有测试
 composer test
-# 或
+# 或 (Linux/Mac)
 ./vendor/bin/phpunit
+# 或 (Windows)
+./vendor/bin/phpunit.bat
 
-# 运行单个测试文件
+# 运行单个测试文件 (Linux/Mac)
 ./vendor/bin/phpunit tests/Database/Eloquent/ModelTest.php
+# 运行单个测试文件 (Windows)
+./vendor/bin/phpunit.bat tests/Database/Eloquent/ModelTest.php
 
-# 运行特定测试类中的方法
+# 运行特定测试类中的方法 (Linux/Mac)
 ./vendor/bin/phpunit --filter testMethodName tests/SomeTest.php
+# 运行特定测试类中的方法 (Windows)
+./vendor/bin/phpunit.bat --filter testMethodName tests/SomeTest.php
 ```
 
 ### 代码质量检查
