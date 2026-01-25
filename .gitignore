@@ -18,3 +18,4 @@ phpunit.xml
 /coverage.html
 /coverage1.html
 /tests/.temp/
+phpunit_*.txt
