@@ -13,7 +13,6 @@ use Carbon\CarbonPeriod;
 use HughCube\Laravel\Knight\Database\Eloquent\Builder as KnightEloquentBuilder;
 use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
-use HughCube\Laravel\Knight\Ide\Database\Query\KIdeBuilder;
 use HughCube\Laravel\Knight\Support\ParameterBag;
 use Illuminate\Cache\NullStore;
 use Illuminate\Cache\Repository;

@@ -87,6 +87,110 @@ namespace Illuminate\Database\Schema {
         public function knightIndexWhereNotDeleted($columns, ?string $indexName = null, string $deletedAtColumn = 'deleted_at'): mixed
         {
         }
+
+        /**
+         * 添加 INTEGER[] 数组列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightIntArray()
+         */
+        public function knightIntArray(string $column): mixed
+        {
+        }
+
+        /**
+         * 添加 BIGINT[] 数组列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightBigIntArray()
+         */
+        public function knightBigIntArray(string $column): mixed
+        {
+        }
+
+        /**
+         * 添加 SMALLINT[] 数组列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightSmallIntArray()
+         */
+        public function knightSmallIntArray(string $column): mixed
+        {
+        }
+
+        /**
+         * 添加 TEXT[] 数组列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightTextArray()
+         */
+        public function knightTextArray(string $column): mixed
+        {
+        }
+
+        /**
+         * 添加 VARCHAR(n)[] 数组列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightVarcharArray()
+         */
+        public function knightVarcharArray(string $column, int $length = 255): mixed
+        {
+        }
+
+        /**
+         * 添加 BOOLEAN[] 数组列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightBooleanArray()
+         */
+        public function knightBooleanArray(string $column): mixed
+        {
+        }
+
+        /**
+         * 添加 DOUBLE PRECISION[] 数组列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightDoubleArray()
+         */
+        public function knightDoubleArray(string $column): mixed
+        {
+        }
+
+        /**
+         * 添加 REAL[] (单精度浮点) 数组列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightFloatArray()
+         */
+        public function knightFloatArray(string $column): mixed
+        {
+        }
+
+        /**
+         * 添加 UUID[] 数组列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightUuidArray()
+         */
+        public function knightUuidArray(string $column): mixed
+        {
+        }
+
+        /**
+         * 添加 NUMERIC[] 数组列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightNumericArray()
+         */
+        public function knightNumericArray(string $column, ?int $precision = null, ?int $scale = null): mixed
+        {
+        }
+
+        /**
+         * 添加 TIMESTAMPTZ[] 数组列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightTimestamptzArray()
+         */
+        public function knightTimestamptzArray(string $column): mixed
+        {
+        }
+
+        /**
+         * 添加 DATE[] 数组列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightDateArray()
+         */
+        public function knightDateArray(string $column): mixed
+        {
+        }
+
+        /**
+         * 添加 JSONB[] 数组列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightJsonbArray()
+         */
+        public function knightJsonbArray(string $column): mixed
+        {
+        }
     }
 }
 
@@ -128,6 +232,110 @@ namespace Illuminate\Database\Schema\Grammars {
         public function compileKnightGinIndexWhere(\Illuminate\Database\Schema\Blueprint $blueprint, \Illuminate\Support\Fluent $command): mixed
         {
         }
+
+        /**
+         * 定义 INTEGER[] 数组列类型.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::typeKnightIntArray()
+         */
+        public function typeKnightIntArray(\Illuminate\Support\Fluent $column): mixed
+        {
+        }
+
+        /**
+         * 定义 BIGINT[] 数组列类型.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::typeKnightBigIntArray()
+         */
+        public function typeKnightBigIntArray(\Illuminate\Support\Fluent $column): mixed
+        {
+        }
+
+        /**
+         * 定义 SMALLINT[] 数组列类型.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::typeKnightSmallIntArray()
+         */
+        public function typeKnightSmallIntArray(\Illuminate\Support\Fluent $column): mixed
+        {
+        }
+
+        /**
+         * 定义 TEXT[] 数组列类型.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::typeKnightTextArray()
+         */
+        public function typeKnightTextArray(\Illuminate\Support\Fluent $column): mixed
+        {
+        }
+
+        /**
+         * 定义 VARCHAR(n)[] 数组列类型.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::typeKnightVarcharArray()
+         */
+        public function typeKnightVarcharArray(\Illuminate\Support\Fluent $column): mixed
+        {
+        }
+
+        /**
+         * 定义 BOOLEAN[] 数组列类型.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::typeKnightBooleanArray()
+         */
+        public function typeKnightBooleanArray(\Illuminate\Support\Fluent $column): mixed
+        {
+        }
+
+        /**
+         * 定义 DOUBLE PRECISION[] 数组列类型.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::typeKnightDoubleArray()
+         */
+        public function typeKnightDoubleArray(\Illuminate\Support\Fluent $column): mixed
+        {
+        }
+
+        /**
+         * 定义 REAL[] (单精度浮点) 数组列类型.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::typeKnightFloatArray()
+         */
+        public function typeKnightFloatArray(\Illuminate\Support\Fluent $column): mixed
+        {
+        }
+
+        /**
+         * 定义 UUID[] 数组列类型.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::typeKnightUuidArray()
+         */
+        public function typeKnightUuidArray(\Illuminate\Support\Fluent $column): mixed
+        {
+        }
+
+        /**
+         * 定义 NUMERIC[] 数组列类型.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::typeKnightNumericArray()
+         */
+        public function typeKnightNumericArray(\Illuminate\Support\Fluent $column): mixed
+        {
+        }
+
+        /**
+         * 定义 TIMESTAMPTZ[] 数组列类型.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::typeKnightTimestamptzArray()
+         */
+        public function typeKnightTimestamptzArray(\Illuminate\Support\Fluent $column): mixed
+        {
+        }
+
+        /**
+         * 定义 DATE[] 数组列类型.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::typeKnightDateArray()
+         */
+        public function typeKnightDateArray(\Illuminate\Support\Fluent $column): mixed
+        {
+        }
+
+        /**
+         * 定义 JSONB[] 数组列类型.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::typeKnightJsonbArray()
+         */
+        public function typeKnightJsonbArray(\Illuminate\Support\Fluent $column): mixed
+        {
+        }
     }
 }
 
@@ -139,98 +347,770 @@ namespace Illuminate\Database\Query {
     class Builder
     {
         /**
-         * 添加 PostgreSQL 数组包含查询条件 (
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereArrayContains()
+         * 添加 PostgreSQL INTEGER[] 数组包含查询条件 (
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereIntArrayContains()
          */
-        public function whereArrayContains($column, $value, $boolean = 'and', $not = false, $arrayType = null): mixed
+        public function whereIntArrayContains($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
         {
         }
 
         /**
-         * 添加 OR PostgreSQL 数组包含查询条件.
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereArrayContains()
+         * 添加 OR 条件的 INTEGER[] 数组包含查询.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereIntArrayContains()
          */
-        public function orWhereArrayContains($column, $value, $arrayType = null): mixed
+        public function orWhereIntArrayContains($column, $value): \Illuminate\Database\Query\Builder
         {
         }
 
         /**
-         * 添加 NOT PostgreSQL 数组包含查询条件.
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotArrayContains()
+         * 添加 NOT 条件的 INTEGER[] 数组包含查询.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotIntArrayContains()
          */
-        public function whereNotArrayContains($column, $value, $boolean = 'and', $arrayType = null): mixed
+        public function whereNotIntArrayContains($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
         {
         }
 
         /**
-         * 添加 OR NOT PostgreSQL 数组包含查询条件.
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotArrayContains()
+         * 添加 OR NOT 条件的 INTEGER[] 数组包含查询.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotIntArrayContains()
          */
-        public function orWhereNotArrayContains($column, $value, $arrayType = null): mixed
+        public function orWhereNotIntArrayContains($column, $value): \Illuminate\Database\Query\Builder
         {
         }
 
         /**
-         * 添加 PostgreSQL 数组被包含查询条件 (<
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereArrayContainedBy()
+         * 添加 PostgreSQL INTEGER[] 数组被包含查询条件 (<
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereIntArrayContainedBy()
          */
-        public function whereArrayContainedBy($column, $value, $boolean = 'and', $not = false, $arrayType = null): mixed
+        public function whereIntArrayContainedBy($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
         {
         }
 
         /**
-         * 添加 OR PostgreSQL 数组被包含查询条件.
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereArrayContainedBy()
+         * 添加 OR 条件的 INTEGER[] 数组被包含查询.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereIntArrayContainedBy()
          */
-        public function orWhereArrayContainedBy($column, $value, $arrayType = null): mixed
+        public function orWhereIntArrayContainedBy($column, $value): \Illuminate\Database\Query\Builder
         {
         }
 
         /**
-         * 添加 NOT PostgreSQL 数组被包含查询条件.
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotArrayContainedBy()
+         * 添加 NOT 条件的 INTEGER[] 数组被包含查询.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotIntArrayContainedBy()
          */
-        public function whereNotArrayContainedBy($column, $value, $boolean = 'and', $arrayType = null): mixed
+        public function whereNotIntArrayContainedBy($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
         {
         }
 
         /**
-         * 添加 OR NOT PostgreSQL 数组被包含查询条件.
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotArrayContainedBy()
+         * 添加 OR NOT 条件的 INTEGER[] 数组被包含查询.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotIntArrayContainedBy()
          */
-        public function orWhereNotArrayContainedBy($column, $value, $arrayType = null): mixed
+        public function orWhereNotIntArrayContainedBy($column, $value): \Illuminate\Database\Query\Builder
         {
         }
 
         /**
-         * 添加 PostgreSQL 数组重叠查询条件 (&&).
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereArrayOverlaps()
+         * 添加 PostgreSQL INTEGER[] 数组交集查询条件 (&&).
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereIntArrayOverlaps()
          */
-        public function whereArrayOverlaps($column, $value, $boolean = 'and', $not = false, $arrayType = null): mixed
+        public function whereIntArrayOverlaps($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
         {
         }
 
         /**
-         * 添加 OR PostgreSQL 数组重叠查询条件.
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereArrayOverlaps()
+         * 添加 OR 条件的 INTEGER[] 数组交集查询.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereIntArrayOverlaps()
          */
-        public function orWhereArrayOverlaps($column, $value, $arrayType = null): mixed
+        public function orWhereIntArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
         {
         }
 
         /**
-         * 添加 NOT PostgreSQL 数组重叠查询条件.
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotArrayOverlaps()
+         * 添加 NOT 条件的 INTEGER[] 数组交集查询.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotIntArrayOverlaps()
          */
-        public function whereNotArrayOverlaps($column, $value, $boolean = 'and', $arrayType = null): mixed
+        public function whereNotIntArrayOverlaps($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
         {
         }
 
         /**
-         * 添加 OR NOT PostgreSQL 数组重叠查询条件.
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotArrayOverlaps()
+         * 添加 OR NOT 条件的 INTEGER[] 数组交集查询.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotIntArrayOverlaps()
          */
-        public function orWhereNotArrayOverlaps($column, $value, $arrayType = null): mixed
+        public function orWhereNotIntArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL BIGINT[] 数组包含查询条件 (
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereBigIntArrayContains()
+         */
+        public function whereBigIntArrayContains($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereBigIntArrayContains()
+         */
+        public function orWhereBigIntArrayContains($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotBigIntArrayContains()
+         */
+        public function whereNotBigIntArrayContains($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotBigIntArrayContains()
+         */
+        public function orWhereNotBigIntArrayContains($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL BIGINT[] 数组被包含查询条件 (<
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereBigIntArrayContainedBy()
+         */
+        public function whereBigIntArrayContainedBy($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereBigIntArrayContainedBy()
+         */
+        public function orWhereBigIntArrayContainedBy($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotBigIntArrayContainedBy()
+         */
+        public function whereNotBigIntArrayContainedBy($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotBigIntArrayContainedBy()
+         */
+        public function orWhereNotBigIntArrayContainedBy($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL BIGINT[] 数组交集查询条件 (&&).
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereBigIntArrayOverlaps()
+         */
+        public function whereBigIntArrayOverlaps($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereBigIntArrayOverlaps()
+         */
+        public function orWhereBigIntArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotBigIntArrayOverlaps()
+         */
+        public function whereNotBigIntArrayOverlaps($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotBigIntArrayOverlaps()
+         */
+        public function orWhereNotBigIntArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL SMALLINT[] 数组包含查询条件 (
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereSmallIntArrayContains()
+         */
+        public function whereSmallIntArrayContains($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereSmallIntArrayContains()
+         */
+        public function orWhereSmallIntArrayContains($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotSmallIntArrayContains()
+         */
+        public function whereNotSmallIntArrayContains($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotSmallIntArrayContains()
+         */
+        public function orWhereNotSmallIntArrayContains($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL SMALLINT[] 数组被包含查询条件 (<
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereSmallIntArrayContainedBy()
+         */
+        public function whereSmallIntArrayContainedBy($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereSmallIntArrayContainedBy()
+         */
+        public function orWhereSmallIntArrayContainedBy($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotSmallIntArrayContainedBy()
+         */
+        public function whereNotSmallIntArrayContainedBy($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotSmallIntArrayContainedBy()
+         */
+        public function orWhereNotSmallIntArrayContainedBy($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL SMALLINT[] 数组交集查询条件 (&&).
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereSmallIntArrayOverlaps()
+         */
+        public function whereSmallIntArrayOverlaps($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereSmallIntArrayOverlaps()
+         */
+        public function orWhereSmallIntArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotSmallIntArrayOverlaps()
+         */
+        public function whereNotSmallIntArrayOverlaps($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotSmallIntArrayOverlaps()
+         */
+        public function orWhereNotSmallIntArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL TEXT[] 数组包含查询条件 (
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereTextArrayContains()
+         */
+        public function whereTextArrayContains($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereTextArrayContains()
+         */
+        public function orWhereTextArrayContains($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotTextArrayContains()
+         */
+        public function whereNotTextArrayContains($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotTextArrayContains()
+         */
+        public function orWhereNotTextArrayContains($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL TEXT[] 数组被包含查询条件 (<
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereTextArrayContainedBy()
+         */
+        public function whereTextArrayContainedBy($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereTextArrayContainedBy()
+         */
+        public function orWhereTextArrayContainedBy($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotTextArrayContainedBy()
+         */
+        public function whereNotTextArrayContainedBy($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotTextArrayContainedBy()
+         */
+        public function orWhereNotTextArrayContainedBy($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL TEXT[] 数组交集查询条件 (&&).
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereTextArrayOverlaps()
+         */
+        public function whereTextArrayOverlaps($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereTextArrayOverlaps()
+         */
+        public function orWhereTextArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotTextArrayOverlaps()
+         */
+        public function whereNotTextArrayOverlaps($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotTextArrayOverlaps()
+         */
+        public function orWhereNotTextArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL BOOLEAN[] 数组包含查询条件 (
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereBooleanArrayContains()
+         */
+        public function whereBooleanArrayContains($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereBooleanArrayContains()
+         */
+        public function orWhereBooleanArrayContains($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotBooleanArrayContains()
+         */
+        public function whereNotBooleanArrayContains($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotBooleanArrayContains()
+         */
+        public function orWhereNotBooleanArrayContains($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL BOOLEAN[] 数组被包含查询条件 (<
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereBooleanArrayContainedBy()
+         */
+        public function whereBooleanArrayContainedBy($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereBooleanArrayContainedBy()
+         */
+        public function orWhereBooleanArrayContainedBy($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotBooleanArrayContainedBy()
+         */
+        public function whereNotBooleanArrayContainedBy($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotBooleanArrayContainedBy()
+         */
+        public function orWhereNotBooleanArrayContainedBy($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL BOOLEAN[] 数组交集查询条件 (&&).
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereBooleanArrayOverlaps()
+         */
+        public function whereBooleanArrayOverlaps($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereBooleanArrayOverlaps()
+         */
+        public function orWhereBooleanArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotBooleanArrayOverlaps()
+         */
+        public function whereNotBooleanArrayOverlaps($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotBooleanArrayOverlaps()
+         */
+        public function orWhereNotBooleanArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL DOUBLE PRECISION[] 数组包含查询条件 (
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereDoubleArrayContains()
+         */
+        public function whereDoubleArrayContains($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereDoubleArrayContains()
+         */
+        public function orWhereDoubleArrayContains($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotDoubleArrayContains()
+         */
+        public function whereNotDoubleArrayContains($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotDoubleArrayContains()
+         */
+        public function orWhereNotDoubleArrayContains($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL DOUBLE PRECISION[] 数组被包含查询条件 (<
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereDoubleArrayContainedBy()
+         */
+        public function whereDoubleArrayContainedBy($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereDoubleArrayContainedBy()
+         */
+        public function orWhereDoubleArrayContainedBy($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotDoubleArrayContainedBy()
+         */
+        public function whereNotDoubleArrayContainedBy($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotDoubleArrayContainedBy()
+         */
+        public function orWhereNotDoubleArrayContainedBy($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL DOUBLE PRECISION[] 数组交集查询条件 (&&).
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereDoubleArrayOverlaps()
+         */
+        public function whereDoubleArrayOverlaps($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereDoubleArrayOverlaps()
+         */
+        public function orWhereDoubleArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotDoubleArrayOverlaps()
+         */
+        public function whereNotDoubleArrayOverlaps($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotDoubleArrayOverlaps()
+         */
+        public function orWhereNotDoubleArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL REAL[] (单精度浮点) 数组包含查询条件 (
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereFloatArrayContains()
+         */
+        public function whereFloatArrayContains($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereFloatArrayContains()
+         */
+        public function orWhereFloatArrayContains($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotFloatArrayContains()
+         */
+        public function whereNotFloatArrayContains($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotFloatArrayContains()
+         */
+        public function orWhereNotFloatArrayContains($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL REAL[] 数组被包含查询条件 (<
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereFloatArrayContainedBy()
+         */
+        public function whereFloatArrayContainedBy($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereFloatArrayContainedBy()
+         */
+        public function orWhereFloatArrayContainedBy($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotFloatArrayContainedBy()
+         */
+        public function whereNotFloatArrayContainedBy($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotFloatArrayContainedBy()
+         */
+        public function orWhereNotFloatArrayContainedBy($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL REAL[] 数组交集查询条件 (&&).
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereFloatArrayOverlaps()
+         */
+        public function whereFloatArrayOverlaps($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereFloatArrayOverlaps()
+         */
+        public function orWhereFloatArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotFloatArrayOverlaps()
+         */
+        public function whereNotFloatArrayOverlaps($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotFloatArrayOverlaps()
+         */
+        public function orWhereNotFloatArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL UUID[] 数组包含查询条件 (
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereUuidArrayContains()
+         */
+        public function whereUuidArrayContains($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereUuidArrayContains()
+         */
+        public function orWhereUuidArrayContains($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotUuidArrayContains()
+         */
+        public function whereNotUuidArrayContains($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotUuidArrayContains()
+         */
+        public function orWhereNotUuidArrayContains($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL UUID[] 数组被包含查询条件 (<
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereUuidArrayContainedBy()
+         */
+        public function whereUuidArrayContainedBy($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereUuidArrayContainedBy()
+         */
+        public function orWhereUuidArrayContainedBy($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotUuidArrayContainedBy()
+         */
+        public function whereNotUuidArrayContainedBy($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotUuidArrayContainedBy()
+         */
+        public function orWhereNotUuidArrayContainedBy($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 添加 PostgreSQL UUID[] 数组交集查询条件 (&&).
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereUuidArrayOverlaps()
+         */
+        public function whereUuidArrayOverlaps($column, $value, $boolean = 'and', $not = false): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereUuidArrayOverlaps()
+         */
+        public function orWhereUuidArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::whereNotUuidArrayOverlaps()
+         */
+        public function whereNotUuidArrayOverlaps($column, $value, $boolean = 'and'): \Illuminate\Database\Query\Builder
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::orWhereNotUuidArrayOverlaps()
+         */
+        public function orWhereNotUuidArrayOverlaps($column, $value): \Illuminate\Database\Query\Builder
         {
         }
     }
@@ -244,34 +1124,194 @@ namespace Illuminate\Database\Query\Grammars {
     class Grammar
     {
         /**
-         * 编译 WHERE PostgreSQL 数组包含条件 (
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereArrayContains()
+         * 编译 WHERE PostgreSQL INTEGER[] 数组包含条件 (
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereIntArrayContains()
          */
-        public function whereArrayContains(\Illuminate\Database\Query\Builder $query, $where): mixed
+        public function whereIntArrayContains(\Illuminate\Database\Query\Builder $query, $where): mixed
         {
         }
 
         /**
-         * 编译 WHERE PostgreSQL 数组被包含条件 (<
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereArrayContainedBy()
+         * 编译 WHERE PostgreSQL INTEGER[] 数组被包含条件 (<
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereIntArrayContainedBy()
          */
-        public function whereArrayContainedBy(\Illuminate\Database\Query\Builder $query, $where): mixed
+        public function whereIntArrayContainedBy(\Illuminate\Database\Query\Builder $query, $where): mixed
         {
         }
 
         /**
-         * 编译 WHERE PostgreSQL 数组重叠条件 (&&) 为 SQL 片段.
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereArrayOverlaps()
+         * 编译 WHERE PostgreSQL INTEGER[] 数组重叠条件 (&&) 为 SQL 片段.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereIntArrayOverlaps()
          */
-        public function whereArrayOverlaps(\Illuminate\Database\Query\Builder $query, $where): mixed
+        public function whereIntArrayOverlaps(\Illuminate\Database\Query\Builder $query, $where): mixed
         {
         }
 
         /**
-         * 编译 PostgreSQL ARRAY[?, ?, ?]::type[] 表达式.
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::compilePgArrayExpression()
+         * 编译 WHERE PostgreSQL BIGINT[] 数组包含条件 (
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereBigIntArrayContains()
          */
-        public function compilePgArrayExpression(array $values, ?string $arrayType = null): string
+        public function whereBigIntArrayContains(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL BIGINT[] 数组被包含条件 (<
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereBigIntArrayContainedBy()
+         */
+        public function whereBigIntArrayContainedBy(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL BIGINT[] 数组重叠条件 (&&) 为 SQL 片段.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereBigIntArrayOverlaps()
+         */
+        public function whereBigIntArrayOverlaps(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL SMALLINT[] 数组包含条件 (
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereSmallIntArrayContains()
+         */
+        public function whereSmallIntArrayContains(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL SMALLINT[] 数组被包含条件 (<
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereSmallIntArrayContainedBy()
+         */
+        public function whereSmallIntArrayContainedBy(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL SMALLINT[] 数组重叠条件 (&&) 为 SQL 片段.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereSmallIntArrayOverlaps()
+         */
+        public function whereSmallIntArrayOverlaps(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL TEXT[] 数组包含条件 (
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereTextArrayContains()
+         */
+        public function whereTextArrayContains(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL TEXT[] 数组被包含条件 (<
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereTextArrayContainedBy()
+         */
+        public function whereTextArrayContainedBy(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL TEXT[] 数组重叠条件 (&&) 为 SQL 片段.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereTextArrayOverlaps()
+         */
+        public function whereTextArrayOverlaps(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL BOOLEAN[] 数组包含条件 (
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereBooleanArrayContains()
+         */
+        public function whereBooleanArrayContains(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL BOOLEAN[] 数组被包含条件 (<
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereBooleanArrayContainedBy()
+         */
+        public function whereBooleanArrayContainedBy(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL BOOLEAN[] 数组重叠条件 (&&) 为 SQL 片段.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereBooleanArrayOverlaps()
+         */
+        public function whereBooleanArrayOverlaps(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL DOUBLE PRECISION[] 数组包含条件 (
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereDoubleArrayContains()
+         */
+        public function whereDoubleArrayContains(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL DOUBLE PRECISION[] 数组被包含条件 (<
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereDoubleArrayContainedBy()
+         */
+        public function whereDoubleArrayContainedBy(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL DOUBLE PRECISION[] 数组重叠条件 (&&) 为 SQL 片段.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereDoubleArrayOverlaps()
+         */
+        public function whereDoubleArrayOverlaps(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL REAL[] 数组包含条件 (
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereFloatArrayContains()
+         */
+        public function whereFloatArrayContains(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL REAL[] 数组被包含条件 (<
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereFloatArrayContainedBy()
+         */
+        public function whereFloatArrayContainedBy(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL REAL[] 数组重叠条件 (&&) 为 SQL 片段.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereFloatArrayOverlaps()
+         */
+        public function whereFloatArrayOverlaps(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL UUID[] 数组包含条件 (
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereUuidArrayContains()
+         */
+        public function whereUuidArrayContains(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL UUID[] 数组被包含条件 (<
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereUuidArrayContainedBy()
+         */
+        public function whereUuidArrayContainedBy(\Illuminate\Database\Query\Builder $query, $where): mixed
+        {
+        }
+
+        /**
+         * 编译 WHERE PostgreSQL UUID[] 数组重叠条件 (&&) 为 SQL 片段.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin::whereUuidArrayOverlaps()
+         */
+        public function whereUuidArrayOverlaps(\Illuminate\Database\Query\Builder $query, $where): mixed
         {
         }
     }

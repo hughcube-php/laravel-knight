@@ -38,7 +38,7 @@ class ServiceProviderTest extends TestCase
 
         $provider = new ServiceProvider($this->app);
 
-        $routesCached = self::callMethod($provider, 'hasRoutesCache');
+        $routesCached = $this->app->routesAreCached();
 
         self::callMethod($provider, 'bootOpCache');
         self::callMethod($provider, 'bootRequest');
@@ -106,14 +106,14 @@ class ServiceProviderTest extends TestCase
         $provider->register();
 
         $this->assertTrue(Collection::hasMacro('hasAnyValues'));
-        $this->assertTrue(Builder::hasMacro('whereArrayContains'));
+        $this->assertTrue(Builder::hasMacro('whereIntArrayContains'));
         $this->assertTrue(Carbon::hasMacro('getTimestampAsFloat'));
 
         $collection = Collection::make([1, 2]);
         $this->assertTrue($collection->hasAnyValues([2]));
 
         $query = $this->app['db']->connection()->query();
-        $query->whereArrayContains('tags', ['a']);
+        $query->whereIntArrayContains('scores', [1, 2]);
         $this->assertNotEmpty($query->wheres);
     }
 }

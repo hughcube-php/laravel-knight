@@ -495,4 +495,124 @@ trait Model
     {
         return $this->isAvailable();
     }
+
+    // ==================== PostgreSQL Array Helpers ====================
+
+    /**
+     * 解析 PostgreSQL 数组格式.
+     *
+     * 支持格式:
+     *   - {1,2,3}
+     *   - {"a","b","c"}
+     *   - {1,2,NULL,3}
+     *
+     * @param string $pgArray PostgreSQL 数组字符串
+     *
+     * @return IlluminateCollection
+     */
+    protected function parsePgArray(string $pgArray): IlluminateCollection
+    {
+        $pgArray = trim($pgArray);
+
+        // 空数组
+        if ($pgArray === '{}' || $pgArray === '') {
+            return Collection::make();
+        }
+
+        // 去除大括号
+        if (str_starts_with($pgArray, '{') && str_ends_with($pgArray, '}')) {
+            $pgArray = substr($pgArray, 1, -1);
+        }
+
+        if ('' === $pgArray) {
+            return Collection::make();
+        }
+
+        $result = [];
+        $current = '';
+        $inQuotes = false;
+        $length = strlen($pgArray);
+
+        for ($i = 0; $i < $length; $i++) {
+            $char = $pgArray[$i];
+
+            if ($char === '"' && ($i === 0 || $pgArray[$i - 1] !== '\\')) {
+                $inQuotes = !$inQuotes;
+                continue;
+            }
+
+            if ($char === ',' && !$inQuotes) {
+                $result[] = $this->parsePgArrayValue($current);
+                $current = '';
+                continue;
+            }
+
+            $current .= $char;
+        }
+
+        // 添加最后一个元素
+        if ('' !== $current || count($result) > 0) {
+            $result[] = $this->parsePgArrayValue($current);
+        }
+
+        return Collection::make($result);
+    }
+
+    /**
+     * 解析 PostgreSQL 数组中的单个值.
+     *
+     * @param string $value
+     *
+     * @return mixed
+     */
+    protected function parsePgArrayValue(string $value)
+    {
+        $value = trim($value);
+
+        // NULL 值
+        if (strtoupper($value) === 'NULL') {
+            return null;
+        }
+
+        // 去除引号
+        if (str_starts_with($value, '"') && str_ends_with($value, '"')) {
+            $value = substr($value, 1, -1);
+        }
+
+        // 处理转义字符
+        $value = str_replace(['\\\\', '\\"'], ['\\', '"'], $value);
+
+        return $value;
+    }
+
+    /**
+     * 格式化为 PostgreSQL 数组格式.
+     *
+     * @param array $array
+     *
+     * @return string
+     */
+    protected function formatPgArray(array $array): string
+    {
+        if (empty($array)) {
+            return '{}';
+        }
+
+        $elements = [];
+        foreach ($array as $value) {
+            if (null === $value) {
+                $elements[] = 'NULL';
+            } elseif (is_bool($value)) {
+                $elements[] = $value ? 'true' : 'false';
+            } elseif (is_numeric($value)) {
+                $elements[] = (string)$value;
+            } else {
+                // 字符串需要转义和引用
+                $escaped = str_replace(['\\', '"'], ['\\\\', '\\"'], (string)$value);
+                $elements[] = '"' . $escaped . '"';
+            }
+        }
+
+        return '{' . implode(',', $elements) . '}';
+    }
 }

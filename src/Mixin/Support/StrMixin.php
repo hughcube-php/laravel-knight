@@ -13,7 +13,7 @@ use Closure;
 use Illuminate\Support\Str;
 
 /**
- * @mixin-target Str
+ * @mixin-target \Illuminate\Support\Str
  *
  * @deprecated \HughCube\Laravel\Knight\Support\Str
  */

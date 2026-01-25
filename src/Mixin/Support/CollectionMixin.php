@@ -14,7 +14,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 /**
- * @mixin-target Collection
+ * @mixin-target \Illuminate\Support\Collection
  */
 class CollectionMixin
 {

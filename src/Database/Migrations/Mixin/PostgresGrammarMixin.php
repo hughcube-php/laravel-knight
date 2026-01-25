@@ -100,4 +100,176 @@ class PostgresGrammarMixin
             return "CREATE INDEX {$indexName} ON {$tableName} USING GIN ({$columns}) WHERE {$where}";
         };
     }
+
+    // ==================== PostgreSQL Array Column Type Methods ====================
+
+    /**
+     * 定义 INTEGER[] 数组列类型.
+     *
+     * @return Closure(Fluent): string
+     */
+    public function typeKnightIntArray(): Closure
+    {
+        return function (Fluent $column) {
+            return 'integer[]';
+        };
+    }
+
+    /**
+     * 定义 BIGINT[] 数组列类型.
+     *
+     * @return Closure(Fluent): string
+     */
+    public function typeKnightBigIntArray(): Closure
+    {
+        return function (Fluent $column) {
+            return 'bigint[]';
+        };
+    }
+
+    /**
+     * 定义 SMALLINT[] 数组列类型.
+     *
+     * @return Closure(Fluent): string
+     */
+    public function typeKnightSmallIntArray(): Closure
+    {
+        return function (Fluent $column) {
+            return 'smallint[]';
+        };
+    }
+
+    /**
+     * 定义 TEXT[] 数组列类型.
+     *
+     * @return Closure(Fluent): string
+     */
+    public function typeKnightTextArray(): Closure
+    {
+        return function (Fluent $column) {
+            return 'text[]';
+        };
+    }
+
+    /**
+     * 定义 VARCHAR(n)[] 数组列类型.
+     *
+     * @return Closure(Fluent): string
+     */
+    public function typeKnightVarcharArray(): Closure
+    {
+        return function (Fluent $column) {
+            $length = $column->length ?? 255;
+
+            return "varchar({$length})[]";
+        };
+    }
+
+    /**
+     * 定义 BOOLEAN[] 数组列类型.
+     *
+     * @return Closure(Fluent): string
+     */
+    public function typeKnightBooleanArray(): Closure
+    {
+        return function (Fluent $column) {
+            return 'boolean[]';
+        };
+    }
+
+    /**
+     * 定义 DOUBLE PRECISION[] 数组列类型.
+     *
+     * @return Closure(Fluent): string
+     */
+    public function typeKnightDoubleArray(): Closure
+    {
+        return function (Fluent $column) {
+            return 'double precision[]';
+        };
+    }
+
+    /**
+     * 定义 REAL[] (单精度浮点) 数组列类型.
+     *
+     * @return Closure(Fluent): string
+     */
+    public function typeKnightFloatArray(): Closure
+    {
+        return function (Fluent $column) {
+            return 'real[]';
+        };
+    }
+
+    /**
+     * 定义 UUID[] 数组列类型.
+     *
+     * @return Closure(Fluent): string
+     */
+    public function typeKnightUuidArray(): Closure
+    {
+        return function (Fluent $column) {
+            return 'uuid[]';
+        };
+    }
+
+    /**
+     * 定义 NUMERIC[] 数组列类型.
+     *
+     * @return Closure(Fluent): string
+     */
+    public function typeKnightNumericArray(): Closure
+    {
+        return function (Fluent $column) {
+            $precision = $column->precision;
+            $scale = $column->scale;
+
+            if ($precision !== null && $scale !== null) {
+                return "numeric({$precision}, {$scale})[]";
+            }
+
+            if ($precision !== null) {
+                return "numeric({$precision})[]";
+            }
+
+            return 'numeric[]';
+        };
+    }
+
+    /**
+     * 定义 TIMESTAMPTZ[] 数组列类型.
+     *
+     * @return Closure(Fluent): string
+     */
+    public function typeKnightTimestamptzArray(): Closure
+    {
+        return function (Fluent $column) {
+            return 'timestamptz[]';
+        };
+    }
+
+    /**
+     * 定义 DATE[] 数组列类型.
+     *
+     * @return Closure(Fluent): string
+     */
+    public function typeKnightDateArray(): Closure
+    {
+        return function (Fluent $column) {
+            return 'date[]';
+        };
+    }
+
+    /**
+     * 定义 JSONB[] 数组列类型.
+     *
+     * @return Closure(Fluent): string
+     */
+    public function typeKnightJsonbArray(): Closure
+    {
+        return function (Fluent $column) {
+            return 'jsonb[]';
+        };
+    }
+
 }

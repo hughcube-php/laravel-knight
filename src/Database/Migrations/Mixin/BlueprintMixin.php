@@ -19,7 +19,7 @@ use Illuminate\Database\Schema\Blueprint;
  * 此 Mixin 专门用于 Migration 场景，在 Migration 基类中自动注册。
  * 所有方法使用 knight 前缀以避免与框架冲突。
  *
- * @mixin-target Blueprint
+ * @mixin-target \Illuminate\Database\Schema\Blueprint
  */
 class BlueprintMixin
 {
@@ -251,6 +251,232 @@ class BlueprintMixin
             /** @var Blueprint $this */
             /** @phpstan-ignore-next-line */
             return $this->knightIndexWhere($columns, "{$deletedAtColumn} IS NULL", $indexName);
+        };
+    }
+
+    // ==================== PostgreSQL Array Column Methods ====================
+
+    /**
+     * 添加 INTEGER[] 数组列 (PostgreSQL).
+     *
+     * 示例:
+     *   $table->knightIntArray('scores');
+     *   $table->knightIntArray('scores')->nullable();
+     *
+     * @return Closure(string $column): \Illuminate\Database\Schema\ColumnDefinition
+     */
+    public function knightIntArray(): Closure
+    {
+        return function (string $column) {
+            /** @var Blueprint $this */
+            return $this->addColumn('knightIntArray', $column);
+        };
+    }
+
+    /**
+     * 添加 BIGINT[] 数组列 (PostgreSQL).
+     *
+     * 示例:
+     *   $table->knightBigIntArray('user_ids');
+     *   $table->knightBigIntArray('user_ids')->nullable();
+     *
+     * @return Closure(string $column): \Illuminate\Database\Schema\ColumnDefinition
+     */
+    public function knightBigIntArray(): Closure
+    {
+        return function (string $column) {
+            /** @var Blueprint $this */
+            return $this->addColumn('knightBigIntArray', $column);
+        };
+    }
+
+    /**
+     * 添加 SMALLINT[] 数组列 (PostgreSQL).
+     *
+     * 示例:
+     *   $table->knightSmallIntArray('ratings');
+     *   $table->knightSmallIntArray('ratings')->nullable();
+     *
+     * @return Closure(string $column): \Illuminate\Database\Schema\ColumnDefinition
+     */
+    public function knightSmallIntArray(): Closure
+    {
+        return function (string $column) {
+            /** @var Blueprint $this */
+            return $this->addColumn('knightSmallIntArray', $column);
+        };
+    }
+
+    /**
+     * 添加 TEXT[] 数组列 (PostgreSQL).
+     *
+     * 示例:
+     *   $table->knightTextArray('tags');
+     *   $table->knightTextArray('tags')->nullable();
+     *
+     * @return Closure(string $column): \Illuminate\Database\Schema\ColumnDefinition
+     */
+    public function knightTextArray(): Closure
+    {
+        return function (string $column) {
+            /** @var Blueprint $this */
+            return $this->addColumn('knightTextArray', $column);
+        };
+    }
+
+    /**
+     * 添加 VARCHAR(n)[] 数组列 (PostgreSQL).
+     *
+     * 示例:
+     *   $table->knightVarcharArray('codes', 50);
+     *   $table->knightVarcharArray('codes', 50)->nullable();
+     *
+     * @return Closure(string $column, int $length = 255): \Illuminate\Database\Schema\ColumnDefinition
+     */
+    public function knightVarcharArray(): Closure
+    {
+        return function (string $column, int $length = 255) {
+            /** @var Blueprint $this */
+            return $this->addColumn('knightVarcharArray', $column, ['length' => $length]);
+        };
+    }
+
+    /**
+     * 添加 BOOLEAN[] 数组列 (PostgreSQL).
+     *
+     * 示例:
+     *   $table->knightBooleanArray('flags');
+     *   $table->knightBooleanArray('flags')->nullable();
+     *
+     * @return Closure(string $column): \Illuminate\Database\Schema\ColumnDefinition
+     */
+    public function knightBooleanArray(): Closure
+    {
+        return function (string $column) {
+            /** @var Blueprint $this */
+            return $this->addColumn('knightBooleanArray', $column);
+        };
+    }
+
+    /**
+     * 添加 DOUBLE PRECISION[] 数组列 (PostgreSQL).
+     *
+     * 示例:
+     *   $table->knightDoubleArray('prices');
+     *   $table->knightDoubleArray('prices')->nullable();
+     *
+     * @return Closure(string $column): \Illuminate\Database\Schema\ColumnDefinition
+     */
+    public function knightDoubleArray(): Closure
+    {
+        return function (string $column) {
+            /** @var Blueprint $this */
+            return $this->addColumn('knightDoubleArray', $column);
+        };
+    }
+
+    /**
+     * 添加 REAL[] (单精度浮点) 数组列 (PostgreSQL).
+     *
+     * 示例:
+     *   $table->knightFloatArray('coordinates');
+     *   $table->knightFloatArray('coordinates')->nullable();
+     *
+     * @return Closure(string $column): \Illuminate\Database\Schema\ColumnDefinition
+     */
+    public function knightFloatArray(): Closure
+    {
+        return function (string $column) {
+            /** @var Blueprint $this */
+            return $this->addColumn('knightFloatArray', $column);
+        };
+    }
+
+    /**
+     * 添加 UUID[] 数组列 (PostgreSQL).
+     *
+     * 示例:
+     *   $table->knightUuidArray('related_ids');
+     *   $table->knightUuidArray('related_ids')->nullable();
+     *
+     * @return Closure(string $column): \Illuminate\Database\Schema\ColumnDefinition
+     */
+    public function knightUuidArray(): Closure
+    {
+        return function (string $column) {
+            /** @var Blueprint $this */
+            return $this->addColumn('knightUuidArray', $column);
+        };
+    }
+
+    /**
+     * 添加 NUMERIC[] 数组列 (PostgreSQL).
+     *
+     * 示例:
+     *   $table->knightNumericArray('amounts');
+     *   $table->knightNumericArray('amounts', 10, 2)->nullable();
+     *
+     * @return Closure(string $column, int|null $precision = null, int|null $scale = null): \Illuminate\Database\Schema\ColumnDefinition
+     */
+    public function knightNumericArray(): Closure
+    {
+        return function (string $column, ?int $precision = null, ?int $scale = null) {
+            /** @var Blueprint $this */
+            return $this->addColumn('knightNumericArray', $column, [
+                'precision' => $precision,
+                'scale' => $scale,
+            ]);
+        };
+    }
+
+    /**
+     * 添加 TIMESTAMPTZ[] 数组列 (PostgreSQL).
+     *
+     * 示例:
+     *   $table->knightTimestamptzArray('event_times');
+     *   $table->knightTimestamptzArray('event_times')->nullable();
+     *
+     * @return Closure(string $column): \Illuminate\Database\Schema\ColumnDefinition
+     */
+    public function knightTimestamptzArray(): Closure
+    {
+        return function (string $column) {
+            /** @var Blueprint $this */
+            return $this->addColumn('knightTimestamptzArray', $column);
+        };
+    }
+
+    /**
+     * 添加 DATE[] 数组列 (PostgreSQL).
+     *
+     * 示例:
+     *   $table->knightDateArray('holidays');
+     *   $table->knightDateArray('holidays')->nullable();
+     *
+     * @return Closure(string $column): \Illuminate\Database\Schema\ColumnDefinition
+     */
+    public function knightDateArray(): Closure
+    {
+        return function (string $column) {
+            /** @var Blueprint $this */
+            return $this->addColumn('knightDateArray', $column);
+        };
+    }
+
+    /**
+     * 添加 JSONB[] 数组列 (PostgreSQL).
+     *
+     * 示例:
+     *   $table->knightJsonbArray('metadata_list');
+     *   $table->knightJsonbArray('metadata_list')->nullable();
+     *
+     * @return Closure(string $column): \Illuminate\Database\Schema\ColumnDefinition
+     */
+    public function knightJsonbArray(): Closure
+    {
+        return function (string $column) {
+            /** @var Blueprint $this */
+            return $this->addColumn('knightJsonbArray', $column);
         };
     }
 }

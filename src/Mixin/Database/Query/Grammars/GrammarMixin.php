@@ -26,149 +26,457 @@ use Illuminate\Database\Query\Grammars\Grammar;
  *   - 列名通过 wrapJsonFieldAndPath() 正确转义处理
  *   - 遵循 Laravel 的标准 Grammar 编译模式
  *
- * @mixin-target Grammar
+ * @mixin-target \Illuminate\Database\Query\Grammars\Grammar
  * @property-read Grammar $connection
  * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin 对应的 Builder 扩展
  */
 class GrammarMixin
 {
+    // ==================== INTEGER Array Grammar Methods ====================
+
     /**
-     * 编译 WHERE PostgreSQL 数组包含条件 (@>) 为 SQL 片段.
-     *
-     * PostgreSQL 数组包含操作符 (@>) 检查左侧数组是否包含右侧数组的所有元素。
-     * 使用 ARRAY[?, ?, ?]::type[] 格式，每个元素独立绑定，避免 SQL 注入风险。
-     *
-     * 生成的 SQL 示例:
-     *   - whereArrayContains('tags', ['php', 'laravel'])
-     *     => "tags" @> ARRAY[?, ?]::text[]
-     *
-     *   - whereArrayContains('ids', [1, 2, 3])
-     *     => "ids" @> ARRAY[?, ?, ?]::integer[]
-     *
-     *   - whereArrayContains('tags', ['php'], 'and', true)
-     *     => not ("tags" @> ARRAY[?]::text[])
+     * 编译 WHERE PostgreSQL INTEGER[] 数组包含条件 (@>) 为 SQL 片段.
      *
      * @return Closure(Builder $query, array $where): string
-     *
-     * @link https://www.postgresql.org/docs/current/functions-array.html
      */
-    public function whereArrayContains(): Closure
+    public function whereIntArrayContains(): Closure
     {
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
-
             $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::integer[]' : 'ARRAY[]::integer[]';
 
-            /** @phpstan-ignore-next-line */
-            $arrayExpr = $this->compilePgArrayExpression($where['value'], $where['arrayType'] ?? null);
-
-            /** @phpstan-ignore-next-line */
             return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
         };
     }
 
     /**
-     * 编译 WHERE PostgreSQL 数组被包含条件 (<@) 为 SQL 片段.
-     *
-     * PostgreSQL 数组被包含操作符 (<@) 检查左侧数组是否被右侧数组包含。
-     * 使用 ARRAY[?, ?, ?]::type[] 格式，每个元素独立绑定，避免 SQL 注入风险。
-     *
-     * 生成的 SQL 示例:
-     *   - whereArrayContainedBy('tags', ['php', 'laravel', 'mysql'])
-     *     => "tags" <@ ARRAY[?, ?, ?]::text[]
-     *
-     *   - whereArrayContainedBy('tags', ['php'], 'and', true)
-     *     => not ("tags" <@ ARRAY[?]::text[])
+     * 编译 WHERE PostgreSQL INTEGER[] 数组被包含条件 (<@) 为 SQL 片段.
      *
      * @return Closure(Builder $query, array $where): string
-     *
-     * @link https://www.postgresql.org/docs/current/functions-array.html
      */
-    public function whereArrayContainedBy(): Closure
+    public function whereIntArrayContainedBy(): Closure
     {
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
-
             $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::integer[]' : 'ARRAY[]::integer[]';
 
-            /** @phpstan-ignore-next-line */
-            $arrayExpr = $this->compilePgArrayExpression($where['value'], $where['arrayType'] ?? null);
-
-            /** @phpstan-ignore-next-line */
             return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
         };
     }
 
     /**
-     * 编译 WHERE PostgreSQL 数组重叠条件 (&&) 为 SQL 片段.
-     *
-     * PostgreSQL 数组重叠操作符 (&&) 检查两个数组是否有交集（共同元素）。
-     * 使用 ARRAY[?, ?, ?]::type[] 格式，每个元素独立绑定，避免 SQL 注入风险。
-     *
-     * 生成的 SQL 示例:
-     *   - whereArrayOverlaps('tags', ['php', 'laravel'])
-     *     => "tags" && ARRAY[?, ?]::text[]
-     *
-     *   - whereArrayOverlaps('tags', ['php'], 'and', true)
-     *     => not ("tags" && ARRAY[?]::text[])
+     * 编译 WHERE PostgreSQL INTEGER[] 数组重叠条件 (&&) 为 SQL 片段.
      *
      * @return Closure(Builder $query, array $where): string
-     *
-     * @link https://www.postgresql.org/docs/current/functions-array.html
      */
-    public function whereArrayOverlaps(): Closure
+    public function whereIntArrayOverlaps(): Closure
     {
         return function (Builder $query, $where) {
             $not = $where['not'] ? 'not ' : '';
-
             $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::integer[]' : 'ARRAY[]::integer[]';
 
-            /** @phpstan-ignore-next-line */
-            $arrayExpr = $this->compilePgArrayExpression($where['value'], $where['arrayType'] ?? null);
-
-            /** @phpstan-ignore-next-line */
             return $not . '(' . $column . ' && ' . $arrayExpr . ')';
         };
     }
 
+    // ==================== BIGINT Array Grammar Methods ====================
+
     /**
-     * 编译 PostgreSQL ARRAY[?, ?, ?]::type[] 表达式.
+     * 编译 WHERE PostgreSQL BIGINT[] 数组包含条件 (@>) 为 SQL 片段.
      *
-     * 根据值的 PHP 类型自动推断 PostgreSQL 数组类型：
-     *   - int     => integer[]
-     *   - float   => double precision[]
-     *   - bool    => boolean[]
-     *   - string  => text[]
-     *
-     * @return Closure(array $values, string|null $arrayType): string
+     * @return Closure(Builder $query, array $where): string
      */
-    public function compilePgArrayExpression(): Closure
+    public function whereBigIntArrayContains(): Closure
     {
-        return function (array $values, ?string $arrayType = null): string {
-            $count = count($values);
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::bigint[]' : 'ARRAY[]::bigint[]';
 
-            if ($count === 0) {
-                $type = $arrayType ?? 'text';
+            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
+        };
+    }
 
-                return 'ARRAY[]::' . $type . '[]';
-            }
+    /**
+     * 编译 WHERE PostgreSQL BIGINT[] 数组被包含条件 (<@) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereBigIntArrayContainedBy(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::bigint[]' : 'ARRAY[]::bigint[]';
 
-            $placeholders = implode(', ', array_fill(0, $count, '?'));
+            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
+        };
+    }
 
-            if ($arrayType === null) {
-                $firstValue = reset($values);
-                if (is_int($firstValue)) {
-                    $arrayType = 'integer';
-                } elseif (is_float($firstValue)) {
-                    $arrayType = 'double precision';
-                } elseif (is_bool($firstValue)) {
-                    $arrayType = 'boolean';
-                } else {
-                    $arrayType = 'text';
-                }
-            }
+    /**
+     * 编译 WHERE PostgreSQL BIGINT[] 数组重叠条件 (&&) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereBigIntArrayOverlaps(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::bigint[]' : 'ARRAY[]::bigint[]';
 
-            return 'ARRAY[' . $placeholders . ']::' . $arrayType . '[]';
+            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
+        };
+    }
+
+    // ==================== SMALLINT Array Grammar Methods ====================
+
+    /**
+     * 编译 WHERE PostgreSQL SMALLINT[] 数组包含条件 (@>) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereSmallIntArrayContains(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::smallint[]' : 'ARRAY[]::smallint[]';
+
+            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
+        };
+    }
+
+    /**
+     * 编译 WHERE PostgreSQL SMALLINT[] 数组被包含条件 (<@) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereSmallIntArrayContainedBy(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::smallint[]' : 'ARRAY[]::smallint[]';
+
+            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
+        };
+    }
+
+    /**
+     * 编译 WHERE PostgreSQL SMALLINT[] 数组重叠条件 (&&) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereSmallIntArrayOverlaps(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::smallint[]' : 'ARRAY[]::smallint[]';
+
+            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
+        };
+    }
+
+    // ==================== TEXT Array Grammar Methods ====================
+
+    /**
+     * 编译 WHERE PostgreSQL TEXT[] 数组包含条件 (@>) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereTextArrayContains(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::text[]' : 'ARRAY[]::text[]';
+
+            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
+        };
+    }
+
+    /**
+     * 编译 WHERE PostgreSQL TEXT[] 数组被包含条件 (<@) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereTextArrayContainedBy(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::text[]' : 'ARRAY[]::text[]';
+
+            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
+        };
+    }
+
+    /**
+     * 编译 WHERE PostgreSQL TEXT[] 数组重叠条件 (&&) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereTextArrayOverlaps(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::text[]' : 'ARRAY[]::text[]';
+
+            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
+        };
+    }
+
+    // ==================== BOOLEAN Array Grammar Methods ====================
+
+    /**
+     * 编译 WHERE PostgreSQL BOOLEAN[] 数组包含条件 (@>) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereBooleanArrayContains(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::boolean[]' : 'ARRAY[]::boolean[]';
+
+            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
+        };
+    }
+
+    /**
+     * 编译 WHERE PostgreSQL BOOLEAN[] 数组被包含条件 (<@) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereBooleanArrayContainedBy(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::boolean[]' : 'ARRAY[]::boolean[]';
+
+            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
+        };
+    }
+
+    /**
+     * 编译 WHERE PostgreSQL BOOLEAN[] 数组重叠条件 (&&) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereBooleanArrayOverlaps(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::boolean[]' : 'ARRAY[]::boolean[]';
+
+            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
+        };
+    }
+
+    // ==================== DOUBLE PRECISION Array Grammar Methods ====================
+
+    /**
+     * 编译 WHERE PostgreSQL DOUBLE PRECISION[] 数组包含条件 (@>) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereDoubleArrayContains(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::double precision[]' : 'ARRAY[]::double precision[]';
+
+            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
+        };
+    }
+
+    /**
+     * 编译 WHERE PostgreSQL DOUBLE PRECISION[] 数组被包含条件 (<@) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereDoubleArrayContainedBy(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::double precision[]' : 'ARRAY[]::double precision[]';
+
+            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
+        };
+    }
+
+    /**
+     * 编译 WHERE PostgreSQL DOUBLE PRECISION[] 数组重叠条件 (&&) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereDoubleArrayOverlaps(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::double precision[]' : 'ARRAY[]::double precision[]';
+
+            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
+        };
+    }
+
+    // ==================== REAL (Float) Array Grammar Methods ====================
+
+    /**
+     * 编译 WHERE PostgreSQL REAL[] 数组包含条件 (@>) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereFloatArrayContains(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::real[]' : 'ARRAY[]::real[]';
+
+            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
+        };
+    }
+
+    /**
+     * 编译 WHERE PostgreSQL REAL[] 数组被包含条件 (<@) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereFloatArrayContainedBy(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::real[]' : 'ARRAY[]::real[]';
+
+            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
+        };
+    }
+
+    /**
+     * 编译 WHERE PostgreSQL REAL[] 数组重叠条件 (&&) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereFloatArrayOverlaps(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::real[]' : 'ARRAY[]::real[]';
+
+            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
+        };
+    }
+
+    // ==================== UUID Array Grammar Methods ====================
+
+    /**
+     * 编译 WHERE PostgreSQL UUID[] 数组包含条件 (@>) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereUuidArrayContains(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::uuid[]' : 'ARRAY[]::uuid[]';
+
+            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
+        };
+    }
+
+    /**
+     * 编译 WHERE PostgreSQL UUID[] 数组被包含条件 (<@) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereUuidArrayContainedBy(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::uuid[]' : 'ARRAY[]::uuid[]';
+
+            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
+        };
+    }
+
+    /**
+     * 编译 WHERE PostgreSQL UUID[] 数组重叠条件 (&&) 为 SQL 片段.
+     *
+     * @return Closure(Builder $query, array $where): string
+     */
+    public function whereUuidArrayOverlaps(): Closure
+    {
+        return function (Builder $query, $where) {
+            $not = $where['not'] ? 'not ' : '';
+            $column = $this->wrap($where['column']);
+            $count = count((array)$where['value']);
+            $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
+            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::uuid[]' : 'ARRAY[]::uuid[]';
+
+            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
         };
     }
 }

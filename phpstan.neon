@@ -41,3 +41,5 @@ parameters:
             paths:
                 - src/Database/Migrations/Mixin/BlueprintMixin.php
                 - src/Database/Migrations/Mixin/PostgresGrammarMixin.php
+                - src/Mixin/Database/Query/BuilderMixin.php
+                - src/Mixin/Database/Query/Grammars/GrammarMixin.php

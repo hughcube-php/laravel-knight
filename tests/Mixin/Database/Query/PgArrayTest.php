@@ -17,8 +17,8 @@ use Illuminate\Support\Facades\DB;
 /**
  * PostgreSQL Array Query Tests.
  *
- * Tests for whereArrayContains, whereArrayContainedBy, whereArrayOverlaps
- * and their variants (or, not, orNot).
+ * Tests for type-specific array methods like whereIntArrayContains,
+ * whereTextArrayContains, whereBigIntArrayContains, etc.
  */
 class PgArrayTest extends TestCase
 {
@@ -175,45 +175,533 @@ class PgArrayTest extends TestCase
         return ['ARRAY['.$placeholders.']', array_values($values)];
     }
 
-    // ==================== whereArrayContains (@>) ====================
+    // ==================== INTEGER Array Methods ====================
 
-    public function testWhereArrayContains()
+    public function testWhereIntArrayContains()
     {
-        // tags contains ['php', 'laravel']
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayContains('tags', ['php', 'laravel'])
-                ->get()
-        );
+        $query = $this->getTestQuery(false)
+            ->whereIntArrayContains('scores', [80, 90]);
 
-        $results->each(function ($item) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue(in_array('php', $tags));
-            $this->assertTrue(in_array('laravel', $tags));
-        });
+        $sql = $query->toSql();
+        $bindings = $query->getBindings();
+
+        $this->assertStringContainsString('@>', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?]::integer[]', $sql);
+        $this->assertEquals([80, 90], $bindings);
     }
 
-    public function testWhereArrayContainsSingle()
+    public function testOrWhereIntArrayContains()
     {
-        // tags contains ['php']
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayContains('tags', ['php'])
-                ->get()
-        );
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereIntArrayContains('scores', [80]);
 
-        $results->each(function ($item) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue(in_array('php', $tags));
-        });
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::integer[]', $sql);
     }
 
-    public function testWhereArrayContainsInteger()
+    public function testWhereNotIntArrayContains()
     {
-        // scores contains [80, 90]
+        $query = $this->getTestQuery(false)
+            ->whereNotIntArrayContains('scores', [80]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::integer[]', $sql);
+    }
+
+    public function testOrWhereNotIntArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotIntArrayContains('scores', [80]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::integer[]', $sql);
+    }
+
+    public function testWhereIntArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereIntArrayContainedBy('scores', [80, 90, 100]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('<@', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?, ?]::integer[]', $sql);
+    }
+
+    public function testOrWhereIntArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereIntArrayContainedBy('scores', [80, 90]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testWhereNotIntArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotIntArrayContainedBy('scores', [80, 90]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testOrWhereNotIntArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotIntArrayContainedBy('scores', [80, 90]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testWhereIntArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereIntArrayOverlaps('scores', [80, 90]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('&&', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?]::integer[]', $sql);
+    }
+
+    public function testOrWhereIntArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereIntArrayOverlaps('scores', [80, 90]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    public function testWhereNotIntArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotIntArrayOverlaps('scores', [80, 90]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    public function testOrWhereNotIntArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotIntArrayOverlaps('scores', [80, 90]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    // ==================== BIGINT Array Methods ====================
+
+    public function testWhereBigIntArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereBigIntArrayContains('user_ids', [9223372036854775807]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('@>', $sql);
+        $this->assertStringContainsString('ARRAY[?]::bigint[]', $sql);
+    }
+
+    public function testOrWhereBigIntArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereBigIntArrayContains('user_ids', [123]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::bigint[]', $sql);
+    }
+
+    public function testWhereBigIntArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereBigIntArrayContainedBy('user_ids', [1, 2, 3]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('<@', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?, ?]::bigint[]', $sql);
+    }
+
+    public function testWhereBigIntArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereBigIntArrayOverlaps('user_ids', [1, 2]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('&&', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?]::bigint[]', $sql);
+    }
+
+    // ==================== SMALLINT Array Methods ====================
+
+    public function testWhereSmallIntArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereSmallIntArrayContains('ratings', [1, 2]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('@>', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?]::smallint[]', $sql);
+    }
+
+    public function testWhereSmallIntArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereSmallIntArrayContainedBy('ratings', [1, 2, 3]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('<@', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?, ?]::smallint[]', $sql);
+    }
+
+    public function testWhereSmallIntArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereSmallIntArrayOverlaps('ratings', [1, 2]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('&&', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?]::smallint[]', $sql);
+    }
+
+    // ==================== TEXT Array Methods ====================
+
+    public function testWhereTextArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereTextArrayContains('tags', ['php', 'laravel']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('@>', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?]::text[]', $sql);
+    }
+
+    public function testOrWhereTextArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereTextArrayContains('tags', ['php']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::text[]', $sql);
+    }
+
+    public function testWhereNotTextArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotTextArrayContains('tags', ['php']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::text[]', $sql);
+    }
+
+    public function testWhereTextArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereTextArrayContainedBy('tags', ['php', 'laravel', 'mysql']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('<@', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?, ?]::text[]', $sql);
+    }
+
+    public function testWhereTextArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereTextArrayOverlaps('tags', ['php', 'java']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('&&', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?]::text[]', $sql);
+    }
+
+    // ==================== BOOLEAN Array Methods ====================
+
+    public function testWhereBooleanArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereBooleanArrayContains('flags', [true, false]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('@>', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?]::boolean[]', $sql);
+    }
+
+    public function testWhereBooleanArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereBooleanArrayContainedBy('flags', [true, false]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('<@', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?]::boolean[]', $sql);
+    }
+
+    public function testWhereBooleanArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereBooleanArrayOverlaps('flags', [true]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('&&', $sql);
+        $this->assertStringContainsString('ARRAY[?]::boolean[]', $sql);
+    }
+
+    // ==================== DOUBLE PRECISION Array Methods ====================
+
+    public function testWhereDoubleArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereDoubleArrayContains('prices', [1.5, 2.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('@>', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?]::double precision[]', $sql);
+    }
+
+    public function testWhereDoubleArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereDoubleArrayContainedBy('prices', [1.5, 2.5, 3.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('<@', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?, ?]::double precision[]', $sql);
+    }
+
+    public function testWhereDoubleArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereDoubleArrayOverlaps('prices', [1.5, 3.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('&&', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?]::double precision[]', $sql);
+    }
+
+    // ==================== REAL (Float) Array Methods ====================
+
+    public function testWhereFloatArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereFloatArrayContains('coordinates', [1.5, 2.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('@>', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?]::real[]', $sql);
+    }
+
+    public function testWhereFloatArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereFloatArrayContainedBy('coordinates', [1.5, 2.5, 3.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('<@', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?, ?]::real[]', $sql);
+    }
+
+    public function testWhereFloatArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereFloatArrayOverlaps('coordinates', [1.5, 3.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('&&', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?]::real[]', $sql);
+    }
+
+    // ==================== UUID Array Methods ====================
+
+    public function testWhereUuidArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereUuidArrayContains('related_ids', ['a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('@>', $sql);
+        $this->assertStringContainsString('ARRAY[?]::uuid[]', $sql);
+    }
+
+    public function testOrWhereUuidArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereUuidArrayContains('related_ids', ['a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::uuid[]', $sql);
+    }
+
+    public function testWhereUuidArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereUuidArrayContainedBy('related_ids', [
+                'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+                'b1ffcd00-0d1c-5fg9-cc7e-7cc0ce491b22',
+            ]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('<@', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?]::uuid[]', $sql);
+    }
+
+    public function testWhereUuidArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereUuidArrayOverlaps('related_ids', ['a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('&&', $sql);
+        $this->assertStringContainsString('ARRAY[?]::uuid[]', $sql);
+    }
+
+    // ==================== Mixed type method tests ====================
+
+    public function testMixedTypeSpecificMethods()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereIntArrayContains('scores', [80])
+            ->whereTextArrayOverlaps('tags', ['php', 'laravel']);
+
+        $sql = $query->toSql();
+        $bindings = $query->getBindings();
+
+        $this->assertStringContainsString('ARRAY[?]::integer[]', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?]::text[]', $sql);
+        $this->assertEquals([80, 'php', 'laravel'], $bindings);
+    }
+
+    public function testTypeSpecificWithOtherConditions()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', '>', 2)
+            ->whereIntArrayOverlaps('scores', [80, 90])
+            ->whereTextArrayContains('tags', ['php']);
+
+        $sql = $query->toSql();
+        $bindings = $query->getBindings();
+
+        $this->assertStringContainsString('"id" > ?', $sql);
+        $this->assertStringContainsString('ARRAY[?, ?]::integer[]', $sql);
+        $this->assertStringContainsString('ARRAY[?]::text[]', $sql);
+        $this->assertEquals([2, 80, 90, 'php'], $bindings);
+    }
+
+    // ==================== Empty array tests ====================
+
+    public function testEmptyIntArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereIntArrayContains('scores', []);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('ARRAY[]::integer[]', $sql);
+    }
+
+    public function testEmptyTextArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereTextArrayOverlaps('tags', []);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('ARRAY[]::text[]', $sql);
+    }
+
+    // ==================== SQL Injection prevention tests ====================
+
+    public function testSqlInjectionPreventionWithTextArray()
+    {
+        $maliciousInput = "test'; DROP TABLE users; --";
+
+        $query = $this->getTestQuery(false)
+            ->whereTextArrayContains('tags', [$maliciousInput]);
+
+        $bindings = $query->getBindings();
+
+        // Value should be properly bound
+        $this->assertCount(1, $bindings);
+        $this->assertEquals($maliciousInput, $bindings[0]);
+    }
+
+    public function testBindingsAreProperlyEscaped()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereTextArrayContains('tags', ["test'; DROP TABLE users; --", 'normal']);
+
+        $bindings = $query->getBindings();
+
+        // Each value should be a separate binding
+        $this->assertCount(2, $bindings);
+        $this->assertEquals("test'; DROP TABLE users; --", $bindings[0]);
+        $this->assertEquals('normal', $bindings[1]);
+    }
+
+    // ==================== Real database execution tests ====================
+
+    public function testIntArrayMethodsWithRealDatabase()
+    {
         $results = Collection::make(
             $this->getTestQuery()
-                ->whereArrayContains('scores', [80, 90])
+                ->whereIntArrayContains('scores', [80, 90])
                 ->get()
         );
 
@@ -224,244 +712,11 @@ class PgArrayTest extends TestCase
         });
     }
 
-    public function testOrWhereArrayContains()
+    public function testTextArrayMethodsWithRealDatabase()
     {
-        // name = 'record3' OR tags contains ['symfony']
         $results = Collection::make(
             $this->getTestQuery()
-                ->where('name', 'record3')
-                ->orWhereArrayContains('tags', ['symfony'])
-                ->get()
-        );
-
-        $results->each(function ($item) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue($item->name === 'record3' || in_array('symfony', $tags));
-        });
-    }
-
-    public function testWhereNotArrayContains()
-    {
-        // tags NOT contains ['php']
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereNotArrayContains('tags', ['php'])
-                ->get()
-        );
-
-        $results->each(function ($item) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertFalse(in_array('php', $tags));
-        });
-    }
-
-    public function testOrWhereNotArrayContains()
-    {
-        // name = 'record1' OR tags NOT contains ['java']
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->where('name', 'record1')
-                ->orWhereNotArrayContains('tags', ['java'])
-                ->get()
-        );
-
-        $results->each(function ($item) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue($item->name === 'record1' || !in_array('java', $tags));
-        });
-    }
-
-    // ==================== whereArrayContainedBy (<@) ====================
-
-    public function testWhereArrayContainedBy()
-    {
-        // tags is contained by ['php', 'laravel']
-        $allowed = ['php', 'laravel'];
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayContainedBy('tags', $allowed)
-                ->get()
-        );
-
-        $results->each(function ($item) use ($allowed) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertSame([], array_diff($tags, $allowed));
-        });
-    }
-
-    public function testWhereArrayContainedByLarger()
-    {
-        // tags is contained by ['php', 'laravel', 'mysql', 'symfony']
-        $allowed = ['php', 'laravel', 'mysql', 'symfony'];
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayContainedBy('tags', $allowed)
-                ->get()
-        );
-
-        $results->each(function ($item) use ($allowed) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertSame([], array_diff($tags, $allowed));
-        });
-    }
-
-    public function testOrWhereArrayContainedBy()
-    {
-        // name = 'record3' OR tags contained by ['php', 'laravel']
-        $allowed = ['php', 'laravel'];
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->where('name', 'record3')
-                ->orWhereArrayContainedBy('tags', $allowed)
-                ->get()
-        );
-
-        $results->each(function ($item) use ($allowed) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue($item->name === 'record3' || [] === array_diff($tags, $allowed));
-        });
-    }
-
-    public function testWhereNotArrayContainedBy()
-    {
-        // tags NOT contained by ['php', 'laravel', 'mysql', 'symfony']
-        $allowed = ['php', 'laravel', 'mysql', 'symfony'];
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereNotArrayContainedBy('tags', $allowed)
-                ->get()
-        );
-
-        $results->each(function ($item) use ($allowed) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertNotSame([], array_diff($tags, $allowed));
-        });
-    }
-
-    public function testOrWhereNotArrayContainedBy()
-    {
-        // name = 'record1' OR tags NOT contained by ['java', 'spring']
-        $allowed = ['java', 'spring'];
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->where('name', 'record1')
-                ->orWhereNotArrayContainedBy('tags', $allowed)
-                ->get()
-        );
-
-        $results->each(function ($item) use ($allowed) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue($item->name === 'record1' || [] !== array_diff($tags, $allowed));
-        });
-    }
-
-    // ==================== whereArrayOverlaps (&&) ====================
-
-    public function testWhereArrayOverlaps()
-    {
-        // tags overlaps ['laravel', 'django']
-        $overlaps = ['laravel', 'django'];
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayOverlaps('tags', $overlaps)
-                ->get()
-        );
-
-        $results->each(function ($item) use ($overlaps) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertNotEmpty(array_intersect($tags, $overlaps));
-        });
-    }
-
-    public function testWhereArrayOverlapsSingle()
-    {
-        // tags overlaps ['java']
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayOverlaps('tags', ['java'])
-                ->get()
-        );
-
-        $results->each(function ($item) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue(in_array('java', $tags));
-        });
-    }
-
-    public function testWhereArrayOverlapsInteger()
-    {
-        // scores overlaps [95, 100]
-        $overlaps = ['95', '100'];
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayOverlaps('scores', [95, 100])
-                ->get()
-        );
-
-        $results->each(function ($item) use ($overlaps) {
-            $scores = $this->parsePgArray($item->scores);
-            $this->assertNotEmpty(array_intersect($scores, $overlaps));
-        });
-    }
-
-    public function testOrWhereArrayOverlaps()
-    {
-        // name = 'record2' OR tags overlaps ['java']
-        $overlaps = ['java'];
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->where('name', 'record2')
-                ->orWhereArrayOverlaps('tags', $overlaps)
-                ->get()
-        );
-
-        $results->each(function ($item) use ($overlaps) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue($item->name === 'record2' || !empty(array_intersect($tags, $overlaps)));
-        });
-    }
-
-    public function testWhereNotArrayOverlaps()
-    {
-        // tags NOT overlaps ['php']
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereNotArrayOverlaps('tags', ['php'])
-                ->get()
-        );
-
-        $results->each(function ($item) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertFalse(in_array('php', $tags));
-        });
-    }
-
-    public function testOrWhereNotArrayOverlaps()
-    {
-        // name = 'record1' OR tags NOT overlaps ['java', 'python']
-        $blocked = ['java', 'python'];
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->where('name', 'record1')
-                ->orWhereNotArrayOverlaps('tags', $blocked)
-                ->get()
-        );
-
-        $results->each(function ($item) use ($blocked) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue($item->name === 'record1' || empty(array_intersect($tags, $blocked)));
-        });
-    }
-
-    // ==================== Combined queries ====================
-
-    public function testCombinedArrayQueries()
-    {
-        // tags contains ['php'] AND tags overlaps ['laravel']
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayContains('tags', ['php'])
-                ->whereArrayOverlaps('tags', ['laravel'])
+                ->whereTextArrayContains('tags', ['php', 'laravel'])
                 ->get()
         );
 
@@ -472,13 +727,87 @@ class PgArrayTest extends TestCase
         });
     }
 
-    public function testArrayWithOtherConditions()
+    public function testIntArrayOverlapsWithRealDatabase()
     {
-        // id > 2 AND tags overlaps ['php']
+        $overlaps = ['95', '100'];
+        $results = Collection::make(
+            $this->getTestQuery()
+                ->whereIntArrayOverlaps('scores', [95, 100])
+                ->get()
+        );
+
+        $results->each(function ($item) use ($overlaps) {
+            $scores = $this->parsePgArray($item->scores);
+            $this->assertNotEmpty(array_intersect($scores, $overlaps));
+        });
+    }
+
+    public function testTextArrayContainedByWithRealDatabase()
+    {
+        $allowed = ['php', 'laravel'];
+        $results = Collection::make(
+            $this->getTestQuery()
+                ->whereTextArrayContainedBy('tags', $allowed)
+                ->get()
+        );
+
+        $results->each(function ($item) use ($allowed) {
+            $tags = $this->parsePgArray($item->tags);
+            $this->assertSame([], array_diff($tags, $allowed));
+        });
+    }
+
+    public function testOrWhereTextArrayContainsWithRealDatabase()
+    {
+        $results = Collection::make(
+            $this->getTestQuery()
+                ->where('name', 'record3')
+                ->orWhereTextArrayContains('tags', ['symfony'])
+                ->get()
+        );
+
+        $results->each(function ($item) {
+            $tags = $this->parsePgArray($item->tags);
+            $this->assertTrue($item->name === 'record3' || in_array('symfony', $tags));
+        });
+    }
+
+    public function testWhereNotTextArrayContainsWithRealDatabase()
+    {
+        $results = Collection::make(
+            $this->getTestQuery()
+                ->whereNotTextArrayContains('tags', ['php'])
+                ->get()
+        );
+
+        $results->each(function ($item) {
+            $tags = $this->parsePgArray($item->tags);
+            $this->assertFalse(in_array('php', $tags));
+        });
+    }
+
+    public function testCombinedArrayQueriesWithRealDatabase()
+    {
+        $results = Collection::make(
+            $this->getTestQuery()
+                ->whereTextArrayContains('tags', ['php'])
+                ->whereTextArrayOverlaps('tags', ['laravel'])
+                ->get()
+        );
+
+        $results->each(function ($item) {
+            $tags = $this->parsePgArray($item->tags);
+            $this->assertTrue(in_array('php', $tags));
+            $this->assertTrue(in_array('laravel', $tags));
+        });
+    }
+
+    public function testArrayWithOtherConditionsWithRealDatabase()
+    {
         $results = Collection::make(
             $this->getTestQuery()
                 ->where('id', '>', 2)
-                ->whereArrayOverlaps('tags', ['php'])
+                ->whereTextArrayOverlaps('tags', ['php'])
                 ->get()
         );
 
@@ -489,407 +818,709 @@ class PgArrayTest extends TestCase
         });
     }
 
-    // ==================== SQL generation tests ====================
+    // ==================== Additional variant method tests ====================
 
-    public function testSqlGeneration()
+    // BigInt variants
+    public function testWhereNotBigIntArrayContains()
     {
         $query = $this->getTestQuery(false)
-            ->whereArrayContains('tags', ['php', 'laravel']);
-
-        $sql = $query->toSql();
-        $bindings = $query->getBindings();
-
-        $this->assertStringContainsString('@>', $sql);
-        $this->assertStringContainsString('ARRAY[?, ?]::text[]', $sql);
-        $this->assertEquals(['php', 'laravel'], $bindings);
-    }
-
-    public function testSqlGenerationInteger()
-    {
-        $query = $this->getTestQuery(false)
-            ->whereArrayContains('scores', [80, 90]);
-
-        $sql = $query->toSql();
-        $bindings = $query->getBindings();
-
-        $this->assertStringContainsString('@>', $sql);
-        $this->assertStringContainsString('ARRAY[?, ?]::integer[]', $sql);
-        $this->assertEquals([80, 90], $bindings);
-    }
-
-    public function testSqlGenerationCustomType()
-    {
-        $query = $this->getTestQuery(false)
-            ->whereArrayContains('scores', [80, 90], 'and', false, 'bigint');
+            ->whereNotBigIntArrayContains('user_ids', [123]);
 
         $sql = $query->toSql();
 
-        $this->assertStringContainsString('ARRAY[?, ?]::bigint[]', $sql);
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::bigint[]', $sql);
     }
 
-    public function testSqlGenerationCustomTypeForArrayContainsVariants()
+    public function testOrWhereNotBigIntArrayContains()
     {
-        $orSql = $this->getTestQuery(false)
+        $query = $this->getTestQuery(false)
             ->where('id', 1)
-            ->orWhereArrayContains('tags', ['php'], 'uuid')
-            ->toSql();
-
-        $this->assertStringContainsString('ARRAY[?]::uuid[]', $orSql);
-
-        $notSql = $this->getTestQuery(false)
-            ->whereNotArrayContains('tags', ['php'], 'and', 'uuid')
-            ->toSql();
-
-        $this->assertStringContainsString('ARRAY[?]::uuid[]', $notSql);
-
-        $orNotSql = $this->getTestQuery(false)
-            ->where('id', 1)
-            ->orWhereNotArrayContains('tags', ['php'], 'uuid')
-            ->toSql();
-
-        $this->assertStringContainsString('ARRAY[?]::uuid[]', $orNotSql);
-    }
-
-    public function testSqlGenerationCustomTypeForArrayContainedByVariants()
-    {
-        $orSql = $this->getTestQuery(false)
-            ->where('id', 1)
-            ->orWhereArrayContainedBy('scores', [1, 2], 'bigint')
-            ->toSql();
-
-        $this->assertStringContainsString('ARRAY[?, ?]::bigint[]', $orSql);
-
-        $notSql = $this->getTestQuery(false)
-            ->whereNotArrayContainedBy('scores', [1, 2], 'and', 'bigint')
-            ->toSql();
-
-        $this->assertStringContainsString('ARRAY[?, ?]::bigint[]', $notSql);
-
-        $orNotSql = $this->getTestQuery(false)
-            ->where('id', 1)
-            ->orWhereNotArrayContainedBy('scores', [1, 2], 'bigint')
-            ->toSql();
-
-        $this->assertStringContainsString('ARRAY[?, ?]::bigint[]', $orNotSql);
-    }
-
-    public function testSqlGenerationCustomTypeForArrayOverlapsVariants()
-    {
-        $orSql = $this->getTestQuery(false)
-            ->where('id', 1)
-            ->orWhereArrayOverlaps('tags', ['php'], 'citext')
-            ->toSql();
-
-        $this->assertStringContainsString('ARRAY[?]::citext[]', $orSql);
-
-        $notSql = $this->getTestQuery(false)
-            ->whereNotArrayOverlaps('tags', ['php'], 'and', 'citext')
-            ->toSql();
-
-        $this->assertStringContainsString('ARRAY[?]::citext[]', $notSql);
-
-        $orNotSql = $this->getTestQuery(false)
-            ->where('id', 1)
-            ->orWhereNotArrayOverlaps('tags', ['php'], 'citext')
-            ->toSql();
-
-        $this->assertStringContainsString('ARRAY[?]::citext[]', $orNotSql);
-    }
-
-    // ==================== Empty array tests ====================
-
-    public function testEmptyArrayContains()
-    {
-        // Empty array should match all (any array contains empty array)
-        $allIds = $this->getTestQuery()
-            ->pluck('id')
-            ->toArray();
-
-        $results = $this->getTestQuery()
-            ->whereArrayContains('tags', [])
-            ->pluck('id')
-            ->toArray();
-
-        $this->assertSame([], array_diff($allIds, $results));
-        $this->assertSame([], array_diff($results, $allIds));
-    }
-
-    public function testEmptyArrayOverlaps()
-    {
-        // Empty array overlaps nothing
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayOverlaps('tags', [])
-                ->get()
-        );
-
-        $results->each(function ($item) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertNotEmpty(array_intersect($tags, []));
-        });
-    }
-
-    // ==================== Special characters tests ====================
-
-    public function testArrayWithCommas()
-    {
-        // Test values containing commas: '1,2,4', 'a,b,c'
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayContains('tags', ['1,2,4'])
-                ->get()
-        );
-
-        $results->each(function ($item) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue(in_array('1,2,4', $tags));
-        });
-    }
-
-    public function testArrayWithMultipleCommaValues()
-    {
-        // Test multiple values with commas
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayContains('tags', ['1,2,4', 'a,b,c'])
-                ->get()
-        );
-
-        $results->each(function ($item) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue(in_array('1,2,4', $tags));
-            $this->assertTrue(in_array('a,b,c', $tags));
-        });
-    }
-
-    public function testArrayOverlapsWithCommas()
-    {
-        // Test overlaps with comma-containing values
-        $overlaps = ['a,b,c', 'nonexistent'];
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayOverlaps('tags', $overlaps)
-                ->get()
-        );
-
-        $results->each(function ($item) use ($overlaps) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertNotEmpty(array_intersect($tags, $overlaps));
-        });
-    }
-
-    public function testArrayWithSpaces()
-    {
-        // Test values with spaces
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayOverlaps('tags', ['hello world'])
-                ->get()
-        );
-
-        $results->each(function ($item) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue(in_array('hello world', $tags));
-        });
-    }
-
-    public function testArrayWithQuotes()
-    {
-        // Test values with double quotes
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayOverlaps('tags', ['has"quote'])
-                ->get()
-        );
-
-        $results->each(function ($item) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue(in_array('has"quote', $tags));
-        });
-    }
-
-    public function testArrayWithSingleQuotes()
-    {
-        // Test values with single quotes
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayOverlaps('tags', ["has'single"])
-                ->get()
-        );
-
-        $results->each(function ($item) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue(in_array("has'single", $tags));
-        });
-    }
-
-    public function testArrayWithBackslash()
-    {
-        // Test values with backslashes
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayOverlaps('tags', ['has\\backslash'])
-                ->get()
-        );
-
-        $results->each(function ($item) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue(in_array('has\\backslash', $tags));
-        });
-    }
-
-    public function testArrayWithBraces()
-    {
-        // Test values with curly braces
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayOverlaps('tags', ['has{brace}'])
-                ->get()
-        );
-
-        $results->each(function ($item) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue(in_array('has{brace}', $tags));
-        });
-    }
-
-    public function testArrayWithBrackets()
-    {
-        // Test values with square brackets
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayOverlaps('tags', ['has[bracket]'])
-                ->get()
-        );
-
-        $results->each(function ($item) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue(in_array('has[bracket]', $tags));
-        });
-    }
-
-    // ==================== SQL Injection prevention tests ====================
-
-    public function testSqlInjectionPrevention()
-    {
-        // Test that SQL injection is prevented
-        $maliciousInput = "test'; DROP TABLE users; --";
-
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayOverlaps('tags', [$maliciousInput])
-                ->get()
-        );
-
-        $results->each(function ($item) use ($maliciousInput) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue(in_array($maliciousInput, $tags));
-        });
-
-        // Verify the table still exists (injection was prevented)
-        $count = $this->getTestQuery()->count();
-        $this->assertIsInt($count);
-    }
-
-    public function testSqlInjectionInContains()
-    {
-        // Another injection attempt via whereArrayContains
-        $maliciousInput = "'); DELETE FROM knight_array_test; --";
-
-        // This should not cause any SQL errors or deletions
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayContains('tags', [$maliciousInput])
-                ->get()
-        );
-
-        $results->each(function ($item) use ($maliciousInput) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertTrue(in_array($maliciousInput, $tags));
-        });
-
-        // Verify data is still intact
-        $count = $this->getTestQuery()->count();
-        $this->assertIsInt($count);
-    }
-
-    public function testSqlInjectionWithMultipleValues()
-    {
-        // Injection attempt with multiple values
-        $overlaps = [
-            'normal',
-            "test' OR '1'='1",
-            'test"; DROP TABLE users; --',
-        ];
-
-        $results = Collection::make(
-            $this->getTestQuery()
-                ->whereArrayOverlaps('tags', $overlaps)
-                ->get()
-        );
-
-        $results->each(function ($item) use ($overlaps) {
-            $tags = $this->parsePgArray($item->tags);
-            $this->assertNotEmpty(array_intersect($tags, $overlaps));
-        });
-    }
-
-    public function testBindingsAreProperlyEscaped()
-    {
-        $query = $this->getTestQuery(false)
-            ->whereArrayContains('tags', ["test'; DROP TABLE users; --", 'normal']);
-
-        $bindings = $query->getBindings();
-
-        // Each value should be a separate binding
-        $this->assertCount(2, $bindings);
-        $this->assertEquals("test'; DROP TABLE users; --", $bindings[0]);
-        $this->assertEquals('normal', $bindings[1]);
-    }
-
-    // ==================== Type coercion tests ====================
-
-    public function testIntegerArrayTypeInference()
-    {
-        $query = $this->getTestQuery(false)
-            ->whereArrayContains('scores', [1, 2, 3]);
+            ->orWhereNotBigIntArrayContains('user_ids', [123]);
 
         $sql = $query->toSql();
 
-        // Should infer integer type
-        $this->assertStringContainsString('::integer[]', $sql);
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::bigint[]', $sql);
     }
 
-    public function testFloatArrayTypeInference()
+    public function testOrWhereBigIntArrayContainedBy()
     {
         $query = $this->getTestQuery(false)
-            ->whereArrayContains('prices', [1.5, 2.5]);
+            ->where('id', 1)
+            ->orWhereBigIntArrayContainedBy('user_ids', [1, 2, 3]);
 
         $sql = $query->toSql();
 
-        // Should infer double precision type
-        $this->assertStringContainsString('::double precision[]', $sql);
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
     }
 
-    public function testBooleanArrayTypeInference()
+    public function testWhereNotBigIntArrayContainedBy()
     {
         $query = $this->getTestQuery(false)
-            ->whereArrayContains('flags', [true, false]);
+            ->whereNotBigIntArrayContainedBy('user_ids', [1, 2, 3]);
 
         $sql = $query->toSql();
 
-        // Should infer boolean type
-        $this->assertStringContainsString('::boolean[]', $sql);
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
     }
 
-    public function testStringArrayTypeInference()
+    public function testOrWhereNotBigIntArrayContainedBy()
     {
         $query = $this->getTestQuery(false)
-            ->whereArrayContains('tags', ['php', 'laravel']);
+            ->where('id', 1)
+            ->orWhereNotBigIntArrayContainedBy('user_ids', [1, 2, 3]);
 
         $sql = $query->toSql();
 
-        // Should infer text type
-        $this->assertStringContainsString('::text[]', $sql);
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testOrWhereBigIntArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereBigIntArrayOverlaps('user_ids', [1, 2]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    public function testWhereNotBigIntArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotBigIntArrayOverlaps('user_ids', [1, 2]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    public function testOrWhereNotBigIntArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotBigIntArrayOverlaps('user_ids', [1, 2]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    // SmallInt variants
+    public function testOrWhereSmallIntArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereSmallIntArrayContains('ratings', [1, 2]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?, ?]::smallint[]', $sql);
+    }
+
+    public function testWhereNotSmallIntArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotSmallIntArrayContains('ratings', [1]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::smallint[]', $sql);
+    }
+
+    public function testOrWhereNotSmallIntArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotSmallIntArrayContains('ratings', [1]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::smallint[]', $sql);
+    }
+
+    public function testOrWhereSmallIntArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereSmallIntArrayContainedBy('ratings', [1, 2, 3]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testWhereNotSmallIntArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotSmallIntArrayContainedBy('ratings', [1, 2, 3]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testOrWhereNotSmallIntArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotSmallIntArrayContainedBy('ratings', [1, 2, 3]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testOrWhereSmallIntArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereSmallIntArrayOverlaps('ratings', [1, 2]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    public function testWhereNotSmallIntArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotSmallIntArrayOverlaps('ratings', [1, 2]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    public function testOrWhereNotSmallIntArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotSmallIntArrayOverlaps('ratings', [1, 2]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    // Text variants
+    public function testOrWhereNotTextArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotTextArrayContains('tags', ['php']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::text[]', $sql);
+    }
+
+    public function testOrWhereTextArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereTextArrayContainedBy('tags', ['php', 'laravel', 'mysql']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testWhereNotTextArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotTextArrayContainedBy('tags', ['php', 'laravel', 'mysql']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testOrWhereNotTextArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotTextArrayContainedBy('tags', ['php', 'laravel', 'mysql']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testOrWhereTextArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereTextArrayOverlaps('tags', ['php', 'java']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    public function testWhereNotTextArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotTextArrayOverlaps('tags', ['php', 'java']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    public function testOrWhereNotTextArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotTextArrayOverlaps('tags', ['php', 'java']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    // Boolean variants
+    public function testOrWhereBooleanArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereBooleanArrayContains('flags', [true]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::boolean[]', $sql);
+    }
+
+    public function testWhereNotBooleanArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotBooleanArrayContains('flags', [true]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::boolean[]', $sql);
+    }
+
+    public function testOrWhereNotBooleanArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotBooleanArrayContains('flags', [true]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::boolean[]', $sql);
+    }
+
+    public function testOrWhereBooleanArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereBooleanArrayContainedBy('flags', [true, false]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testWhereNotBooleanArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotBooleanArrayContainedBy('flags', [true, false]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testOrWhereNotBooleanArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotBooleanArrayContainedBy('flags', [true, false]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testOrWhereBooleanArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereBooleanArrayOverlaps('flags', [true]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    public function testWhereNotBooleanArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotBooleanArrayOverlaps('flags', [true]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    public function testOrWhereNotBooleanArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotBooleanArrayOverlaps('flags', [true]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    // Double variants
+    public function testOrWhereDoubleArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereDoubleArrayContains('prices', [1.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::double precision[]', $sql);
+    }
+
+    public function testWhereNotDoubleArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotDoubleArrayContains('prices', [1.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::double precision[]', $sql);
+    }
+
+    public function testOrWhereNotDoubleArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotDoubleArrayContains('prices', [1.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::double precision[]', $sql);
+    }
+
+    public function testOrWhereDoubleArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereDoubleArrayContainedBy('prices', [1.5, 2.5, 3.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testWhereNotDoubleArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotDoubleArrayContainedBy('prices', [1.5, 2.5, 3.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testOrWhereNotDoubleArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotDoubleArrayContainedBy('prices', [1.5, 2.5, 3.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testOrWhereDoubleArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereDoubleArrayOverlaps('prices', [1.5, 3.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    public function testWhereNotDoubleArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotDoubleArrayOverlaps('prices', [1.5, 3.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    public function testOrWhereNotDoubleArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotDoubleArrayOverlaps('prices', [1.5, 3.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    // Float variants
+    public function testOrWhereFloatArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereFloatArrayContains('coordinates', [1.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::real[]', $sql);
+    }
+
+    public function testWhereNotFloatArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotFloatArrayContains('coordinates', [1.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::real[]', $sql);
+    }
+
+    public function testOrWhereNotFloatArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotFloatArrayContains('coordinates', [1.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::real[]', $sql);
+    }
+
+    public function testOrWhereFloatArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereFloatArrayContainedBy('coordinates', [1.5, 2.5, 3.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testWhereNotFloatArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotFloatArrayContainedBy('coordinates', [1.5, 2.5, 3.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testOrWhereNotFloatArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotFloatArrayContainedBy('coordinates', [1.5, 2.5, 3.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testOrWhereFloatArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereFloatArrayOverlaps('coordinates', [1.5, 3.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    public function testWhereNotFloatArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotFloatArrayOverlaps('coordinates', [1.5, 3.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    public function testOrWhereNotFloatArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotFloatArrayOverlaps('coordinates', [1.5, 3.5]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    // UUID variants
+    public function testWhereNotUuidArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotUuidArrayContains('related_ids', ['a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::uuid[]', $sql);
+    }
+
+    public function testOrWhereNotUuidArrayContains()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotUuidArrayContains('related_ids', ['a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('ARRAY[?]::uuid[]', $sql);
+    }
+
+    public function testOrWhereUuidArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereUuidArrayContainedBy('related_ids', [
+                'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+                'b1ffcd00-0d1c-5fg9-cc7e-7cc0ce491b22',
+            ]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testWhereNotUuidArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotUuidArrayContainedBy('related_ids', [
+                'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+                'b1ffcd00-0d1c-5fg9-cc7e-7cc0ce491b22',
+            ]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testOrWhereNotUuidArrayContainedBy()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotUuidArrayContainedBy('related_ids', [
+                'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+                'b1ffcd00-0d1c-5fg9-cc7e-7cc0ce491b22',
+            ]);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('<@', $sql);
+    }
+
+    public function testOrWhereUuidArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereUuidArrayOverlaps('related_ids', ['a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    public function testWhereNotUuidArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->whereNotUuidArrayOverlaps('related_ids', ['a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('not', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
+    }
+
+    public function testOrWhereNotUuidArrayOverlaps()
+    {
+        $query = $this->getTestQuery(false)
+            ->where('id', 1)
+            ->orWhereNotUuidArrayOverlaps('related_ids', ['a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11']);
+
+        $sql = $query->toSql();
+
+        $this->assertStringContainsString('or not', strtolower($sql));
+        $this->assertStringContainsString('&&', $sql);
     }
 }

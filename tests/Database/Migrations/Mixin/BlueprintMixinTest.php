@@ -881,6 +881,326 @@ class BlueprintMixinTest extends TestCase
         $this->assertTrue($schema->hasColumn('knight_alter_test_pg', 'data_version'));
     }
 
+    // ==================== PostgreSQL Array Column Tests ====================
+
+    public function testKnightIntArray(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightIntArray('scores')->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'scores'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (scores) VALUES (ARRAY[1, 2, 3]::integer[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    public function testKnightBigIntArray(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightBigIntArray('user_ids')->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'user_ids'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (user_ids) VALUES (ARRAY[9223372036854775807]::bigint[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    public function testKnightSmallIntArray(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightSmallIntArray('ratings')->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'ratings'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (ratings) VALUES (ARRAY[1, 2, 3]::smallint[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    public function testKnightTextArray(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightTextArray('tags')->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'tags'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (tags) VALUES (ARRAY['php', 'laravel']::text[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    public function testKnightVarcharArray(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightVarcharArray('codes', 50)->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'codes'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (codes) VALUES (ARRAY['ABC', 'DEF']::varchar(50)[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    public function testKnightBooleanArray(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightBooleanArray('flags')->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'flags'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (flags) VALUES (ARRAY[true, false]::boolean[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    public function testKnightDoubleArray(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightDoubleArray('prices')->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'prices'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (prices) VALUES (ARRAY[1.5, 2.5]::double precision[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    public function testKnightFloatArray(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightFloatArray('coordinates')->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'coordinates'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (coordinates) VALUES (ARRAY[1.5, 2.5]::real[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    public function testKnightUuidArray(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightUuidArray('related_ids')->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'related_ids'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (related_ids) VALUES (ARRAY['a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11']::uuid[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    public function testKnightNumericArray(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightNumericArray('amounts', 10, 2)->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'amounts'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (amounts) VALUES (ARRAY[123.45, 678.90]::numeric(10,2)[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    public function testKnightTimestamptzArray(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightTimestamptzArray('event_times')->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'event_times'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (event_times) VALUES (ARRAY['2024-01-01 00:00:00+00']::timestamptz[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    public function testKnightDateArray(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightDateArray('holidays')->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'holidays'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (holidays) VALUES (ARRAY['2024-01-01', '2024-12-25']::date[])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    public function testKnightJsonbArray(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightJsonbArray('metadata_list')->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'metadata_list'));
+
+        // Insert and verify data
+        $connection->statement("INSERT INTO knight_mixin_test_pg (metadata_list) VALUES (ARRAY['{\"key\": \"value\"}'::jsonb])");
+        $record = $connection->table('knight_mixin_test_pg')->first();
+        $this->assertNotNull($record);
+    }
+
+    public function testMultipleArrayColumnsInOneTable(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->knightIntArray('scores')->nullable();
+            $table->knightTextArray('tags')->nullable();
+            $table->knightBigIntArray('user_ids')->nullable();
+            $table->knightBooleanArray('flags')->nullable();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'scores'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'tags'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'user_ids'));
+        $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'flags'));
+    }
+
+    public function testArrayColumnWithGinIndex(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_mixin_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->knightIntArray('scores')->nullable();
+            $table->knightGin('scores');
+        });
+
+        $this->assertTrue($schema->hasTable('knight_mixin_test_pg'));
+
+        // Verify GIN index exists
+        $indexes = $connection->select(
+            "SELECT indexname FROM pg_indexes WHERE tablename = 'knight_mixin_test_pg' AND indexname LIKE '%_gin'"
+        );
+        $this->assertNotEmpty($indexes);
+    }
+
     // ==================== Helper Methods ====================
 
     protected function skipIfBtreeGinExtensionNotAvailable(): void
