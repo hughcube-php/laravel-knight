@@ -16,6 +16,7 @@ use HughCube\Laravel\Knight\Console\Commands\Config;
 use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\GenerateMixinIdeHelperCommand;
 use HughCube\Laravel\Knight\Console\Commands\KRTest;
+use HughCube\Laravel\Knight\Console\Commands\MigrationRerun;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin as MigrationBlueprintMixin;
@@ -99,6 +100,7 @@ class ServiceProvider extends IlluminateServiceProvider
                 KRTest::class,
                 ClearModelCache::class,
                 GenerateMixinIdeHelperCommand::class,
+                MigrationRerun::class,
             ]);
         }
 
