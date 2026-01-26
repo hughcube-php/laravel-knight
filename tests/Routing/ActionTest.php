@@ -10,6 +10,7 @@
 namespace HughCube\Laravel\Knight\Tests\Routing;
 
 use BadMethodCallException;
+use Closure;
 use Dotenv\Exception\ValidationException;
 use Exception;
 use HughCube\Laravel\Knight\Support\ParameterBag;
@@ -208,5 +209,223 @@ class ActionTest extends TestCase
 
         $this->expectException(BadMethodCallException::class);
         $action->missingMethod();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testActionMiddlewaresWithNoMiddleware()
+    {
+        ActionWithMiddleware::resetExecutionLog();
+
+        $action = new ActionWithMiddleware();
+        $action->setMiddlewares([]);
+
+        $uuid = md5(random_bytes(100));
+        $request = Request::create(
+            '/test',
+            'GET',
+            [],
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode(['uuid' => $uuid])
+        );
+        $this->app->instance('request', $request);
+
+        $result = $action();
+
+        $this->assertSame($uuid, $result['uuid']);
+        $this->assertSame(['action'], ActionWithMiddleware::$middlewareExecutionLog);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testActionMiddlewaresWithSingleMiddleware()
+    {
+        ActionWithMiddleware::resetExecutionLog();
+
+        $action = new ActionWithMiddleware();
+        $action->setMiddlewares([
+            new TestMiddleware('first'),
+        ]);
+
+        $uuid = md5(random_bytes(100));
+        $request = Request::create(
+            '/test',
+            'GET',
+            [],
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode(['uuid' => $uuid])
+        );
+        $this->app->instance('request', $request);
+
+        $result = $action();
+
+        $this->assertSame($uuid, $result['uuid']);
+        $this->assertSame([
+            'middleware:first:before',
+            'action',
+            'middleware:first:after',
+        ], ActionWithMiddleware::$middlewareExecutionLog);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testActionMiddlewaresWithMultipleMiddlewares()
+    {
+        ActionWithMiddleware::resetExecutionLog();
+
+        $action = new ActionWithMiddleware();
+        $action->setMiddlewares([
+            new TestMiddleware('first'),
+            new TestMiddleware('second'),
+            new TestMiddleware('third'),
+        ]);
+
+        $uuid = md5(random_bytes(100));
+        $request = Request::create(
+            '/test',
+            'GET',
+            [],
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode(['uuid' => $uuid])
+        );
+        $this->app->instance('request', $request);
+
+        $result = $action();
+
+        $this->assertSame($uuid, $result['uuid']);
+        $this->assertSame([
+            'middleware:first:before',
+            'middleware:second:before',
+            'middleware:third:before',
+            'action',
+            'middleware:third:after',
+            'middleware:second:after',
+            'middleware:first:after',
+        ], ActionWithMiddleware::$middlewareExecutionLog);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testActionMiddlewaresWithClosureMiddleware()
+    {
+        ActionWithMiddleware::resetExecutionLog();
+
+        $action = new ActionWithMiddleware();
+        $action->setMiddlewares([
+            function (Request $request, Closure $next) {
+                ActionWithMiddleware::$middlewareExecutionLog[] = 'closure:before';
+                $response = $next($request);
+                ActionWithMiddleware::$middlewareExecutionLog[] = 'closure:after';
+
+                return $response;
+            },
+        ]);
+
+        $uuid = md5(random_bytes(100));
+        $request = Request::create(
+            '/test',
+            'GET',
+            [],
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode(['uuid' => $uuid])
+        );
+        $this->app->instance('request', $request);
+
+        $result = $action();
+
+        $this->assertSame($uuid, $result['uuid']);
+        $this->assertSame([
+            'closure:before',
+            'action',
+            'closure:after',
+        ], ActionWithMiddleware::$middlewareExecutionLog);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testActionMiddlewaresWithMixedMiddlewares()
+    {
+        ActionWithMiddleware::resetExecutionLog();
+
+        $action = new ActionWithMiddleware();
+        $action->setMiddlewares([
+            new TestMiddleware('class'),
+            function (Request $request, Closure $next) {
+                ActionWithMiddleware::$middlewareExecutionLog[] = 'closure:before';
+                $response = $next($request);
+                ActionWithMiddleware::$middlewareExecutionLog[] = 'closure:after';
+
+                return $response;
+            },
+        ]);
+
+        $uuid = md5(random_bytes(100));
+        $request = Request::create(
+            '/test',
+            'GET',
+            [],
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode(['uuid' => $uuid])
+        );
+        $this->app->instance('request', $request);
+
+        $result = $action();
+
+        $this->assertSame($uuid, $result['uuid']);
+        $this->assertSame([
+            'middleware:class:before',
+            'closure:before',
+            'action',
+            'closure:after',
+            'middleware:class:after',
+        ], ActionWithMiddleware::$middlewareExecutionLog);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testActionMiddlewaresCanModifyRequest()
+    {
+        ActionWithMiddleware::resetExecutionLog();
+
+        $action = new ActionWithMiddleware();
+        $action->setMiddlewares([
+            function (Request $request, Closure $next) {
+                $request->attributes->set('middleware_data', 'modified');
+
+                return $next($request);
+            },
+        ]);
+
+        $uuid = md5(random_bytes(100));
+        $request = Request::create(
+            '/test',
+            'GET',
+            [],
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode(['uuid' => $uuid])
+        );
+        $this->app->instance('request', $request);
+
+        $action();
+
+        $this->assertSame('modified', $request->attributes->get('middleware_data'));
     }
 }

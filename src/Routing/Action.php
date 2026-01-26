@@ -10,6 +10,7 @@
 namespace HughCube\Laravel\Knight\Routing;
 
 use BadMethodCallException;
+use Closure;
 use HughCube\Laravel\Knight\Http\JsonResponse as KJsonResponse;
 use HughCube\Laravel\Knight\Http\Request as KnightRequest;
 use HughCube\Laravel\Knight\Ide\Http\KIdeRequest;
@@ -21,6 +22,7 @@ use HughCube\Laravel\Knight\Traits\Validation;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -63,17 +65,52 @@ trait Action
         // Collect all validated parameters
         $this->loadParameters();
 
-        $this->dispatchActionProcessingEvent();
+        // Run action middlewares after parameter validation
+        return $this->runActionMiddlewares(function () {
+            $this->dispatchActionProcessingEvent();
 
-        try {
-            $this->beforeAction();
-            $result = $this->action();
-        } finally {
-            $this->afterAction();
+            try {
+                $this->beforeAction();
+                $result = $this->action();
+            } finally {
+                $this->afterAction();
+            }
+            $this->dispatchActionProcessedEvent();
+
+            return $result;
+        });
+    }
+
+    /**
+     * Define action middlewares (executed after loadParameters).
+     *
+     * @return array<class-string|Closure>
+     */
+    protected function actionMiddlewares(): array
+    {
+        return [];
+    }
+
+    /**
+     * Run action middlewares pipeline.
+     *
+     * @param Closure $destination
+     * @return mixed
+     */
+    protected function runActionMiddlewares(Closure $destination)
+    {
+        $middlewares = $this->actionMiddlewares();
+
+        if (empty($middlewares)) {
+            return $destination();
         }
-        $this->dispatchActionProcessedEvent();
 
-        return $result;
+        return (new Pipeline($this->getContainer()))
+            ->send($this->getRequest())
+            ->through($middlewares)
+            ->then(function ($request) use ($destination) {
+                return $destination();
+            });
     }
 
     protected function dispatchActionProcessingEvent()
