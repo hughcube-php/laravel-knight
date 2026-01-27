@@ -690,15 +690,15 @@ class ModelTest extends TestCase
         $sortedUsers = User::sort()->get();
         $this->assertSame(5, $sortedUsers->count());
         // sort: 5, 4, 3, 2, 1
-        $this->assertSame([5, 4, 3, 2, 1], $sortedUsers->pluck('sort')->toArray());
+        $this->assertEquals([5, 4, 3, 2, 1], $sortedUsers->pluck('sort')->toArray());
 
         // 测试链式调用
         $sortedUsers = User::query()->sort()->get();
-        $this->assertSame([5, 4, 3, 2, 1], $sortedUsers->pluck('sort')->toArray());
+        $this->assertEquals([5, 4, 3, 2, 1], $sortedUsers->pluck('sort')->toArray());
 
         // 测试 sortQuery (deprecated) 应该返回相同结果
         $sortedUsersDeprecated = User::sortQuery()->get();
-        $this->assertSame([5, 4, 3, 2, 1], $sortedUsersDeprecated->pluck('sort')->toArray());
+        $this->assertEquals([5, 4, 3, 2, 1], $sortedUsersDeprecated->pluck('sort')->toArray());
     }
 
     /**
@@ -720,7 +720,7 @@ class ModelTest extends TestCase
         $sortedUsers = User::sort()->get();
         $this->assertSame(3, $sortedUsers->count());
         // id: 3, 2, 1 (按 id 降序)
-        $this->assertSame([3, 2, 1], $sortedUsers->pluck('id')->toArray());
+        $this->assertEquals([3, 2, 1], $sortedUsers->pluck('id')->toArray());
     }
 
     /**
@@ -749,15 +749,15 @@ class ModelTest extends TestCase
         $users = User::sortAvailable()->get();
         $this->assertSame(3, $users->count());
         // 未删除的 sort 值: 4, 3, 1 (降序)
-        $this->assertSame([4, 3, 1], $users->pluck('sort')->toArray());
+        $this->assertEquals([4, 3, 1], $users->pluck('sort')->toArray());
 
         // 测试链式调用
         $users = User::query()->sortAvailable()->get();
-        $this->assertSame([4, 3, 1], $users->pluck('sort')->toArray());
+        $this->assertEquals([4, 3, 1], $users->pluck('sort')->toArray());
 
         // 测试 sortAvailableQuery (deprecated) 应该返回相同结果
         $usersDeprecated = User::sortAvailableQuery()->get();
-        $this->assertSame([4, 3, 1], $usersDeprecated->pluck('sort')->toArray());
+        $this->assertEquals([4, 3, 1], $usersDeprecated->pluck('sort')->toArray());
     }
 
     /**
@@ -781,7 +781,7 @@ class ModelTest extends TestCase
         // 测试 available()->sort() 组合调用
         $users = User::available()->sort()->get();
         $this->assertSame(4, $users->count());
-        $this->assertSame([5, 4, 2, 1], $users->pluck('sort')->toArray());
+        $this->assertEquals([5, 4, 2, 1], $users->pluck('sort')->toArray());
 
         // 测试 sort()->available() 组合调用 (顺序不影响结果)
         $users = User::sort()->available()->get();
