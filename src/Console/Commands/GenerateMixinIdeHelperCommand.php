@@ -369,10 +369,25 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
             // 获取方法文档注释
             $docComment = $method->getDocComment() ?: '';
 
+            // 从 docblock 中提取 @return 注解
+            $docReturnType = null;
+            if (preg_match('/@return\s+([^\n\*]+)/', $docComment, $returnMatch)) {
+                $rawReturn = trim($returnMatch[1]);
+
+                // 处理 @return Closure(...): Type 格式，提取实际返回类型
+                if (preg_match('/^Closure\s*\([^)]*\)\s*:\s*(.+)$/', $rawReturn, $closureMatch)) {
+                    $docReturnType = trim($closureMatch[1]);
+                } elseif (stripos($rawReturn, 'Closure') !== 0) {
+                    // 不是 Closure 开头的，直接使用
+                    $docReturnType = $rawReturn;
+                }
+            }
+
             return [
                 'name' => $method->getName(),
                 'parameters' => $parameters,
                 'returnType' => $returnTypeStr,
+                'docReturnType' => $docReturnType,
                 'docComment' => $docComment,
                 'mixinClass' => $mixinClass,
             ];
@@ -525,6 +540,12 @@ PHP;
             $paramStr = implode(', ', $info['parameters']);
             $returnType = $info['returnType'];
 
+            // 当 Closure 没有返回类型声明（mixed）且 docblock 有 @return 注解时，使用 docblock 的返回类型
+            $effectiveReturnType = $returnType;
+            if ($returnType === 'mixed' && !empty($info['docReturnType'])) {
+                $effectiveReturnType = $info['docReturnType'];
+            }
+
             $docLines = [];
             if (!empty($info['docComment'])) {
                 // 提取原始注释中的描述部分
@@ -534,6 +555,11 @@ PHP;
             }
             $docLines[] = "@see \\{$info['mixinClass']}::{$info['name']}()";
 
+            // 添加 @return 注解（优先使用 docblock 中的 @return）
+            if (!empty($info['docReturnType'])) {
+                $docLines[] = "@return {$info['docReturnType']}";
+            }
+
             $docComment = "        /**\n";
             foreach ($docLines as $line) {
                 $docComment .= "         * {$line}\n";
@@ -542,7 +568,7 @@ PHP;
 
             $methods[] = <<<METHOD
 {$docComment}
-        public function {$info['name']}({$paramStr}): {$returnType}
+        public function {$info['name']}({$paramStr}): {$effectiveReturnType}
         {
         }
 METHOD;

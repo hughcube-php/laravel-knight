@@ -18,6 +18,25 @@ Laravel Knight 是一个 Laravel 扩展包,提供增强的 Eloquent 模型、查
 
 ## 开发命令
 
+### Windows 环境重要提示
+**在 Windows 环境下，所有 `vendor/bin/` 下的命令都必须使用 `.bat` 后缀**：
+
+```bash
+# ✅ 正确 - 使用 .bat 后缀
+./vendor/bin/phpunit.bat
+./vendor/bin/phpstan.bat
+./vendor/bin/phpcs.bat
+./vendor/bin/phpcbf.bat
+./vendor/bin/testbench.bat
+./vendor/bin/psysh.bat
+
+# ❌ 错误 - 不带 .bat 后缀会失败
+./vendor/bin/phpunit
+./vendor/bin/phpstan
+```
+
+这是因为 Windows 不能直接执行 Unix shell 脚本，需要通过 `.bat` 批处理文件来调用。
+
 ### 测试
 ```bash
 # 运行所有测试
@@ -40,10 +59,13 @@ composer test
 
 ### 代码质量检查
 ```bash
-# 运行 PHPStan 静态分析
+# 运行 PHPStan 静态分析 (Linux/Mac)
 composer phpstan
 # 或
 ./vendor/bin/phpstan analyse -vvv --memory-limit=-1
+
+# 运行 PHPStan 静态分析 (Windows)
+./vendor/bin/phpstan.bat analyse --memory-limit=-1
 
 # 检查代码风格 (PSR2)
 composer check-style

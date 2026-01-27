@@ -20,6 +20,9 @@ use Throwable;
  */
 class CarbonMixin
 {
+    /**
+     * @return \Carbon\Carbon|null
+     */
     public static function tryParse(): Closure
     {
         return function ($date = null, $tz = null): ?Carbon {

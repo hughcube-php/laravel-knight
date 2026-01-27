@@ -19,6 +19,9 @@ use Illuminate\Support\Str;
  */
 class StrMixin
 {
+    /**
+     * @return string
+     */
     public function afterLast(): Closure
     {
         return function ($subject, $search) {
@@ -26,7 +29,7 @@ class StrMixin
                 return $subject;
             }
 
-            $position = strrpos($subject, (string) $search);
+            $position = strrpos($subject, (string)$search);
 
             if ($position === false) {
                 return $subject;
@@ -36,6 +39,9 @@ class StrMixin
         };
     }
 
+    /**
+     * @return string
+     */
     public function beforeLast(): Closure
     {
         return function ($subject, $search) {
@@ -55,7 +61,7 @@ class StrMixin
 
     public function getMobilePattern(): Closure
     {
-        return function () {
+        return function (): string {
             return '/^(13[0-9]|14[0-9]|15[0-9]|16[0-9]|17[0-9]|18[0-9]|19[0-9])\d{8}$/';
         };
     }
@@ -421,7 +427,7 @@ class StrMixin
                 $slice = join('', array_slice($match[0], $start, $length));
             }
 
-            return $slice.$suffix;
+            return $slice . $suffix;
         };
     }
 

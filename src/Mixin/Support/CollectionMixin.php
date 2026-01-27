@@ -149,6 +149,8 @@ class CollectionMixin
 
     /**
      * 返回指定元素之后的所有元素.
+     *
+     * @return static
      */
     public function afterFirstItems(): Closure
     {
@@ -178,6 +180,8 @@ class CollectionMixin
 
     /**
      * 返回指定元素之后的所有元素.
+     *
+     * @return static
      */
     public function afterLastItems(): Closure
     {
@@ -209,6 +213,8 @@ class CollectionMixin
 
     /**
      * 过滤元素直到满足$stop.
+     *
+     * @return static
      */
     public function filterWithStop(): Closure
     {
@@ -226,6 +232,8 @@ class CollectionMixin
 
     /**
      * pluck指定set(1,2,3,4)元素, 并且合并后在分割为Collection.
+     *
+     * @return static
      */
     public function pluckAndMergeSetColumn(): Closure
     {
@@ -243,6 +251,8 @@ class CollectionMixin
 
     /**
      * 合并指定列中的数组元素.
+     *
+     * @return static
      */
     public function pluckAndMergeArrayColumn(): Closure
     {
@@ -265,6 +275,8 @@ class CollectionMixin
 
     /**
      * 收集指定数组keys, 组合成一个新的collection.
+     *
+     * @return static
      */
     public function onlyArrayKeys(): Closure
     {
@@ -273,7 +285,6 @@ class CollectionMixin
             $collection = $this->make();
 
             foreach ($this->getIterator() as $key => $item) {
-                /** @phpstan-ignore-next-line */
                 if ($keys->hasValue($key, true)) {
                     $collection->put($key, $item);
                 }
@@ -285,6 +296,8 @@ class CollectionMixin
 
     /**
      * 收集指定属性的指定值, 组合成一个新的collection.
+     *
+     * @return static
      */
     public function onlyColumnValues(): Closure
     {
@@ -300,7 +313,6 @@ class CollectionMixin
                     $column = $name;
                 }
 
-                /** @phpstan-ignore-next-line */
                 if ($values->hasValue($item[$column], $strict)) {
                     $collection->put($key, $item);
                 }
@@ -312,6 +324,8 @@ class CollectionMixin
 
     /**
      * 满足条件在执行过滤.
+     *
+     * @return static
      */
     public function whenFilter(): Closure
     {
@@ -326,6 +340,8 @@ class CollectionMixin
 
     /**
      * map int.
+     *
+     * @return static
      */
     public function mapInt(): Closure
     {
@@ -338,6 +354,8 @@ class CollectionMixin
 
     /**
      * map string.
+     *
+     * @return static
      */
     public function mapString(): Closure
     {
@@ -350,6 +368,8 @@ class CollectionMixin
 
     /**
      * explode.
+     *
+     * @return static
      */
     public function explode(): Closure
     {
@@ -362,6 +382,8 @@ class CollectionMixin
      * split.
      * /[,，]/
      * /\s+/.
+     *
+     * @return static
      */
     public function splitWhitespace(): Closure
     {
@@ -372,6 +394,8 @@ class CollectionMixin
 
     /**
      * split ,.
+     *
+     * @return static
      */
     public function splitComma(): Closure
     {
@@ -382,6 +406,8 @@ class CollectionMixin
 
     /**
      * split \/／.
+     *
+     * @return static
      */
     public function splitSlash(): Closure
     {

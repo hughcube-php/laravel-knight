@@ -36,10 +36,62 @@ parameters:
         - '#Parameter \#1 \$num of function base_convert expects string, int<0, max> given.#'
         - '#.*unknown class Laravel\\Lumen.*#'
         - '#Call to function method_exists\(\) .* will always evaluate to true.*#'
+        # Mixin 文件特有的错误类型，因 Mixin 机制在运行时绑定方法/属性
         -
-            message: '#.*#'
+            identifier: method.notFound
+            paths:
+                - src/Mixin/Database/Query/BuilderMixin.php
+                - src/Mixin/Database/Query/Grammars/GrammarMixin.php
+                - src/Mixin/Support/CollectionMixin.php
+                - src/Mixin/Support/CarbonMixin.php
+                - src/Mixin/Http/RequestMixin.php
+        -
+            identifier: staticMethod.notFound
+            paths:
+                - src/Mixin/Support/CollectionMixin.php
+                - src/Mixin/Support/CarbonMixin.php
+        -
+            identifier: return.phpDocType
+            paths:
+                - src/Mixin/Support/CollectionMixin.php
+                - src/Mixin/Support/StrMixin.php
+                - src/Mixin/Support/CarbonMixin.php
+        -
+            identifier: property.notFound
+            paths:
+                - src/Database/Migrations/Mixin/PostgresGrammarMixin.php
+                - src/Mixin/Database/Query/BuilderMixin.php
+        -
+            identifier: varTag.nativeType
             paths:
                 - src/Database/Migrations/Mixin/BlueprintMixin.php
                 - src/Database/Migrations/Mixin/PostgresGrammarMixin.php
+        -
+            identifier: phpDoc.parseError
+            paths:
+                - src/Database/Migrations/Mixin/BlueprintMixin.php
                 - src/Mixin/Database/Query/BuilderMixin.php
-                - src/Mixin/Database/Query/Grammars/GrammarMixin.php
+        -
+            identifier: method.protected
+            path: src/Database/Migrations/Mixin/BlueprintMixin.php
+        -
+            identifier: return.type
+            path: src/Mixin/Database/Query/BuilderMixin.php
+        -
+            identifier: arguments.count
+            path: src/Mixin/Database/Query/BuilderMixin.php
+        -
+            identifier: varTag.trait
+            path: src/Database/Eloquent/Traits/Builder.php
+        -
+            identifier: class.notFound
+            path: src/Database/Eloquent/Traits/Builder.php
+        -
+            identifier: property.defaultValue
+            path: src/Exceptions/DebugHandler.php
+        -
+            identifier: function.alreadyNarrowedType
+            path: src/Exceptions/DebugHandler.php
+        -
+            identifier: class.notFound
+            path: src/Http/Middleware/RequestSignatureValidate.php
