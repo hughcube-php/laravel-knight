@@ -197,7 +197,7 @@ trait Model
      */
     public static function availableQuery(): Builder
     {
-        return static::query()->whereDeletedAtColumn();
+        return static::query()->available();
     }
 
     /**
@@ -205,7 +205,7 @@ trait Model
      */
     public static function sortQuery(): Builder
     {
-        return static::query()->orderByDesc('sort')->orderByDesc('id');
+        return static::query()->sort();
     }
 
     /**
@@ -213,7 +213,7 @@ trait Model
      */
     public static function sortAvailableQuery(): Builder
     {
-        return static::availableQuery()->orderByDesc('sort')->orderByDesc('id');
+        return static::query()->sortAvailable();
     }
 
     /**

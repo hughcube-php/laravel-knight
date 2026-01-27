@@ -44,6 +44,7 @@ class ModelTest extends TestCase
         Schema::create('users', function (Blueprint $table) {
             $table->bigIncrements('id')->unsigned()->comment('id');
             $table->string('nickname')->nullable();
+            $table->integer('sort')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -633,5 +634,157 @@ class ModelTest extends TestCase
 
         $this->assertInstanceOf(KnightCollection::class, $users);
         $this->assertInstanceOf(KnightCollection::class, User::findByIds($users->pluck('id')));
+    }
+
+    /**
+     * @return void
+     */
+    public function testScopeAvailable()
+    {
+        $this->resetTable();
+
+        // 创建3个用户
+        for ($i = 1; $i <= 3; $i++) {
+            $user = new User();
+            $user->nickname = 'user' . $i;
+            $user->sort = $i;
+            $user->save();
+        }
+
+        // 删除第2个用户
+        $user2 = User::query()->where('nickname', 'user2')->first();
+        $user2->delete();
+
+        // 测试 scopeAvailable - 只返回未删除的记录
+        $availableUsers = User::available()->get();
+        $this->assertSame(2, $availableUsers->count());
+        $this->assertSame(['user1', 'user3'], $availableUsers->pluck('nickname')->toArray());
+
+        // 测试链式调用
+        $availableUsers = User::query()->available()->get();
+        $this->assertSame(2, $availableUsers->count());
+
+        // 测试 availableQuery (deprecated) 应该返回相同结果
+        $availableUsersDeprecated = User::availableQuery()->get();
+        $this->assertSame(2, $availableUsersDeprecated->count());
+        $this->assertSame(['user1', 'user3'], $availableUsersDeprecated->pluck('nickname')->toArray());
+    }
+
+    /**
+     * @return void
+     */
+    public function testScopeSort()
+    {
+        $this->resetTable();
+
+        // 创建用户并设置不同的 sort 值
+        $sortValues = [3, 1, 5, 2, 4];
+        foreach ($sortValues as $index => $sortValue) {
+            $user = new User();
+            $user->nickname = 'user' . ($index + 1);
+            $user->sort = $sortValue;
+            $user->save();
+        }
+
+        // 测试 scopeSort - 按 sort 降序, 然后按 id 降序
+        $sortedUsers = User::sort()->get();
+        $this->assertSame(5, $sortedUsers->count());
+        // sort: 5, 4, 3, 2, 1
+        $this->assertSame([5, 4, 3, 2, 1], $sortedUsers->pluck('sort')->toArray());
+
+        // 测试链式调用
+        $sortedUsers = User::query()->sort()->get();
+        $this->assertSame([5, 4, 3, 2, 1], $sortedUsers->pluck('sort')->toArray());
+
+        // 测试 sortQuery (deprecated) 应该返回相同结果
+        $sortedUsersDeprecated = User::sortQuery()->get();
+        $this->assertSame([5, 4, 3, 2, 1], $sortedUsersDeprecated->pluck('sort')->toArray());
+    }
+
+    /**
+     * @return void
+     */
+    public function testScopeSortWithSameSort()
+    {
+        $this->resetTable();
+
+        // 创建用户，相同的 sort 值
+        for ($i = 1; $i <= 3; $i++) {
+            $user = new User();
+            $user->nickname = 'user' . $i;
+            $user->sort = 10; // 相同的 sort 值
+            $user->save();
+        }
+
+        // 测试相同 sort 值时按 id 降序
+        $sortedUsers = User::sort()->get();
+        $this->assertSame(3, $sortedUsers->count());
+        // id: 3, 2, 1 (按 id 降序)
+        $this->assertSame([3, 2, 1], $sortedUsers->pluck('id')->toArray());
+    }
+
+    /**
+     * @return void
+     */
+    public function testScopeSortAvailable()
+    {
+        $this->resetTable();
+
+        // 创建5个用户
+        $sortValues = [3, 1, 5, 2, 4];
+        foreach ($sortValues as $index => $sortValue) {
+            $user = new User();
+            $user->nickname = 'user' . ($index + 1);
+            $user->sort = $sortValue;
+            $user->save();
+        }
+
+        // 删除 sort=5 和 sort=2 的用户
+        /** @var User $user */
+        foreach (User::query()->whereIn('sort', [5, 2])->get() as $user) {
+            $user->delete();
+        }
+
+        // 测试 scopeSortAvailable - 只返回未删除的记录，并按 sort 降序
+        $users = User::sortAvailable()->get();
+        $this->assertSame(3, $users->count());
+        // 未删除的 sort 值: 4, 3, 1 (降序)
+        $this->assertSame([4, 3, 1], $users->pluck('sort')->toArray());
+
+        // 测试链式调用
+        $users = User::query()->sortAvailable()->get();
+        $this->assertSame([4, 3, 1], $users->pluck('sort')->toArray());
+
+        // 测试 sortAvailableQuery (deprecated) 应该返回相同结果
+        $usersDeprecated = User::sortAvailableQuery()->get();
+        $this->assertSame([4, 3, 1], $usersDeprecated->pluck('sort')->toArray());
+    }
+
+    /**
+     * @return void
+     */
+    public function testScopeCombination()
+    {
+        $this->resetTable();
+
+        // 创建用户
+        for ($i = 1; $i <= 5; $i++) {
+            $user = new User();
+            $user->nickname = 'user' . $i;
+            $user->sort = $i;
+            $user->save();
+        }
+
+        // 删除第3个用户
+        User::query()->where('sort', 3)->first()->delete();
+
+        // 测试 available()->sort() 组合调用
+        $users = User::available()->sort()->get();
+        $this->assertSame(4, $users->count());
+        $this->assertSame([5, 4, 2, 1], $users->pluck('sort')->toArray());
+
+        // 测试 sort()->available() 组合调用 (顺序不影响结果)
+        $users = User::sort()->available()->get();
+        $this->assertSame(4, $users->count());
     }
 }

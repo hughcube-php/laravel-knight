@@ -18,7 +18,7 @@ use Psr\SimpleCache\CacheInterface;
 /**
  * @property int         $id
  * @property string      $nickname
- * @property int         $range
+ * @property int         $sort
  * @property null|Carbon $created_at
  * @property null|Carbon $updated_at
  * @property null|Carbon $deleted_at
@@ -34,6 +34,7 @@ class User extends Model
     protected $fillable = [
         'id',
         'nickname',
+        'sort',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -61,7 +62,7 @@ class User extends Model
     /**
      * 获取缓存.
      *
-     * @return CacheInterface;
+     * @return CacheInterface
      */
     public function getCache(): CacheInterface
     {
