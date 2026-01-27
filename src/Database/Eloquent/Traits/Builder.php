@@ -36,7 +36,6 @@ use Traversable;
  * @method Connection                       getConnection()
  *
  * @mixin \Illuminate\Database\Eloquent\Builder
- * @mixin KIdeBuilder
  */
 trait Builder
 {
