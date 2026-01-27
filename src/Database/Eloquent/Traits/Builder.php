@@ -30,6 +30,9 @@ use Traversable;
  * @method KnightCollection                 get()
  * @method Model                            getModel()
  * @method KnightEloquentBuilder            kCanUsable()
+ * @method KnightEloquentBuilder            available()
+ * @method KnightEloquentBuilder            sort()
+ * @method KnightEloquentBuilder            sortAvailable()
  * @method Connection                       getConnection()
  *
  * @mixin \Illuminate\Database\Eloquent\Builder

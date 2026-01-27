@@ -22,6 +22,9 @@ use Traversable;
  * @method static Builder query()
  * @method static Builder newQuery()
  * @method static Builder kCanUsable()
+ * @method static Builder available()
+ * @method static Builder sort()
+ * @method static Builder sortAvailable()
  *
  * @mixin SoftDeletes
  * @mixin EloquentModel
@@ -189,19 +192,58 @@ trait Model
         return static::query()->noCache();
     }
 
+    /**
+     * @deprecated 请使用 scope 方式: Model::query()->available() 或 Model::available()
+     */
     public static function availableQuery(): Builder
     {
         return static::query()->whereDeletedAtColumn();
     }
 
+    /**
+     * @deprecated 请使用 scope 方式: Model::query()->sort() 或 Model::sort()
+     */
     public static function sortQuery(): Builder
     {
         return static::query()->orderByDesc('sort')->orderByDesc('id');
     }
 
+    /**
+     * @deprecated 请使用 scope 方式: Model::query()->sortAvailable() 或 Model::sortAvailable()
+     */
     public static function sortAvailableQuery(): Builder
     {
         return static::availableQuery()->orderByDesc('sort')->orderByDesc('id');
+    }
+
+    /**
+     * @param Builder $query
+     *
+     * @return Builder
+     */
+    public function scopeAvailable($query)
+    {
+        return $query->whereDeletedAtColumn();
+    }
+
+    /**
+     * @param Builder $query
+     *
+     * @return Builder
+     */
+    public function scopeSort($query)
+    {
+        return $query->orderByDesc('sort')->orderByDesc('id');
+    }
+
+    /**
+     * @param Builder $query
+     *
+     * @return Builder
+     */
+    public function scopeSortAvailable($query)
+    {
+        return $query->available()->sort();
     }
 
     public function getCache(): ?CacheInterface
