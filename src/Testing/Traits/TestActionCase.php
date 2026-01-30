@@ -22,7 +22,7 @@ trait TestActionCase
      *
      * @param object $job
      */
-    protected function assertJob(object $job): void
+    protected function assertKnightHandle(object $job): void
     {
         if (!method_exists($job, 'handle')) {
             $this->fail(sprintf('Object %s does not have a handle method', get_class($job)));
