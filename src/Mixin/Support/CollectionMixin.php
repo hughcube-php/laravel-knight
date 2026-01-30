@@ -428,13 +428,8 @@ class CollectionMixin
     public function splitNested(): Closure
     {
         return function (string $string, string $firstPattern = '#[;；]#', string $secondPattern = '#[\/／]#') {
-            return static::make(preg_split($firstPattern, $string) ?: [])->map(function ($item) {
-                return trim($item);
-            })->filter()->values()->map(function ($item) use ($secondPattern) {
-
-                return static::make(preg_split($secondPattern, $item) ?: [])->map(function ($v) {
-                    return trim($v);
-                })->filter()->values();
+            return static::make(preg_split($firstPattern, $string) ?: [])->map(fn($item) => trim($item))->filter()->values()->map(function ($item) use ($secondPattern) {
+                return static::make(preg_split($secondPattern, $item) ?: [])->map(fn($v) => trim($v))->filter()->values();
             });
         };
     }

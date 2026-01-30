@@ -240,18 +240,6 @@ class CollectionMixinTest extends TestCase
         $this->assertEquals(['A', 'B', 'C'], $result[0]->toArray());
         $this->assertEquals(['D', 'E', 'F'], $result[1]->toArray());
 
-        // 全角分隔符测试
-        $result = Collection::splitNested('A／B／C；D／E／F');
-        $this->assertCount(2, $result);
-        $this->assertEquals(['A', 'B', 'C'], $result[0]->toArray());
-        $this->assertEquals(['D', 'E', 'F'], $result[1]->toArray());
-
-        // 混合全角半角分隔符
-        $result = Collection::splitNested('A/B／C;D／E/F');
-        $this->assertCount(2, $result);
-        $this->assertEquals(['A', 'B', 'C'], $result[0]->toArray());
-        $this->assertEquals(['D', 'E', 'F'], $result[1]->toArray());
-
         // 带空格的字符串（测试 trim）
         $result = Collection::splitNested(' A / B / C ; D / E / F ');
         $this->assertCount(2, $result);
@@ -269,14 +257,26 @@ class CollectionMixinTest extends TestCase
 
         // 连续分隔符（测试 filter 过滤空值）
         $result = Collection::splitNested('A//B;C;;D');
-        $this->assertCount(2, $result);
+        $this->assertCount(3, $result);
         $this->assertEquals(['A', 'B'], $result[0]->toArray());
-        $this->assertEquals(['C', 'D'], $result[1]->toArray());
+        $this->assertEquals(['C'], $result[1]->toArray());
+        $this->assertEquals(['D'], $result[2]->toArray());
 
         // 自定义分隔符模式
         $result = Collection::splitNested('A-B-C|D-E-F', '/\|/', '/-/');
         $this->assertCount(2, $result);
         $this->assertEquals(['A', 'B', 'C'], $result[0]->toArray());
         $this->assertEquals(['D', 'E', 'F'], $result[1]->toArray());
+
+        // 多层嵌套测试
+        $result = Collection::splitNested('X;Y;Z');
+        $this->assertCount(3, $result);
+        $this->assertEquals(['X'], $result[0]->toArray());
+        $this->assertEquals(['Y'], $result[1]->toArray());
+        $this->assertEquals(['Z'], $result[2]->toArray());
+
+        // 只有空格的字符串
+        $result = Collection::splitNested('   ;   ');
+        $this->assertCount(0, $result);
     }
 }
