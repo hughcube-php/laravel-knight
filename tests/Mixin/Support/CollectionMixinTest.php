@@ -231,4 +231,52 @@ class CollectionMixinTest extends TestCase
         $this->assertSame(['a', 'b', 'c'], $collection->splitComma('a,b,c')->toArray());
         $this->assertSame(['a', 'b', 'c'], $collection->splitSlash('a/b/c')->toArray());
     }
+
+    public function testSplitNested()
+    {
+        // 基本功能测试
+        $result = Collection::splitNested('A/B/C;D/E/F');
+        $this->assertCount(2, $result);
+        $this->assertEquals(['A', 'B', 'C'], $result[0]->toArray());
+        $this->assertEquals(['D', 'E', 'F'], $result[1]->toArray());
+
+        // 全角分隔符测试
+        $result = Collection::splitNested('A／B／C；D／E／F');
+        $this->assertCount(2, $result);
+        $this->assertEquals(['A', 'B', 'C'], $result[0]->toArray());
+        $this->assertEquals(['D', 'E', 'F'], $result[1]->toArray());
+
+        // 混合全角半角分隔符
+        $result = Collection::splitNested('A/B／C;D／E/F');
+        $this->assertCount(2, $result);
+        $this->assertEquals(['A', 'B', 'C'], $result[0]->toArray());
+        $this->assertEquals(['D', 'E', 'F'], $result[1]->toArray());
+
+        // 带空格的字符串（测试 trim）
+        $result = Collection::splitNested(' A / B / C ; D / E / F ');
+        $this->assertCount(2, $result);
+        $this->assertEquals(['A', 'B', 'C'], $result[0]->toArray());
+        $this->assertEquals(['D', 'E', 'F'], $result[1]->toArray());
+
+        // 空字符串
+        $result = Collection::splitNested('');
+        $this->assertCount(0, $result);
+
+        // 单个层级（无第一级分隔符）
+        $result = Collection::splitNested('A/B/C');
+        $this->assertCount(1, $result);
+        $this->assertEquals(['A', 'B', 'C'], $result[0]->toArray());
+
+        // 连续分隔符（测试 filter 过滤空值）
+        $result = Collection::splitNested('A//B;C;;D');
+        $this->assertCount(2, $result);
+        $this->assertEquals(['A', 'B'], $result[0]->toArray());
+        $this->assertEquals(['C', 'D'], $result[1]->toArray());
+
+        // 自定义分隔符模式
+        $result = Collection::splitNested('A-B-C|D-E-F', '/\|/', '/-/');
+        $this->assertCount(2, $result);
+        $this->assertEquals(['A', 'B', 'C'], $result[0]->toArray());
+        $this->assertEquals(['D', 'E', 'F'], $result[1]->toArray());
+    }
 }

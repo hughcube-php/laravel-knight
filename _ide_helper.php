@@ -1951,6 +1951,15 @@ namespace Illuminate\Support {
         public function splitSlash(string $separator, string $pattern = '#[\\/／]#', int $limit = -1): static
         {
         }
+
+        /**
+         * 分割字符串为层级数组.
+         * @see \HughCube\Laravel\Knight\Mixin\Support\CollectionMixin::splitNested()
+         * @return static
+         */
+        public function splitNested(string $string, string $firstPattern = '#[;；]#', string $secondPattern = '#[\\/／]#'): static
+        {
+        }
     }
 
     /**

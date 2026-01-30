@@ -262,9 +262,9 @@ class CollectionMixin
             foreach ($this->pluck($name) as $items) {
                 if ($items instanceof Collection) {
                     $merged = $merged->merge($items);
-                }elseif (is_array($items)){
+                } elseif (is_array($items)) {
                     $merged = $merged->merge($items);
-                }else{
+                } else {
                     $merged = $merged->merge($this->make($items));
                 }
             }
@@ -413,6 +413,29 @@ class CollectionMixin
     {
         return function (string $separator, string $pattern = '#[\/／]#', int $limit = -1) {
             return static::make(preg_split($pattern, $separator, $limit) ?: []);
+        };
+    }
+
+    /**
+     * 分割字符串为层级数组.
+     *
+     * 示例:
+     *   Collection::splitNested('A/B/C;D/E/F', '/[;；]/', '#[\/／]#')
+     *   // [['A', 'B', 'C'], ['D', 'E', 'F']]
+     *
+     * @return static
+     */
+    public function splitNested(): Closure
+    {
+        return function (string $string, string $firstPattern = '#[;；]#', string $secondPattern = '#[\/／]#') {
+            return static::make(preg_split($firstPattern, $string) ?: [])->map(function ($item) {
+                return trim($item);
+            })->filter()->values()->map(function ($item) use ($secondPattern) {
+
+                return static::make(preg_split($secondPattern, $item) ?: [])->map(function ($v) {
+                    return trim($v);
+                })->filter()->values();
+            });
         };
     }
 }
