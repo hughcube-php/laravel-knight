@@ -1332,6 +1332,15 @@ namespace Illuminate\Database\Query {
         public function orWhereArrayIsNotEmpty($column): \Illuminate\Database\Query\Builder
         {
         }
+
+        /**
+         * 输出完整的 SQL 语句并终止程序.
+         * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin::dieRawSql()
+         * @return never
+         */
+        public function dieRawSql(): void
+        {
+        }
     }
 }
 

@@ -1722,4 +1722,26 @@ class BuilderMixin
         };
     }
 
+    // ==================== Debug Methods ====================
+
+    /**
+     * 输出完整的 SQL 语句并终止程序.
+     *
+     * 获取带有绑定值的完整 SQL 后直接 die。
+     * 用于调试查询时快速查看生成的 SQL。
+     *
+     * 示例:
+     *   User::query()->where('id', 1)->dieRawSql();
+     *   // 输出: select * from "users" where "id" = 1
+     *   // 然后终止程序
+     *
+     * @return Closure(): never
+     */
+    public function dieRawSql(): Closure
+    {
+        return function (): void {
+            die($this->toRawSql());
+        };
+    }
+
 }
