@@ -17,12 +17,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Throwable;
 
-class MigrationRerun extends Command
+class MigrateRerun extends Command
 {
     /**
      * @inheritdoc
      */
-    protected $signature = 'migration:krerun
+    protected $signature = 'migrate:krerun
                     {migrations?* : Migration file names or keywords to match (without .php extension) }
                     {--connection= : Database connection name }
                     {--path=database/migrations : Migration files path (supports absolute path) }

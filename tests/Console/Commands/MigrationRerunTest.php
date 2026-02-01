@@ -9,7 +9,7 @@
 
 namespace HughCube\Laravel\Knight\Tests\Console\Commands;
 
-use HughCube\Laravel\Knight\Console\Commands\MigrationRerun;
+use HughCube\Laravel\Knight\Console\Commands\MigrateRerun;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -262,7 +262,7 @@ class MigrationRerunTest extends TestCase
      */
     public function testGetMigrationFiles()
     {
-        $command = new MigrationRerun();
+        $command = new MigrateRerun();
 
         $method = new ReflectionMethod($command, 'getMigrationFiles');
         $method->setAccessible(true);
@@ -279,7 +279,7 @@ class MigrationRerunTest extends TestCase
      */
     public function testMatchMigrations()
     {
-        $command = new MigrationRerun();
+        $command = new MigrateRerun();
 
         $getMigrationFilesMethod = new ReflectionMethod($command, 'getMigrationFiles');
         $getMigrationFilesMethod->setAccessible(true);
@@ -310,7 +310,7 @@ class MigrationRerunTest extends TestCase
      */
     public function testMatchMigrationsWithPhpSuffix()
     {
-        $command = new MigrationRerun();
+        $command = new MigrateRerun();
 
         $getMigrationFilesMethod = new ReflectionMethod($command, 'getMigrationFiles');
         $getMigrationFilesMethod->setAccessible(true);
@@ -329,7 +329,7 @@ class MigrationRerunTest extends TestCase
      */
     public function testMatchMigrationsWithEmptyKeyword()
     {
-        $command = new MigrationRerun();
+        $command = new MigrateRerun();
 
         $getMigrationFilesMethod = new ReflectionMethod($command, 'getMigrationFiles');
         $getMigrationFilesMethod->setAccessible(true);
@@ -352,7 +352,7 @@ class MigrationRerunTest extends TestCase
      */
     public function testResolveMigrationInstanceNonAnonymous()
     {
-        $command = new MigrationRerun();
+        $command = new MigrateRerun();
 
         $method = new ReflectionMethod($command, 'resolveMigrationInstance');
         $method->setAccessible(true);
@@ -373,7 +373,7 @@ class MigrationRerunTest extends TestCase
      */
     public function testResolveMigrationInstanceAnonymous()
     {
-        $command = new MigrationRerun();
+        $command = new MigrateRerun();
 
         $method = new ReflectionMethod($command, 'resolveMigrationInstance');
         $method->setAccessible(true);
@@ -393,7 +393,7 @@ class MigrationRerunTest extends TestCase
      */
     public function testShouldUseTransaction()
     {
-        $command = new MigrationRerun();
+        $command = new MigrateRerun();
 
         $method = new ReflectionMethod($command, 'shouldUseTransaction');
         $method->setAccessible(true);
@@ -430,7 +430,7 @@ class MigrationRerunTest extends TestCase
      */
     public function testIsAbsolutePath()
     {
-        $command = new MigrationRerun();
+        $command = new MigrateRerun();
 
         $method = new ReflectionMethod($command, 'isAbsolutePath');
         $method->setAccessible(true);
@@ -524,7 +524,7 @@ class MigrationRerunTest extends TestCase
         // 确保表存在
         $this->assertTrue(Schema::hasTable('migrations'));
 
-        $command = new MigrationRerun();
+        $command = new MigrateRerun();
 
         $method = new ReflectionMethod($command, 'ensureMigrationsTableExists');
         $method->setAccessible(true);
