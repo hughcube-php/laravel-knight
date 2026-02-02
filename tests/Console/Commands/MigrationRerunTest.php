@@ -66,7 +66,7 @@ class MigrationRerunTest extends TestCase
      */
     public function testRunNonAnonymousMigration()
     {
-        $this->artisan('migration:krerun', [
+        $this->artisan('migrate:krerun', [
             'migrations' => ['create_test_users_table'],
             '--path' => $this->migrationPath,
             '--force' => true,
@@ -87,7 +87,7 @@ class MigrationRerunTest extends TestCase
      */
     public function testRunAnonymousMigration()
     {
-        $this->artisan('migration:krerun', [
+        $this->artisan('migrate:krerun', [
             'migrations' => ['create_test_posts_table'],
             '--path' => $this->migrationPath,
             '--force' => true,
@@ -109,7 +109,7 @@ class MigrationRerunTest extends TestCase
     public function testRerunMigrationWithoutDown()
     {
         // 第一次执行
-        $this->artisan('migration:krerun', [
+        $this->artisan('migrate:krerun', [
             'migrations' => ['create_test_users_table'],
             '--path' => $this->migrationPath,
             '--force' => true,
@@ -127,7 +127,7 @@ class MigrationRerunTest extends TestCase
         Schema::dropIfExists('test_users');
 
         // 第二次执行（跳过 down，因为表已不存在）
-        $this->artisan('migration:krerun', [
+        $this->artisan('migrate:krerun', [
             'migrations' => ['create_test_users_table'],
             '--path' => $this->migrationPath,
             '--force' => true,
@@ -151,7 +151,7 @@ class MigrationRerunTest extends TestCase
     public function testRerunMigrationWithDown()
     {
         // 第一次执行
-        $this->artisan('migration:krerun', [
+        $this->artisan('migrate:krerun', [
             'migrations' => ['create_test_users_table'],
             '--path' => $this->migrationPath,
             '--force' => true,
@@ -161,7 +161,7 @@ class MigrationRerunTest extends TestCase
         $this->assertTrue(Schema::hasTable('test_users'));
 
         // 第二次执行（使用 --force 会自动执行 down）
-        $this->artisan('migration:krerun', [
+        $this->artisan('migrate:krerun', [
             'migrations' => ['create_test_users_table'],
             '--path' => $this->migrationPath,
             '--force' => true,
@@ -176,7 +176,7 @@ class MigrationRerunTest extends TestCase
      */
     public function testRunMultipleMigrations()
     {
-        $this->artisan('migration:krerun', [
+        $this->artisan('migrate:krerun', [
             'migrations' => ['create_test_users_table', 'create_test_posts_table'],
             '--path' => $this->migrationPath,
             '--force' => true,
@@ -201,7 +201,7 @@ class MigrationRerunTest extends TestCase
      */
     public function testRunMigrationByKeyword()
     {
-        $this->artisan('migration:krerun', [
+        $this->artisan('migrate:krerun', [
             'migrations' => ['test_users'],
             '--path' => $this->migrationPath,
             '--force' => true,
@@ -221,7 +221,7 @@ class MigrationRerunTest extends TestCase
 
         $this->assertFalse(Schema::hasTable('migrations'));
 
-        $this->artisan('migration:krerun', [
+        $this->artisan('migrate:krerun', [
             'migrations' => ['create_test_users_table'],
             '--path' => $this->migrationPath,
             '--force' => true,
@@ -238,7 +238,7 @@ class MigrationRerunTest extends TestCase
      */
     public function testNoMatchingMigration()
     {
-        $this->artisan('migration:krerun', [
+        $this->artisan('migrate:krerun', [
             'migrations' => ['non_existing_migration'],
             '--path' => $this->migrationPath,
             '--force' => true,
@@ -250,7 +250,7 @@ class MigrationRerunTest extends TestCase
      */
     public function testInvalidMigrationPath()
     {
-        $this->artisan('migration:krerun', [
+        $this->artisan('migrate:krerun', [
             'migrations' => ['test'],
             '--path' => 'non/existing/path',
             '--force' => true,
@@ -462,7 +462,7 @@ class MigrationRerunTest extends TestCase
         // 首次执行，不应该询问 down（因为没有记录）
         // 使用 --force 但不使用 --skip-down，如果有记录会执行 down
         // 但因为没有记录，所以不会执行 down
-        $this->artisan('migration:krerun', [
+        $this->artisan('migrate:krerun', [
             'migrations' => ['create_test_users_table'],
             '--path' => $this->migrationPath,
             '--force' => true,
@@ -476,7 +476,7 @@ class MigrationRerunTest extends TestCase
      */
     public function testMigrationWithoutDownMethod()
     {
-        $this->artisan('migration:krerun', [
+        $this->artisan('migrate:krerun', [
             'migrations' => ['create_test_no_down_table'],
             '--path' => $this->migrationPath,
             '--force' => true,
@@ -488,7 +488,7 @@ class MigrationRerunTest extends TestCase
         Schema::dropIfExists('test_no_down');
 
         // 重复执行也应该成功（因为没有 down 方法，不会尝试回滚）
-        $this->artisan('migration:krerun', [
+        $this->artisan('migrate:krerun', [
             'migrations' => ['create_test_no_down_table'],
             '--path' => $this->migrationPath,
             '--force' => true,
@@ -506,7 +506,7 @@ class MigrationRerunTest extends TestCase
         mkdir($emptyDir);
 
         try {
-            $this->artisan('migration:krerun', [
+            $this->artisan('migrate:krerun', [
                 'migrations' => ['test'],
                 '--path' => $emptyDir,
                 '--force' => true,
@@ -542,7 +542,7 @@ class MigrationRerunTest extends TestCase
     public function testDownFailsWithForceModeContinues()
     {
         // 第一次执行
-        $this->artisan('migration:krerun', [
+        $this->artisan('migrate:krerun', [
             'migrations' => ['create_test_users_table'],
             '--path' => $this->migrationPath,
             '--force' => true,
@@ -553,7 +553,7 @@ class MigrationRerunTest extends TestCase
         Schema::dropIfExists('test_users');
 
         // 第二次执行，down 会失败（表不存在），但 --force 模式应该继续
-        $this->artisan('migration:krerun', [
+        $this->artisan('migrate:krerun', [
             'migrations' => ['create_test_users_table'],
             '--path' => $this->migrationPath,
             '--force' => true,
@@ -569,7 +569,7 @@ class MigrationRerunTest extends TestCase
     public function testMultipleRerunsOfSameMigration()
     {
         for ($i = 1; $i <= 3; $i++) {
-            $this->artisan('migration:krerun', [
+            $this->artisan('migrate:krerun', [
                 'migrations' => ['create_test_users_table'],
                 '--path' => $this->migrationPath,
                 '--force' => true,
@@ -595,7 +595,7 @@ class MigrationRerunTest extends TestCase
     public function testAnonymousMigrationMultipleReruns()
     {
         for ($i = 1; $i <= 2; $i++) {
-            $this->artisan('migration:krerun', [
+            $this->artisan('migrate:krerun', [
                 'migrations' => ['create_test_posts_table'],
                 '--path' => $this->migrationPath,
                 '--force' => true,

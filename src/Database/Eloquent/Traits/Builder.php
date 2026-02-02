@@ -178,66 +178,9 @@ trait Builder
             return $rows->values();
         }
 
-        /**
-         * db 查询没有命中缓存的数据.
-         *
-         * [['pk1' => 1, 'pk2' => 1], ['pk1' => 1, 'pk2' => 1]] => ['pk1' => [1, 1], 'pk2' => [1, 1]]
-         * [['pk1' => 1, 'pk2' => 1]] => ['pk1' => 1, 'pk2' => 1]
-         */
+        /** db 查询没有命中缓存的数据 */
         $missIds = $ids->only($missIndexes->toArray());
-        $condition = Collection::make(array_merge_recursive(...$missIds->toArray()));
-        $fromDbRows = $this
-            ->where(function (self $query) use ($missIds, $condition) {
-                /** 非联合唯一键 */
-                if (1 === $condition->count()) {
-                    foreach ($condition as $name => $values) {
-                        if (is_array($values)) {
-                            $query->whereIn($name, array_values(array_unique($values)));
-                        } elseif (null === $values) {
-                            $query->whereNull($name);
-                        } else {
-                            $query->where($name, $values);
-                        }
-                    }
-
-                    return;
-                }
-
-                /** 联合唯一健, 但是只有一个In操作的 */
-                if (1 === $condition->filter(fn($v) => is_array($v) && 1 < count($v))->count()) {
-                    foreach ($condition as $name => $values) {
-                        if (is_array($values)) {
-                            $query->whereIn($name, array_values(array_unique($values)));
-                        } elseif (null === $values) {
-                            $query->whereNull($name);
-                        } else {
-                            $query->where($name, $values);
-                        }
-                    }
-
-                    return;
-                }
-
-                /** 兜底方案 */
-                foreach ($missIds as $id) {
-                    $query->orWhere(function (self $query) use ($id) {
-                        foreach ($id as $name => $value) {
-                            if (null === $value) {
-                                $query->whereNull($name);
-                            } else {
-                                $query->where($name, $value);
-                            }
-                        }
-                    });
-                }
-            })
-            ->limit($missIndexes->count())
-            /** @phpstan-ignore-next-line */
-            ->get()->keyBy(function (IlluminateModel $model) use ($condition) {
-                return $this->getModel()->makeColumnsCacheKey(
-                    Arr::only($model->getAttributes(), $condition->keys()->toArray())
-                );
-            });
+        $fromDbRows = $this->queryByUniqueConditions($missIds);
 
         /** 把db的查询结果缓存起来 */
         $cacheItems = [];
@@ -259,6 +202,106 @@ trait Builder
         }
 
         return $rows->values();
+    }
+
+    /**
+     * 根据唯一键条件查询数据库（不含缓存逻辑）.
+     *
+     * @param Collection $conditions 条件数组 [['id' => 1], ['id' => 2], ...]
+     *
+     * @return Collection 以缓存键为 key 的结果集
+     */
+    public function queryByUniqueConditions(Collection $conditions): Collection
+    {
+        if ($conditions->isEmpty()) {
+            return Collection::make();
+        }
+
+        $condition = Collection::make(array_merge_recursive(...$conditions->toArray()));
+
+        return $this
+            ->where(function (self $query) use ($conditions, $condition) {
+                /** 非联合唯一键 */
+                if (1 === $condition->count()) {
+                    foreach ($condition as $name => $values) {
+                        $this->applyConditionWithNullSupport($query, $name, $values);
+                    }
+
+                    return;
+                }
+
+                /** 联合唯一健, 但是只有一个In操作的 */
+                if (1 === $condition->filter(fn($v) => is_array($v) && 1 < count($v))->count()) {
+                    foreach ($condition as $name => $values) {
+                        $this->applyConditionWithNullSupport($query, $name, $values);
+                    }
+
+                    return;
+                }
+
+                /** 兜底方案 */
+                foreach ($conditions as $cond) {
+                    $query->orWhere(function (self $query) use ($cond) {
+                        foreach ($cond as $name => $value) {
+                            if (null === $value) {
+                                $query->whereNull($name);
+                            } else {
+                                $query->where($name, $value);
+                            }
+                        }
+                    });
+                }
+            })
+            ->limit($conditions->count())
+            /** @phpstan-ignore-next-line */
+            ->get()->keyBy(function (IlluminateModel $model) use ($condition) {
+                return $this->getModel()->makeColumnsCacheKey(
+                    Arr::only($model->getAttributes(), $condition->keys()->toArray())
+                );
+            });
+    }
+
+    /**
+     * 应用带 NULL 值支持的条件.
+     *
+     * 处理数组值中包含 NULL 的情况，因为 SQL 的 IN 子句不能正确匹配 NULL 值。
+     *
+     * @param self $query
+     * @param string $name 字段名
+     * @param mixed $values 值或值数组
+     *
+     * @return void
+     */
+    protected function applyConditionWithNullSupport(self $query, string $name, $values): void
+    {
+        if (!is_array($values)) {
+            if (null === $values) {
+                $query->whereNull($name);
+            } else {
+                $query->where($name, $values);
+            }
+
+            return;
+        }
+
+        $uniqueValues = array_values(array_unique($values, SORT_REGULAR));
+        $nonNullValues = array_filter($uniqueValues, function ($v) {
+            return null !== $v;
+        });
+        $hasNull = count($uniqueValues) !== count($nonNullValues);
+
+        if (empty($nonNullValues)) {
+            /** 所有值都是 null */
+            $query->whereNull($name);
+        } elseif ($hasNull) {
+            /** 混合情况：既有 null 又有非 null */
+            $query->where(function (self $q) use ($name, $nonNullValues) {
+                $q->whereIn($name, array_values($nonNullValues))->orWhereNull($name);
+            });
+        } else {
+            /** 没有 null 值 */
+            $query->whereIn($name, $uniqueValues);
+        }
     }
 
     /**

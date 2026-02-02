@@ -10,7 +10,7 @@ class ClearModelCacheTest extends TestCase
 {
     private string $modelDir;
     private string $modelFile;
-    private string $modelClass;
+    private string $class;
     private bool $createdModelDir = false;
 
     protected function setUp(): void
@@ -136,11 +136,11 @@ PHP, $this->modelClass);
 
     public function testHandleClearsSelectedScopes()
     {
-        $modelClass = $this->getModelClass();
-        $modelClass::$rows = [new $modelClass(1), new $modelClass(2), new $modelClass(3)];
-        $modelClass::$deletedIds = [];
+        $class = $this->getModelClass();
+        $class::$rows = [new $class(1), new $class(2), new $class(3)];
+        $class::$deletedIds = [];
 
-        $command = new class($modelClass, '1,3') extends ClearModelCache {
+        $command = new class($class, '1,3') extends ClearModelCache {
             public array $choices = [];
             public array $infoMessages = [];
             private string $model;
@@ -173,17 +173,17 @@ PHP, $this->modelClass);
 
         $command->handle(new Schedule($this->app));
 
-        $this->assertContains($modelClass, $command->choices);
-        $this->assertSame([1, 3], $modelClass::$deletedIds);
+        $this->assertContains($class, $command->choices);
+        $this->assertSame([1, 3], $class::$deletedIds);
     }
 
     public function testHandleClearsAllScopesWhenWildcardProvided()
     {
-        $modelClass = $this->getModelClass();
-        $modelClass::$rows = [new $modelClass(10), new $modelClass(20)];
-        $modelClass::$deletedIds = [];
+        $class = $this->getModelClass();
+        $class::$rows = [new $class(10), new $class(20)];
+        $class::$deletedIds = [];
 
-        $command = new class($modelClass, '*') extends ClearModelCache {
+        $command = new class($class, '*') extends ClearModelCache {
             private string $model;
             private string $scopes;
 
@@ -211,7 +211,7 @@ PHP, $this->modelClass);
 
         $command->handle(new Schedule($this->app));
 
-        $this->assertSame([10, 20], $modelClass::$deletedIds);
+        $this->assertSame([10, 20], $class::$deletedIds);
     }
 
     private function getModelClass(): string
