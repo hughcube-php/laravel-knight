@@ -23,7 +23,7 @@ trait GetMobile
      */
     protected function getMobile(): ?string
     {
-        return $this->getRequest()->get('mobile');
+        return $this->getRequest()->input('mobile');
     }
 
     /**
@@ -31,7 +31,7 @@ trait GetMobile
      */
     protected function getIDDCode(): ?string
     {
-        return $this->getRequest()->get('idd_code', 86);
+        return $this->getRequest()->input('idd_code', 86);
     }
 
     /**

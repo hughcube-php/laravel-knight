@@ -20,7 +20,7 @@ trait ValidatePinCodeSms
 
     protected function getPinCode()
     {
-        return $this->getRequest()->get('pincode');
+        return $this->getRequest()->input('pincode');
     }
 
     /**
