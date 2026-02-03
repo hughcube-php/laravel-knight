@@ -19,6 +19,11 @@ class KnightModelTraitTestModel extends EloquentModel
     public $timestamps = false;
 
     protected $guarded = [];
+
+    public function publicConvertEmptyStringsToNull($value)
+    {
+        return $this->convertEmptyStringsToNull($value);
+    }
 }
 
 class KnightModelTraitTest extends TestCase
@@ -58,5 +63,20 @@ class KnightModelTraitTest extends TestCase
 
         $model->setAttribute('deleted_at', '2024-01-01 00:00:00');
         $this->assertNull($model->ifAvailableReturnSelf());
+    }
+
+    public function testConvertEmptyStringsToNull()
+    {
+        $model = new KnightModelTraitTestModel();
+
+        $this->assertNull($model->publicConvertEmptyStringsToNull(''));
+        $this->assertNull($model->publicConvertEmptyStringsToNull(null));
+
+        $this->assertSame('hello', $model->publicConvertEmptyStringsToNull('hello'));
+        $this->assertSame(' ', $model->publicConvertEmptyStringsToNull(' '));
+        $this->assertSame('0', $model->publicConvertEmptyStringsToNull('0'));
+        $this->assertSame(0, $model->publicConvertEmptyStringsToNull(0));
+        $this->assertSame(false, $model->publicConvertEmptyStringsToNull(false));
+        $this->assertSame([], $model->publicConvertEmptyStringsToNull([]));
     }
 }

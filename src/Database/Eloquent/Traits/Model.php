@@ -537,4 +537,13 @@ trait Model
     {
         return $this->isAvailable();
     }
+
+    /**
+     * @param mixed $value
+     * @return mixed
+     */
+    protected function convertEmptyStringsToNull($value)
+    {
+        return ('' === $value || null === $value) ? null : $value;
+    }
 }
