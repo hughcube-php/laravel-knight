@@ -28,14 +28,28 @@ use ReflectionException;
  * - knightIndexWhere($columns, $where, $indexName): 创建条件索引 (PostgreSQL)
  * - knightUniqueWhereNotDeleted($columns, $indexName): 创建未删除记录的唯一索引 (PostgreSQL)
  * - knightIndexWhereNotDeleted($columns, $indexName): 创建未删除记录的索引 (PostgreSQL)
+ * - knightSetSequenceValue($column, $value, $sequenceName): 设置序列下一个值 (PostgreSQL)
+ * - knightRestartSequence($column, $value, $sequenceName): 重启序列 (PostgreSQL)
+ * - knightCreateSequence($name, $start, $increment, $max, $min, $cycle): 创建独立序列 (PostgreSQL)
+ * - knightDropSequence($name, $ifExists): 删除序列 (PostgreSQL)
+ * - knightIdWithSequence($column, $sequenceName, $primary): 创建使用指定序列的主键 (PostgreSQL)
+ * - knightUseSequence($column, $sequenceName): 修改列使用指定序列 (PostgreSQL)
  *
  * 使用示例:
+ *   // 创建全局序列
+ *   Schema::create('_sequences', function (Blueprint $table) {
+ *       $table->knightCreateSequence('global_id_seq', 1000);
+ *   });
+ *
+ *   // 多个表使用同一个序列
  *   Schema::create('users', function (Blueprint $table) {
- *       $table->id();
+ *       $table->knightIdWithSequence('id', 'global_id_seq');
  *       $table->string('name');
- *       $table->knightColumns();       // 或 $table->knightColumnsReversed();
- *       $table->knightUniqueWhereNotDeleted('email');
- *       $table->knightGin(['tenant_id', 'tags']); // 多列 GIN 索引需要 btree_gin 扩展
+ *   });
+ *
+ *   Schema::create('orders', function (Blueprint $table) {
+ *       $table->knightIdWithSequence('id', 'global_id_seq');
+ *       $table->string('order_no');
  *   });
  */
 class Migration extends IlluminateMigration

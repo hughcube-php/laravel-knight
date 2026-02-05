@@ -63,6 +63,13 @@ class BlueprintMixinTest extends TestCase
                 DB::connection('pgsql')->statement('DROP TABLE IF EXISTS knight_unique_where_test_pg');
                 DB::connection('pgsql')->statement('DROP TABLE IF EXISTS knight_index_where_test_pg');
                 DB::connection('pgsql')->statement('DROP TABLE IF EXISTS knight_alter_test_pg');
+                DB::connection('pgsql')->statement('DROP TABLE IF EXISTS knight_sequence_test_pg');
+                DB::connection('pgsql')->statement('DROP TABLE IF EXISTS knight_shared_seq_table1');
+                DB::connection('pgsql')->statement('DROP TABLE IF EXISTS knight_shared_seq_table2');
+                DB::connection('pgsql')->statement('DROP TABLE IF EXISTS knight_shared_seq_table3');
+                DB::connection('pgsql')->statement('DROP SEQUENCE IF EXISTS global_test_seq');
+                DB::connection('pgsql')->statement('DROP SEQUENCE IF EXISTS shared_id_seq');
+                DB::connection('pgsql')->statement('DROP SEQUENCE IF EXISTS custom_seq');
             } catch (\Throwable $e) {
                 // Ignore cleanup errors
             }
@@ -1592,6 +1599,1121 @@ class BlueprintMixinTest extends TestCase
         $this->assertContains('idx_search_gin', $indexNames);
         $this->assertContains('idx_tags_gin', $indexNames);
         $this->assertContains('uk_name', $indexNames);
+    }
+
+    // ==================== PostgreSQL Sequence Tests ====================
+
+    public function testKnightSetSequenceValue(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create table with SERIAL primary key
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        $this->assertTrue($schema->hasTable('knight_sequence_test_pg'));
+
+        // Set sequence value using alter table
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightSetSequenceValue('id', 1000);
+        });
+
+        // Insert a record and verify the ID starts from 1000
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test1']);
+        $record = $connection->table('knight_sequence_test_pg')->orderByDesc('id')->first();
+
+        $this->assertEquals(1000, $record->id);
+    }
+
+    public function testKnightSetSequenceValueMultipleInserts(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        // Set sequence to start from 5000
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightSetSequenceValue('id', 5000);
+        });
+
+        // Insert multiple records
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test1']);
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test2']);
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test3']);
+
+        $records = $connection->table('knight_sequence_test_pg')->orderBy('id')->get();
+
+        $this->assertEquals(5000, $records[0]->id);
+        $this->assertEquals(5001, $records[1]->id);
+        $this->assertEquals(5002, $records[2]->id);
+    }
+
+    public function testKnightSetSequenceValueWithCustomSequenceName(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        // Set sequence value using custom sequence name
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightSetSequenceValue('id', 2000, 'knight_sequence_test_pg_id_seq');
+        });
+
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test1']);
+        $record = $connection->table('knight_sequence_test_pg')->first();
+
+        $this->assertEquals(2000, $record->id);
+    }
+
+    public function testKnightRestartSequence(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        // First insert some records
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test1']);
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test2']);
+
+        // Delete all records
+        $connection->table('knight_sequence_test_pg')->truncate();
+
+        // Restart sequence from 100
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightRestartSequence('id', 100);
+        });
+
+        // Insert new record
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test3']);
+        $record = $connection->table('knight_sequence_test_pg')->first();
+
+        $this->assertEquals(100, $record->id);
+    }
+
+    public function testKnightRestartSequenceMultipleInserts(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        // Restart sequence from 10000
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightRestartSequence('id', 10000);
+        });
+
+        // Insert multiple records
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test1']);
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test2']);
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test3']);
+
+        $records = $connection->table('knight_sequence_test_pg')->orderBy('id')->get();
+
+        $this->assertEquals(10000, $records[0]->id);
+        $this->assertEquals(10001, $records[1]->id);
+        $this->assertEquals(10002, $records[2]->id);
+    }
+
+    public function testKnightRestartSequenceWithCustomSequenceName(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        // Restart sequence with custom sequence name
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightRestartSequence('id', 3000, 'knight_sequence_test_pg_id_seq');
+        });
+
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test1']);
+        $record = $connection->table('knight_sequence_test_pg')->first();
+
+        $this->assertEquals(3000, $record->id);
+    }
+
+    public function testKnightSetSequenceValueDuringTableCreation(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create table and set sequence value in one migration
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->knightSetSequenceValue('id', 500);
+        });
+
+        $this->assertTrue($schema->hasTable('knight_sequence_test_pg'));
+
+        // Insert a record and verify the ID
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test1']);
+        $record = $connection->table('knight_sequence_test_pg')->first();
+
+        $this->assertEquals(500, $record->id);
+    }
+
+    public function testKnightRestartSequenceDuringTableCreation(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create table and restart sequence in one migration
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->knightRestartSequence('id', 999);
+        });
+
+        $this->assertTrue($schema->hasTable('knight_sequence_test_pg'));
+
+        // Insert a record and verify the ID
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test1']);
+        $record = $connection->table('knight_sequence_test_pg')->first();
+
+        $this->assertEquals(999, $record->id);
+    }
+
+    public function testKnightSetSequenceValueWithLargeNumber(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        // Set sequence to a large number
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightSetSequenceValue('id', 9000000000);
+        });
+
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test1']);
+        $record = $connection->table('knight_sequence_test_pg')->first();
+
+        $this->assertEquals(9000000000, $record->id);
+    }
+
+    public function testKnightSetSequenceValuePreservesExistingRecords(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        // Insert some records first
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test1']);
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test2']);
+
+        // Now set sequence to a higher value
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightSetSequenceValue('id', 1000);
+        });
+
+        // Insert another record
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test3']);
+
+        // Verify all records exist with correct IDs
+        $records = $connection->table('knight_sequence_test_pg')->orderBy('id')->get();
+
+        $this->assertCount(3, $records);
+        $this->assertEquals(1, $records[0]->id);
+        $this->assertEquals(2, $records[1]->id);
+        $this->assertEquals(1000, $records[2]->id);
+    }
+
+    public function testKnightSequenceMethodsChaining(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Test that methods return $this for chaining
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->knightSetSequenceValue('id', 100)
+                  ->knightColumns();
+        });
+
+        $this->assertTrue($schema->hasTable('knight_sequence_test_pg'));
+        $this->assertTrue($schema->hasColumn('knight_sequence_test_pg', 'created_at'));
+        $this->assertTrue($schema->hasColumn('knight_sequence_test_pg', 'data_version'));
+    }
+
+    public function testSequenceValueDirectQuery(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->knightSetSequenceValue('id', 7777);
+        });
+
+        // Verify the sequence value using direct query
+        $result = $connection->selectOne(
+            "SELECT last_value, is_called FROM knight_sequence_test_pg_id_seq"
+        );
+
+        // After setval with false, last_value should be 7777 and is_called should be false
+        $this->assertEquals(7777, $result->last_value);
+        // is_called is false means next nextval() will return last_value
+        $this->assertFalse($result->is_called);
+    }
+
+    // ==================== PostgreSQL Shared Sequence Tests ====================
+
+    public function testKnightCreateSequence(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create a sequence using a dummy table context
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightCreateSequence('global_test_seq', 1000);
+        });
+
+        // Verify sequence exists
+        $result = $connection->selectOne(
+            "SELECT sequencename FROM pg_sequences WHERE sequencename = 'global_test_seq'"
+        );
+        $this->assertNotNull($result);
+        $this->assertEquals('global_test_seq', $result->sequencename);
+    }
+
+    public function testKnightCreateSequenceWithAllOptions(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightCreateSequence('global_test_seq', 100, 2, 10000, 1, false);
+        });
+
+        // Verify sequence exists and has correct settings
+        $result = $connection->selectOne(
+            "SELECT start_value, increment_by, min_value, max_value, cycle
+             FROM pg_sequences WHERE sequencename = 'global_test_seq'"
+        );
+        $this->assertNotNull($result);
+        $this->assertEquals(100, $result->start_value);
+        $this->assertEquals(2, $result->increment_by);
+        $this->assertEquals(1, $result->min_value);
+        $this->assertEquals(10000, $result->max_value);
+        $this->assertFalse($result->cycle);
+    }
+
+    public function testKnightDropSequence(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // First create a sequence
+        $connection->statement("CREATE SEQUENCE global_test_seq START WITH 1");
+
+        // Verify sequence exists
+        $result = $connection->selectOne(
+            "SELECT sequencename FROM pg_sequences WHERE sequencename = 'global_test_seq'"
+        );
+        $this->assertNotNull($result);
+
+        // Drop the sequence
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightDropSequence('global_test_seq');
+        });
+
+        // Verify sequence no longer exists
+        $result = $connection->selectOne(
+            "SELECT sequencename FROM pg_sequences WHERE sequencename = 'global_test_seq'"
+        );
+        $this->assertNull($result);
+    }
+
+    public function testKnightDropSequenceIfExists(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create a dummy table for context
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+        });
+
+        // Drop sequence that doesn't exist (should not throw error)
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightDropSequence('non_existent_seq', true);
+        });
+
+        $this->assertTrue(true); // Test passes if no exception
+    }
+
+    public function testKnightIdWithSequence(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create a shared sequence
+        $connection->statement("CREATE SEQUENCE shared_id_seq START WITH 5000");
+
+        // Create table using the shared sequence
+        $connection->statement("CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))");
+        $schema->table('knight_shared_seq_table1', function (Blueprint $table) {
+            $table->knightIdWithSequence('id', 'shared_id_seq');
+        });
+
+        // Insert and verify
+        $connection->table('knight_shared_seq_table1')->insert(['name' => 'test1']);
+        $record = $connection->table('knight_shared_seq_table1')->first();
+
+        $this->assertEquals(5000, $record->id);
+    }
+
+    public function testKnightIdWithSequenceNonPrimary(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create a shared sequence
+        $connection->statement("CREATE SEQUENCE shared_id_seq START WITH 1000");
+
+        // Create table with regular id and secondary column using sequence
+        $schema->create('knight_shared_seq_table1', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        $schema->table('knight_shared_seq_table1', function (Blueprint $table) {
+            $table->knightIdWithSequence('external_id', 'shared_id_seq', false);
+        });
+
+        // Insert and verify
+        $connection->table('knight_shared_seq_table1')->insert(['name' => 'test1']);
+        $record = $connection->table('knight_shared_seq_table1')->first();
+
+        $this->assertEquals(1, $record->id);
+        $this->assertEquals(1000, $record->external_id);
+    }
+
+    public function testMultipleTablesWithSharedSequence(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create a shared sequence starting at 10000
+        $connection->statement("CREATE SEQUENCE shared_id_seq START WITH 10000");
+
+        // Create first table using the shared sequence
+        $connection->statement("CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))");
+        $schema->table('knight_shared_seq_table1', function (Blueprint $table) {
+            $table->knightIdWithSequence('id', 'shared_id_seq');
+        });
+
+        // Create second table using the same sequence
+        $connection->statement("CREATE TABLE knight_shared_seq_table2 (title VARCHAR(255))");
+        $schema->table('knight_shared_seq_table2', function (Blueprint $table) {
+            $table->knightIdWithSequence('id', 'shared_id_seq');
+        });
+
+        // Insert into first table
+        $connection->table('knight_shared_seq_table1')->insert(['name' => 'record1']);
+
+        // Insert into second table
+        $connection->table('knight_shared_seq_table2')->insert(['title' => 'record2']);
+
+        // Insert into first table again
+        $connection->table('knight_shared_seq_table1')->insert(['name' => 'record3']);
+
+        // Verify IDs are sequential across tables
+        $record1 = $connection->table('knight_shared_seq_table1')->where('name', 'record1')->first();
+        $record2 = $connection->table('knight_shared_seq_table2')->where('title', 'record2')->first();
+        $record3 = $connection->table('knight_shared_seq_table1')->where('name', 'record3')->first();
+
+        $this->assertEquals(10000, $record1->id);
+        $this->assertEquals(10001, $record2->id);
+        $this->assertEquals(10002, $record3->id);
+    }
+
+    public function testThreeTablesWithSharedSequence(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create a shared sequence
+        $connection->statement("CREATE SEQUENCE shared_id_seq START WITH 1");
+
+        // Create three tables all using the same sequence
+        $connection->statement("CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))");
+        $schema->table('knight_shared_seq_table1', function (Blueprint $table) {
+            $table->knightIdWithSequence('id', 'shared_id_seq');
+        });
+
+        $connection->statement("CREATE TABLE knight_shared_seq_table2 (name VARCHAR(255))");
+        $schema->table('knight_shared_seq_table2', function (Blueprint $table) {
+            $table->knightIdWithSequence('id', 'shared_id_seq');
+        });
+
+        $connection->statement("CREATE TABLE knight_shared_seq_table3 (name VARCHAR(255))");
+        $schema->table('knight_shared_seq_table3', function (Blueprint $table) {
+            $table->knightIdWithSequence('id', 'shared_id_seq');
+        });
+
+        // Insert in alternating order
+        $connection->table('knight_shared_seq_table1')->insert(['name' => 'A']);
+        $connection->table('knight_shared_seq_table2')->insert(['name' => 'B']);
+        $connection->table('knight_shared_seq_table3')->insert(['name' => 'C']);
+        $connection->table('knight_shared_seq_table1')->insert(['name' => 'D']);
+        $connection->table('knight_shared_seq_table2')->insert(['name' => 'E']);
+        $connection->table('knight_shared_seq_table3')->insert(['name' => 'F']);
+
+        // Collect all IDs
+        $ids = [];
+        foreach (['knight_shared_seq_table1', 'knight_shared_seq_table2', 'knight_shared_seq_table3'] as $table) {
+            $records = $connection->table($table)->get();
+            foreach ($records as $record) {
+                $ids[] = $record->id;
+            }
+        }
+
+        sort($ids);
+
+        // All IDs should be unique and sequential
+        $this->assertEquals([1, 2, 3, 4, 5, 6], $ids);
+    }
+
+    public function testKnightUseSequence(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create a sequence
+        $connection->statement("CREATE SEQUENCE custom_seq START WITH 8000");
+
+        // Create table with standard id
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        // Modify id column to use custom sequence
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightUseSequence('id', 'custom_seq');
+        });
+
+        // Insert and verify
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test1']);
+        $record = $connection->table('knight_sequence_test_pg')->first();
+
+        $this->assertEquals(8000, $record->id);
+    }
+
+    public function testKnightUseSequenceMultipleInserts(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create a sequence
+        $connection->statement("CREATE SEQUENCE custom_seq START WITH 100 INCREMENT BY 5");
+
+        // Create table
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        // Modify to use custom sequence
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightUseSequence('id', 'custom_seq');
+        });
+
+        // Insert multiple records
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test1']);
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test2']);
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test3']);
+
+        $records = $connection->table('knight_sequence_test_pg')->orderBy('id')->get();
+
+        // With INCREMENT BY 5, IDs should be 100, 105, 110
+        $this->assertEquals(100, $records[0]->id);
+        $this->assertEquals(105, $records[1]->id);
+        $this->assertEquals(110, $records[2]->id);
+    }
+
+    public function testCreateSequenceAndUseTogether(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create sequence in one migration
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightCreateSequence('global_test_seq', 50000);
+        });
+
+        // Create first table
+        $connection->statement("CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))");
+        $schema->table('knight_shared_seq_table1', function (Blueprint $table) {
+            $table->knightIdWithSequence('id', 'global_test_seq');
+        });
+
+        // Create second table
+        $connection->statement("CREATE TABLE knight_shared_seq_table2 (name VARCHAR(255))");
+        $schema->table('knight_shared_seq_table2', function (Blueprint $table) {
+            $table->knightIdWithSequence('id', 'global_test_seq');
+        });
+
+        // Insert and verify
+        $connection->table('knight_shared_seq_table1')->insert(['name' => 'A']);
+        $connection->table('knight_shared_seq_table2')->insert(['name' => 'B']);
+
+        $r1 = $connection->table('knight_shared_seq_table1')->first();
+        $r2 = $connection->table('knight_shared_seq_table2')->first();
+
+        $this->assertEquals(50000, $r1->id);
+        $this->assertEquals(50001, $r2->id);
+    }
+
+    public function testSequenceCycleOption(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create a sequence with cycle and small max
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightCreateSequence('global_test_seq', 1, 1, 3, 1, true);
+        });
+
+        // Get values and verify cycling
+        $val1 = $connection->selectOne("SELECT nextval('global_test_seq') as val")->val;
+        $val2 = $connection->selectOne("SELECT nextval('global_test_seq') as val")->val;
+        $val3 = $connection->selectOne("SELECT nextval('global_test_seq') as val")->val;
+        $val4 = $connection->selectOne("SELECT nextval('global_test_seq') as val")->val;
+
+        $this->assertEquals(1, $val1);
+        $this->assertEquals(2, $val2);
+        $this->assertEquals(3, $val3);
+        $this->assertEquals(1, $val4); // Should cycle back to 1
+    }
+
+    public function testSequenceCacheOption(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create a sequence with cache = 20
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightCreateSequence('global_test_seq', 1, 1, null, 1, false, 20);
+        });
+
+        // Verify sequence exists with correct cache setting
+        $result = $connection->selectOne(
+            "SELECT cache_size FROM pg_sequences WHERE sequencename = 'global_test_seq'"
+        );
+        $this->assertNotNull($result);
+        $this->assertEquals(20, $result->cache_size);
+    }
+
+    public function testSequenceCacheDefaultValue(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create a sequence without specifying cache (default = 1)
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightCreateSequence('global_test_seq', 1000);
+        });
+
+        // Verify sequence has cache = 1
+        $result = $connection->selectOne(
+            "SELECT cache_size FROM pg_sequences WHERE sequencename = 'global_test_seq'"
+        );
+        $this->assertNotNull($result);
+        $this->assertEquals(1, $result->cache_size);
+    }
+
+    public function testSequenceWithAllOptions(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // Create a sequence with all options
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightCreateSequence(
+                'global_test_seq',
+                100,      // startWith
+                5,        // incrementBy
+                1000,     // maxValue
+                1,        // minValue
+                true,     // cycle
+                50        // cache
+            );
+        });
+
+        // Verify all settings
+        $result = $connection->selectOne(
+            "SELECT start_value, increment_by, min_value, max_value, cycle, cache_size
+             FROM pg_sequences WHERE sequencename = 'global_test_seq'"
+        );
+
+        $this->assertEquals(100, $result->start_value);
+        $this->assertEquals(5, $result->increment_by);
+        $this->assertEquals(1, $result->min_value);
+        $this->assertEquals(1000, $result->max_value);
+        $this->assertTrue($result->cycle);
+        $this->assertEquals(50, $result->cache_size);
+    }
+
+    // ==================== Strict Additional Tests ====================
+
+    public function testKnightSetSequenceValueWithZero(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        // 设置序列值为 0 应该会导致错误或特殊行为
+        // PostgreSQL 序列最小值通常是 1
+        $this->expectException(\Throwable::class);
+
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightSetSequenceValue('id', 0);
+        });
+    }
+
+    public function testKnightSetSequenceValueWithNegative(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        // 设置序列为负数应该会报错（序列默认 MINVALUE 是 1）
+        $this->expectException(\Throwable::class);
+
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightSetSequenceValue('id', -100);
+        });
+    }
+
+    public function testKnightCreateSequenceWithNegativeIncrement(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // 创建递减序列
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightCreateSequence('global_test_seq', 100, -1, 100, -1000, false);
+        });
+
+        // 验证序列存在
+        $result = $connection->selectOne(
+            "SELECT start_value, increment_by, min_value, max_value
+             FROM pg_sequences WHERE sequencename = 'global_test_seq'"
+        );
+
+        $this->assertEquals(100, $result->start_value);
+        $this->assertEquals(-1, $result->increment_by);
+        $this->assertEquals(-1000, $result->min_value);
+        $this->assertEquals(100, $result->max_value);
+
+        // 验证递减行为
+        $val1 = $connection->selectOne("SELECT nextval('global_test_seq') as val")->val;
+        $val2 = $connection->selectOne("SELECT nextval('global_test_seq') as val")->val;
+        $val3 = $connection->selectOne("SELECT nextval('global_test_seq') as val")->val;
+
+        $this->assertEquals(100, $val1);
+        $this->assertEquals(99, $val2);
+        $this->assertEquals(98, $val3);
+    }
+
+    public function testKnightCreateSequenceWithZeroCache(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // cache = 0 应该被转换为 1
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightCreateSequence('global_test_seq', 1, 1, null, 1, false, 0);
+        });
+
+        $result = $connection->selectOne(
+            "SELECT cache_size FROM pg_sequences WHERE sequencename = 'global_test_seq'"
+        );
+
+        // 由于 max(1, 0) = 1，cache 应该是 1
+        $this->assertEquals(1, $result->cache_size);
+    }
+
+    public function testKnightCreateSequenceWithNegativeCache(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // 负数 cache 应该被转换为 1
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightCreateSequence('global_test_seq', 1, 1, null, 1, false, -10);
+        });
+
+        $result = $connection->selectOne(
+            "SELECT cache_size FROM pg_sequences WHERE sequencename = 'global_test_seq'"
+        );
+
+        // 由于 max(1, -10) = 1，cache 应该是 1
+        $this->assertEquals(1, $result->cache_size);
+    }
+
+    public function testKnightIdWithSequenceColumnProperties(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // 创建共享序列
+        $connection->statement("CREATE SEQUENCE shared_id_seq START WITH 1");
+
+        // 创建表
+        $connection->statement("CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))");
+        $schema->table('knight_shared_seq_table1', function (Blueprint $table) {
+            $table->knightIdWithSequence('id', 'shared_id_seq');
+        });
+
+        // 验证列属性
+        $column = $connection->selectOne("
+            SELECT column_name, data_type, column_default, is_nullable
+            FROM information_schema.columns
+            WHERE table_name = 'knight_shared_seq_table1' AND column_name = 'id'
+        ");
+
+        $this->assertEquals('id', $column->column_name);
+        $this->assertEquals('bigint', $column->data_type);
+        $this->assertStringContainsString('shared_id_seq', $column->column_default);
+        $this->assertEquals('NO', $column->is_nullable);
+
+        // 验证是否为主键
+        $pk = $connection->selectOne("
+            SELECT constraint_name
+            FROM information_schema.table_constraints
+            WHERE table_name = 'knight_shared_seq_table1' AND constraint_type = 'PRIMARY KEY'
+        ");
+
+        $this->assertNotNull($pk);
+    }
+
+    public function testKnightRestartSequencePreservesSequenceProperties(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        // 获取序列属性
+        $before = $connection->selectOne(
+            "SELECT increment_by FROM pg_sequences WHERE sequencename = 'knight_sequence_test_pg_id_seq'"
+        );
+
+        // 重启序列
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightRestartSequence('id', 5000);
+        });
+
+        // 验证序列属性未改变（只有值改变了）
+        $after = $connection->selectOne(
+            "SELECT increment_by FROM pg_sequences WHERE sequencename = 'knight_sequence_test_pg_id_seq'"
+        );
+
+        $this->assertEquals($before->increment_by, $after->increment_by);
+
+        // 验证值确实改变了
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test']);
+        $record = $connection->table('knight_sequence_test_pg')->first();
+        $this->assertEquals(5000, $record->id);
+    }
+
+    public function testKnightDropSequenceFailsForNonExistent(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+        });
+
+        // 删除不存在的序列（没有 IF EXISTS）应该抛出异常
+        $this->expectException(\Throwable::class);
+
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightDropSequence('absolutely_nonexistent_seq_xyz_123', false);
+        });
+    }
+
+    public function testKnightUseSequenceOnNonExistentSequence(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        // 使用不存在的序列应该失败
+        $this->expectException(\Throwable::class);
+
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightUseSequence('id', 'nonexistent_sequence_xyz');
+        });
+    }
+
+    public function testSequenceValueBoundaryBigInt(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        // 设置一个接近 BIGINT 最大值的值（但不是最大值，避免溢出）
+        $largeValue = 9223372036854775000;  // 接近 PHP_INT_MAX
+
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) use ($largeValue) {
+            $table->knightSetSequenceValue('id', $largeValue);
+        });
+
+        // 插入记录并验证
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test1']);
+        $record = $connection->table('knight_sequence_test_pg')->first();
+
+        // PostgreSQL 返回的是字符串（因为数字太大）
+        $this->assertEquals((string) $largeValue, (string) $record->id);
+    }
+
+    public function testMultipleSequenceOperationsInSameTable(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // 在同一个 table 回调中执行多个序列操作
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            // 创建表的同时设置序列值
+            $table->knightSetSequenceValue('id', 100);
+        });
+
+        // 插入第一条记录
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test1']);
+
+        // 在同一个 table 回调中修改序列值两次
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightSetSequenceValue('id', 200);
+            $table->knightSetSequenceValue('id', 300);
+        });
+
+        // 插入第二条记录 - 应该使用最后设置的值 300
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test2']);
+
+        $records = $connection->table('knight_sequence_test_pg')->orderBy('id')->get();
+
+        $this->assertEquals(100, $records[0]->id);
+        $this->assertEquals(300, $records[1]->id);
+    }
+
+    public function testSharedSequenceAfterDrop(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // 创建共享序列
+        $connection->statement("CREATE SEQUENCE shared_id_seq START WITH 1000");
+
+        // 创建使用该序列的表
+        $connection->statement("CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))");
+        $schema->table('knight_shared_seq_table1', function (Blueprint $table) {
+            $table->knightIdWithSequence('id', 'shared_id_seq');
+        });
+
+        // 插入一条记录
+        $connection->table('knight_shared_seq_table1')->insert(['name' => 'test1']);
+        $record1 = $connection->table('knight_shared_seq_table1')->first();
+        $this->assertEquals(1000, $record1->id);
+
+        // 删除序列（CASCADE 会同时删除依赖）
+        $connection->statement("DROP SEQUENCE shared_id_seq CASCADE");
+
+        // 现在插入应该失败
+        $this->expectException(\Throwable::class);
+        $connection->table('knight_shared_seq_table1')->insert(['name' => 'test2']);
+    }
+
+    public function testSequenceIncrementByLargeValue(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        // 创建大步长的序列
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightCreateSequence('global_test_seq', 1, 1000, null, 1, false);
+        });
+
+        $val1 = $connection->selectOne("SELECT nextval('global_test_seq') as val")->val;
+        $val2 = $connection->selectOne("SELECT nextval('global_test_seq') as val")->val;
+        $val3 = $connection->selectOne("SELECT nextval('global_test_seq') as val")->val;
+
+        $this->assertEquals(1, $val1);
+        $this->assertEquals(1001, $val2);
+        $this->assertEquals(2001, $val3);
+    }
+
+    public function testKnightSetSequenceValueVerifyIsCalled(): void
+    {
+        $this->skipIfPgsqlNotConfigured();
+
+        $connection = DB::connection('pgsql');
+        $schema = $connection->getSchemaBuilder();
+
+        $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+        });
+
+        // 使用 setval(..., false) 设置值
+        $schema->table('knight_sequence_test_pg', function (Blueprint $table) {
+            $table->knightSetSequenceValue('id', 500);
+        });
+
+        // 验证 is_called 为 false（下一次 nextval 返回设置的值）
+        $result = $connection->selectOne(
+            "SELECT last_value, is_called FROM knight_sequence_test_pg_id_seq"
+        );
+
+        $this->assertEquals(500, $result->last_value);
+        $this->assertFalse($result->is_called);
+
+        // 插入记录应该得到 500
+        $connection->table('knight_sequence_test_pg')->insert(['name' => 'test']);
+        $record = $connection->table('knight_sequence_test_pg')->first();
+        $this->assertEquals(500, $record->id);
+
+        // 再次检查 is_called
+        $result2 = $connection->selectOne(
+            "SELECT last_value, is_called FROM knight_sequence_test_pg_id_seq"
+        );
+        $this->assertTrue($result2->is_called);
     }
 
     // ==================== Helper Methods ====================

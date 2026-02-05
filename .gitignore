@@ -19,3 +19,4 @@ phpunit.xml
 /coverage1.html
 /tests/.temp/
 phpunit_*.txt
+toArra*

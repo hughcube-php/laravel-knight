@@ -297,4 +297,138 @@ class PostgresGrammarMixin
             return 'tsquery';
         };
     }
+
+    // ==================== PostgreSQL Sequence Methods ====================
+
+    /**
+     * 编译设置序列值命令.
+     *
+     * 使用 setval() 函数设置序列的下一个值。
+     * 第三个参数 false 表示下一次 nextval() 将返回指定的值。
+     *
+     * @return Closure(Blueprint, Fluent): string
+     */
+    public function compileKnightSetSequenceValue(): Closure
+    {
+        return function (Blueprint $blueprint, Fluent $command) {
+            $sequenceName = $command->sequenceName;
+            $value = $command->value;
+
+            return "SELECT setval('{$sequenceName}', {$value}, false)";
+        };
+    }
+
+    /**
+     * 编译重启序列命令.
+     *
+     * 使用 ALTER SEQUENCE ... RESTART WITH 语法重启序列。
+     *
+     * @return Closure(Blueprint, Fluent): string
+     */
+    public function compileKnightRestartSequence(): Closure
+    {
+        return function (Blueprint $blueprint, Fluent $command) {
+            $sequenceName = $command->sequenceName;
+            $value = $command->value;
+
+            return "ALTER SEQUENCE \"{$sequenceName}\" RESTART WITH {$value}";
+        };
+    }
+
+    /**
+     * 编译创建序列命令.
+     *
+     * @return Closure(Blueprint, Fluent): string
+     */
+    public function compileKnightCreateSequence(): Closure
+    {
+        return function (Blueprint $blueprint, Fluent $command) {
+            $sequenceName = $command->sequenceName;
+            $startWith = $command->startWith;
+            $incrementBy = $command->incrementBy;
+            $maxValue = $command->maxValue;
+            $minValue = $command->minValue;
+            $cycle = $command->cycle;
+            $cache = $command->cache ?? 1;
+
+            $sql = "CREATE SEQUENCE \"{$sequenceName}\"";
+            $sql .= " START WITH {$startWith}";
+            $sql .= " INCREMENT BY {$incrementBy}";
+            $sql .= " MINVALUE {$minValue}";
+
+            if ($maxValue !== null) {
+                $sql .= " MAXVALUE {$maxValue}";
+            } else {
+                $sql .= " NO MAXVALUE";
+            }
+
+            $sql .= $cycle ? " CYCLE" : " NO CYCLE";
+            $sql .= " CACHE {$cache}";
+
+            return $sql;
+        };
+    }
+
+    /**
+     * 编译删除序列命令.
+     *
+     * @return Closure(Blueprint, Fluent): string
+     */
+    public function compileKnightDropSequence(): Closure
+    {
+        return function (Blueprint $blueprint, Fluent $command) {
+            $sequenceName = $command->sequenceName;
+            $ifExists = $command->ifExists;
+
+            $sql = "DROP SEQUENCE";
+            if ($ifExists) {
+                $sql .= " IF EXISTS";
+            }
+            $sql .= " \"{$sequenceName}\"";
+
+            return $sql;
+        };
+    }
+
+    /**
+     * 编译使用序列的主键列命令.
+     *
+     * @return Closure(Blueprint, Fluent): string
+     */
+    public function compileKnightIdWithSequence(): Closure
+    {
+        return function (Blueprint $blueprint, Fluent $command) {
+            /** @var \Illuminate\Database\Schema\Grammars\PostgresGrammar $this */
+            $tableName = $this->wrapTable($blueprint);
+            $column = $command->column;
+            $sequenceName = $command->sequenceName;
+            $primary = $command->primary;
+
+            $sql = "ALTER TABLE {$tableName} ADD COLUMN \"{$column}\" BIGINT";
+            $sql .= " DEFAULT nextval('{$sequenceName}') NOT NULL";
+
+            if ($primary) {
+                $sql .= "; ALTER TABLE {$tableName} ADD PRIMARY KEY (\"{$column}\")";
+            }
+
+            return $sql;
+        };
+    }
+
+    /**
+     * 编译修改列使用序列命令.
+     *
+     * @return Closure(Blueprint, Fluent): string
+     */
+    public function compileKnightUseSequence(): Closure
+    {
+        return function (Blueprint $blueprint, Fluent $command) {
+            /** @var \Illuminate\Database\Schema\Grammars\PostgresGrammar $this */
+            $tableName = $this->wrapTable($blueprint);
+            $column = $command->column;
+            $sequenceName = $command->sequenceName;
+
+            return "ALTER TABLE {$tableName} ALTER COLUMN \"{$column}\" SET DEFAULT nextval('{$sequenceName}')";
+        };
+    }
 }

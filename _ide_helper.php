@@ -175,9 +175,8 @@ namespace Illuminate\Database\Schema {
         /**
          * 添加 NUMERIC[] 数组列 (PostgreSQL).
          * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightNumericArray()
-         * @return \Illuminate\Database\Schema\ColumnDefinition
          */
-        public function knightNumericArray(string $column, ?int $precision = null, ?int $scale = null): \Illuminate\Database\Schema\ColumnDefinition
+        public function knightNumericArray(string $column, ?int $precision = null, ?int $scale = null): mixed
         {
         }
 
@@ -223,6 +222,57 @@ namespace Illuminate\Database\Schema {
          * @return \Illuminate\Database\Schema\ColumnDefinition
          */
         public function knightTsQuery(string $column): \Illuminate\Database\Schema\ColumnDefinition
+        {
+        }
+
+        /**
+         * 设置序列的下一个值 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightSetSequenceValue()
+         * @return static
+         */
+        public function knightSetSequenceValue(string $column, int $value, ?string $sequenceName = null): static
+        {
+        }
+
+        /**
+         * 重启序列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightRestartSequence()
+         * @return static
+         */
+        public function knightRestartSequence(string $column, int $value, ?string $sequenceName = null): static
+        {
+        }
+
+        /**
+         * 创建一个独立的序列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightCreateSequence()
+         */
+        public function knightCreateSequence(string $sequenceName, int $startWith = 1, int $incrementBy = 1, ?int $maxValue = null, int $minValue = 1, bool $cycle = false, int $cache = 1): mixed
+        {
+        }
+
+        /**
+         * 删除序列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightDropSequence()
+         * @return static
+         */
+        public function knightDropSequence(string $sequenceName, bool $ifExists = false): static
+        {
+        }
+
+        /**
+         * 添加使用指定序列的 BIGINT 主键列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightIdWithSequence()
+         */
+        public function knightIdWithSequence(string $column, string $sequenceName, bool $primary = true): mixed
+        {
+        }
+
+        /**
+         * 修改列以使用指定的序列 (PostgreSQL).
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin::knightUseSequence()
+         */
+        public function knightUseSequence(string $column, string $sequenceName): mixed
         {
         }
     }
@@ -403,6 +453,60 @@ namespace Illuminate\Database\Schema\Grammars {
          * @return string
          */
         public function typeKnightTsQuery(\Illuminate\Support\Fluent $column): string
+        {
+        }
+
+        /**
+         * 编译设置序列值命令.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::compileKnightSetSequenceValue()
+         * @return string
+         */
+        public function compileKnightSetSequenceValue(\Illuminate\Database\Schema\Blueprint $blueprint, \Illuminate\Support\Fluent $command): string
+        {
+        }
+
+        /**
+         * 编译重启序列命令.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::compileKnightRestartSequence()
+         * @return string
+         */
+        public function compileKnightRestartSequence(\Illuminate\Database\Schema\Blueprint $blueprint, \Illuminate\Support\Fluent $command): string
+        {
+        }
+
+        /**
+         * 编译创建序列命令.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::compileKnightCreateSequence()
+         * @return string
+         */
+        public function compileKnightCreateSequence(\Illuminate\Database\Schema\Blueprint $blueprint, \Illuminate\Support\Fluent $command): string
+        {
+        }
+
+        /**
+         * 编译删除序列命令.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::compileKnightDropSequence()
+         * @return string
+         */
+        public function compileKnightDropSequence(\Illuminate\Database\Schema\Blueprint $blueprint, \Illuminate\Support\Fluent $command): string
+        {
+        }
+
+        /**
+         * 编译使用序列的主键列命令.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::compileKnightIdWithSequence()
+         * @return string
+         */
+        public function compileKnightIdWithSequence(\Illuminate\Database\Schema\Blueprint $blueprint, \Illuminate\Support\Fluent $command): string
+        {
+        }
+
+        /**
+         * 编译修改列使用序列命令.
+         * @see \HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin::compileKnightUseSequence()
+         * @return string
+         */
+        public function compileKnightUseSequence(\Illuminate\Database\Schema\Blueprint $blueprint, \Illuminate\Support\Fluent $command): string
         {
         }
     }

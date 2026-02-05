@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use HughCube\Laravel\Knight\Auth\ModelUserProvider;
 use HughCube\Laravel\Knight\Console\Commands\ClearModelCache;
 use HughCube\Laravel\Knight\Console\Commands\Config;
+use HughCube\Laravel\Knight\Console\Commands\DatabaseRandomizeSequences;
 use HughCube\Laravel\Knight\Console\Commands\DatabaseResetAutoIncrementStartId;
 use HughCube\Laravel\Knight\Console\Commands\Environment;
 use HughCube\Laravel\Knight\Console\Commands\GenerateMixinIdeHelperCommand;
@@ -96,6 +97,7 @@ class ServiceProvider extends IlluminateServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 Config::class,
+                DatabaseRandomizeSequences::class,
                 DatabaseResetAutoIncrementStartId::class,
                 Environment::class,
                 PhpIniFile::class,
