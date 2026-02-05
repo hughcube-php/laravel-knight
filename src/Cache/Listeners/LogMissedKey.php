@@ -24,7 +24,6 @@ class LogMissedKey
     {
         Log::debug(sprintf(
             'cache missed: store: %s, key: %s, tags: %s',
-            /** @phpstan-ignore-next-line */
             property_exists($event, 'storeName') ? $event->storeName : null,
             $event->key,
             implode(',', $event->tags)

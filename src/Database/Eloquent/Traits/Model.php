@@ -373,7 +373,7 @@ trait Model
             static::$modelCacheKeyMakeCache['classCacheKeyPrefix'][$class] = sprintf(
                 '%s-%s',
                 Str::snake(Str::afterLast($class, '\\')),
-                base_convert(abs(crc32($class)), 10, 36)
+                base_convert((string) abs(crc32($class)), 10, 36)
             );
         }
 
@@ -383,7 +383,7 @@ trait Model
             static::$modelCacheKeyMakeCache['classCacheKeyPrefix'][$class],
             $this->getCacheVersion(),
             md5($string = sprintf('%s:%s', $class, $cacheKey)),
-            base_convert(abs(crc32($string)), 10, 32)
+            base_convert((string) abs(crc32($string)), 10, 32)
         );
     }
 

@@ -512,6 +512,23 @@ namespace Illuminate\Database\Schema\Grammars {
     }
 }
 
+namespace Illuminate\Console\Scheduling {
+
+    /**
+     * @see \HughCube\Laravel\Knight\Mixin\Console\Scheduling\EventMixin
+     */
+    class Event
+    {
+        /**
+         * 设置日志输出路径，通过回调函数动态生成路径.
+         * @see \HughCube\Laravel\Knight\Mixin\Console\Scheduling\EventMixin::sendOutputToDynamic()
+         */
+        public function sendOutputToDynamic(callable $callback, $append = true): mixed
+        {
+        }
+    }
+}
+
 namespace Illuminate\Database\Query {
 
     /**

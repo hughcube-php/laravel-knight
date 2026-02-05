@@ -23,6 +23,7 @@ class PingDatabaseJob extends Job
      */
     protected function action(): void
     {
+        /** @var Connection $connection */
         $connection = DB::connection($this->p('connection'));
 
         $writeResultMessage = $this->pingResultMessage($connection, false);

@@ -71,7 +71,7 @@ class PostgresGrammar extends BasePostgresGrammar
                 : new PostgresConnection($connection, $database, $prefix, $config);
 
             if (method_exists($resolvedConnection, 'setQueryGrammar')) {
-                $resolvedConnection->setQueryGrammar(new self($resolvedConnection));
+                $resolvedConnection->setQueryGrammar(new self());
             }
 
             return $resolvedConnection;
@@ -97,7 +97,7 @@ class PostgresGrammar extends BasePostgresGrammar
                 && $connection->getDriverName() === 'pgsql'
                 && method_exists($connection, 'setQueryGrammar')
             ) {
-                $connection->setQueryGrammar(new self($connection));
+                $connection->setQueryGrammar(new self());
             }
         }
     }

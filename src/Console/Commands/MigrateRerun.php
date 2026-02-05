@@ -56,6 +56,7 @@ class MigrateRerun extends Command
             }
         }
 
+        /** @var Connection $connection */
         $connection = DB::connection($this->option('connection') ?: null);
         $pathOption = $this->option('path');
 

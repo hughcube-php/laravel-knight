@@ -70,7 +70,7 @@ class DebugHandler extends ExceptionHandler
     {
         // 优先使用子类自定义的转换逻辑
         $custom = $this->convertExceptionToResults($e);
-        if (!empty($custom) && is_array($custom)) {
+        if (!empty($custom)) {
             $custom['Data'] ??= new stdClass();
             return $custom;
         }

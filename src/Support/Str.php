@@ -378,7 +378,6 @@ class Str extends \Illuminate\Support\Str
     {
         $char = substr($string, $index, 1);
 
-        /** @phpstan-ignore-next-line */
         return false === $char ? '' : $char;
     }
 

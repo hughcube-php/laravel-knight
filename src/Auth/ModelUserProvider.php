@@ -77,7 +77,6 @@ class ModelUserProvider implements UserProvider
      */
     public function rehashPasswordIfRequired(Authenticatable $user, array $credentials, bool $force = false)
     {
-        /** @phpstan-ignore-next-line */
         return $this->callModelMethod(__FUNCTION__, $user, $credentials, $force);
     }
 }

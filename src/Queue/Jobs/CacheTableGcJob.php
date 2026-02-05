@@ -47,6 +47,7 @@ class CacheTableGcJob extends Job
 
     protected function getConnection(): Connection
     {
+        /** @var Connection */
         return DB::connection($this->p('connection'));
     }
 

@@ -32,6 +32,7 @@ use HughCube\Laravel\Knight\Mixin\Database\Eloquent\CollectionMixin as EloquentC
 use HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin;
 use HughCube\Laravel\Knight\Mixin\Database\Query\Grammars\GrammarMixin;
 use HughCube\Laravel\Knight\Mixin\Http\RequestMixin;
+use HughCube\Laravel\Knight\Mixin\Console\Scheduling\EventMixin as ScheduleEventMixin;
 use HughCube\Laravel\Knight\Mixin\Support\CarbonMixin;
 use HughCube\Laravel\Knight\Mixin\Support\CollectionMixin;
 use HughCube\Laravel\Knight\OPcache\Actions\ResetAction as OPcacheResetAction;
@@ -41,6 +42,7 @@ use HughCube\Laravel\Knight\OPcache\Commands\ClearCliCacheCommand as OPcacheClea
 use HughCube\Laravel\Knight\OPcache\Commands\CompileFilesCommand as OPcacheCompileFilesCommand;
 use HughCube\Laravel\Knight\OPcache\Commands\CreatePreloadCommand as OPcacheCreatePreloadCommand;
 use Illuminate\Config\Repository;
+use Illuminate\Console\Scheduling\Event as ScheduleEvent;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
@@ -81,6 +83,11 @@ class ServiceProvider extends IlluminateServiceProvider
 
         /** Carbon */
         Carbon::mixin(new CarbonMixin());
+
+        /** Console Scheduling - 仅在 CLI 模式下注册 */
+        if ($this->app->runningInConsole()) {
+            ScheduleEvent::mixin(new ScheduleEventMixin(), false);
+        }
 
         /** Migration Schema - 仅在 ide-helper 命令时注册 */
         if ($this->app->runningInConsole() && str_starts_with($_SERVER['argv'][1] ?? '', 'ide-helper:')) {
@@ -211,8 +218,9 @@ class ServiceProvider extends IlluminateServiceProvider
      */
     protected function registerRefreshModelCacheEvent()
     {
+        /** @var Dispatcher|null $dispatcher */
         $dispatcher = EloquentModel::getEventDispatcher();
-        if (!$dispatcher instanceof Dispatcher) {
+        if (null === $dispatcher) {
             return;
         }
 

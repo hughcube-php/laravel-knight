@@ -446,11 +446,9 @@ class StrMixin
      */
     protected function offsetGet(): Closure
     {
-        /** @phpstan-ignore-next-line */
-        return function ($string, $index): ?string {
+        return function ($string, $index): string {
             $char = substr($string, $index, 1);
 
-            /** @phpstan-ignore-next-line */
             return false === $char ? '' : $char;
         };
     }
