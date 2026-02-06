@@ -131,12 +131,12 @@ class RequestMixin
     }
 
     /**
-     * 判断是否在postmen.
+     * 判断是否在postmen/Apifox.
      */
     public function isPostmen(): Closure
     {
         return function (): bool {
-            return Str::startsWith($this->userAgent(), 'PostmanRuntime');
+            return Str::startsWith($this->userAgent(), ['PostmanRuntime', 'Apifox']);
         };
     }
 
