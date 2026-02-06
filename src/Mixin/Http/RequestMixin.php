@@ -136,7 +136,27 @@ class RequestMixin
     public function isPostmen(): Closure
     {
         return function (): bool {
-            return Str::startsWith($this->userAgent(), ['PostmanRuntime', 'Apifox']);
+            return Str::startsWith($this->userAgent(), ['PostmanRuntime']);
+        };
+    }
+
+    /**
+     * 判断是否为 API 调试工具.
+     */
+    public function isApiDebugTool(): Closure
+    {
+        return function (): bool {
+            return Str::startsWith($this->userAgent(), [
+                'PostmanRuntime',
+                'Apifox',
+                'insomnia',
+                'HTTPie',
+                'curl',
+                'Hoppscotch',
+                'ApiPOST',
+                'Paw',
+                'RapidAPI',
+            ]);
         };
     }
 
