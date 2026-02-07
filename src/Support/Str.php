@@ -544,4 +544,109 @@ class Str extends \Illuminate\Support\Str
         return strtolower(mb_convert_kana($a, $model, 'UTF-8'))
             == strtolower(mb_convert_kana($b, $model, 'UTF-8'));
     }
+
+    /**
+     * 邮箱脱敏: u**r@example.com
+     */
+    public static function maskEmail($string): string
+    {
+        if (!is_string($string) || empty($string)) {
+            return '';
+        }
+
+        $atPos = strpos($string, '@');
+        if (false === $atPos) {
+            return $string;
+        }
+
+        $local = substr($string, 0, $atPos);
+        $domain = substr($string, $atPos);
+        $localLen = strlen($local);
+
+        if ($localLen <= 1) {
+            return '*' . $domain;
+        }
+
+        if ($localLen <= 2) {
+            return $local[0] . '*' . $domain;
+        }
+
+        return $local[0] . str_repeat('*', $localLen - 2) . $local[$localLen - 1] . $domain;
+    }
+
+    /**
+     * 银行卡脱敏: 6222 **** **** 1234
+     */
+    public static function maskBankCard($string): string
+    {
+        if (!is_string($string) || empty($string)) {
+            return '';
+        }
+
+        $len = strlen($string);
+        if ($len <= 8) {
+            return $string;
+        }
+
+        return substr($string, 0, 4) . str_repeat('*', $len - 8) . substr($string, -4);
+    }
+
+    /**
+     * 中文姓名脱敏: 张*、张*丰
+     */
+    public static function maskName($string): string
+    {
+        if (!is_string($string) || empty($string)) {
+            return '';
+        }
+
+        $len = mb_strlen($string, 'UTF-8');
+        if ($len <= 1) {
+            return '*';
+        }
+
+        if ($len == 2) {
+            return mb_substr($string, 0, 1, 'UTF-8') . '*';
+        }
+
+        return mb_substr($string, 0, 1, 'UTF-8')
+            . str_repeat('*', $len - 2)
+            . mb_substr($string, -1, 1, 'UTF-8');
+    }
+
+    /**
+     * 地址脱敏: 保留前N个字符，其余用*替换
+     */
+    public static function maskAddress($string, int $keepLength = 6): string
+    {
+        if (!is_string($string) || empty($string)) {
+            return '';
+        }
+
+        $len = mb_strlen($string, 'UTF-8');
+        if ($len <= $keepLength) {
+            return $string;
+        }
+
+        return mb_substr($string, 0, $keepLength, 'UTF-8') . str_repeat('*', $len - $keepLength);
+    }
+
+    /**
+     * 车牌号脱敏: 京A****8
+     */
+    public static function maskPlateNumber($string): string
+    {
+        if (!is_string($string) || empty($string)) {
+            return '';
+        }
+
+        $len = mb_strlen($string, 'UTF-8');
+        if ($len <= 2) {
+            return $string;
+        }
+
+        return mb_substr($string, 0, 2, 'UTF-8')
+            . str_repeat('*', $len - 3)
+            . mb_substr($string, -1, 1, 'UTF-8');
+    }
 }

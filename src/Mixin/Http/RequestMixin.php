@@ -208,4 +208,107 @@ class RequestMixin
             return Str::afterLast(trim($this->getPathInfo()), '/') ?: null;
         };
     }
+
+    /**
+     * 判断是否在企业微信客户端内.
+     */
+    public function isWeCom(): Closure
+    {
+        return function (): bool {
+            return str_contains($this->userAgent(), 'wxwork');
+        };
+    }
+
+    /**
+     * 判断是否在钉钉客户端内.
+     */
+    public function isDingTalk(): Closure
+    {
+        return function (): bool {
+            return str_contains($this->userAgent(), 'DingTalk');
+        };
+    }
+
+    /**
+     * 判断是否在飞书客户端内.
+     */
+    public function isFeishu(): Closure
+    {
+        return function (): bool {
+            $ua = $this->userAgent();
+            return str_contains($ua, 'Lark') || str_contains($ua, 'Feishu');
+        };
+    }
+
+    /**
+     * 判断是否在支付宝客户端内.
+     */
+    public function isAlipay(): Closure
+    {
+        return function (): bool {
+            return str_contains($this->userAgent(), 'AlipayClient');
+        };
+    }
+
+    /**
+     * 判断是否在QQ客户端内(非QQ浏览器).
+     */
+    public function isQQ(): Closure
+    {
+        return function (): bool {
+            $ua = $this->userAgent();
+            return str_contains($ua, 'QQ/') && !str_contains($ua, 'MQQBrowser');
+        };
+    }
+
+    /**
+     * 判断是否在QQ浏览器内.
+     */
+    public function isQQBrowser(): Closure
+    {
+        return function (): bool {
+            return str_contains($this->userAgent(), 'MQQBrowser');
+        };
+    }
+
+    /**
+     * 判断是否在UC浏览器内.
+     */
+    public function isUCBrowser(): Closure
+    {
+        return function (): bool {
+            return str_contains($this->userAgent(), 'UCBrowser');
+        };
+    }
+
+    /**
+     * 判断是否在微博客户端内.
+     */
+    public function isWeibo(): Closure
+    {
+        return function (): bool {
+            return str_contains($this->userAgent(), 'Weibo');
+        };
+    }
+
+    /**
+     * 判断是否在抖音/字节系客户端内.
+     */
+    public function isDouyin(): Closure
+    {
+        return function (): bool {
+            $ua = $this->userAgent();
+            return str_contains($ua, 'Aweme') || str_contains($ua, 'BytedanceWebview');
+        };
+    }
+
+    /**
+     * 判断是否在Quark浏览器内.
+     */
+    public function isQuark(): Closure
+    {
+        return function (): bool {
+            return str_contains($this->userAgent(), 'Quark');
+        };
+    }
 }

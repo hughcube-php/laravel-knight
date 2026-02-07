@@ -1787,10 +1787,18 @@ namespace Illuminate\Http {
         }
 
         /**
-         * 判断是否在postmen.
+         * 判断是否在postmen/Apifox.
          * @see \HughCube\Laravel\Knight\Mixin\Http\RequestMixin::isPostmen()
          */
         public function isPostmen(): bool
+        {
+        }
+
+        /**
+         * 判断是否为 API 调试工具.
+         * @see \HughCube\Laravel\Knight\Mixin\Http\RequestMixin::isApiDebugTool()
+         */
+        public function isApiDebugTool(): bool
         {
         }
 
@@ -1823,6 +1831,86 @@ namespace Illuminate\Http {
          * @see \HughCube\Laravel\Knight\Mixin\Http\RequestMixin::getLastDirectory()
          */
         public function getLastDirectory(): ?string
+        {
+        }
+
+        /**
+         * 判断是否在企业微信客户端内.
+         * @see \HughCube\Laravel\Knight\Mixin\Http\RequestMixin::isWeCom()
+         */
+        public function isWeCom(): bool
+        {
+        }
+
+        /**
+         * 判断是否在钉钉客户端内.
+         * @see \HughCube\Laravel\Knight\Mixin\Http\RequestMixin::isDingTalk()
+         */
+        public function isDingTalk(): bool
+        {
+        }
+
+        /**
+         * 判断是否在飞书客户端内.
+         * @see \HughCube\Laravel\Knight\Mixin\Http\RequestMixin::isFeishu()
+         */
+        public function isFeishu(): bool
+        {
+        }
+
+        /**
+         * 判断是否在支付宝客户端内.
+         * @see \HughCube\Laravel\Knight\Mixin\Http\RequestMixin::isAlipay()
+         */
+        public function isAlipay(): bool
+        {
+        }
+
+        /**
+         * 判断是否在QQ客户端内(非QQ浏览器).
+         * @see \HughCube\Laravel\Knight\Mixin\Http\RequestMixin::isQQ()
+         */
+        public function isQQ(): bool
+        {
+        }
+
+        /**
+         * 判断是否在QQ浏览器内.
+         * @see \HughCube\Laravel\Knight\Mixin\Http\RequestMixin::isQQBrowser()
+         */
+        public function isQQBrowser(): bool
+        {
+        }
+
+        /**
+         * 判断是否在UC浏览器内.
+         * @see \HughCube\Laravel\Knight\Mixin\Http\RequestMixin::isUCBrowser()
+         */
+        public function isUCBrowser(): bool
+        {
+        }
+
+        /**
+         * 判断是否在微博客户端内.
+         * @see \HughCube\Laravel\Knight\Mixin\Http\RequestMixin::isWeibo()
+         */
+        public function isWeibo(): bool
+        {
+        }
+
+        /**
+         * 判断是否在抖音/字节系客户端内.
+         * @see \HughCube\Laravel\Knight\Mixin\Http\RequestMixin::isDouyin()
+         */
+        public function isDouyin(): bool
+        {
+        }
+
+        /**
+         * 判断是否在Quark浏览器内.
+         * @see \HughCube\Laravel\Knight\Mixin\Http\RequestMixin::isQuark()
+         */
+        public function isQuark(): bool
         {
         }
     }
