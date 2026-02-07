@@ -8,46 +8,46 @@ use HughCube\Laravel\Knight\Tests\TestCase;
 
 class UniqueIdTest extends TestCase
 {
-    /**
-     * @dataProvider methodProvider
-     */
-    public function testReturnsNonEmptyBase36String($method)
+    public function testReturnsNonEmptyBase36String()
     {
-        $id = UniqueId::$method();
-        $this->assertNotEmpty($id);
-        $this->assertIsString($id);
-        $this->assertTrue(1 === preg_match('/^[0-9a-z]+$/', $id));
-    }
-
-    /**
-     * @dataProvider methodProvider
-     */
-    public function testUniqueness($method)
-    {
-        $ids = [];
-        for ($i = 0; $i < 10000; $i++) {
-            $ids[] = UniqueId::$method();
+        foreach ($this->methodProvider() as $name => $args) {
+            $method = $args[0];
+            $id = UniqueId::$method();
+            $this->assertNotEmpty($id, "$name: ID should not be empty");
+            $this->assertIsString($id, "$name: ID should be a string");
+            $this->assertTrue(1 === preg_match('/^[0-9a-z]+$/', $id), "$name: ID should be base36");
         }
-
-        $this->assertCount(10000, array_unique($ids));
     }
 
-    /**
-     * @dataProvider methodProvider
-     */
-    public function testLengthByMethod($method)
+    public function testUniqueness()
     {
-        $id = UniqueId::$method();
-        $length = strlen($id);
+        foreach ($this->methodProvider() as $name => $args) {
+            $method = $args[0];
+            $ids = [];
+            for ($i = 0; $i < 10000; $i++) {
+                $ids[] = UniqueId::$method();
+            }
 
+            $this->assertCount(10000, array_unique($ids), "$name: 10000 IDs should be unique");
+        }
+    }
+
+    public function testLengthByMethod()
+    {
         $expectedLengths = [
             'short'       => 13,
             'process'     => 27,
-            'distributed' => 39,
-            'secure'      => 52,
+            'distributed' => 48,
+            'secure'      => 64,
         ];
 
-        $this->assertSame($expectedLengths[$method], $length);
+        foreach ($this->methodProvider() as $name => $args) {
+            $method = $args[0];
+            $id = UniqueId::$method();
+            $length = strlen($id);
+
+            $this->assertSame($expectedLengths[$method], $length, "$name: length mismatch");
+        }
     }
 
     public function testShortIsShortest()
@@ -112,47 +112,47 @@ class UniqueIdTest extends TestCase
         $this->assertTrue(1 === preg_match('/^[0-9a-zA-Z]+$/', $id));
     }
 
-    /**
-     * @dataProvider methodProvider
-     */
-    public function testFixedLengthConsistency($method)
+    public function testFixedLengthConsistency()
     {
-        $lengths = [];
-        for ($i = 0; $i < 100; $i++) {
-            $lengths[] = strlen(UniqueId::$method());
+        foreach ($this->methodProvider() as $name => $args) {
+            $method = $args[0];
+            $lengths = [];
+            for ($i = 0; $i < 100; $i++) {
+                $lengths[] = strlen(UniqueId::$method());
+            }
+
+            $this->assertCount(1, array_unique($lengths), "$method should always return the same length");
         }
-
-        $this->assertCount(1, array_unique($lengths), "$method should always return the same length");
     }
 
-    /**
-     * @dataProvider methodProvider
-     */
-    public function testVariableLengthMode($method)
+    public function testVariableLengthMode()
     {
-        $id = UniqueId::$method(UniqueId::BASE36, false);
-        $this->assertNotEmpty($id);
-        $this->assertTrue(1 === preg_match('/^[0-9a-z]+$/', $id));
+        foreach ($this->methodProvider() as $name => $args) {
+            $method = $args[0];
+            $id = UniqueId::$method(UniqueId::BASE36, false);
+            $this->assertNotEmpty($id, "$name: variable length ID should not be empty");
+            $this->assertTrue(1 === preg_match('/^[0-9a-z]+$/', $id), "$name: should be base36");
+        }
     }
 
-    /**
-     * @dataProvider methodProvider
-     */
-    public function testUnorderedBase36($method)
+    public function testUnorderedBase36()
     {
-        $id = UniqueId::$method(UniqueId::UNORDERED_BASE36);
-        $this->assertNotEmpty($id);
-        $this->assertTrue(1 === preg_match('/^[0-9a-z]+$/', $id));
+        foreach ($this->methodProvider() as $name => $args) {
+            $method = $args[0];
+            $id = UniqueId::$method(UniqueId::UNORDERED_BASE36);
+            $this->assertNotEmpty($id, "$name: unordered base36 ID should not be empty");
+            $this->assertTrue(1 === preg_match('/^[0-9a-z]+$/', $id), "$name: should be base36");
+        }
     }
 
-    /**
-     * @dataProvider methodProvider
-     */
-    public function testUnorderedBase62($method)
+    public function testUnorderedBase62()
     {
-        $id = UniqueId::$method(UniqueId::UNORDERED_BASE62);
-        $this->assertNotEmpty($id);
-        $this->assertTrue(1 === preg_match('/^[0-9a-zA-Z]+$/', $id));
+        foreach ($this->methodProvider() as $name => $args) {
+            $method = $args[0];
+            $id = UniqueId::$method(UniqueId::UNORDERED_BASE62);
+            $this->assertNotEmpty($id, "$name: unordered base62 ID should not be empty");
+            $this->assertTrue(1 === preg_match('/^[0-9a-zA-Z]+$/', $id), "$name: should be base62");
+        }
     }
 
     public function testUnorderedNotLexicographicOrdered()
@@ -172,7 +172,7 @@ class UniqueIdTest extends TestCase
     {
         $ids = [];
         for ($i = 0; $i < 100; $i++) {
-            $ids[] = UniqueId::distributed();
+            $ids[] = UniqueId::process();
         }
 
         for ($i = 1; $i < count($ids); $i++) {
@@ -190,52 +190,56 @@ class UniqueIdTest extends TestCase
      * - 最大值(全9)自然编码长度 = 期望长度 (不溢出)
      * - 最大值(全9)自然编码长度 = 期望长度 (不浪费, 少1位会装不下)
      * - 最小值(全0)补齐后长度 = 期望长度
-     *
-     * @dataProvider decimalDigitsAndLengthProvider
      */
-    public function testMinMaxDecimalBoundary($decimalDigits, $encoding, $expectedLen)
+    public function testMinMaxDecimalBoundary()
     {
-        $maxDecimal = str_repeat('9', $decimalDigits);
-        $base = strlen($encoding);
+        foreach ($this->decimalDigitsAndLengthProvider() as $caseName => $args) {
+            $decimalDigits = $args[0];
+            $encoding = $args[1];
+            $expectedLen = $args[2];
 
-        // 验证公式: ceil(digits * log(10) / log(base)) = expectedLen
-        $calculatedLen = (int) ceil($decimalDigits * log(10) / log($base));
-        $this->assertSame($expectedLen, $calculatedLen,
-            "Formula check: $decimalDigits digits in base$base should need $expectedLen chars");
+            $maxDecimal = str_repeat('9', $decimalDigits);
+            $base = strlen($encoding);
 
-        // 最大值 (全9): 自然编码长度恰好等于期望长度 (不溢出 + 不浪费)
-        $maxEncoded = Base::conv($maxDecimal, '0123456789', $encoding);
-        $this->assertSame($expectedLen, strlen($maxEncoded),
-            "Max($decimalDigits digits) base$base: natural length must be exactly $expectedLen");
+            // 验证公式: ceil(digits * log(10) / log(base)) = expectedLen
+            $calculatedLen = (int) ceil($decimalDigits * log(10) / log($base));
+            $this->assertSame($expectedLen, $calculatedLen,
+                "[$caseName] Formula check: $decimalDigits digits in base$base should need $expectedLen chars");
 
-        // 最大值补齐后长度不变 (已经是最大长度, pad 不应该增长)
-        $maxPadded = str_pad($maxEncoded, $expectedLen, $encoding[0], STR_PAD_LEFT);
-        $this->assertSame($expectedLen, strlen($maxPadded),
-            "Max($decimalDigits digits) base$base: padded length must still be $expectedLen");
+            // 最大值 (全9): 自然编码长度恰好等于期望长度 (不溢出 + 不浪费)
+            $maxEncoded = Base::conv($maxDecimal, '0123456789', $encoding);
+            $this->assertSame($expectedLen, strlen($maxEncoded),
+                "[$caseName] Max($decimalDigits digits) base$base: natural length must be exactly $expectedLen");
 
-        // 最小值 ("1"): 编码后短于期望长度, 补齐后等于期望长度
-        $minEncoded = Base::conv('1', '0123456789', $encoding);
-        $this->assertLessThan($expectedLen, strlen($minEncoded),
-            "Min(1) base$base: natural length must be less than $expectedLen");
-        $minPadded = str_pad($minEncoded, $expectedLen, $encoding[0], STR_PAD_LEFT);
-        $this->assertSame($expectedLen, strlen($minPadded),
-            "Min(1) base$base: padded length must be $expectedLen");
+            // 最大值补齐后长度不变 (已经是最大长度, pad 不应该增长)
+            $maxPadded = str_pad($maxEncoded, $expectedLen, $encoding[0], STR_PAD_LEFT);
+            $this->assertSame($expectedLen, strlen($maxPadded),
+                "[$caseName] Max($decimalDigits digits) base$base: padded length must still be $expectedLen");
 
-        // 数学证明 expectedLen 是最小必要长度:
-        // base^(expectedLen-1) < 10^decimalDigits  (len-1 不够用)
-        // 10^decimalDigits <= base^expectedLen      (len 刚好够用)
-        $basePowLen = bcpow((string) $base, (string) $expectedLen);
-        $basePowLenMinus1 = bcpow((string) $base, (string) ($expectedLen - 1));
-        $tenPowDigits = bcpow('10', (string) $decimalDigits);
+            // 最小值 ("1"): 编码后短于期望长度, 补齐后等于期望长度
+            $minEncoded = Base::conv('1', '0123456789', $encoding);
+            $this->assertLessThan($expectedLen, strlen($minEncoded),
+                "[$caseName] Min(1) base$base: natural length must be less than $expectedLen");
+            $minPadded = str_pad($minEncoded, $expectedLen, $encoding[0], STR_PAD_LEFT);
+            $this->assertSame($expectedLen, strlen($minPadded),
+                "[$caseName] Min(1) base$base: padded length must be $expectedLen");
 
-        $this->assertTrue(
-            bccomp($basePowLenMinus1, $tenPowDigits) < 0,
-            "base$base^" . ($expectedLen - 1) . " must be < 10^$decimalDigits (len-1 would overflow)"
-        );
-        $this->assertTrue(
-            bccomp($tenPowDigits, $basePowLen) <= 0,
-            "10^$decimalDigits must be <= base$base^$expectedLen (len is sufficient)"
-        );
+            // 数学证明 expectedLen 是最小必要长度:
+            // base^(expectedLen-1) < 10^decimalDigits  (len-1 不够用)
+            // 10^decimalDigits <= base^expectedLen      (len 刚好够用)
+            $basePowLen = bcpow((string) $base, (string) $expectedLen);
+            $basePowLenMinus1 = bcpow((string) $base, (string) ($expectedLen - 1));
+            $tenPowDigits = bcpow('10', (string) $decimalDigits);
+
+            $this->assertTrue(
+                bccomp($basePowLenMinus1, $tenPowDigits) < 0,
+                "[$caseName] base$base^" . ($expectedLen - 1) . " must be < 10^$decimalDigits (len-1 would overflow)"
+            );
+            $this->assertTrue(
+                bccomp($tenPowDigits, $basePowLen) <= 0,
+                "[$caseName] 10^$decimalDigits must be <= base$base^$expectedLen (len is sufficient)"
+            );
+        }
     }
 
     public function decimalDigitsAndLengthProvider()
@@ -251,16 +255,16 @@ class UniqueIdTest extends TestCase
             'process_base62'          => [41, UniqueId::BASE62, 23],
             'process_unordered36'     => [41, UniqueId::UNORDERED_BASE36, 27],
             'process_unordered62'     => [41, UniqueId::UNORDERED_BASE62, 23],
-            // distributed = time(14) + machine(19) + pid(10) + seed(12) + counter(5) = 60 位十进制
-            'distributed_base36'      => [60, UniqueId::BASE36, 39],
-            'distributed_base62'      => [60, UniqueId::BASE62, 34],
-            'distributed_unordered36' => [60, UniqueId::UNORDERED_BASE36, 39],
-            'distributed_unordered62' => [60, UniqueId::UNORDERED_BASE62, 34],
-            // secure = time(14) + machine(19) + pid(10) + seed(12) + counter(5) + random(20) = 80 位十进制
-            'secure_base36'           => [80, UniqueId::BASE36, 52],
-            'secure_base62'           => [80, UniqueId::BASE62, 45],
-            'secure_unordered36'      => [80, UniqueId::UNORDERED_BASE36, 52],
-            'secure_unordered62'      => [80, UniqueId::UNORDERED_BASE62, 45],
+            // distributed = time(14) + machine(19) + pid(10) + seed(12) + counter(5) + random(14) = 74 位十进制
+            'distributed_base36'      => [74, UniqueId::BASE36, 48],
+            'distributed_base62'      => [74, UniqueId::BASE62, 42],
+            'distributed_unordered36' => [74, UniqueId::UNORDERED_BASE36, 48],
+            'distributed_unordered62' => [74, UniqueId::UNORDERED_BASE62, 42],
+            // secure = time(14) + machine(19) + pid(10) + seed(12) + counter(5) + random(39) = 99 位十进制
+            'secure_base36'           => [99, UniqueId::BASE36, 64],
+            'secure_base62'           => [99, UniqueId::BASE62, 56],
+            'secure_unordered36'      => [99, UniqueId::UNORDERED_BASE36, 64],
+            'secure_unordered62'      => [99, UniqueId::UNORDERED_BASE62, 56],
         ];
     }
 
@@ -277,10 +281,10 @@ class UniqueIdTest extends TestCase
         $this->assertLessThanOrEqual(14, strlen((string) $currentRelativeTime),
             'Current relative time must fit in 14 decimal digits');
 
-        // machineId: hexdec(15个f) = 2^60-1 = 1152921504606846975, 必须 ≤ 19 位十进制
-        $maxMachineId = hexdec(str_repeat('f', 15));
+        // machineId: 63-bit, 贴合 PHP_INT_MAX (2^63-1 = 9223372036854775807), 必须 ≤ 19 位十进制
+        $maxMachineId = PHP_INT_MAX;
         $this->assertLessThanOrEqual(19, strlen((string) $maxMachineId),
-            'machineId max (2^60-1) must fit in 19 decimal digits');
+            'machineId max (PHP_INT_MAX) must fit in 19 decimal digits');
         // 并且 < 10^19 (确保 toStringWithPad 不会输出 20 位)
         $this->assertTrue(
             bccomp((string) $maxMachineId, bcpow('10', '19')) < 0,
@@ -299,9 +303,11 @@ class UniqueIdTest extends TestCase
         $this->assertSame(5, strlen((string) UniqueId::MAX_COUNTER),
             'MAX_COUNTER must be exactly 5 decimal digits');
 
-        // random: max = 9999999999, 正好 10 位
-        $this->assertSame(10, strlen('9999999999'),
-            'random max must be exactly 10 decimal digits');
+        // random: secure 使用 13 位, distributed 使用 14 位
+        $this->assertSame(13, strlen('9999999999999'),
+            'random (secure) max must be exactly 13 decimal digits');
+        $this->assertSame(14, strlen('99999999999999'),
+            'random (distributed) max must be exactly 14 decimal digits');
     }
 
     /**
@@ -313,13 +319,16 @@ class UniqueIdTest extends TestCase
             [0, 14],
             [99999999999999, 14],
             [0, 19],
-            [1152921504606846975, 19],  // hexdec('f'*15) = 2^60 - 1
+            [PHP_INT_MAX, 19],  // 2^63 - 1 = 9223372036854775807
             [0, 10],
             [4294967295, 10],
             [0, 12],
             [999999999999, 12],
             [0, 5],
             [99999, 5],
+            [0, 13],
+            [9999999999999, 13],
+            [99999999999999, 14],
         ];
 
         foreach ($fields as list($value, $width)) {

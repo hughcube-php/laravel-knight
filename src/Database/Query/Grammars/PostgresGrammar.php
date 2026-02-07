@@ -71,7 +71,7 @@ class PostgresGrammar extends BasePostgresGrammar
                 : new PostgresConnection($connection, $database, $prefix, $config);
 
             if (method_exists($resolvedConnection, 'setQueryGrammar')) {
-                $resolvedConnection->setQueryGrammar(new self());
+                $resolvedConnection->setQueryGrammar(static::createInstance($resolvedConnection));
             }
 
             return $resolvedConnection;
@@ -97,8 +97,27 @@ class PostgresGrammar extends BasePostgresGrammar
                 && $connection->getDriverName() === 'pgsql'
                 && method_exists($connection, 'setQueryGrammar')
             ) {
-                $connection->setQueryGrammar(new self());
+                $connection->setQueryGrammar(static::createInstance($connection));
             }
         }
+    }
+
+    /**
+     * 创建 Grammar 实例, 兼容 Laravel 新版本和旧版本的构造函数签名.
+     *
+     * @param Connection $connection
+     *
+     * @return static
+     */
+    protected static function createInstance(Connection $connection)
+    {
+        $ref = new \ReflectionClass(parent::class);
+        $constructor = $ref->getConstructor();
+
+        if ($constructor !== null && $constructor->getNumberOfRequiredParameters() > 0) {
+            return new static($connection);
+        }
+
+        return new static();
     }
 }

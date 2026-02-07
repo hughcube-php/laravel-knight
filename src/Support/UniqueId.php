@@ -20,23 +20,24 @@ use HughCube\Base\Base;
  * 提供四个生成方法, 不同方法有不同的唯一性保证范围和 ID 长度:
  * - short():       单进程内唯一, 13 字符 (Base36, 固定长度)
  * - process():     同机器多进程唯一, 27 字符 (Base36, 固定长度)
- * - distributed(): 分布式跨机器唯一, 39 字符 (Base36, 固定长度, 推荐)
- * - secure():      分布式唯一且防枚举, 52 字符 (Base36, 固定长度)
+ * - distributed(): 分布式跨机器唯一, 48 字符 (Base36, 固定长度, 推荐)
+ * - secure():      分布式唯一且防枚举, 64 字符 (Base36, 固定长度)
  *
  * 唯一性保护机制:
  * - 计数器溢出保护: 同毫秒内计数器达到上限时自旋等待到下一毫秒, 避免回绕碰撞
  * - 时钟回拨保护: 检测到系统时钟倒退时自旋等待, 避免与历史 ID 碰撞
  * - 进程种子: 进程启动时生成一次性随机数(12位, ~40 bit), 解决 OS 回收复用 PID 导致的碰撞风险
  * - fork 安全: 检测 PID 变化自动重置状态, 避免 fork 后父子进程产生相同 ID 序列
- * - 主机标识混入 machine-id/boot_id/MAC 等机器特征, MD5 取 60-bit(19位十进制), 生日碰撞阈值约 10 亿台
- * - 避免容器环境中 hostname 重复导致的确定性碰撞
+ * - 主机标识混入 hostname/php_uname/MAC/machine-id/cgroup/容器环境变量, MD5 取 63-bit(19位十进制), 同机器稳定, 碰撞概率极低
+ * - 收集所有网卡 MAC 地址(非仅第一块), 最大化机器区分度
+ * - 混入容器编排环境变量(POD_NAME/POD_IP 等), 解决容器间 hostname 和 MAC 都相同的碰撞风险
  * - PID 使用 10 位固定宽度, 覆盖 32-bit 无符号整数上限(兼容 Windows/Linux)
  * - 每个字段使用 Base::toStringWithPad() 固定宽度, 杜绝字段边界错位
  * - 每毫秒计数器随机化起始值(0-49999), 降低多进程同毫秒首个 ID 碰撞的概率
  * - 优先使用 hrtime 单调时钟, 避免 NTP 跳变和 microtime 精度抖动
  *
- * 唯一性分析 (distributed 模式, 约 196 bit 信息量):
- * - 碰撞需同时满足: 相同毫秒 + MD5 碰撞 + 相同 PID + 相同种子 + 相同计数器
+ * 唯一性分析 (distributed 模式, 约 245 bit 信息量):
+ * - 碰撞需同时满足: 相同毫秒 + MD5 碰撞 + 相同 PID + 相同种子 + 相同计数器 + 随机数碰撞
  * - 联合概率远低于 UUID v4 碰撞概率, 工程上可视为绝对唯一
  *
  * 注意事项:
@@ -47,7 +48,12 @@ class UniqueId
     const BASE36 = '0123456789abcdefghijklmnopqrstuvwxyz';
     const BASE62 = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-    /** 字符集打乱, ID 不具备字典序排列特性, 外部无法通过排序推断生成顺序 */
+    /**
+     * 字符集打乱, ID 不具备字典序排列特性, 外部无法通过排序推断生成顺序.
+     *
+     * 注意: 这仅是混淆(obfuscation), 不是加密. 字符集为公开常量, 知道字符集即可还原原始值.
+     * 防枚举场景请使用 secure() 模式, 其 ~130 bit 随机熵才是真正的安全保障.
+     */
     const UNORDERED_BASE36 = '5m3k1izgxevctar8p6n4l2j0hyfwdubs9q7o';
     const UNORDERED_BASE62 = 'bMnYzaLmXy9KlWx8JkVw7IjUv6HiTu5GhSt4FgRs3EfQr2DePq1CdOp0BcNoZA';
 
@@ -99,7 +105,7 @@ class UniqueId
     protected static ?int $seedPid = null;
 
     /**
-     * 缓存的主机标识 (MD5 取 60-bit, 19 位十进制)
+     * 缓存的主机标识 (MD5 取 63-bit, 贴合 PHP_INT_MAX, 19 位十进制)
      *
      * @var int|null
      */
@@ -160,12 +166,14 @@ class UniqueId
     }
 
     /**
-     * 分布式模式 (推荐): time(14) + machine(19) + pid(10) + seed(12) + counter(5) = 60 位十进制
+     * 分布式模式 (推荐): time(14) + machine(19) + pid(10) + seed(12) + counter(5) + random(14) = 74 位十进制
      *
-     * 组成: 毫秒时间戳(相对纪元, 14位) + 机器特征MD5取60-bit(19位) + 进程PID(10位) + 进程种子(12位, ~40 bit) + 递增计数器(5位, 随机起始)
-     * 长度: 39 字符 (Base36, 固定长度)
-     * 唯一性: 跨机器分布式环境下唯一, 含种子防 PID 复用碰撞, fork 安全, 工程上可视为绝对唯一
+     * 组成: 毫秒时间戳(相对纪元, 14位) + 机器特征MD5取63-bit(19位) + 进程PID(10位)
+     *       + 进程种子(12位, ~40 bit) + 递增计数器(5位, 随机起始) + 随机数(14位, ~46 bit)
+     * 长度: 48 字符 (Base36, 固定长度)
+     * 唯一性: 跨机器分布式环境下唯一, 含种子防 PID 复用碰撞, fork 安全, 额外 46 bit 随机熵进一步降低碰撞概率
      * 适用: 分布式系统、微服务、多节点部署等需要全局唯一的场景
+     * 注意: 本模式的 ~46 bit 随机不足以防枚举, 对外暴露的 ID 请使用 secure() 模式
      *
      * @param string $encoding 编码字符集, 默认 BASE36
      * @param bool $fixedLength 是否返回固定长度字符串, 默认 true
@@ -181,20 +189,21 @@ class UniqueId
             . Base::toStringWithPad(static::getMachineId(), 19)
             . Base::toStringWithPad(getmypid(), 10)
             . Base::toStringWithPad(static::getProcessSeed(), 12)
-            . Base::toStringWithPad($counter, 5);
+            . Base::toStringWithPad($counter, 5)
+            . Base::toStringWithPad(random_int(0, 99999999999999), 14);
 
         $encoded = Base::conv($decimal, '0123456789', $encoding);
 
-        return $fixedLength ? static::padToFixedLength($encoded, 60, $encoding) : $encoded;
+        return $fixedLength ? static::padToFixedLength($encoded, 74, $encoding) : $encoded;
     }
 
     /**
-     * 安全模式: time(14) + machine(19) + pid(10) + seed(12) + counter(5) + random(20) = 80 位十进制
+     * 安全模式: time(14) + machine(19) + pid(10) + seed(12) + counter(5) + random(39) = 99 位十进制
      *
-     * 组成: 毫秒时间戳(相对纪元, 14位) + 机器特征MD5取60-bit(19位) + 进程PID(10位)
-     *       + 进程种子(12位, ~40 bit) + 递增计数器(5位, 随机起始) + 随机数(20位, ~66 bit)
-     * 长度: 52 字符 (Base36, 固定长度)
-     * 唯一性: 分布式唯一 + 20位随机数防枚举(~66 bit 熵, 暴力枚举需 10^20 次)
+     * 组成: 毫秒时间戳(相对纪元, 14位) + 机器特征MD5取63-bit(19位) + 进程PID(10位)
+     *       + 进程种子(12位, ~40 bit) + 递增计数器(5位, 随机起始) + 随机数(39位, ~130 bit)
+     * 长度: 64 字符 (Base36, 固定长度)
+     * 唯一性: 分布式唯一 + 39位随机数防枚举(~130 bit 熵, 暴力枚举需 10^39 次)
      * 适用: 对外暴露的 ID(如订单号、文件URL)、防止用户猜测和遍历的场景
      *
      * @param string $encoding 编码字符集, 默认 BASE36
@@ -212,47 +221,79 @@ class UniqueId
             . Base::toStringWithPad(getmypid(), 10)
             . Base::toStringWithPad(static::getProcessSeed(), 12)
             . Base::toStringWithPad($counter, 5)
-            . Base::toStringWithPad(random_int(0, 9999999999), 10)
-            . Base::toStringWithPad(random_int(0, 9999999999), 10);
+            . Base::toStringWithPad(random_int(0, 9999999999999), 13)
+            . Base::toStringWithPad(random_int(0, 9999999999999), 13)
+            . Base::toStringWithPad(random_int(0, 9999999999999), 13);
 
         $encoded = Base::conv($decimal, '0123456789', $encoding);
 
-        return $fixedLength ? static::padToFixedLength($encoded, 80, $encoding) : $encoded;
+        return $fixedLength ? static::padToFixedLength($encoded, 99, $encoding) : $encoded;
     }
 
     /**
-     * 获取主机标识 (MD5 取 60-bit, 惰性初始化)
+     * 获取主机标识 (MD5 取 63-bit, 惰性初始化, 同机器所有进程相同)
      *
-     * 混入 hostname + machine-id/boot_id + MAC 地址等机器特征, 避免容器环境 hostname 重复.
-     * 使用 MD5 取前 15 个十六进制字符(60-bit), 生日碰撞阈值约 10 亿台.
+     * 混入 hostname + php_uname + 所有网卡MAC + /etc/machine-id + /proc/self/cgroup + 容器环境变量,
+     * 使用 MD5 取 63-bit(贴合 PHP_INT_MAX).
+     *
+     * 不混入随机熵, 保持机器级稳定性:
+     * - 同一台机器/容器上所有进程 machineId 相同, 可用于来源追溯
+     * - 进程级唯一性由 processSeed (~40 bit) 保证, 无需 machineId 承担
+     * - fork 后无需重新计算, 父子进程在同一台机器上, machineId 相同是正确语义
      *
      * @return int
      */
     protected static function getMachineId(): int
     {
         if (static::$machineId === null) {
-            $identity = gethostname();
+            // hostname + OS 内核版本/架构等信息
+            $identity = gethostname() . php_uname();
 
-            // 混入更多机器级熵源, 降低容器环境中 hostname 重复导致的碰撞
-            foreach (['/etc/machine-id', '/proc/sys/kernel/random/boot_id'] as $file) {
-                if (is_readable($file)) {
-                    $identity .= file_get_contents($file);
-                    break;
-                }
-            }
-
-            // 混入网卡 MAC 地址 (net_get_interfaces 需要 PHP 8.0+)
+            // 混入所有网卡 MAC 地址, 最大化机器区分度
             if (function_exists('net_get_interfaces')) {
                 foreach (net_get_interfaces() as $iface) {
                     if (!empty($iface['mac']) && $iface['mac'] !== '00:00:00:00:00:00') {
                         $identity .= $iface['mac'];
-                        break;
                     }
                 }
             }
 
-            // 取 MD5 前 15 个十六进制字符 (60-bit), 生日碰撞阈值约 10 亿台
-            static::$machineId = hexdec(substr(md5($identity), 0, 15));
+            // 以下为 Linux/容器 专属路径, Windows 上跳过避免无意义的 I/O
+            if (DIRECTORY_SEPARATOR === '/') {
+                // /etc/machine-id (systemd 生成的持久随机 ID, 每台机器/容器唯一)
+                if (is_readable('/etc/machine-id')) {
+                    $identity .= trim(file_get_contents('/etc/machine-id'));
+                }
+
+                // /proc/self/cgroup (包含容器 ID, 即使 hostname 和 MAC 相同也能区分)
+                if (is_readable('/proc/self/cgroup')) {
+                    $identity .= file_get_contents('/proc/self/cgroup', false, null, 0, 512);
+                }
+            }
+
+            // 混入容器/编排环境标识, 解决容器间 hostname 和 MAC 都可能相同的碰撞风险
+            foreach ([
+                'POD_NAME', 'POD_IP', 'CONTAINER_ID', 'INSTANCE_ID',
+                'HOSTNAME', 'K8S_NODE_NAME',
+                'ECS_CONTAINER_METADATA_URI', 'CLOUD_RUN_JOB',
+            ] as $env) {
+                $val = getenv($env);
+                if (false !== $val) {
+                    $identity .= $val;
+                }
+            }
+
+            // 取 MD5 的高位, 贴合 PHP_INT_MAX
+            $hash = md5($identity);
+            if (PHP_INT_SIZE >= 8) {
+                // 64-bit PHP: 取 63-bit (2^63 - 1 = 9223372036854775807, 19 位十进制)
+                $hi = hexdec(substr($hash, 0, 8));
+                $lo = hexdec(substr($hash, 8, 8));
+                static::$machineId = (($hi & 0x7FFFFFFF) << 32) | $lo;
+            } else {
+                // 32-bit PHP: 取 31-bit (2^31 - 1 = 2147483647, 10 位十进制)
+                static::$machineId = hexdec(substr($hash, 0, 8)) & 0x7FFFFFFF;
+            }
         }
 
         return static::$machineId;
@@ -277,11 +318,13 @@ class UniqueId
     }
 
     /**
-     * Fork 检测: 当 PID 发生变化时重置所有进程级状态
+     * Fork 检测: 当 PID 发生变化时重置进程级状态
      *
      * fork() 后子进程继承父进程的所有静态变量, 如果不重置将导致:
      * - 父子进程共享相同的种子, 仅靠 PID 不同来区分(short 模式无 PID 字段, 会直接碰撞)
      * - 父子进程共享相同的计数器和时间戳状态, 可能产生相同的计数器序列
+     *
+     * machineId 不重置: 它是机器级标识, 父子进程在同一台机器上, 相同是正确语义.
      *
      * @return void
      */
@@ -314,17 +357,19 @@ class UniqueId
 
         $timestamp = static::currentTimeMillis();
 
-        // 时钟回拨保护
+        // 时钟回拨保护: 加 usleep 避免极端回拨时忙等占满 CPU
         while ($timestamp < static::$lastTimestamp) {
+            usleep(100);
             $timestamp = static::currentTimeMillis();
         }
 
         if ($timestamp === static::$lastTimestamp) {
             static::$counter++;
 
-            // 计数器溢出保护
+            // 计数器溢出保护: 等待下一毫秒, 加 usleep 避免忙等
             if (static::$counter > self::MAX_COUNTER) {
                 while ($timestamp <= static::$lastTimestamp) {
+                    usleep(100);
                     $timestamp = static::currentTimeMillis();
                 }
                 static::$counter = random_int(0, 49999);

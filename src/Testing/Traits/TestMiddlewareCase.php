@@ -18,7 +18,7 @@ trait TestMiddlewareCase
      * @param string $content
      * @return Request
      */
-    protected function createTestRequest(
+    protected function createMiddlewareTestRequest(
         string $method = 'GET',
         string $uri = '/',
         array $headers = [],
@@ -43,7 +43,7 @@ trait TestMiddlewareCase
      */
     protected function assertMiddlewarePasses($middleware, ?Request $request = null): Response
     {
-        $request = $request ?: $this->createTestRequest();
+        $request = $request ?: $this->createMiddlewareTestRequest();
 
         $response = $middleware->handle($request, function () {
             return new Response('ok', 200);
@@ -64,7 +64,7 @@ trait TestMiddlewareCase
      */
     protected function assertMiddlewareBlocks($middleware, string $exceptionClass, ?Request $request = null): void
     {
-        $request = $request ?: $this->createTestRequest();
+        $request = $request ?: $this->createMiddlewareTestRequest();
 
         $this->expectException($exceptionClass);
 

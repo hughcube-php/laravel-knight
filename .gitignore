@@ -20,3 +20,4 @@ phpunit.xml
 /tests/.temp/
 phpunit_*.txt
 toArra*
+benchmark_*.php

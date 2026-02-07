@@ -14,7 +14,7 @@ class TestMiddlewareCaseTest extends TestCase
 
     public function testCreateTestRequest()
     {
-        $request = $this->createTestRequest('POST', '/api/test', ['X-Custom' => 'value']);
+        $request = $this->createMiddlewareTestRequest('POST', '/api/test', ['X-Custom' => 'value']);
 
         $this->assertInstanceOf(Request::class, $request);
         $this->assertSame('POST', $request->method());
@@ -23,7 +23,7 @@ class TestMiddlewareCaseTest extends TestCase
 
     public function testCreateTestRequestDefaults()
     {
-        $request = $this->createTestRequest();
+        $request = $this->createMiddlewareTestRequest();
 
         $this->assertSame('GET', $request->method());
         $this->assertSame('/', $request->getPathInfo());
@@ -64,7 +64,7 @@ class TestMiddlewareCaseTest extends TestCase
             }
         };
 
-        $request = $this->createTestRequest('POST', '/custom');
+        $request = $this->createMiddlewareTestRequest('POST', '/custom');
         $response = $this->assertMiddlewarePasses($middleware, $request);
 
         $this->assertSame('ok', $response->getContent());
