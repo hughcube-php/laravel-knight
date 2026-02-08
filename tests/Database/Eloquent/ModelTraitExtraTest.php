@@ -111,13 +111,16 @@ class ModelTraitExtraTest extends TestCase
 
         $userB = new User();
         $userB->setRawAttributes(['id' => 1, 'nickname' => 'neo']);
+        $this->assertTrue($userA->isEqualAttributes($userB));
         $this->assertTrue($userA->equal($userB));
 
         $userB->setRawAttributes(['id' => 1, 'nickname' => 'trinity']);
+        $this->assertFalse($userA->isEqualAttributes($userB));
         $this->assertFalse($userA->equal($userB));
 
         $userC = new User();
         $userC->setRawAttributes(['id' => 1]);
+        $this->assertFalse($userA->isEqualAttributes($userC));
         $this->assertFalse($userA->equal($userC));
 
         $this->assertSame($userA, $userA->ifReturnSelf(true));

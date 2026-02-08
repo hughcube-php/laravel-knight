@@ -373,7 +373,7 @@ trait Model
             static::$modelCacheKeyMakeCache['classCacheKeyPrefix'][$class] = sprintf(
                 '%s-%s',
                 Str::snake(Str::afterLast($class, '\\')),
-                base_convert((string) abs(crc32($class)), 10, 36)
+                base_convert((string)abs(crc32($class)), 10, 36)
             );
         }
 
@@ -383,7 +383,7 @@ trait Model
             static::$modelCacheKeyMakeCache['classCacheKeyPrefix'][$class],
             $this->getCacheVersion(),
             md5($string = sprintf('%s:%s', $class, $cacheKey)),
-            base_convert((string) abs(crc32($string)), 10, 32)
+            base_convert((string)abs(crc32($string)), 10, 32)
         );
     }
 
@@ -501,7 +501,17 @@ trait Model
         return $collection->all();
     }
 
-    public function equal($model): bool
+    /**
+     * 判断两个 Model 是否为同一条记录且所有属性值相同.
+     *
+     * 与 Laravel 的 is() 不同, is() 只判断是否同一条记录(同表同主键),
+     * 本方法还会比较所有原始属性值是否完全一致.
+     *
+     * @param mixed $model
+     *
+     * @return bool
+     */
+    public function isEqualAttributes($model): bool
     {
         if (!$model instanceof EloquentModel || !$this->is($model)) {
             return false;
@@ -513,19 +523,43 @@ trait Model
         $names = Collection::empty()
             ->merge(array_keys($attributes))
             ->merge(array_keys($thisAttributes))
-            ->unique()->filter()->values();
+            ->unique()->values();
 
         foreach ($names as $name) {
             if (!array_key_exists($name, $attributes) || !array_key_exists($name, $thisAttributes)) {
                 return false;
             }
 
-            if ($attributes[$name] !== $thisAttributes[$name]) {
+            $a = $thisAttributes[$name];
+            $b = $attributes[$name];
+
+            /** 统一日期时间为字符串, 避免对象引用比较 */
+            $a = $a instanceof DateTimeInterface ? $a->format('Y-m-d H:i:s') : $a;
+            $b = $b instanceof DateTimeInterface ? $b->format('Y-m-d H:i:s') : $b;
+
+            /** int vs numeric-string 用 == 数值比较 (如 PDO 返回 "1" vs int 1), 其他用 === 严格比较 */
+            if ((is_int($a) || is_int($b)) && is_numeric($a) && is_numeric($b)) {
+                if ($a != $b) {
+                    return false;
+                }
+            } elseif ($a !== $b) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * @param mixed $model
+     *
+     * @return bool
+     *
+     * @deprecated 请使用 isEqualAttributes()
+     */
+    public function equal($model): bool
+    {
+        return $this->isEqualAttributes($model);
     }
 
     public function scopeKCanUsable($query)
