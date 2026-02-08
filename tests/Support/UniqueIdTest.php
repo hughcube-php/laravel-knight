@@ -366,6 +366,270 @@ class UniqueIdTest extends TestCase
             'UNORDERED_BASE62 must not equal BASE62');
     }
 
+    public function testShortInitializesPidSnapshotForForkSafety()
+    {
+        $this->setUniqueIdState('processSeed', null);
+        $this->setUniqueIdState('seedPid', null);
+        $this->setUniqueIdState('fallbackPid', null);
+        $this->setUniqueIdState('counter', 0);
+        $this->setUniqueIdState('lastTimestamp', 0);
+
+        UniqueId::short();
+
+        $seedPid = $this->getUniqueIdState('seedPid');
+        $this->assertIsInt($seedPid, 'short() should initialize pid snapshot');
+        $this->assertGreaterThan(0, $seedPid, 'pid snapshot should be positive');
+    }
+
+    public function testForkDetectionResetsStateForShortMode()
+    {
+        $fakePid = -1;
+
+        $this->setUniqueIdState('processSeed', null);
+        $this->setUniqueIdState('fallbackPid', null);
+        $this->setUniqueIdState('counter', 12345);
+        $this->setUniqueIdState('lastTimestamp', 123456789);
+        $this->setUniqueIdState('seedPid', $fakePid);
+
+        UniqueId::short();
+
+        $this->assertIsInt($this->getUniqueIdState('seedPid'));
+        $this->assertNotSame($fakePid, $this->getUniqueIdState('seedPid'),
+            'fork detection should refresh pid snapshot for current process');
+        $this->assertNull($this->getUniqueIdState('processSeed'),
+            'short mode should keep process seed null after fork state reset');
+    }
+
+    public function testShortKeepsProcessSeedNullWhenNoFork()
+    {
+        $this->setUniqueIdState('processSeed', null);
+        $this->setUniqueIdState('seedPid', null);
+        $this->setUniqueIdState('fallbackPid', null);
+
+        UniqueId::short();
+        UniqueId::short();
+
+        $this->assertNull($this->getUniqueIdState('processSeed'),
+            'short mode should not initialize process seed');
+    }
+
+    public function testShortClearsExistingProcessSeedWhenForkDetected()
+    {
+        $this->setUniqueIdState('processSeed', 123456789012);
+        $this->setUniqueIdState('seedPid', -1);
+        $this->setUniqueIdState('fallbackPid', null);
+        $this->setUniqueIdState('counter', 12345);
+        $this->setUniqueIdState('lastTimestamp', 123456789);
+
+        UniqueId::short();
+
+        $this->assertNull($this->getUniqueIdState('processSeed'),
+            'short mode should clear inherited process seed after fork detection');
+        $this->assertSame($this->callUniqueIdMethod('getProcessId'), $this->getUniqueIdState('seedPid'),
+            'pid snapshot should be refreshed to current process');
+        $this->assertTrue(
+            $this->getUniqueIdState('counter') >= 0 && $this->getUniqueIdState('counter') <= UniqueId::MAX_COUNTER,
+            'counter should stay inside declared range'
+        );
+        $this->assertGreaterThan(0, $this->getUniqueIdState('lastTimestamp'),
+            'timestamp should be refreshed after state reset');
+    }
+
+    public function testCheckForkDoesNotResetStateWhenPidUnchanged()
+    {
+        $pid = $this->callUniqueIdMethod('getProcessId');
+
+        $this->setUniqueIdState('processSeed', 123456);
+        $this->setUniqueIdState('seedPid', $pid);
+        $this->setUniqueIdState('counter', 987);
+        $this->setUniqueIdState('lastTimestamp', 123456789);
+
+        $this->callUniqueIdMethod('checkFork');
+
+        $this->assertSame(123456, $this->getUniqueIdState('processSeed'));
+        $this->assertSame($pid, $this->getUniqueIdState('seedPid'));
+        $this->assertSame(987, $this->getUniqueIdState('counter'));
+        $this->assertSame(123456789, $this->getUniqueIdState('lastTimestamp'));
+    }
+
+    public function testProcessRegeneratesProcessSeedAfterForkDetected()
+    {
+        $this->setUniqueIdState('processSeed', -1);
+        $this->setUniqueIdState('seedPid', -1);
+        $this->setUniqueIdState('fallbackPid', null);
+        $this->setUniqueIdState('counter', 12345);
+        $this->setUniqueIdState('lastTimestamp', 123456789);
+
+        $id = UniqueId::process();
+
+        $this->assertNotEmpty($id);
+        $this->assertNotSame(-1, $this->getUniqueIdState('processSeed'),
+            'process mode should regenerate process seed after fork detection');
+        $this->assertSame($this->callUniqueIdMethod('getProcessId'), $this->getUniqueIdState('seedPid'),
+            'process mode should refresh pid snapshot to current process');
+        $this->assertTrue(
+            $this->getUniqueIdState('counter') >= 0 && $this->getUniqueIdState('counter') <= UniqueId::MAX_COUNTER,
+            'counter should stay inside declared range'
+        );
+    }
+
+    public function testProcessIdSegmentMatchesCurrentPid()
+    {
+        $id = UniqueId::process();
+        $decimal = Base::conv($id, UniqueId::BASE36, '0123456789');
+        $decimal = str_pad($decimal, 41, '0', STR_PAD_LEFT);
+
+        $expectedPid = Base::toStringWithPad($this->callUniqueIdMethod('getProcessId'), 10);
+        $actualPid = substr($decimal, 14, 10);
+
+        $this->assertSame($expectedPid, $actualPid, 'process ID should embed current pid in fixed field');
+    }
+
+    public function testDistributedMachineSegmentIsStable()
+    {
+        $id1 = UniqueId::distributed();
+        $id2 = UniqueId::distributed();
+
+        $decimal1 = str_pad(Base::conv($id1, UniqueId::BASE36, '0123456789'), 74, '0', STR_PAD_LEFT);
+        $decimal2 = str_pad(Base::conv($id2, UniqueId::BASE36, '0123456789'), 74, '0', STR_PAD_LEFT);
+
+        $machineSegment1 = substr($decimal1, 14, 19);
+        $machineSegment2 = substr($decimal2, 14, 19);
+        $expectedMachine = Base::toStringWithPad($this->callUniqueIdMethod('getMachineId'), 19);
+
+        $this->assertSame($machineSegment1, $machineSegment2,
+            'distributed mode should keep machine segment stable across calls');
+        $this->assertSame($expectedMachine, $machineSegment1,
+            'distributed mode should use current cached machine id');
+    }
+
+    public function testGetProcessIdReturnsPositiveInteger()
+    {
+        $pid = $this->callUniqueIdMethod('getProcessId');
+
+        $this->assertIsInt($pid);
+        $this->assertGreaterThan(0, $pid);
+        $this->assertLessThanOrEqual(4294967295, $pid);
+    }
+
+    public function testGetMachineIdIsStableAndWithinRange()
+    {
+        $this->setUniqueIdState('machineId', null);
+
+        $machine1 = $this->callUniqueIdMethod('getMachineId');
+        $machine2 = $this->callUniqueIdMethod('getMachineId');
+
+        $this->assertIsInt($machine1);
+        $this->assertSame($machine1, $machine2, 'machine id should be cached and stable');
+        $this->assertGreaterThanOrEqual(0, $machine1);
+        $this->assertLessThanOrEqual(PHP_INT_MAX, $machine1);
+        $this->assertTrue(
+            strlen((string) $machine1) <= (PHP_INT_SIZE >= 8 ? 19 : 10),
+            'machine id should stay within declared decimal width'
+        );
+    }
+
+    public function testMachineIdNamespaceEnvCanPartitionIdDomain()
+    {
+        $env = 'KNIGHT_UNIQUE_ID_NAMESPACE';
+        $original = getenv($env);
+
+        try {
+            putenv($env . '=namespace_a');
+            $this->setUniqueIdState('machineId', null);
+            $machineA1 = $this->callUniqueIdMethod('getMachineId');
+
+            // Reset cache and re-read under the same namespace; value should remain stable.
+            $this->setUniqueIdState('machineId', null);
+            $machineA2 = $this->callUniqueIdMethod('getMachineId');
+
+            putenv($env . '=namespace_b');
+            $this->setUniqueIdState('machineId', null);
+            $machineB = $this->callUniqueIdMethod('getMachineId');
+
+            $this->assertSame($machineA1, $machineA2, 'machine id should be stable in one namespace');
+            $this->assertNotSame($machineA1, $machineB, 'different namespaces should produce different machine ids');
+        } finally {
+            if (false === $original) {
+                putenv($env);
+            } else {
+                putenv($env . '=' . $original);
+            }
+            $this->setUniqueIdState('machineId', null);
+        }
+    }
+
+    public function testPadToFixedLengthUsesFirstEncodingChar()
+    {
+        $encoding = UniqueId::UNORDERED_BASE36;
+        $padded = $this->callUniqueIdMethod('padToFixedLength', '1', 19, $encoding);
+
+        $this->assertSame(13, strlen($padded));
+        $this->assertSame('1', substr($padded, -1));
+        $this->assertSame(str_repeat($encoding[0], 12), substr($padded, 0, 12));
+
+        $alreadyMax = str_repeat('z', 13);
+        $this->assertSame(
+            $alreadyMax,
+            $this->callUniqueIdMethod('padToFixedLength', $alreadyMax, 19, UniqueId::BASE36)
+        );
+    }
+
+    public function testVariableLengthNeverExceedsFixedLength()
+    {
+        foreach ($this->methodProvider() as $name => $args) {
+            $method = $args[0];
+            $fixedLength = strlen(UniqueId::$method(UniqueId::BASE36, true));
+
+            for ($i = 0; $i < 100; $i++) {
+                $variable = UniqueId::$method(UniqueId::BASE36, false);
+                $this->assertTrue(
+                    strlen($variable) <= $fixedLength,
+                    "$name: variable length should never exceed fixed length"
+                );
+            }
+        }
+    }
+
+    /**
+     * @param mixed ...$args
+     * @return mixed
+     * @throws \ReflectionException
+     */
+    protected function callUniqueIdMethod(string $method, ...$args)
+    {
+        $reflection = new \ReflectionClass(UniqueId::class);
+        $instance = $reflection->getMethod($method);
+        $instance->setAccessible(true);
+
+        return $instance->invokeArgs(null, $args);
+    }
+
+    /**
+     * @return mixed
+     * @throws \ReflectionException
+     */
+    protected function getUniqueIdState(string $property)
+    {
+        $reflection = new \ReflectionClass(UniqueId::class);
+        $instance = $reflection->getProperty($property);
+        $instance->setAccessible(true);
+
+        return $instance->getValue();
+    }
+
+    /**
+     * @param mixed $value
+     * @throws \ReflectionException
+     */
+    protected function setUniqueIdState(string $property, $value): void
+    {
+        $reflection = new \ReflectionClass(UniqueId::class);
+        $instance = $reflection->getProperty($property);
+        $instance->setAccessible(true);
+        $instance->setValue($value);
+    }
+
     public function methodProvider()
     {
         return [
