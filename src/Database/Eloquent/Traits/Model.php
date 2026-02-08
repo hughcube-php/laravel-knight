@@ -543,7 +543,7 @@ trait Model
             $b = $b instanceof DateTimeInterface ? $b->format('Y-m-d H:i:s') : $b;
 
             /** int vs numeric-string 用字符串比较 (如 PDO 返回 "1" vs int 1), 其他用 === 严格比较 */
-            if ((is_int($a) || is_int($b)) && is_numeric($a) && is_numeric($b)) {
+            if ((is_int($a) || is_int($b)) && (!is_int($a) || !is_int($b)) && (is_numeric($a) && is_numeric($b))) {
                 if (strval($a) !== strval($b)) {
                     return false;
                 }
