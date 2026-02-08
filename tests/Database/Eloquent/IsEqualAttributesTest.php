@@ -93,6 +93,20 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
+     * 未持久化模型(主键均为 null)不应被判定为同一条记录
+     */
+    public function testUnsavedModelsReturnFalse()
+    {
+        $a = new EqualTestModel();
+        $a->setRawAttributes(['name' => 'test']);
+
+        $b = new EqualTestModel();
+        $b->setRawAttributes(['name' => 'test']);
+
+        $this->assertFalse($a->isEqualAttributes($b));
+    }
+
+    /**
      * 完全相同的属性应返回 true
      */
     public function testIdenticalAttributesReturnsTrue()
@@ -163,6 +177,62 @@ class IsEqualAttributesTest extends TestCase
 
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'name' => 'test', 'age' => 30]);
+
+        $this->assertFalse($a->isEqualAttributes($b));
+    }
+
+    /**
+     * int vs 科学计数法字符串不应视为相等
+     */
+    public function testScientificNotationStringVsIntNotEqual()
+    {
+        $a = new EqualTestModel();
+        $a->setRawAttributes(['id' => 1, 'age' => 1]);
+
+        $b = new EqualTestModel();
+        $b->setRawAttributes(['id' => 1, 'age' => '1e0']);
+
+        $this->assertFalse($a->isEqualAttributes($b));
+    }
+
+    /**
+     * int vs 0e... 字符串不应视为相等
+     */
+    public function testZeroExponentialStringVsIntNotEqual()
+    {
+        $a = new EqualTestModel();
+        $a->setRawAttributes(['id' => 1, 'age' => 0]);
+
+        $b = new EqualTestModel();
+        $b->setRawAttributes(['id' => 1, 'age' => '0e12345']);
+
+        $this->assertFalse($a->isEqualAttributes($b));
+    }
+
+    /**
+     * int vs 超出整型范围字符串不应误判相等
+     */
+    public function testIntMaxPlusOneStringNotEqual()
+    {
+        $intMaxString = (string) PHP_INT_MAX;
+        $digits = str_split($intMaxString);
+        for ($i = count($digits) - 1; $i >= 0; --$i) {
+            if ('9' !== $digits[$i]) {
+                $digits[$i] = (string) ((int) $digits[$i] + 1);
+                break;
+            }
+
+            $digits[$i] = '0';
+            if (0 === $i) {
+                array_unshift($digits, '1');
+            }
+        }
+
+        $a = new EqualTestModel();
+        $a->setRawAttributes(['id' => 1, 'age' => PHP_INT_MAX]);
+
+        $b = new EqualTestModel();
+        $b->setRawAttributes(['id' => 1, 'age' => implode('', $digits)]);
 
         $this->assertFalse($a->isEqualAttributes($b));
     }

@@ -517,6 +517,11 @@ trait Model
             return false;
         }
 
+        /** 主键为 null 时无法确认是同一条记录 */
+        if (null === $this->getKey()) {
+            return false;
+        }
+
         $attributes = $model->getAttributes();
         $thisAttributes = $this->getAttributes();
 
@@ -537,9 +542,9 @@ trait Model
             $a = $a instanceof DateTimeInterface ? $a->format('Y-m-d H:i:s') : $a;
             $b = $b instanceof DateTimeInterface ? $b->format('Y-m-d H:i:s') : $b;
 
-            /** int vs numeric-string 用 == 数值比较 (如 PDO 返回 "1" vs int 1), 其他用 === 严格比较 */
+            /** int vs numeric-string 用字符串比较 (如 PDO 返回 "1" vs int 1), 其他用 === 严格比较 */
             if ((is_int($a) || is_int($b)) && is_numeric($a) && is_numeric($b)) {
-                if ($a != $b) {
+                if (strval($a) !== strval($b)) {
                     return false;
                 }
             } elseif ($a !== $b) {
