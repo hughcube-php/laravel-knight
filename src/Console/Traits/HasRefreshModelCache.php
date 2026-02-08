@@ -32,14 +32,14 @@ trait HasRefreshModelCache
             $modelClass = get_class($model);
 
             $cacheModel = $modelClass::findById($model->getKey());
-            $wasChanged = $force || !$model->isEqualAttributes($cacheModel);
+            $wasChanged = $force || !$model->hasSameAttributes($cacheModel);
 
             if ($wasChanged) {
                 $model->deleteRowCache();
                 $model->resetRowCache();
 
                 $cacheModel = $modelClass::findById($model->getKey());
-                if (!$model->isEqualAttributes($cacheModel)) {
+                if (!$model->hasSameAttributes($cacheModel)) {
                     throw new Exception(sprintf('重置 %s(%s) 后对比缓存失败!', $modelClass, $model->getKey()));
                 }
             }

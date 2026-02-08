@@ -511,7 +511,7 @@ trait Model
      *
      * @return bool
      */
-    public function isEqualAttributes($model): bool
+    public function hasSameAttributes($model): bool
     {
         if (!$model instanceof EloquentModel || !$this->is($model)) {
             return false;
@@ -560,11 +560,11 @@ trait Model
      *
      * @return bool
      *
-     * @deprecated 请使用 isEqualAttributes()
+     * @deprecated 请使用 hasSameAttributes()
      */
     public function equal($model): bool
     {
-        return $this->isEqualAttributes($model);
+        return $this->hasSameAttributes($model);
     }
 
     public function scopeKCanUsable($query)

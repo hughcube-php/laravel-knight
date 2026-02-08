@@ -48,7 +48,7 @@ class IsEqualAttributesTest extends TestCase
         $model = new EqualTestModel();
         $model->setRawAttributes(['id' => 1, 'name' => 'test']);
 
-        $this->assertFalse($model->isEqualAttributes(null));
+        $this->assertFalse($model->hasSameAttributes(null));
     }
 
     /**
@@ -59,9 +59,9 @@ class IsEqualAttributesTest extends TestCase
         $model = new EqualTestModel();
         $model->setRawAttributes(['id' => 1, 'name' => 'test']);
 
-        $this->assertFalse($model->isEqualAttributes('string'));
-        $this->assertFalse($model->isEqualAttributes(123));
-        $this->assertFalse($model->isEqualAttributes(new \stdClass()));
+        $this->assertFalse($model->hasSameAttributes('string'));
+        $this->assertFalse($model->hasSameAttributes(123));
+        $this->assertFalse($model->hasSameAttributes(new \stdClass()));
     }
 
     /**
@@ -75,7 +75,7 @@ class IsEqualAttributesTest extends TestCase
         $other = new User();
         $other->setRawAttributes(['id' => 1, 'nickname' => 'test']);
 
-        $this->assertFalse($model->isEqualAttributes($other));
+        $this->assertFalse($model->hasSameAttributes($other));
     }
 
     /**
@@ -89,7 +89,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 2, 'name' => 'test']);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 
     /**
@@ -103,7 +103,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['name' => 'test']);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 
     /**
@@ -117,7 +117,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'name' => 'test', 'age' => 25]);
 
-        $this->assertTrue($a->isEqualAttributes($b));
+        $this->assertTrue($a->hasSameAttributes($b));
     }
 
     /**
@@ -131,11 +131,11 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'name' => 'test']);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 
     /**
-     * deprecated 的 equal() 方法应与 isEqualAttributes() 行为一致
+     * deprecated 的 equal() 方法应与 hasSameAttributes() 行为一致
      */
     public function testEqualIsAliasForIsEqualAttributes()
     {
@@ -145,10 +145,10 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'name' => 'test']);
 
-        $this->assertSame($a->equal($b), $a->isEqualAttributes($b));
+        $this->assertSame($a->equal($b), $a->hasSameAttributes($b));
 
         $b->setRawAttributes(['id' => 1, 'name' => 'other']);
-        $this->assertSame($a->equal($b), $a->isEqualAttributes($b));
+        $this->assertSame($a->equal($b), $a->hasSameAttributes($b));
     }
 
     // ===================== 数值类型 =====================
@@ -164,7 +164,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'name' => 'test', 'age' => '25']);
 
-        $this->assertTrue($a->isEqualAttributes($b));
+        $this->assertTrue($a->hasSameAttributes($b));
     }
 
     /**
@@ -178,7 +178,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'name' => 'test', 'age' => 30]);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 
     /**
@@ -192,7 +192,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'age' => '1e0']);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 
     /**
@@ -206,7 +206,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'age' => '0e12345']);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 
     /**
@@ -234,7 +234,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'age' => implode('', $digits)]);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 
     /**
@@ -248,7 +248,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'price' => '99.99']);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 
     /**
@@ -262,7 +262,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'price' => 99.99]);
 
-        $this->assertTrue($a->isEqualAttributes($b));
+        $this->assertTrue($a->hasSameAttributes($b));
     }
 
     /**
@@ -276,7 +276,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => '1', 'name' => 'test']);
 
-        $this->assertTrue($a->isEqualAttributes($b));
+        $this->assertTrue($a->hasSameAttributes($b));
     }
 
     // ===================== 日期时间类型 =====================
@@ -294,7 +294,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'created_at' => Carbon::parse($time)]);
 
-        $this->assertTrue($a->isEqualAttributes($b));
+        $this->assertTrue($a->hasSameAttributes($b));
     }
 
     /**
@@ -310,7 +310,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'created_at' => $time]);
 
-        $this->assertTrue($a->isEqualAttributes($b));
+        $this->assertTrue($a->hasSameAttributes($b));
     }
 
     /**
@@ -326,7 +326,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'created_at' => Carbon::parse($time)]);
 
-        $this->assertTrue($a->isEqualAttributes($b));
+        $this->assertTrue($a->hasSameAttributes($b));
     }
 
     /**
@@ -340,7 +340,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'created_at' => '2025-06-15 12:30:01']);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 
     /**
@@ -354,7 +354,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'created_at' => Carbon::parse('2025-01-02')]);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 
     /**
@@ -368,7 +368,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'deleted_at' => null]);
 
-        $this->assertTrue($a->isEqualAttributes($b));
+        $this->assertTrue($a->hasSameAttributes($b));
     }
 
     /**
@@ -382,7 +382,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'deleted_at' => Carbon::now()]);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 
     // ===================== 字符串类型 =====================
@@ -398,7 +398,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'name' => 'hello']);
 
-        $this->assertTrue($a->isEqualAttributes($b));
+        $this->assertTrue($a->hasSameAttributes($b));
     }
 
     /**
@@ -412,7 +412,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'name' => 'world']);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 
     /**
@@ -426,7 +426,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'name' => null]);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 
     // ===================== JSON / 数组类型 =====================
@@ -444,7 +444,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'json_data' => $json]);
 
-        $this->assertTrue($a->isEqualAttributes($b));
+        $this->assertTrue($a->hasSameAttributes($b));
     }
 
     /**
@@ -458,7 +458,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'json_data' => '{"key":"value2"}']);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 
     /**
@@ -474,7 +474,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'tags' => $arr]);
 
-        $this->assertTrue($a->isEqualAttributes($b));
+        $this->assertTrue($a->hasSameAttributes($b));
     }
 
     /**
@@ -488,7 +488,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'tags' => ['a', 'c']]);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 
     // ===================== Boolean 类型 =====================
@@ -504,7 +504,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'is_active' => true]);
 
-        $this->assertTrue($a->isEqualAttributes($b));
+        $this->assertTrue($a->hasSameAttributes($b));
     }
 
     /**
@@ -518,7 +518,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'is_active' => false]);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 
     // ===================== DB 实际读写场景 =====================
@@ -533,7 +533,7 @@ class IsEqualAttributesTest extends TestCase
         $a = EqualTestModel::noCacheQuery()->first();
         $b = EqualTestModel::noCacheQuery()->first();
 
-        $this->assertTrue($a->isEqualAttributes($b));
+        $this->assertTrue($a->hasSameAttributes($b));
     }
 
     /**
@@ -551,7 +551,7 @@ class IsEqualAttributesTest extends TestCase
         // 从缓存加载
         $cacheModel = EqualTestModel::findById($model->id);
 
-        $this->assertTrue($dbModel->isEqualAttributes($cacheModel));
+        $this->assertTrue($dbModel->hasSameAttributes($cacheModel));
     }
 
     /**
@@ -574,7 +574,7 @@ class IsEqualAttributesTest extends TestCase
         // 从缓存加载 (旧数据)
         $cacheModel = EqualTestModel::findById($model->id);
 
-        $this->assertFalse($freshModel->isEqualAttributes($cacheModel));
+        $this->assertFalse($freshModel->hasSameAttributes($cacheModel));
     }
 
     /**
@@ -598,7 +598,7 @@ class IsEqualAttributesTest extends TestCase
 
         $cacheModel = EqualTestModel::findById($model->id);
 
-        $this->assertTrue($dbModel->isEqualAttributes($cacheModel));
+        $this->assertTrue($dbModel->hasSameAttributes($cacheModel));
     }
 
     /**
@@ -619,7 +619,7 @@ class IsEqualAttributesTest extends TestCase
 
         $cacheModel = EqualTestModel::findById($model->id);
 
-        $this->assertTrue($dbModel->isEqualAttributes($cacheModel));
+        $this->assertTrue($dbModel->hasSameAttributes($cacheModel));
     }
 
     /**
@@ -639,7 +639,7 @@ class IsEqualAttributesTest extends TestCase
 
         $cacheModel = EqualTestModel::findById($model->id);
 
-        $this->assertTrue($dbModel->isEqualAttributes($cacheModel));
+        $this->assertTrue($dbModel->hasSameAttributes($cacheModel));
     }
 
     /**
@@ -664,7 +664,7 @@ class IsEqualAttributesTest extends TestCase
 
         foreach ($models as $model) {
             $cacheModel = EqualTestModel::findById($model->id);
-            $this->assertTrue($model->isEqualAttributes($cacheModel), "Model ID {$model->id} DB vs Cache 不一致");
+            $this->assertTrue($model->hasSameAttributes($cacheModel), "Model ID {$model->id} DB vs Cache 不一致");
         }
     }
 
@@ -681,7 +681,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'name' => 'test', 'age' => 25]);
 
-        $this->assertTrue($a->isEqualAttributes($b));
+        $this->assertTrue($a->hasSameAttributes($b));
     }
 
     /**
@@ -695,7 +695,7 @@ class IsEqualAttributesTest extends TestCase
         $b = new EqualTestModel();
         $b->setRawAttributes(['id' => 1, 'name' => 123]);
 
-        $this->assertFalse($a->isEqualAttributes($b));
+        $this->assertFalse($a->hasSameAttributes($b));
     }
 }
 
