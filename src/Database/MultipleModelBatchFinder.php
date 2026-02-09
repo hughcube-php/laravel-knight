@@ -11,6 +11,7 @@ namespace HughCube\Laravel\Knight\Database;
 
 use HughCube\Laravel\Knight\Database\Eloquent\Builder;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
+use HughCube\Laravel\Knight\Database\Eloquent\Traits\Model as KnightModelTrait;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use Illuminate\Support\Collection;
 use Psr\SimpleCache\CacheInterface;
@@ -333,11 +334,17 @@ class MultipleModelBatchFinder
      *
      * @param class-string<Model> $class 模型类名
      *
-     * @return Model
+     * @return IlluminateModel|KnightModelTrait
      */
-    protected function getModel(string $class): Model
+    protected function getModel(string $class): IlluminateModel
     {
-        return $this->getQuery($class)->getModel();
+        $model = $this->getQuery($class)->getModel();
+
+        if (!in_array(KnightModelTrait::class, class_uses_recursive($model), true)) {
+            throw new \InvalidArgumentException(sprintf('%s must use trait %s', get_class($model), KnightModelTrait::class));
+        }
+
+        return $model;
     }
 
     /**
