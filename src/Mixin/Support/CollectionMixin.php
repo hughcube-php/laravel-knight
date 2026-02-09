@@ -417,6 +417,32 @@ class CollectionMixin
     }
 
     /**
+     * 按模型默认排序: sort DESC, id DESC.
+     *
+     * 等价于 Eloquent 的 scopeSort(): orderByDesc('sort')->orderByDesc('id')
+     *
+     * @return static
+     */
+    public function sortKnightModel(): Closure
+    {
+        return function () {
+            return $this->sort(function ($a, $b) {
+                $sortA = data_get($a, 'sort', 0);
+                $sortB = data_get($b, 'sort', 0);
+
+                if ($sortA != $sortB) {
+                    return $sortB <=> $sortA;
+                }
+
+                $idA = data_get($a, 'id', 0);
+                $idB = data_get($b, 'id', 0);
+
+                return $idB <=> $idA;
+            })->values();
+        };
+    }
+
+    /**
      * 分割字符串为层级数组.
      *
      * 示例:

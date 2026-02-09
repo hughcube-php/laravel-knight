@@ -279,4 +279,39 @@ class CollectionMixinTest extends TestCase
         $result = Collection::splitNested('   ;   ');
         $this->assertCount(0, $result);
     }
+
+    public function testSortKnightModel()
+    {
+        // 基本排序：sort DESC, id DESC
+        $collection = Collection::make([
+            (object) ['id' => 1, 'sort' => 10],
+            (object) ['id' => 2, 'sort' => 30],
+            (object) ['id' => 3, 'sort' => 20],
+        ]);
+        $sorted = $collection->sortKnightModel();
+        $this->assertSame([2, 3, 1], $sorted->pluck('id')->toArray());
+
+        // sort 相同时按 id DESC
+        $collection = Collection::make([
+            (object) ['id' => 5, 'sort' => 10],
+            (object) ['id' => 3, 'sort' => 10],
+            (object) ['id' => 8, 'sort' => 10],
+        ]);
+        $sorted = $collection->sortKnightModel();
+        $this->assertSame([8, 5, 3], $sorted->pluck('id')->toArray());
+
+        // 空集合
+        $collection = Collection::make([]);
+        $sorted = $collection->sortKnightModel();
+        $this->assertSame([], $sorted->toArray());
+
+        // 数组元素（非对象）
+        $collection = Collection::make([
+            ['id' => 1, 'sort' => 5],
+            ['id' => 2, 'sort' => 15],
+            ['id' => 3, 'sort' => 5],
+        ]);
+        $sorted = $collection->sortKnightModel();
+        $this->assertSame([2, 3, 1], $sorted->pluck('id')->toArray());
+    }
 }
