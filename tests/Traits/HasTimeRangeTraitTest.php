@@ -31,10 +31,10 @@ class HasTimeRangeTraitTest extends TestCase
         $this->assertFalse($obj->isStarted());
     }
 
-    public function testIsStartedReturnsFalseWhenStartedAtIsNull()
+    public function testIsStartedReturnsTrueWhenStartedAtIsNull()
     {
         $obj = new TestTimeRangeObject(null, null);
-        $this->assertFalse($obj->isStarted());
+        $this->assertTrue($obj->isStarted());
     }
 
     public function testIsStartedReturnsTrueWhenStartedAtIsYesterday()
@@ -121,10 +121,10 @@ class HasTimeRangeTraitTest extends TestCase
         $this->assertFalse($obj->isInProgress());
     }
 
-    public function testIsInProgressReturnsFalseWhenBothNull()
+    public function testIsInProgressReturnsTrueWhenBothNull()
     {
         $obj = new TestTimeRangeObject(null, null);
-        $this->assertFalse($obj->isInProgress());
+        $this->assertTrue($obj->isInProgress());
     }
 
     public function testIsInProgressReturnsTrueWhenStartedAndEndedAtIsNull()
@@ -139,10 +139,10 @@ class HasTimeRangeTraitTest extends TestCase
         $this->assertFalse($obj->isInProgress());
     }
 
-    public function testIsInProgressReturnsFalseWhenStartedAtIsNullAndEndedAtIsInTheFuture()
+    public function testIsInProgressReturnsTrueWhenStartedAtIsNullAndEndedAtIsInTheFuture()
     {
         $obj = new TestTimeRangeObject(null, Carbon::now()->addHour());
-        $this->assertFalse($obj->isInProgress());
+        $this->assertTrue($obj->isInProgress());
     }
 
     public function testIsInProgressReturnsFalseWhenStartedAtEqualsEndedAtInThePast()

@@ -21,7 +21,7 @@ trait HasTimeRangeTrait
      */
     public function isStarted()
     {
-        return null !== $this->getStartedAt() && $this->getStartedAt() <= Carbon::now();
+        return null === $this->getStartedAt() || $this->getStartedAt() <= Carbon::now();
     }
 
     /**
