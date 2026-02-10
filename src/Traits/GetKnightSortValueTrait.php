@@ -11,6 +11,9 @@ use HughCube\Base\Base;
  * 需要对象具有 sort 和 id 属性
  *
  * @see \HughCube\Laravel\Knight\Contracts\Support\GetKnightSortValue
+ *
+ * @property int $sort
+ * @property int $id
  */
 trait GetKnightSortValueTrait
 {
@@ -21,8 +24,8 @@ trait GetKnightSortValueTrait
      */
     public function getKSortValue(): string
     {
-        $sort = Base::toStringWithPad(data_get($this, 'sort', 0), 40);
-        $id = Base::toStringWithPad(data_get($this, 'id', 0), 40);
+        $sort = Base::toStringWithPad($this->sort ?? 0, 40);
+        $id = Base::toStringWithPad($this->id ?? 0, 40);
 
         return $sort . $id;
     }
