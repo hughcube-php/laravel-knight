@@ -10,6 +10,7 @@
 namespace HughCube\Laravel\Knight\Mixin\Support;
 
 use Closure;
+use HughCube\Laravel\Knight\Contracts\Support\GetKnightSortValue;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
@@ -431,6 +432,30 @@ class CollectionMixin
             return static::make(preg_split($firstPattern, $string) ?: [])->map(fn($item) => trim($item))->filter()->values()->map(function ($item) use ($secondPattern) {
                 return static::make(preg_split($secondPattern, $item) ?: [])->map(fn($v) => trim($v))->filter()->values();
             });
+        };
+    }
+
+    /**
+     * @return static
+     */
+    public function filterAvailable(): Closure
+    {
+        return function () {
+            return $this->filter(function ($model) {
+                return $model->isAvailable();
+            });
+        };
+    }
+
+    /**
+     * 按 GetKnightSortValue::getKSortValue() 降序排序.
+     *
+     * @return static
+     */
+    public function sortKnightModel(): Closure
+    {
+        return function () {
+            return $this->sortByDesc(fn(GetKnightSortValue $item) => $item->getKSortValue());
         };
     }
 }

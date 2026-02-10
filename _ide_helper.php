@@ -529,33 +529,6 @@ namespace Illuminate\Console\Scheduling {
     }
 }
 
-namespace Illuminate\Database\Eloquent {
-
-    /**
-     * @see \HughCube\Laravel\Knight\Mixin\Database\Eloquent\CollectionMixin
-     */
-    class Collection
-    {
-        /**
-         * 
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Eloquent\CollectionMixin::filterAvailable()
-         * @return static
-         */
-        public function filterAvailable(): static
-        {
-        }
-
-        /**
-         * 按 GetKnightSortValue::getKSortValue() 降序排序.
-         * @see \HughCube\Laravel\Knight\Mixin\Database\Eloquent\CollectionMixin::sortKnightModel()
-         * @return static
-         */
-        public function sortKnightModel(): static
-        {
-        }
-    }
-}
-
 namespace Illuminate\Database\Query {
 
     /**
@@ -2194,6 +2167,24 @@ namespace Illuminate\Support {
          * @return static
          */
         public function splitNested(string $string, string $firstPattern = '#[;；]#', string $secondPattern = '#[\\/／]#'): static
+        {
+        }
+
+        /**
+         * 
+         * @see \HughCube\Laravel\Knight\Mixin\Support\CollectionMixin::filterAvailable()
+         * @return static
+         */
+        public function filterAvailable(): static
+        {
+        }
+
+        /**
+         * 按 GetKnightSortValue::getKSortValue() 降序排序.
+         * @see \HughCube\Laravel\Knight\Mixin\Support\CollectionMixin::sortKnightModel()
+         * @return static
+         */
+        public function sortKnightModel(): static
         {
         }
     }

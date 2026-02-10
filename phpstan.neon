@@ -40,7 +40,6 @@ parameters:
                 - src/Mixin/Database/Query/BuilderMixin.php
                 - src/Mixin/Database/Query/Grammars/GrammarMixin.php
                 - src/Mixin/Support/CollectionMixin.php
-                - src/Mixin/Database/Eloquent/CollectionMixin.php
                 - src/Mixin/Support/CarbonMixin.php
                 - src/Mixin/Http/RequestMixin.php
                 - src/Mixin/Console/Scheduling/EventMixin.php
@@ -53,7 +52,6 @@ parameters:
             identifier: return.phpDocType
             paths:
                 - src/Mixin/Support/CollectionMixin.php
-                - src/Mixin/Database/Eloquent/CollectionMixin.php
                 - src/Mixin/Support/StrMixin.php
                 - src/Mixin/Support/CarbonMixin.php
         -
