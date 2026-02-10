@@ -426,8 +426,8 @@ class CollectionMixin
     {
         return function () {
             return $this->sortByDesc(function ($item) {
-                return $item instanceof GetKnightSortValue ? $item->getKSortValue() : '';
-            })->values();
+                return $item->getKSortValue();
+            });
         };
     }
 

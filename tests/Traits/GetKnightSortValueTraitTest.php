@@ -89,7 +89,7 @@ class GetKnightSortValueTraitTest extends TestCase
         $sorted = $collection->sortKnightModel();
         $ids = $sorted->map(function ($item) {
             return $item->id;
-        })->toArray();
+        })->values()->toArray();
 
         $this->assertSame([2, 3, 1], $ids);
     }
@@ -105,7 +105,7 @@ class GetKnightSortValueTraitTest extends TestCase
         $sorted = $collection->sortKnightModel();
         $ids = $sorted->map(function ($item) {
             return $item->id;
-        })->toArray();
+        })->values()->toArray();
 
         $this->assertSame([8, 5, 3], $ids);
     }
