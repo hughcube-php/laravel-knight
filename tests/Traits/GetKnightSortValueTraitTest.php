@@ -118,18 +118,6 @@ class GetKnightSortValueTraitTest extends TestCase
         $this->assertSame([], $sorted->toArray());
     }
 
-    public function testSortKnightModelMixedWithNonInterface()
-    {
-        $collection = Collection::make([
-            (object) ['id' => 1, 'sort' => 10],
-            (object) ['id' => 2, 'sort' => 30],
-            (object) ['id' => 3, 'sort' => 5],
-        ]);
-
-        $sorted = $collection->sortKnightModel();
-
-        $this->assertSame([2, 1, 3], $sorted->pluck('id')->toArray());
-    }
 }
 
 /**

@@ -418,31 +418,15 @@ class CollectionMixin
     }
 
     /**
-     * 按模型默认排序: sort DESC, id DESC.
-     *
-     * 等价于 Eloquent 的 scopeSort(): orderByDesc('sort')->orderByDesc('id')
+     * 按 GetKnightSortValue::getKSortValue() 降序排序.
      *
      * @return static
      */
     public function sortKnightModel(): Closure
     {
         return function () {
-            return $this->sort(function ($a, $b) {
-                if ($a instanceof GetKnightSortValue && $b instanceof GetKnightSortValue) {
-                    return strcmp($b->getKSortValue(), $a->getKSortValue());
-                }
-
-                $sortA = data_get($a, 'sort', 0);
-                $sortB = data_get($b, 'sort', 0);
-
-                if ($sortA != $sortB) {
-                    return $sortB <=> $sortA;
-                }
-
-                $idA = data_get($a, 'id', 0);
-                $idB = data_get($b, 'id', 0);
-
-                return $idB <=> $idA;
+            return $this->sortByDesc(function ($item) {
+                return $item instanceof GetKnightSortValue ? $item->getKSortValue() : '';
             })->values();
         };
     }
