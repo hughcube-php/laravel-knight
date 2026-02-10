@@ -19,7 +19,7 @@ trait GetKnightSortValueTrait
      *
      * @return string
      */
-    public function getKnightSortValue(): string
+    public function getKSortValue(): string
     {
         $sort = Base::toStringWithPad(data_get($this, 'sort', 0), 40);
         $id = Base::toStringWithPad(data_get($this, 'id', 0), 40);

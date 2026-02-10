@@ -18,13 +18,13 @@ class GetKnightSortValueTraitTest extends TestCase
     public function testSortValueLength()
     {
         $obj = new TestSortValueObject(10, 1);
-        $this->assertSame(80, strlen($obj->getKnightSortValue()));
+        $this->assertSame(80, strlen($obj->getKSortValue()));
     }
 
     public function testSortValueFormat()
     {
         $obj = new TestSortValueObject(100, 5);
-        $value = $obj->getKnightSortValue();
+        $value = $obj->getKSortValue();
 
         $sortPart = substr($value, 0, 40);
         $idPart = substr($value, 40, 40);
@@ -36,7 +36,7 @@ class GetKnightSortValueTraitTest extends TestCase
     public function testSortValueWithZeros()
     {
         $obj = new TestSortValueObject(0, 0);
-        $value = $obj->getKnightSortValue();
+        $value = $obj->getKSortValue();
 
         $this->assertSame(str_repeat('0', 80), $value);
     }
@@ -44,7 +44,7 @@ class GetKnightSortValueTraitTest extends TestCase
     public function testSortValueWithLargeNumbers()
     {
         $obj = new TestSortValueObject(PHP_INT_MAX, PHP_INT_MAX);
-        $value = $obj->getKnightSortValue();
+        $value = $obj->getKSortValue();
 
         $this->assertSame(80, strlen($value));
         $this->assertSame(
@@ -59,7 +59,7 @@ class GetKnightSortValueTraitTest extends TestCase
         $a = new TestSortValueObject(20, 1);
         $b = new TestSortValueObject(10, 1);
 
-        $this->assertGreaterThan(0, strcmp($a->getKnightSortValue(), $b->getKnightSortValue()));
+        $this->assertGreaterThan(0, strcmp($a->getKSortValue(), $b->getKSortValue()));
     }
 
     public function testSameSortHigherIdProducesLargerValue()
@@ -67,7 +67,7 @@ class GetKnightSortValueTraitTest extends TestCase
         $a = new TestSortValueObject(10, 5);
         $b = new TestSortValueObject(10, 3);
 
-        $this->assertGreaterThan(0, strcmp($a->getKnightSortValue(), $b->getKnightSortValue()));
+        $this->assertGreaterThan(0, strcmp($a->getKSortValue(), $b->getKSortValue()));
     }
 
     public function testSameSortSameIdProducesEqualValue()
@@ -75,7 +75,7 @@ class GetKnightSortValueTraitTest extends TestCase
         $a = new TestSortValueObject(10, 5);
         $b = new TestSortValueObject(10, 5);
 
-        $this->assertSame(0, strcmp($a->getKnightSortValue(), $b->getKnightSortValue()));
+        $this->assertSame(0, strcmp($a->getKSortValue(), $b->getKSortValue()));
     }
 
     public function testSortKnightModelWithGetKnightSortValue()

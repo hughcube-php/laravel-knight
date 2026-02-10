@@ -429,7 +429,7 @@ class CollectionMixin
         return function () {
             return $this->sort(function ($a, $b) {
                 if ($a instanceof GetKnightSortValue && $b instanceof GetKnightSortValue) {
-                    return strcmp($b->getKnightSortValue(), $a->getKnightSortValue());
+                    return strcmp($b->getKSortValue(), $a->getKSortValue());
                 }
 
                 $sortA = data_get($a, 'sort', 0);

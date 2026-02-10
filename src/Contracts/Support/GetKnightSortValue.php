@@ -14,5 +14,5 @@ interface GetKnightSortValue
      *
      * @return string
      */
-    public function getKnightSortValue(): string;
+    public function getKSortValue(): string;
 }
