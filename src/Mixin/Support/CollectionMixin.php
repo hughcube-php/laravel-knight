@@ -10,6 +10,7 @@
 namespace HughCube\Laravel\Knight\Mixin\Support;
 
 use Closure;
+use HughCube\Laravel\Knight\Contracts\Support\GetKnightSortValue;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
@@ -427,6 +428,10 @@ class CollectionMixin
     {
         return function () {
             return $this->sort(function ($a, $b) {
+                if ($a instanceof GetKnightSortValue && $b instanceof GetKnightSortValue) {
+                    return strcmp($b->getKnightSortValue(), $a->getKnightSortValue());
+                }
+
                 $sortA = data_get($a, 'sort', 0);
                 $sortB = data_get($b, 'sort', 0);
 
