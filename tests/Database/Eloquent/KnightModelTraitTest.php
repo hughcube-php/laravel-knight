@@ -3,7 +3,7 @@
 namespace HughCube\Laravel\Knight\Tests\Database\Eloquent;
 
 use HughCube\Laravel\Knight\Database\Eloquent\Builder as KnightBuilder;
-use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use HughCube\Laravel\Knight\Database\Eloquent\Traits\KnightModelTrait;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
@@ -47,12 +47,12 @@ class KnightModelTraitTest extends TestCase
         $this->assertSame($builder, $builder->noCache());
     }
 
-    public function testNewCollectionReturnsKnightCollection()
+    public function testNewCollectionReturnsEloquentCollection()
     {
         $model = new KnightModelTraitTestModel();
         $collection = $model->newCollection();
 
-        $this->assertInstanceOf(KnightCollection::class, $collection);
+        $this->assertInstanceOf(EloquentCollection::class, $collection);
     }
 
     public function testIfAvailableReturnSelfUsesTrait()

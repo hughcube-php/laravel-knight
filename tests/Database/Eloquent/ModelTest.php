@@ -10,7 +10,7 @@
 namespace HughCube\Laravel\Knight\Tests\Database\Eloquent;
 
 use Exception;
-use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Cache\Events\CacheHit;
 use Illuminate\Cache\Events\CacheMissed;
@@ -632,8 +632,8 @@ class ModelTest extends TestCase
 
         $users = User::query()->limit(10)->get();
 
-        $this->assertInstanceOf(KnightCollection::class, $users);
-        $this->assertInstanceOf(KnightCollection::class, User::findByIds($users->pluck('id')));
+        $this->assertInstanceOf(EloquentCollection::class, $users);
+        $this->assertInstanceOf(EloquentCollection::class, User::findByIds($users->pluck('id')));
     }
 
     /**

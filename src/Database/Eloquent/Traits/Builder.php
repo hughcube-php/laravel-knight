@@ -11,7 +11,7 @@ namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
 use Carbon\CarbonPeriod;
 use HughCube\Laravel\Knight\Database\Eloquent\Builder as KnightEloquentBuilder;
-use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use HughCube\Laravel\Knight\Support\ParameterBag;
 use Illuminate\Cache\NullStore;
@@ -27,7 +27,7 @@ use Traversable;
 /**
  * Trait Builder.
  *
- * @method KnightCollection                 get()
+ * @method EloquentCollection                get()
  * @method Model                            getModel()
  * @method KnightEloquentBuilder            kCanUsable()
  * @method KnightEloquentBuilder            available()
@@ -91,9 +91,9 @@ trait Builder
     /**
      * @param array|Arrayable|Traversable $pks
      *
-     * @return KnightCollection
+     * @return EloquentCollection
      */
-    public function findByPks($pks): KnightCollection
+    public function findByPks($pks): EloquentCollection
     {
         return static::findByOneUniqueColumnValues(
             $this->getModel()->getKeyName(),
@@ -103,7 +103,7 @@ trait Builder
         );
     }
 
-    public function findByOneUniqueColumnValues($column, $values): KnightCollection
+    public function findByOneUniqueColumnValues($column, $values): EloquentCollection
     {
         $collection = Collection::make($values)->map(function ($value) use ($column) {
             return [$column => $value];
@@ -137,13 +137,13 @@ trait Builder
      *
      * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
-     * @return KnightCollection
+     * @return EloquentCollection
      *
      * @phpstan-ignore-next-line
      * @throws
      *
      */
-    public function findUniqueRows($ids): KnightCollection
+    public function findUniqueRows($ids): EloquentCollection
     {
         /** @var Collection $ids */
         $ids = Collection::make($ids)->values();

@@ -11,7 +11,7 @@ namespace HughCube\Laravel\Knight\Database;
 
 use ArrayIterator;
 use Countable;
-use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use Illuminate\Support\Collection;
@@ -23,7 +23,7 @@ use Traversable;
  *
  * 用于存储 MultipleModelBatchFinder 的查询结果，提供按模型类名获取结果的方法。
  *
- * @implements IteratorAggregate<string, KnightCollection>
+ * @implements IteratorAggregate<string, EloquentCollection>
  */
 class MultipleModelBatchResult implements Countable, IteratorAggregate, Arrayable
 {
@@ -85,7 +85,7 @@ class MultipleModelBatchResult implements Countable, IteratorAggregate, Arrayabl
      *
      * @param class-string $class 模型类名
      *
-     * @return KnightCollection
+     * @return EloquentCollection
      */
     public function getOf(string $class)
     {
@@ -95,13 +95,13 @@ class MultipleModelBatchResult implements Countable, IteratorAggregate, Arrayabl
             /** @var IlluminateModel $instance */
             $instance = new $class();
 
-            /** @var KnightCollection $collection */
+            /** @var EloquentCollection $collection */
             $collection = $instance->newCollection($models);
 
             return $collection;
         }
 
-        return new KnightCollection($models);
+        return new EloquentCollection($models);
     }
 
     /**

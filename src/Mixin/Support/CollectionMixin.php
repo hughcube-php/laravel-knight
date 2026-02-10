@@ -10,7 +10,6 @@
 namespace HughCube\Laravel\Knight\Mixin\Support;
 
 use Closure;
-use HughCube\Laravel\Knight\Contracts\Support\GetKnightSortValue;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
@@ -414,20 +413,6 @@ class CollectionMixin
     {
         return function (string $separator, string $pattern = '#[\/／]#', int $limit = -1) {
             return static::make(preg_split($pattern, $separator, $limit) ?: []);
-        };
-    }
-
-    /**
-     * 按 GetKnightSortValue::getKSortValue() 降序排序.
-     *
-     * @return static
-     */
-    public function sortKnightModel(): Closure
-    {
-        return function () {
-            return $this->sortByDesc(function ($item) {
-                return $item->getKSortValue();
-            });
         };
     }
 

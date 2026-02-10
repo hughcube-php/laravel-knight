@@ -10,14 +10,14 @@
 namespace HughCube\Laravel\Knight\Database\Eloquent;
 
 use HughCube\Laravel\Knight\Database\Eloquent\Builder as KnightEloquentBuilder;
-use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use HughCube\Laravel\Knight\Database\Eloquent\Traits\Builder as KnightBuilder;
 use Illuminate\Database\Connection;
 
 /**
  * Class Builder.
  *
- * @method KnightCollection                 get()
+ * @method EloquentCollection                get()
  * @method Model                            getModel()
  * @method KnightEloquentBuilder            kCanUsable()
  * @method KnightEloquentBuilder            available()

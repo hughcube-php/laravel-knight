@@ -4,7 +4,7 @@ namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
 use DateTimeInterface;
 use HughCube\Laravel\Knight\Database\Eloquent\Builder;
-use HughCube\Laravel\Knight\Database\Eloquent\Collection as KnightCollection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use HughCube\Laravel\Knight\Support\Json;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
@@ -400,9 +400,9 @@ trait Model
     /**
      * @param array|Arrayable|Traversable $ids
      *
-     * @return KnightCollection<int, static>
+     * @return EloquentCollection<int, static>
      */
-    public static function findByIds($ids): KnightCollection
+    public static function findByIds($ids): EloquentCollection
     {
         return static::query()->findByPks($ids);
     }
@@ -470,9 +470,9 @@ trait Model
     }
 
     /** @phpstan-ignore-next-line */
-    public function newCollection(array $models = []): KnightCollection
+    public function newCollection(array $models = []): EloquentCollection
     {
-        return new KnightCollection($models);
+        return new EloquentCollection($models);
     }
 
     public static function isAvailableModel($model): bool

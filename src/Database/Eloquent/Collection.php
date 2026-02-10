@@ -22,18 +22,10 @@ use HughCube\Laravel\Knight\Mixin\Support\CollectionMixin;
  *
  * @extends \Illuminate\Support\Collection<TKey, TModel>
  *
+ * @deprecated 使用 \Illuminate\Database\Eloquent\Collection 代替，filterAvailable() 和 sortKnightModel() 已迁移到 EloquentCollectionMixin
+ *
  * @phpstan-ignore-next-line
  */
 class Collection extends \Illuminate\Database\Eloquent\Collection
 {
-    /**
-     * @return static
-     */
-    public function filterAvailable(): Collection
-    {
-        return $this->filter(function ($model) {
-            /** @var Model $model */
-            return $model->isAvailable();
-        });
-    }
 }

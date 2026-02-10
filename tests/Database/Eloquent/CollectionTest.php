@@ -2,7 +2,7 @@
 
 namespace HughCube\Laravel\Knight\Tests\Database\Eloquent;
 
-use HughCube\Laravel\Knight\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use HughCube\Laravel\Knight\Tests\TestCase;
 
 class CollectionTest extends TestCase
@@ -23,7 +23,7 @@ class CollectionTest extends TestCase
             }
         };
 
-        $collection = new Collection([$available, $unavailable]);
+        $collection = new EloquentCollection([$available, $unavailable]);
 
         $filtered = $collection->filterAvailable()->values();
 

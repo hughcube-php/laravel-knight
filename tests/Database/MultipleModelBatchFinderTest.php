@@ -458,7 +458,7 @@ class MultipleModelBatchFinderTest extends TestCase
 
         // 验证返回的是 KnightCollection
         $this->assertInstanceOf(
-            \HughCube\Laravel\Knight\Database\Eloquent\Collection::class,
+            \Illuminate\Database\Eloquent\Collection::class,
             $users
         );
     }
@@ -522,7 +522,7 @@ class MultipleModelBatchFinderTest extends TestCase
         // 获取不存在的类
         $nonExistent = $result->getOf('NonExistentClass');
         $this->assertInstanceOf(
-            \HughCube\Laravel\Knight\Database\Eloquent\Collection::class,
+            \Illuminate\Database\Eloquent\Collection::class,
             $nonExistent
         );
         $this->assertSame(0, $nonExistent->count());
@@ -665,7 +665,7 @@ class MultipleModelBatchFinderTest extends TestCase
 
         // 由于 FakeClass 不存在，应该使用默认的 KnightCollection
         $this->assertInstanceOf(
-            \HughCube\Laravel\Knight\Database\Eloquent\Collection::class,
+            \Illuminate\Database\Eloquent\Collection::class,
             $collection
         );
         $this->assertSame(1, $collection->count());
