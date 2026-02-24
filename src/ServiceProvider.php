@@ -20,6 +20,8 @@ use HughCube\Laravel\Knight\Console\Commands\GenerateMixinIdeHelperCommand;
 use HughCube\Laravel\Knight\Console\Commands\KRTest;
 use HughCube\Laravel\Knight\Console\Commands\MigrateRerun;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
+use HughCube\Laravel\Knight\Console\Commands\WalDropSlotCommand;
+use HughCube\Laravel\Knight\Console\Commands\WalEventDispatchCommand;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin as MigrationBlueprintMixin;
 use HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin as MigrationPostgresGrammarMixin;
@@ -109,6 +111,8 @@ class ServiceProvider extends IlluminateServiceProvider
                 ClearModelCache::class,
                 GenerateMixinIdeHelperCommand::class,
                 MigrateRerun::class,
+                WalEventDispatchCommand::class,
+                WalDropSlotCommand::class,
             ]);
         }
 
@@ -120,7 +124,7 @@ class ServiceProvider extends IlluminateServiceProvider
 
         $this->configureAuthUserProvider();
 
-        $this->registerRefreshModelCacheEvent();
+        $this->registerModelChangedEvent();
     }
 
     protected function bootOpCache()
@@ -213,7 +217,7 @@ class ServiceProvider extends IlluminateServiceProvider
      *
      * @see \Illuminate\Database\Eloquent\Concerns\HasEvents::getObservableEvents
      */
-    protected function registerRefreshModelCacheEvent()
+    protected function registerModelChangedEvent()
     {
         /** @var Dispatcher|null $dispatcher */
         $dispatcher = EloquentModel::getEventDispatcher();
@@ -230,8 +234,9 @@ class ServiceProvider extends IlluminateServiceProvider
         $dispatcher->listen($events, function ($event, $models) {
             /** @var Model $model */
             foreach ($models as $model) {
-                /** @phpstan-ignore-next-line */
-                if (method_exists($model, 'deleteRowCache')) {
+                if (method_exists($model, 'onKnightModelChanged')) {
+                    $model->onKnightModelChanged();
+                } elseif (method_exists($model, 'deleteRowCache')) {
                     $model->deleteRowCache();
                 }
             }

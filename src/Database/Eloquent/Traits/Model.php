@@ -317,6 +317,23 @@ trait Model
     }
 
     /**
+     * Called when model data has changed (created/updated/deleted).
+     * Default: clear row cache. Override to add sync logic (e.g. OTS).
+     */
+    public function onKnightModelChanged(): void
+    {
+        $this->deleteRowCache();
+    }
+
+    /**
+     * Called ONLY by WAL path, after onKnightModelChanged().
+     * Override for WAL-specific side effects (e.g. cascade refresh related models).
+     */
+    public function onKnightWalChanged(): void
+    {
+    }
+
+    /**
      * @throws
      *
      * @phpstan-ignore-next-line

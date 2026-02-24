@@ -10,11 +10,13 @@
 namespace HughCube\Laravel\Knight\Console;
 
 use HughCube\Laravel\Knight\Support\Str;
+use HughCube\Laravel\Knight\Traits\Container;
 use HughCube\Laravel\Knight\Traits\GetOrSet;
 use Illuminate\Support\Collection;
 
 class Command extends \Illuminate\Console\Command
 {
+    use Container;
     use GetOrSet;
 
     protected function getOrAskOption($name, $question, $default = null)
