@@ -95,6 +95,24 @@ jobs:
         if: ${{ 'true' == env.has_deps }}
         run: composer info
 
+      - name: Install wal2json and configure PostgreSQL WAL
+        if: runner.os == 'Linux'
+        continue-on-error: true
+        run: |
+          CONTAINER_ID=$(docker ps --filter "ancestor=postgres:15" --format "{{.ID}}")
+          if [ -n "$CONTAINER_ID" ]; then
+            docker exec "$CONTAINER_ID" bash -c "apt-get update && apt-get install -y postgresql-15-wal2json"
+            docker exec "$CONTAINER_ID" bash -c "echo 'wal_level = logical' >> /var/lib/postgresql/data/postgresql.conf"
+            docker restart "$CONTAINER_ID"
+            for i in $(seq 1 30); do
+              if docker exec "$CONTAINER_ID" pg_isready -U knight -d knight_test 2>/dev/null; then
+                echo "PostgreSQL is ready with wal2json"
+                break
+              fi
+              sleep 1
+            done
+          fi
+
       - name: Run PHPUnit
         if: ${{ 'true' == env.has_deps }}
         run: composer run-script test -- -c phpunit.xml.dist --testdox

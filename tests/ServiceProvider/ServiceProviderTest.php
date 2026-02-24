@@ -57,16 +57,41 @@ class ServiceProviderTest extends TestCase
         $this->assertIsArray(Route::getRoutes()->getRoutesByName());
     }
 
-    public function testRegisterRefreshModelCacheEventTriggersDelete()
+    public function testRegisterModelChangedEventCallsOnKnightModelChanged()
     {
         $provider = new ServiceProvider($this->app);
-        self::callMethod($provider, 'registerRefreshModelCacheEvent');
+        self::callMethod($provider, 'registerModelChangedEvent');
 
         $dispatcher = EloquentModel::getEventDispatcher();
         $this->assertInstanceOf(Dispatcher::class, $dispatcher);
 
         $model = new class() extends KnightModel {
-            public static int $deleteCalls = 0;
+            /** @var int */
+            public static $modelChangedCalls = 0;
+
+            public function onKnightModelChanged(): void
+            {
+                self::$modelChangedCalls++;
+            }
+        };
+
+        $model::$modelChangedCalls = 0;
+        $dispatcher->dispatch('eloquent.updated: '.get_class($model), [$model]);
+
+        $this->assertGreaterThanOrEqual(1, $model::$modelChangedCalls);
+    }
+
+    public function testRegisterModelChangedEventFallbackToDeleteRowCache()
+    {
+        $provider = new ServiceProvider($this->app);
+        self::callMethod($provider, 'registerModelChangedEvent');
+
+        $dispatcher = EloquentModel::getEventDispatcher();
+        $this->assertInstanceOf(Dispatcher::class, $dispatcher);
+
+        $model = new class() extends EloquentModel {
+            /** @var int */
+            public static $deleteCalls = 0;
 
             public function deleteRowCache(): bool
             {
@@ -76,9 +101,18 @@ class ServiceProviderTest extends TestCase
             }
         };
 
+        $model::$deleteCalls = 0;
         $dispatcher->dispatch('eloquent.updated: '.get_class($model), [$model]);
 
         $this->assertGreaterThanOrEqual(1, $model::$deleteCalls);
+    }
+
+    public function testWalCommandsAreRegistered()
+    {
+        $commands = $this->app['Illuminate\Contracts\Console\Kernel']->all();
+
+        $this->assertArrayHasKey('wal:event-dispatch', $commands);
+        $this->assertArrayHasKey('wal:drop-slot', $commands);
     }
 
     public function testConfigureAuthUserProviderRegistersCreator()
