@@ -26,7 +26,7 @@ class ActionProcessed
      *
      * @phpstan-ignore-next-line
      */
-    protected function getAction()
+    public function getAction()
     {
         return $this->action;
     }

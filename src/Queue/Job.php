@@ -67,6 +67,11 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     protected ?FlowJobDescribe $flowJobDescribe = null;
 
     /**
+     * @var float|null
+     */
+    protected $dispatchedAt = null;
+
+    /**
      * @var int
      */
     protected static int $__jobCounter = 0;
@@ -79,6 +84,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     public function __construct(array $data = [])
     {
         $this->data = $data;
+        $this->dispatchedAt = microtime(true);
 
         static::$__jobCounter++;
     }
@@ -155,6 +161,20 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     protected function getDelays(): float
     {
         return round($this->getActionStartedAt(true)->diffInMicroseconds(Carbon::now()) / 1000, 2);
+    }
+
+    /**
+     * @return float|null
+     */
+    public function getQueueWaitMs()
+    {
+        if (null === $this->dispatchedAt) {
+            return null;
+        }
+
+        $startedAt = (float) $this->getActionStartedAt(true)->format('U.u');
+
+        return round(($startedAt - $this->dispatchedAt) * 1000, 2);
     }
 
     public function getData(): array
