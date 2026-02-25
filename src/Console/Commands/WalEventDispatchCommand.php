@@ -17,7 +17,7 @@ class WalEventDispatchCommand extends Command
         {--slot= : Replication slot name, default: {APP_NAME}_wal_event}
         {--interval=1.0 : Poll interval in seconds, supports decimals}
         {--batch=1000 : Max number of changes per poll}
-        {--advance : Advance LSN after processing (default: do not advance)}
+        {--peek : Peek mode: read changes without consuming (for debugging)}
         {--model-path=* : Model scanning paths, can be specified multiple times (default: app/Models)}';
 
     protected $description = 'Monitor PostgreSQL WAL changes and dispatch corresponding events';
@@ -224,8 +224,12 @@ class WalEventDispatchCommand extends Command
     {
         $connection = $this->getConnection();
 
+        $function = $this->option('peek')
+            ? 'pg_logical_slot_peek_changes'
+            : 'pg_logical_slot_get_changes';
+
         $results = $connection->select(
-            'SELECT lsn, data FROM pg_logical_slot_peek_changes(?, NULL, ?)',
+            sprintf('SELECT lsn, data FROM %s(?, NULL, ?)', $function),
             [$slot, $batch]
         );
 
@@ -285,10 +289,6 @@ class WalEventDispatchCommand extends Command
 
                 $this->line(sprintf('%s [%s]', get_class($meta['handler']), implode(',', $uniqueIds)));
             }
-        }
-
-        if ($this->option('advance') && null !== $lastLsn) {
-            $connection->statement('SELECT pg_replication_slot_advance(?, ?)', [$slot, $lastLsn]);
         }
 
         return !empty($tableIds);
