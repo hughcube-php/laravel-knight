@@ -17,6 +17,7 @@ class WalEventDispatchCommand extends Command
         {--slot= : Replication slot name, default: {APP_NAME}_wal_event}
         {--interval=1.0 : Poll interval in seconds, supports decimals}
         {--batch=1000 : Max number of changes per poll}
+        {--memory=128 : Memory limit in MB, process stops when exceeded}
         {--mode=advance : Consume mode: auto(get_changes, read=consume), advance(peek+advance after dispatch, default), peek(read-only for debugging)}
         {--model-path=* : Model scanning paths, can be specified multiple times (default: app/Models)}';
 
@@ -49,9 +50,11 @@ class WalEventDispatchCommand extends Command
             $handlerCount += count($metas);
         }
 
+        $memoryLimit = max(1, intval($this->option('memory')));
+
         $this->info(sprintf(
-            'WAL event dispatch started, slot: %s, mode: %s, interval: %.2fs, batch: %d, tables: %d, handlers: %d, partitions: %d',
-            $slot, $this->getMode(), $interval, $batch, count($handlers), $handlerCount, count($partitionMap)
+            'WAL event dispatch started, slot: %s, mode: %s, interval: %.2fs, batch: %d, memory: %dMB, tables: %d, handlers: %d, partitions: %d',
+            $slot, $this->getMode(), $interval, $batch, $memoryLimit, count($handlers), $handlerCount, count($partitionMap)
         ));
         foreach ($handlers as $table => $metas) {
             foreach ($metas as $meta) {
@@ -75,6 +78,15 @@ class WalEventDispatchCommand extends Command
                 $this->reconnectDatabase();
                 usleep(intval($backoff * 1000000));
                 continue;
+            }
+
+            if ($this->isMemoryExceeded($memoryLimit)) {
+                $this->info(sprintf(
+                    'Memory limit of %dMB exceeded (current: %dMB), stopping...',
+                    $memoryLimit,
+                    intval(memory_get_usage(true) / 1024 / 1024)
+                ));
+                break;
             }
 
             if (!$hasChanges) {
@@ -377,6 +389,14 @@ class WalEventDispatchCommand extends Command
         pcntl_signal(SIGINT, function () {
             $this->shouldRun = false;
         });
+    }
+
+    /**
+     * @param int $memoryLimit MB
+     */
+    protected function isMemoryExceeded($memoryLimit): bool
+    {
+        return (memory_get_usage(true) / 1024 / 1024) >= $memoryLimit;
     }
 
     protected function reconnectDatabase(): void
