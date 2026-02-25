@@ -17,7 +17,7 @@ class WalEventDispatchCommand extends Command
         {--slot= : Replication slot name, default: {APP_NAME}_wal_event}
         {--interval=1.0 : Poll interval in seconds, supports decimals}
         {--batch=1000 : Max number of changes per poll}
-        {--peek : Peek mode: read changes without consuming (for debugging)}
+        {--mode=advance : Consume mode: auto(get_changes, read=consume), advance(peek+advance after dispatch, default), peek(read-only for debugging)}
         {--model-path=* : Model scanning paths, can be specified multiple times (default: app/Models)}';
 
     protected $description = 'Monitor PostgreSQL WAL changes and dispatch corresponding events';
@@ -50,8 +50,8 @@ class WalEventDispatchCommand extends Command
         }
 
         $this->info(sprintf(
-            'WAL event dispatch started, slot: %s, interval: %.2fs, batch: %d, tables: %d, handlers: %d, partitions: %d',
-            $slot, $interval, $batch, count($handlers), $handlerCount, count($partitionMap)
+            'WAL event dispatch started, slot: %s, mode: %s, interval: %.2fs, batch: %d, tables: %d, handlers: %d, partitions: %d',
+            $slot, $this->getMode(), $interval, $batch, count($handlers), $handlerCount, count($partitionMap)
         ));
         foreach ($handlers as $table => $metas) {
             foreach ($metas as $meta) {
@@ -214,19 +214,26 @@ class WalEventDispatchCommand extends Command
     }
 
     /**
-     * Poll WAL changes and dispatch events.
-     *
-     * @param array<string, array<int, array{handler: HasWalHandler, keyName: string}>> $handlers
-     * @param array<string, string> $partitionMap
-     * @return bool Whether changes were found
+     * @return string auto|advance|peek
      */
+    protected function getMode(): string
+    {
+        $mode = $this->option('mode');
+        if (in_array($mode, ['auto', 'advance', 'peek'], true)) {
+            return $mode;
+        }
+        return 'advance';
+    }
+
     protected function pollChanges(string $slot, array $handlers, int $batch, array $partitionMap): bool
     {
         $connection = $this->getConnection();
+        $mode = $this->getMode();
 
-        $function = $this->option('peek')
-            ? 'pg_logical_slot_peek_changes'
-            : 'pg_logical_slot_get_changes';
+        /** auto: get_changes (read=consume), advance/peek: peek_changes (read-only) */
+        $function = 'auto' === $mode
+            ? 'pg_logical_slot_get_changes'
+            : 'pg_logical_slot_peek_changes';
 
         $results = $connection->select(
             sprintf('SELECT lsn, data FROM %s(?, NULL, ?)', $function),
@@ -288,6 +295,16 @@ class WalEventDispatchCommand extends Command
                 );
 
                 $this->line(sprintf('%s [%s]', get_class($meta['handler']), implode(',', $uniqueIds)));
+            }
+        }
+
+        /** advance mode: manually advance slot after successful dispatch */
+        if ('advance' === $mode && null !== $lastLsn) {
+            try {
+                $connection->statement('SELECT pg_replication_slot_advance(?, ?)', [$slot, $lastLsn]);
+            } catch (Throwable $e) {
+                /** Slot already advanced (e.g. by another process), safe to ignore */
+                $this->warn(sprintf('Slot advance warning (LSN %s): %s', $lastLsn, $e->getMessage()));
             }
         }
 
