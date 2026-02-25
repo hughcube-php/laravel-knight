@@ -55,7 +55,7 @@ class WalEventDispatchCommand extends Command
         ));
         foreach ($handlers as $table => $metas) {
             foreach ($metas as $meta) {
-                $this->info(sprintf('  -> %s (%s, key: %s)', $table, get_class($meta['handler']), $meta['keyName']));
+                $this->info(sprintf('  -> %s (table: %s, key: %s)', get_class($meta['handler']), $table, $meta['keyName']));
             }
         }
 
@@ -294,7 +294,7 @@ class WalEventDispatchCommand extends Command
                     new WalChangesDetected($meta['handler'], $uniqueIds)
                 );
 
-                $this->line(sprintf('%s [%s]', get_class($meta['handler']), implode(',', $uniqueIds)));
+                $this->line(sprintf('[%s] %s (key: %s) [%s]', date('Y-m-d H:i:s'), get_class($meta['handler']), $meta['keyName'], implode(',', $uniqueIds)));
             }
         }
 
