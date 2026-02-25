@@ -44,4 +44,22 @@ class DbTest extends TestCase
             $this->assertStringContainsString('select 1', $exception->getMessage());
         }
     }
+
+    public function testRetryOnQueryExceptionHandlesPositiveSleepValue()
+    {
+        $attempts = 0;
+
+        $result = DB::retryOnQueryException(function () use (&$attempts) {
+            $attempts++;
+
+            if ($attempts === 1) {
+                throw $this->newQueryException('select 1', [], new Exception('fail'), 'sqlite');
+            }
+
+            return 'ok';
+        }, 3, 1);
+
+        $this->assertSame('ok', $result);
+        $this->assertSame(2, $attempts);
+    }
 }

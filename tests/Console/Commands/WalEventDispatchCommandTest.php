@@ -521,7 +521,7 @@ class WalEventDispatchCommandTest extends TestCase
         $this->assertTrue($definition->hasOption('slot'));
         $this->assertTrue($definition->hasOption('interval'));
         $this->assertTrue($definition->hasOption('batch'));
-        $this->assertTrue($definition->hasOption('advance'));
+        $this->assertTrue($definition->hasOption('mode'));
         $this->assertTrue($definition->hasOption('model-path'));
     }
 
@@ -532,8 +532,34 @@ class WalEventDispatchCommandTest extends TestCase
 
         $this->assertSame('1.0', $definition->getOption('interval')->getDefault());
         $this->assertSame('1000', $definition->getOption('batch')->getDefault());
+        $this->assertSame('advance', $definition->getOption('mode')->getDefault());
         $this->assertNull($definition->getOption('connection')->getDefault());
         $this->assertNull($definition->getOption('slot')->getDefault());
+    }
+
+    // ==================== getMode ====================
+
+    public function testGetModeDefaultIsAdvance()
+    {
+        $command = $this->makeCommand();
+
+        $this->assertSame('advance', self::callMethod($command, 'getMode'));
+    }
+
+    public function testGetModeSupportsAutoAndPeek()
+    {
+        $auto = $this->makeCommand(['--mode' => 'auto']);
+        $peek = $this->makeCommand(['--mode' => 'peek']);
+
+        $this->assertSame('auto', self::callMethod($auto, 'getMode'));
+        $this->assertSame('peek', self::callMethod($peek, 'getMode'));
+    }
+
+    public function testGetModeInvalidValueFallsBackToAdvance()
+    {
+        $command = $this->makeCommand(['--mode' => 'invalid']);
+
+        $this->assertSame('advance', self::callMethod($command, 'getMode'));
     }
 
     // ==================== shouldRun / errorStreak ====================

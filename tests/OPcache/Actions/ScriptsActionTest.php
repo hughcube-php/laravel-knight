@@ -16,9 +16,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use ReflectionProperty;
 
-/**
- * @requires function opcache_reset
- */
 class ScriptsActionTest extends TestCase
 {
     public function testRun()

@@ -417,13 +417,13 @@ class WalEventDispatchIntegrationTest extends TestCase
         }
     }
 
-    public function testPollChangesWithAdvanceOption()
+    public function testPollChangesWithAdvanceMode()
     {
         $this->skipIfPgsqlNotConfigured();
         $this->skipIfWal2jsonNotAvailable();
 
         $connection = $this->app['db']->connection('pgsql');
-        $command = $this->makeCommand(['--advance' => true]);
+        $command = $this->makeCommand(['--mode' => 'advance']);
         self::callMethod($command, 'ensureSlotExists', [$this->slotName]);
 
         $connection->table('wal_integration_items')->insert(['name' => 'advance_test']);
@@ -448,14 +448,14 @@ class WalEventDispatchIntegrationTest extends TestCase
         $this->assertFalse($hasChanges2);
     }
 
-    public function testPollChangesWithoutAdvanceRetainsChanges()
+    public function testPollChangesWithPeekModeRetainsChanges()
     {
         $this->skipIfPgsqlNotConfigured();
         $this->skipIfWal2jsonNotAvailable();
 
         $connection = $this->app['db']->connection('pgsql');
-        // Default: no --advance
-        $command = $this->makeCommand();
+        // mode=peek is read-only and should keep WAL entries available
+        $command = $this->makeCommand(['--mode' => 'peek']);
         self::callMethod($command, 'ensureSlotExists', [$this->slotName]);
 
         $connection->table('wal_integration_items')->insert(['name' => 'no_advance_test']);
@@ -473,7 +473,7 @@ class WalEventDispatchIntegrationTest extends TestCase
         ]);
         $this->assertTrue($hasChanges);
 
-        // Second poll should STILL detect changes (LSN was NOT advanced, using peek_changes)
+        // Second poll should STILL detect changes (slot not advanced in peek mode)
         $hasChanges2 = self::callMethod($command, 'pollChanges', [
             $this->slotName, $handlers, 1000, [],
         ]);

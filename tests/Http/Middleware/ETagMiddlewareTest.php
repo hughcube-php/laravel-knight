@@ -6,6 +6,7 @@ use HughCube\Laravel\Knight\Http\Middleware\ETagMiddleware;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ETagMiddlewareTest extends TestCase
 {
@@ -88,5 +89,19 @@ class ETagMiddlewareTest extends TestCase
         });
 
         $this->assertNotNull($response->headers->get('ETag'));
+    }
+
+    public function testFalseContentDoesNotAddETag()
+    {
+        $middleware = new ETagMiddleware();
+        $request = Request::create('/test', 'GET');
+
+        $response = $middleware->handle($request, function () {
+            return new StreamedResponse(function () {
+                echo 'ignored';
+            }, 200);
+        });
+
+        $this->assertNull($response->headers->get('ETag'));
     }
 }

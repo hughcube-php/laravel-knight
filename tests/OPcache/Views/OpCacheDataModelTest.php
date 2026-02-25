@@ -89,10 +89,6 @@ class OpCacheDataModelTest extends TestCase
 
     private function loadOpcacheView(): void
     {
-        if (!function_exists('opcache_get_status')) {
-            $this->markTestSkipped('opcache_get_status is not available.');
-        }
-
         static $loaded = false;
         if ($loaded) {
             return;
@@ -101,6 +97,9 @@ class OpCacheDataModelTest extends TestCase
         $root = dirname(__DIR__, 3);
         $path = $root.DIRECTORY_SEPARATOR.'src'.DIRECTORY_SEPARATOR.'OPcache'.DIRECTORY_SEPARATOR.'Views'.DIRECTORY_SEPARATOR.'opcache.php';
         $this->assertFileExists($path);
+
+        $cwd = getcwd();
+        $sampleDir = $this->prepareSampleDataDirectory();
 
         $level = ob_get_level();
         ob_start();
@@ -111,11 +110,15 @@ class OpCacheDataModelTest extends TestCase
 
         try {
             try {
+                chdir($sampleDir);
                 include $path;
             } catch (\Throwable $exception) {
                 // The view executes with CLI opcache disabled; swallow rendering errors after class definition.
             }
         } finally {
+            if ($cwd !== false) {
+                chdir($cwd);
+            }
             restore_error_handler();
             while (ob_get_level() > $level) {
                 ob_end_clean();
@@ -123,6 +126,74 @@ class OpCacheDataModelTest extends TestCase
         }
 
         $loaded = true;
+    }
+
+    private function prepareSampleDataDirectory(): string
+    {
+        $dir = sys_get_temp_dir().DIRECTORY_SEPARATOR.'knight-opcache-view-tests';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        $samplePath = $dir.DIRECTORY_SEPARATOR.'data-sample.php';
+        file_put_contents($samplePath, $this->getSampleDataFileContent());
+
+        return $dir;
+    }
+
+    private function getSampleDataFileContent(): string
+    {
+        return <<<'PHP'
+<?php
+if (!function_exists('opcache_get_configuration')) {
+    function opcache_get_configuration()
+    {
+        return [
+            'version' => [
+                'version' => 'sample',
+            ],
+            'directives' => [
+                'opcache.memory_consumption' => 134217728,
+            ],
+        ];
+    }
+}
+
+if (!function_exists('opcache_get_status')) {
+    function opcache_get_status($includeScripts = true)
+    {
+        $scriptPath = sys_get_temp_dir().DIRECTORY_SEPARATOR.'knight-opcache-sample'.DIRECTORY_SEPARATOR.'sample.php';
+
+        return [
+            'memory_usage' => [
+                'used_memory' => 1,
+                'free_memory' => 1,
+                'wasted_memory' => 0,
+                'current_wasted_percentage' => 0,
+            ],
+            'opcache_statistics' => [
+                'num_cached_keys' => 1,
+                'max_cached_keys' => 2,
+                'misses' => 0,
+                'hits' => 1,
+                'oom_restarts' => 0,
+                'manual_restarts' => 0,
+                'hash_restarts' => 0,
+                'opcache_hit_rate' => 100,
+                'blacklist_miss_ratio' => 0,
+                'start_time' => 0,
+                'last_restart_time' => 0,
+            ],
+            'scripts' => [
+                $scriptPath => [
+                    'hits' => 1,
+                    'memory_consumption' => 128,
+                ],
+            ],
+        ];
+    }
+}
+PHP;
     }
 
     private function buildSampleConfig(): array

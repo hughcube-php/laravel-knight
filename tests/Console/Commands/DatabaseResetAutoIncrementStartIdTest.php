@@ -8,6 +8,9 @@ use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use ReflectionClass;
+use Illuminate\Console\OutputStyle;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 
 class DatabaseResetAutoIncrementStartIdTest extends TestCase
 {
@@ -474,5 +477,264 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
         } finally {
             $connection->statement("DROP TABLE IF EXISTS `{$tableName}`");
         }
+    }
+
+    public function testHandleReportsUnsupportedDriver(): void
+    {
+        $this->artisan('database:reset-auto-increment-start-id', [
+            '--connection' => 'sqlite',
+            '--force' => true,
+        ])->assertExitCode(0);
+    }
+
+    public function testHandleMysqlDatabaseOptionUsesDatabaseAndReturnsWhenNoTables(): void
+    {
+        $pdo = new class() {
+            public array $queries = [];
+
+            public function exec(string $sql)
+            {
+                $this->queries[] = $sql;
+                return 0;
+            }
+        };
+
+        $connection = $this->getMockBuilder(Connection::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getDriverName', 'getPdo', 'select'])
+            ->getMock();
+
+        $connection->method('getDriverName')->willReturn('mysql');
+        $connection->method('getPdo')->willReturn($pdo);
+        $connection->method('select')->willReturn([]);
+
+        DB::shouldReceive('connection')->withAnyArgs()->andReturn($connection);
+
+        $this->artisan('database:reset-auto-increment-start-id', [
+            '--connection' => 'mysql',
+            '--database' => 'local_test',
+            '--force' => true,
+        ])->assertExitCode(0);
+
+        $this->assertContains('use `local_test`;', $pdo->queries);
+    }
+
+    public function testHandleReportsSpecificTableNotFound(): void
+    {
+        $connection = $this->getMockBuilder(Connection::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getDriverName', 'select'])
+            ->getMock();
+
+        $connection->method('getDriverName')->willReturn('mysql');
+        $connection->method('select')->willReturn([
+            (object) ['Tables_in_local_test' => 'users'],
+        ]);
+
+        DB::shouldReceive('connection')->withAnyArgs()->andReturn($connection);
+
+        $this->artisan('database:reset-auto-increment-start-id', [
+            '--connection' => 'mysql',
+            '--table' => 'not_exists',
+            '--force' => true,
+        ])->assertExitCode(0);
+    }
+
+    public function testGetPrimaryKeyColumnForPgsqlReturnsNullWhenNoPrimaryKey(): void
+    {
+        $connection = $this->getMockBuilder(Connection::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['select'])
+            ->getMock();
+
+        $connection->method('select')->willReturn([]);
+
+        $command = new DatabaseResetAutoIncrementStartId();
+        $primaryKey = $this->callMethod($command, 'getPrimaryKeyColumn', [$connection, 'pgsql', 'users']);
+
+        $this->assertNull($primaryKey);
+    }
+
+    public function testProcessTableReturnsWhenPrimaryKeyMissing(): void
+    {
+        $command = new class extends DatabaseResetAutoIncrementStartId {
+            public bool $setAutoIncrementCalled = false;
+
+            protected function getPrimaryKeyColumn(Connection $connection, $driver, $table)
+            {
+                return null;
+            }
+
+            protected function setAutoIncrement(Connection $connection, $driver, $table, $primaryKey, $startId): void
+            {
+                $this->setAutoIncrementCalled = true;
+            }
+        };
+
+        $this->initializeCommand($command);
+
+        $connection = $this->getMockBuilder(Connection::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->callMethod($command, 'processTable', [$connection, 'mysql', 'users', 1, 0, true]);
+
+        $this->assertFalse($command->setAutoIncrementCalled);
+    }
+
+    public function testProcessTableSkipsWhenNotForcedAndNotConfirmed(): void
+    {
+        $command = new class extends DatabaseResetAutoIncrementStartId {
+            public bool $setAutoIncrementCalled = false;
+
+            protected function getPrimaryKeyColumn(Connection $connection, $driver, $table)
+            {
+                return 'id';
+            }
+
+            protected function getMaxId(Connection $connection, $driver, $table, $primaryKey): int
+            {
+                return 10;
+            }
+
+            public function confirm($question, $default = false)
+            {
+                return false;
+            }
+
+            protected function setAutoIncrement(Connection $connection, $driver, $table, $primaryKey, $startId): void
+            {
+                $this->setAutoIncrementCalled = true;
+            }
+        };
+
+        $this->initializeCommand($command);
+
+        $connection = $this->getMockBuilder(Connection::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->callMethod($command, 'processTable', [$connection, 'mysql', 'users', 1, 0, false]);
+
+        $this->assertFalse($command->setAutoIncrementCalled);
+    }
+
+    public function testSetAutoIncrementForPgsqlReturnsWhenNoSequenceFound(): void
+    {
+        $command = new class extends DatabaseResetAutoIncrementStartId {
+            protected function getSequenceName(Connection $connection, $table, $column)
+            {
+                return null;
+            }
+        };
+
+        $this->initializeCommand($command);
+
+        $connection = $this->getMockBuilder(Connection::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['statement'])
+            ->getMock();
+
+        $connection->expects($this->never())->method('statement');
+
+        $this->callMethod($command, 'setAutoIncrement', [$connection, 'pgsql', 'users', 'id', 100]);
+    }
+
+    public function testGetSequenceNameFallsBackToColumnDefault(): void
+    {
+        $connection = $this->getMockBuilder(Connection::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['selectOne'])
+            ->getMock();
+
+        $connection->expects($this->exactly(2))
+            ->method('selectOne')
+            ->willReturnOnConsecutiveCalls(
+                (object) ['sequence_name' => null],
+                (object) ['column_default' => "nextval('public.users_id_seq'::regclass)"]
+            );
+
+        $command = new DatabaseResetAutoIncrementStartId();
+        $sequence = $this->callMethod($command, 'getSequenceName', [$connection, 'users', 'id']);
+
+        $this->assertSame('public.users_id_seq', $sequence);
+    }
+
+    public function testGetSequenceNameFallsBackToDefaultConvention(): void
+    {
+        $connection = $this->getMockBuilder(Connection::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['selectOne'])
+            ->getMock();
+
+        $connection->expects($this->exactly(3))
+            ->method('selectOne')
+            ->willReturnOnConsecutiveCalls(
+                (object) ['sequence_name' => null],
+                (object) ['column_default' => null],
+                (object) ['exists' => true]
+            );
+
+        $command = new DatabaseResetAutoIncrementStartId();
+        $sequence = $this->callMethod($command, 'getSequenceName', [$connection, 'users', 'id']);
+
+        $this->assertSame('users_id_seq', $sequence);
+    }
+
+    public function testGetSequenceNameFallsBackToDependencyLookup(): void
+    {
+        $connection = $this->getMockBuilder(Connection::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['selectOne'])
+            ->getMock();
+
+        $connection->expects($this->exactly(4))
+            ->method('selectOne')
+            ->willReturnOnConsecutiveCalls(
+                (object) ['sequence_name' => null],
+                (object) ['column_default' => null],
+                (object) ['exists' => false],
+                (object) ['sequence_name' => 'users_id_custom_seq']
+            );
+
+        $command = new DatabaseResetAutoIncrementStartId();
+        $sequence = $this->callMethod($command, 'getSequenceName', [$connection, 'users', 'id']);
+
+        $this->assertSame('users_id_custom_seq', $sequence);
+    }
+
+    public function testGetSequenceNameReturnsNullWhenAllStrategiesFail(): void
+    {
+        $connection = $this->getMockBuilder(Connection::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['selectOne'])
+            ->getMock();
+
+        $connection->expects($this->exactly(4))
+            ->method('selectOne')
+            ->willReturnOnConsecutiveCalls(
+                (object) ['sequence_name' => null],
+                (object) ['column_default' => null],
+                (object) ['exists' => false],
+                (object) ['sequence_name' => null]
+            );
+
+        $command = new DatabaseResetAutoIncrementStartId();
+        $sequence = $this->callMethod($command, 'getSequenceName', [$connection, 'users', 'id']);
+
+        $this->assertNull($sequence);
+    }
+
+    private function initializeCommand(DatabaseResetAutoIncrementStartId $command, array $options = []): DatabaseResetAutoIncrementStartId
+    {
+        $command->setLaravel($this->app);
+
+        $input = new ArrayInput($options, $command->getDefinition());
+        self::setProperty($command, 'input', $input);
+
+        $bufferedOutput = new BufferedOutput();
+        self::setProperty($command, 'output', new OutputStyle($input, $bufferedOutput));
+
+        return $command;
     }
 }

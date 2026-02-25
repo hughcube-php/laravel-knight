@@ -63,4 +63,28 @@ class AuthenticateTest extends TestCase
 
         $this->assertSame('ok', $response->getContent());
     }
+
+    public function testAuthenticatedRequestPassesThrough()
+    {
+        $middleware = new class([]) extends Authenticate {
+            public $optional = [];
+
+            public function __construct(array $optional)
+            {
+                $this->optional = $optional;
+            }
+
+            protected function authenticate($request, array $guards)
+            {
+            }
+        };
+
+        $request = Request::create('/secure', 'GET');
+
+        $response = $middleware->handle($request, function () {
+            return new Response('ok');
+        });
+
+        $this->assertSame('ok', $response->getContent());
+    }
 }

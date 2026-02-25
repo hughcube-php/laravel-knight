@@ -608,4 +608,276 @@ class MigrationRerunTest extends TestCase
             Schema::dropIfExists('test_posts');
         }
     }
+
+    public function testHandleReturnsErrorWhenInteractiveInputIsEmpty(): void
+    {
+        $command = new class extends MigrateRerun {
+            public function argument($key = null)
+            {
+                return [];
+            }
+
+            protected function askForMigrations(): array
+            {
+                return [];
+            }
+
+            public function error($string, $verbosity = null)
+            {
+            }
+        };
+
+        $this->assertSame(1, $command->handle());
+    }
+
+    public function testHandleAbortsWhenUserDoesNotConfirm(): void
+    {
+        $this->artisan('migrate:krerun', [
+            'migrations' => ['create_test_users_table'],
+            '--path' => $this->migrationPath,
+        ])
+            ->expectsConfirmation('Do you want to re-run these migrations?', 'no')
+            ->assertExitCode(0);
+    }
+
+    public function testHandleStopsAfterFailureWhenUserRejectsContinue(): void
+    {
+        $tempDir = sys_get_temp_dir() . '/krerun_fail_' . md5((string) microtime(true));
+        @mkdir($tempDir, 0777, true);
+        $migrationFile = $tempDir . '/2024_01_01_000099_temp_fail.php';
+        file_put_contents($migrationFile, <<<'PHP'
+<?php
+return new class extends \Illuminate\Database\Migrations\Migration {
+    public function up()
+    {
+        throw new \RuntimeException('temp migration up failed');
+    }
+
+    public function down()
+    {
+    }
+};
+PHP
+        );
+
+        try {
+            $this->artisan('migrate:krerun', [
+                'migrations' => ['temp_fail'],
+                '--path' => $tempDir,
+            ])
+                ->expectsConfirmation('Do you want to re-run these migrations?', 'yes')
+                ->expectsConfirmation('Continue with remaining migrations?', 'no')
+                ->assertExitCode(1);
+        } finally {
+            @unlink($migrationFile);
+            @rmdir($tempDir);
+        }
+    }
+
+    public function testAskForMigrationsReturnsEmptyArrayWhenNoInput(): void
+    {
+        $command = new class extends MigrateRerun {
+            public function ask($question, $default = null)
+            {
+                return '';
+            }
+        };
+
+        $result = self::callMethod($command, 'askForMigrations');
+        $this->assertSame([], $result);
+    }
+
+    public function testAskForMigrationsParsesCommaSeparatedValues(): void
+    {
+        $command = new class extends MigrateRerun {
+            public function ask($question, $default = null)
+            {
+                return ' user , post,  comment ';
+            }
+        };
+
+        $result = self::callMethod($command, 'askForMigrations');
+        $this->assertSame(['user', 'post', 'comment'], $result);
+    }
+
+    public function testHandleDownMethodRunsRollbackWhenConfirmed(): void
+    {
+        $migration = new class {
+            public bool $called = false;
+            public function down(): void
+            {
+                $this->called = true;
+            }
+        };
+
+        $command = new class extends MigrateRerun {
+            public function option($key = null)
+            {
+                $options = [
+                    'skip-down' => false,
+                    'force' => false,
+                ];
+
+                return $options[$key] ?? null;
+            }
+
+            public function confirm($question, $default = false)
+            {
+                return true;
+            }
+
+            public function line($string, $style = null, $verbosity = null)
+            {
+            }
+
+            public function warn($string, $verbosity = null)
+            {
+            }
+
+            public function error($string, $verbosity = null)
+            {
+            }
+        };
+
+        self::callMethod($command, 'handleDownMethod', [$migration]);
+        $this->assertTrue($migration->called);
+    }
+
+    public function testHandleDownMethodFailureCanContinueWhenConfirmed(): void
+    {
+        $migration = new class {
+            public function down(): void
+            {
+                throw new \RuntimeException('down failed');
+            }
+        };
+
+        $command = new class extends MigrateRerun {
+            private int $confirmCount = 0;
+
+            public function option($key = null)
+            {
+                $options = [
+                    'skip-down' => false,
+                    'force' => false,
+                ];
+
+                return $options[$key] ?? null;
+            }
+
+            public function confirm($question, $default = false)
+            {
+                $this->confirmCount++;
+                return true;
+            }
+
+            public function line($string, $style = null, $verbosity = null)
+            {
+            }
+
+            public function warn($string, $verbosity = null)
+            {
+            }
+
+            public function error($string, $verbosity = null)
+            {
+            }
+        };
+
+        self::callMethod($command, 'handleDownMethod', [$migration]);
+        $this->assertTrue(true);
+    }
+
+    public function testHandleDownMethodFailureThrowsWhenUserRejectsContinue(): void
+    {
+        $migration = new class {
+            public function down(): void
+            {
+                throw new \RuntimeException('down failed');
+            }
+        };
+
+        $command = new class extends MigrateRerun {
+            private int $confirmCount = 0;
+
+            public function option($key = null)
+            {
+                $options = [
+                    'skip-down' => false,
+                    'force' => false,
+                ];
+
+                return $options[$key] ?? null;
+            }
+
+            public function confirm($question, $default = false)
+            {
+                $this->confirmCount++;
+                return $this->confirmCount === 1;
+            }
+
+            public function line($string, $style = null, $verbosity = null)
+            {
+            }
+
+            public function warn($string, $verbosity = null)
+            {
+            }
+
+            public function error($string, $verbosity = null)
+            {
+            }
+        };
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Aborted: down() failed and user chose not to continue');
+        self::callMethod($command, 'handleDownMethod', [$migration]);
+    }
+
+    public function testResolveMigrationInstanceForNamespacedClass(): void
+    {
+        $tempFile = sys_get_temp_dir() . '/migration_namespaced_' . md5((string) microtime(true)) . '.php';
+        file_put_contents($tempFile, <<<'PHP'
+<?php
+namespace KnightTempMigration;
+class DemoNamespacedMigration extends \Illuminate\Database\Migrations\Migration
+{
+    public function up() {}
+    public function down() {}
+}
+PHP
+        );
+
+        try {
+            $command = new MigrateRerun();
+            $instance = self::callMethod($command, 'resolveMigrationInstance', [$tempFile]);
+
+            $this->assertInstanceOf(\Illuminate\Database\Migrations\Migration::class, $instance);
+            $this->assertInstanceOf(\KnightTempMigration\DemoNamespacedMigration::class, $instance);
+        } finally {
+            @unlink($tempFile);
+        }
+    }
+
+    public function testResolveMigrationInstanceForAnonymousClass(): void
+    {
+        $tempFile = sys_get_temp_dir() . '/migration_anonymous_' . md5((string) microtime(true)) . '.php';
+        file_put_contents($tempFile, <<<'PHP'
+<?php
+return new class extends \Illuminate\Database\Migrations\Migration {
+    public function up() {}
+    public function down() {}
+};
+PHP
+        );
+
+        try {
+            $command = new MigrateRerun();
+            $instance = self::callMethod($command, 'resolveMigrationInstance', [$tempFile]);
+
+            $this->assertInstanceOf(\Illuminate\Database\Migrations\Migration::class, $instance);
+        } finally {
+            @unlink($tempFile);
+        }
+    }
 }

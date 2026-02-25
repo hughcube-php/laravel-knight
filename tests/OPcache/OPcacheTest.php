@@ -163,4 +163,35 @@ class OPcacheTest extends TestCase
         $this->assertSame('127.0.0.1', $url->getHost());
         $this->assertSame(8000, $url->getPort());
     }
+
+    public function testGetRemoteScriptsThrowsWhenUrlCannotBeFound()
+    {
+        $opcache = new class() extends OPcache {
+            public function getUrl($url = null, $useAppHost = true): ?PUrl
+            {
+                return null;
+            }
+        };
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Remote interface URL cannot be found!');
+
+        $opcache->getRemoteScripts();
+    }
+
+    public function testGetHistoryScriptsReturnsEmptyArrayForInvalidCacheValue()
+    {
+        config([
+            'cache.default' => 'array',
+            'cache.stores.array' => ['driver' => 'array'],
+        ]);
+
+        $opcache = new OPcache();
+        $key = self::callMethod($opcache, 'getCacheKey');
+        Cache::store()->set($key, 'invalid-value');
+
+        $history = self::callMethod($opcache, 'getHistoryScripts');
+
+        $this->assertSame([], $history);
+    }
 }

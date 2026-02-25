@@ -246,6 +246,40 @@ class HasTimeRangeTraitTest extends TestCase
         $this->assertFalse($obj->isInProgress());
     }
 
+    // ==================== Remaining Seconds Tests ====================
+
+    public function testGetStartRemainingReturnsZeroWhenAlreadyStarted()
+    {
+        $now = Carbon::create(2025, 6, 1, 10, 0, 0);
+        $obj = new TestTimeRangeObject($now->copy()->subMinute(), null);
+
+        $this->assertSame(0, $obj->getStartRemaining($now));
+    }
+
+    public function testGetStartRemainingReturnsSecondsUntilStart()
+    {
+        $now = Carbon::create(2025, 6, 1, 10, 0, 0);
+        $obj = new TestTimeRangeObject($now->copy()->addSeconds(30), null);
+
+        $this->assertSame(30, $obj->getStartRemaining($now));
+    }
+
+    public function testGetEndRemainingReturnsZeroWhenAlreadyEnded()
+    {
+        $now = Carbon::create(2025, 6, 1, 10, 0, 0);
+        $obj = new TestTimeRangeObject(null, $now->copy()->subSecond());
+
+        $this->assertSame(0, $obj->getEndRemaining($now));
+    }
+
+    public function testGetEndRemainingReturnsSecondsUntilEnd()
+    {
+        $now = Carbon::create(2025, 6, 1, 10, 0, 0);
+        $obj = new TestTimeRangeObject(null, $now->copy()->addSeconds(45));
+
+        $this->assertSame(45, $obj->getEndRemaining($now));
+    }
+
     // ==================== Interface Implementation Tests ====================
 
     public function testImplementsHasTimeRangeInterface()

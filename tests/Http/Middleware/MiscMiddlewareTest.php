@@ -241,6 +241,24 @@ class MiscMiddlewareTest extends TestCase
         }, '127.0.0.1');
     }
 
+    public function testTrustIpsAllowsWhenIpIsTrusted()
+    {
+        $middleware = new TrustIps($this->app);
+        $response = $middleware->handle(Request::create('/', 'GET', [], [], [], ['REMOTE_ADDR' => '127.0.0.1']), function () {
+            return new Response('ok');
+        }, '127.0.0.1,10.0.0.0/8');
+
+        $this->assertSame('ok', $response->getContent());
+    }
+
+    public function testTrustIpsAllowsWhenRequestIpOrResolvedIpsIsEmpty()
+    {
+        $middleware = new TrustIps($this->app);
+
+        $this->assertTrue($this->callMethod($middleware, 'isTrustIp', ['', '127.0.0.1']));
+        $this->assertTrue($this->callMethod($middleware, 'isTrustIp', ['127.0.0.1', ',,,']));
+    }
+
     public function testTrustProxiesDefaults()
     {
         $middleware = new TrustProxies($this->app);
