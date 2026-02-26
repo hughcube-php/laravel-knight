@@ -5,6 +5,7 @@ namespace HughCube\Laravel\Knight\Console\Commands;
 use HughCube\Laravel\Knight\Console\Command;
 use HughCube\Laravel\Knight\Contracts\Database\HasWalHandler;
 use HughCube\Laravel\Knight\Events\WalChangesDetected;
+use HughCube\Laravel\Knight\Events\WalPollCompleted;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
@@ -69,7 +70,7 @@ class WalEventDispatchCommand extends Command
                 $hasChanges = $this->pollChanges($slot, $handlers, $batch, $partitionMap);
 
                 $this->errorStreak = 0;
-                $this->flushTelescopeEntries();
+                $this->getEventsDispatcher()->dispatch(new WalPollCompleted($hasChanges));
             } catch (Throwable $e) {
                 $this->errorStreak++;
 
@@ -399,31 +400,6 @@ class WalEventDispatchCommand extends Command
     protected function isMemoryExceeded($memoryLimit): bool
     {
         return (memory_get_usage(true) / 1024 / 1024) >= $memoryLimit;
-    }
-
-    /**
-     * Flush Telescope entries for long-running CLI process.
-     *
-     * Telescope only flushes on $app->terminating(), which never fires for
-     * persistent processes. Call store() explicitly after each poll cycle.
-     */
-    protected function flushTelescopeEntries(): void
-    {
-        if (!class_exists('Laravel\Telescope\Telescope')) {
-            return;
-        }
-
-        if (!\Laravel\Telescope\Telescope::isRecording()) {
-            return;
-        }
-
-        try {
-            \Laravel\Telescope\Telescope::store(
-                app('Laravel\Telescope\Contracts\EntriesRepository')
-            );
-        } catch (Throwable $e) {
-            /** best-effort: Telescope 刷入失败不影响 WAL 处理 */
-        }
     }
 
     protected function reconnectDatabase(): void
