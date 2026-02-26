@@ -11,6 +11,7 @@ namespace HughCube\Laravel\Knight;
 
 use Carbon\Carbon;
 use HughCube\Laravel\Knight\Auth\ModelUserProvider;
+use HughCube\Laravel\Knight\Support\Runtime;
 use HughCube\Laravel\Knight\Console\Commands\ClearModelCache;
 use HughCube\Laravel\Knight\Console\Commands\Config;
 use HughCube\Laravel\Knight\Console\Commands\DatabaseRandomizeSequences;
@@ -89,7 +90,7 @@ class ServiceProvider extends IlluminateServiceProvider
         }
 
         /** Migration Schema - 仅在 ide-helper 命令时注册 */
-        if ($this->app->runningInConsole() && str_starts_with($_SERVER['argv'][1] ?? '', 'ide-helper:')) {
+        if (Runtime::isRunningCommand('ide-helper:*')) {
             Blueprint::mixin(new MigrationBlueprintMixin(), false);
             SchemaPostgresGrammar::mixin(new MigrationPostgresGrammarMixin(), false);
         }

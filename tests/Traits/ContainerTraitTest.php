@@ -24,8 +24,11 @@ class ContainerTraitTest extends TestCase
         $this->assertTrue(self::callMethod($instance, 'isContainerDebug'));
         $this->assertTrue(self::callMethod($instance, 'isContainerEnv', ['local']));
         $this->assertTrue(self::callMethod($instance, 'isContainerLocalEnv'));
-        $this->assertTrue(self::callMethod($instance, 'isContainerTestEnv'));
+        $this->assertFalse(self::callMethod($instance, 'isContainerTestEnv'));
         $this->assertFalse(self::callMethod($instance, 'isContainerProdEnv'));
+
+        config(['app.env' => 'testing']);
+        $this->assertTrue(self::callMethod($instance, 'isContainerTestEnv'));
 
         config(['app.env' => 'production', 'app.debug' => false]);
 

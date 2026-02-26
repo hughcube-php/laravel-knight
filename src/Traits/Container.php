@@ -110,7 +110,7 @@ trait Container
 
     protected function isContainerTestEnv(): bool
     {
-        return $this->isContainerEnv('local');
+        return $this->isContainerEnv('testing');
     }
 
     protected function isContainerProdEnv(): bool
