@@ -18,6 +18,7 @@ class WalEventDispatchCommand extends Command
         {--interval=1.0 : Poll interval in seconds, supports decimals}
         {--batch=1000 : Max number of changes per poll}
         {--memory=128 : Memory limit in MB, process stops when exceeded}
+        {--max-errors=30 : Max consecutive errors before process exits, 0 means unlimited}
         {--mode=advance : Consume mode: auto(get_changes, read=consume), advance(peek+advance after dispatch, default), peek(read-only for debugging)}
         {--model-path=* : Model scanning paths, can be specified multiple times (default: app/Models)}';
 
@@ -51,10 +52,11 @@ class WalEventDispatchCommand extends Command
         }
 
         $memoryLimit = max(1, intval($this->option('memory')));
+        $maxErrors = max(0, intval($this->option('max-errors')));
 
         $this->info(sprintf(
-            'WAL event dispatch started, slot: %s, mode: %s, interval: %.2fs, batch: %d, memory: %dMB, tables: %d, handlers: %d, partitions: %d',
-            $slot, $this->getMode(), $interval, $batch, $memoryLimit, count($handlers), $handlerCount, count($partitionMap)
+            'WAL event dispatch started, slot: %s, mode: %s, interval: %.2fs, batch: %d, memory: %dMB, max-errors: %s, tables: %d, handlers: %d, partitions: %d',
+            $slot, $this->getMode(), $interval, $batch, $memoryLimit, ($maxErrors > 0 ? $maxErrors : 'unlimited'), count($handlers), $handlerCount, count($partitionMap)
         ));
         foreach ($handlers as $table => $metas) {
             foreach ($metas as $meta) {
@@ -83,6 +85,12 @@ class WalEventDispatchCommand extends Command
                 } catch (Throwable $re) {
                     $this->error(sprintf('Slot re-create failed: %s', $re->getMessage()));
                 }
+
+                if ($maxErrors > 0 && $this->errorStreak >= $maxErrors) {
+                    $this->error(sprintf('Consecutive errors reached limit (%d), stopping...', $maxErrors));
+                    break;
+                }
+
                 usleep(intval($backoff * 1000000));
                 continue;
             }

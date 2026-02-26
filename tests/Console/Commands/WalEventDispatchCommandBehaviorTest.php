@@ -185,6 +185,89 @@ class WalEventDispatchCommandBehaviorTest extends TestCase
         $this->assertTrue($command->ensureSlotCalledInErrorPath);
     }
 
+    public function testHandleExitsWhenConsecutiveErrorsReachMaxErrors(): void
+    {
+        $exceptionHandler = $this->createMock(ExceptionHandler::class);
+
+        $command = new TestableWalMultiErrorCommand();
+        $command->handlers = [];
+        $command->pollThrowable = new \RuntimeException('persistent failure');
+        $command->exceptionHandler = $exceptionHandler;
+
+        WalEventDispatchCommandRuntimeState::$mockSleep = true;
+
+        $this->initializeCommand($command, [
+            '--interval' => '0.1',
+            '--batch' => '10',
+            '--max-errors' => '3',
+        ]);
+
+        $command->handle();
+
+        $this->assertSame(3, self::getProperty($command, 'errorStreak'));
+
+        $pollCalls = array_filter($command->calls, static function ($call) {
+            return $call[0] === 'pollChanges';
+        });
+        $this->assertCount(3, $pollCalls);
+    }
+
+    public function testHandleContinuesWhenErrorsRecoverBeforeMaxErrors(): void
+    {
+        $exceptionHandler = $this->createMock(ExceptionHandler::class);
+
+        $command = new TestableWalMultiErrorCommand();
+        $command->handlers = [];
+        $command->failCount = 2;
+        $command->pollThrowable = new \RuntimeException('transient failure');
+        $command->exceptionHandler = $exceptionHandler;
+
+        WalEventDispatchCommandRuntimeState::$mockSleep = true;
+
+        $this->initializeCommand($command, [
+            '--interval' => '0.1',
+            '--batch' => '10',
+            '--max-errors' => '5',
+        ]);
+
+        $command->handle();
+
+        $this->assertSame(0, self::getProperty($command, 'errorStreak'));
+
+        $pollCalls = array_filter($command->calls, static function ($call) {
+            return $call[0] === 'pollChanges';
+        });
+        $this->assertCount(3, $pollCalls);
+    }
+
+    public function testHandleUnlimitedErrorsWhenMaxErrorsIsZero(): void
+    {
+        $exceptionHandler = $this->createMock(ExceptionHandler::class);
+
+        $command = new TestableWalMultiErrorCommand();
+        $command->handlers = [];
+        $command->failCount = 5;
+        $command->pollThrowable = new \RuntimeException('failure');
+        $command->exceptionHandler = $exceptionHandler;
+
+        WalEventDispatchCommandRuntimeState::$mockSleep = true;
+
+        $this->initializeCommand($command, [
+            '--interval' => '0.1',
+            '--batch' => '10',
+            '--max-errors' => '0',
+        ]);
+
+        $command->handle();
+
+        $this->assertSame(0, self::getProperty($command, 'errorStreak'));
+
+        $pollCalls = array_filter($command->calls, static function ($call) {
+            return $call[0] === 'pollChanges';
+        });
+        $this->assertCount(6, $pollCalls);
+    }
+
     public function testDiscoverWalHandlersScansValidAndInvalidClasses(): void
     {
         $relativeDir = 'tests/.temp/wal_scan_' . md5((string) microtime(true));
@@ -774,6 +857,36 @@ class TestableWalEventDispatchCommand extends WalEventDispatchCommand
     {
         $this->reconnectCalled = true;
         $this->shouldRun = false;
+    }
+}
+
+class TestableWalMultiErrorCommand extends TestableWalEventDispatchCommand
+{
+    /** @var int 0 means always fail */
+    public int $failCount = 0;
+    private int $pollAttempt = 0;
+
+    protected function pollChanges(string $slot, array $handlers, int $batch, array $partitionMap): bool
+    {
+        $this->pollAttempt++;
+        $this->calls[] = ['pollChanges', $slot, $batch, count($handlers), count($partitionMap)];
+
+        if ($this->failCount > 0 && $this->pollAttempt > $this->failCount) {
+            $this->shouldRun = false;
+            return false;
+        }
+
+        if ($this->pollThrowable !== null) {
+            throw $this->pollThrowable;
+        }
+
+        $this->shouldRun = false;
+        return false;
+    }
+
+    protected function reconnectDatabase(): void
+    {
+        $this->reconnectCalled = true;
     }
 }
 
