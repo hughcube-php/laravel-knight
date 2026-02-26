@@ -23,6 +23,7 @@ use HughCube\Laravel\Knight\Console\Commands\MigrateRerun;
 use HughCube\Laravel\Knight\Console\Commands\PhpIniFile;
 use HughCube\Laravel\Knight\Console\Commands\WalDropSlotCommand;
 use HughCube\Laravel\Knight\Console\Commands\WalEventDispatchCommand;
+use HughCube\Laravel\Knight\Console\Commands\WalMonitorSlotsCommand;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use HughCube\Laravel\Knight\Database\Migrations\Mixin\BlueprintMixin as MigrationBlueprintMixin;
 use HughCube\Laravel\Knight\Database\Migrations\Mixin\PostgresGrammarMixin as MigrationPostgresGrammarMixin;
@@ -114,6 +115,7 @@ class ServiceProvider extends IlluminateServiceProvider
                 MigrateRerun::class,
                 WalEventDispatchCommand::class,
                 WalDropSlotCommand::class,
+                WalMonitorSlotsCommand::class,
             ]);
         }
 

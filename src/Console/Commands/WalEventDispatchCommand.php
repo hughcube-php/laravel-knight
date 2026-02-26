@@ -78,6 +78,11 @@ class WalEventDispatchCommand extends Command
                 $this->error(sprintf("Poll error (streak %d, backoff %ds): %s\n%s", $this->errorStreak, $backoff, $e->getMessage(), $e->getTraceAsString()));
                 $this->getExceptionHandler()->report($e);
                 $this->reconnectDatabase();
+                try {
+                    $this->ensureSlotExists($slot);
+                } catch (Throwable $re) {
+                    $this->error(sprintf('Slot re-create failed: %s', $re->getMessage()));
+                }
                 usleep(intval($backoff * 1000000));
                 continue;
             }

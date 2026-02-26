@@ -152,6 +152,37 @@ class WalEventDispatchCommandBehaviorTest extends TestCase
         $this->assertTrue($command->reconnectCalled);
         $this->assertContains(1000000, WalEventDispatchCommandRuntimeState::$sleepCalls);
         $this->assertSame(1, self::getProperty($command, 'errorStreak'));
+
+        $ensureSlotCalls = array_filter($command->calls, static function ($call) {
+            return $call[0] === 'ensureSlotExists';
+        });
+        $this->assertCount(2, $ensureSlotCalls, 'ensureSlotExists should be called at startup and in error recovery');
+    }
+
+    public function testHandlePollErrorEnsureSlotExistsFailureDoesNotCrash(): void
+    {
+        $exceptionHandler = $this->createMock(ExceptionHandler::class);
+        $exceptionHandler->expects($this->once())->method('report');
+
+        $command = new TestableWalEnsureSlotFailsCommand();
+        $command->handlers = [];
+        $command->pollThrowable = new \RuntimeException('slot deleted');
+        $command->exceptionHandler = $exceptionHandler;
+        $command->ensureSlotException = new \RuntimeException('create slot failed');
+
+        WalEventDispatchCommandRuntimeState::$mockSleep = true;
+
+        $this->initializeCommand($command, [
+            '--interval' => '0.1',
+            '--batch' => '10',
+        ]);
+
+        $command->handle();
+
+        $this->assertTrue($command->reconnectCalled);
+        $this->assertContains(1000000, WalEventDispatchCommandRuntimeState::$sleepCalls);
+        $this->assertSame(1, self::getProperty($command, 'errorStreak'));
+        $this->assertTrue($command->ensureSlotCalledInErrorPath);
     }
 
     public function testDiscoverWalHandlersScansValidAndInvalidClasses(): void
@@ -743,6 +774,28 @@ class TestableWalEventDispatchCommand extends WalEventDispatchCommand
     {
         $this->reconnectCalled = true;
         $this->shouldRun = false;
+    }
+}
+
+class TestableWalEnsureSlotFailsCommand extends TestableWalEventDispatchCommand
+{
+    public ?\Throwable $ensureSlotException = null;
+    public bool $ensureSlotCalledInErrorPath = false;
+    private bool $firstCall = true;
+
+    protected function ensureSlotExists(string $slot): void
+    {
+        if ($this->firstCall) {
+            $this->firstCall = false;
+            parent::ensureSlotExists($slot);
+            return;
+        }
+
+        $this->ensureSlotCalledInErrorPath = true;
+
+        if ($this->ensureSlotException !== null) {
+            throw $this->ensureSlotException;
+        }
     }
 }
 
