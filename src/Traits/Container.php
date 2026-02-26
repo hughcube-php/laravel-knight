@@ -9,6 +9,7 @@
 
 namespace HughCube\Laravel\Knight\Traits;
 
+use HughCube\Laravel\Knight\Support\Runtime;
 use Illuminate\Config\Repository;
 use Illuminate\Container\Container as IlluminateContainer;
 use Illuminate\Contracts\Bus\Dispatcher;
@@ -95,26 +96,26 @@ trait Container
 
     protected function isContainerDebug(): bool
     {
-        return true == $this->getContainerConfig('app.debug');
+        return Runtime::isDebug();
     }
 
     protected function isContainerEnv($env): bool
     {
-        return $env === $this->getContainerConfig('app.env', 'production');
+        return Runtime::isEnv($env);
     }
 
     protected function isContainerLocalEnv(): bool
     {
-        return $this->isContainerEnv('local');
+        return Runtime::isLocal();
     }
 
     protected function isContainerTestEnv(): bool
     {
-        return $this->isContainerEnv('local');
+        return Runtime::isEnv('testing');
     }
 
     protected function isContainerProdEnv(): bool
     {
-        return $this->isContainerEnv('production');
+        return Runtime::isProduction();
     }
 }
