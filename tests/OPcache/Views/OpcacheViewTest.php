@@ -8,6 +8,10 @@ class OpcacheViewTest extends TestCase
 {
     public function testViewRendersWhenOpcacheEnabled()
     {
+        if (extension_loaded('Zend OPcache') && @opcache_get_status() === false) {
+            $this->markTestSkipped('OPcache extension loaded but not active; cannot mock built-in functions.');
+        }
+
         $path = realpath(dirname(__DIR__, 3).'/src/OPcache/Views/opcache.php');
         if ($path === false) {
             $this->markTestSkipped('OPcache view file not found.');

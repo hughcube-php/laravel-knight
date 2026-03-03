@@ -322,9 +322,9 @@ class ActionTest extends TestCase
 
         $action = new ActionWithMiddleware();
         $action->setMiddlewares([
-            function (Request $request, Closure $next) {
+            function ($action, Closure $next) {
                 ActionWithMiddleware::$middlewareExecutionLog[] = 'closure:before';
-                $response = $next($request);
+                $response = $next($action);
                 ActionWithMiddleware::$middlewareExecutionLog[] = 'closure:after';
 
                 return $response;
@@ -363,9 +363,9 @@ class ActionTest extends TestCase
         $action = new ActionWithMiddleware();
         $action->setMiddlewares([
             new TestMiddleware('class'),
-            function (Request $request, Closure $next) {
+            function ($action, Closure $next) {
                 ActionWithMiddleware::$middlewareExecutionLog[] = 'closure:before';
-                $response = $next($request);
+                $response = $next($action);
                 ActionWithMiddleware::$middlewareExecutionLog[] = 'closure:after';
 
                 return $response;
@@ -405,10 +405,10 @@ class ActionTest extends TestCase
 
         $action = new ActionWithMiddleware();
         $action->setMiddlewares([
-            function (Request $request, Closure $next) {
-                $request->attributes->set('middleware_data', 'modified');
+            function ($action, Closure $next) {
+                $action->getRequest()->attributes->set('middleware_data', 'modified');
 
-                return $next($request);
+                return $next($action);
             },
         ]);
 

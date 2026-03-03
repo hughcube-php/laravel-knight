@@ -10,7 +10,6 @@
 namespace HughCube\Laravel\Knight\Tests\Routing;
 
 use Closure;
-use Illuminate\Http\Request;
 
 class TestMiddleware
 {
@@ -28,15 +27,15 @@ class TestMiddleware
     }
 
     /**
-     * @param Request $request
+     * @param mixed $action
      * @param Closure $next
      * @return mixed
      */
-    public function handle(Request $request, Closure $next)
+    public function handle($action, Closure $next)
     {
         ActionWithMiddleware::$middlewareExecutionLog[] = "middleware:{$this->name}:before";
 
-        $response = $next($request);
+        $response = $next($action);
 
         ActionWithMiddleware::$middlewareExecutionLog[] = "middleware:{$this->name}:after";
 

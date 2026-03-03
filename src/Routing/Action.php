@@ -47,11 +47,11 @@ trait Action
     }
 
     /**
-     * @throws
-     *
      * @return mixed
      *
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
     public function invoke()
     {
@@ -105,12 +105,7 @@ trait Action
             return $destination();
         }
 
-        return (new Pipeline($this->getContainer()))
-            ->send($this->getRequest())
-            ->through($middlewares)
-            ->then(function ($request) use ($destination) {
-                return $destination();
-            });
+        return (new Pipeline($this->getContainer()))->send($this)->through($middlewares)->then($destination);
     }
 
     protected function dispatchActionProcessingEvent()
@@ -147,13 +142,13 @@ trait Action
     }
 
     /**
-     * @throws
-     *
      * @return Request|\Request|KIdeRequest|KnightRequest
      *
      * @phpstan-ignore-next-line
+     * @throws
+     *
      */
-    protected function getRequest(): Request
+    public function getRequest(): Request
     {
         return $this->getContainer()->make('request');
     }
@@ -180,7 +175,7 @@ trait Action
 
     /**
      * @param string $name
-     * @param array  $arguments
+     * @param array $arguments
      *
      * @return mixed
      */
@@ -229,27 +224,27 @@ trait Action
     protected function asResponse(array $data = [], int $code = 200): Response
     {
         return new JsonResponse([
-            'code'    => $code,
+            'code' => $code,
             'message' => 'success',
-            'data'    => $data ?: new stdClass(),
+            'data' => $data ?: new stdClass(),
         ]);
     }
 
     protected function asSuccess(array $data = [], int $statusCode = 200): Response
     {
         return new KJsonResponse([
-            'Code'    => 'Success',
+            'Code' => 'Success',
             'Message' => 'Success',
-            'Data'    => $data ?: new stdClass(),
+            'Data' => $data ?: new stdClass(),
         ], $statusCode);
     }
 
     protected function asFailure(string $code = 'Failure', string $message = 'Failure', array $data = [], int $statusCode = 200): Response
     {
         return new KJsonResponse([
-            'Code'    => $code,
+            'Code' => $code,
             'Message' => $message,
-            'Data'    => $data ?: new stdClass(),
+            'Data' => $data ?: new stdClass(),
         ], $statusCode);
     }
 

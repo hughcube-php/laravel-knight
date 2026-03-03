@@ -2,9 +2,11 @@
 // phpcs:ignoreFile
 defined('THOUSAND_SEPARATOR') or define('THOUSAND_SEPARATOR', true);
 
-if (!extension_loaded('Zend OPcache')) {
+if (!extension_loaded('Zend OPcache') || @opcache_get_status() === false) {
     echo '<div style="background-color: #F2DEDE; color: #B94A48; padding: 1em;">You do not have the Zend OPcache extension loaded, sample data is being shown instead.</div>';
-    require 'data-sample.php';
+    if (file_exists('data-sample.php')) {
+        require 'data-sample.php';
+    }
 }
 
 if (!class_exists(OpCacheDataModel::class)) {
@@ -16,8 +18,8 @@ if (!class_exists(OpCacheDataModel::class)) {
 
         public function __construct()
         {
-            $this->_configuration = opcache_get_configuration();
-            $this->_status = opcache_get_status();
+            $this->_configuration = opcache_get_configuration() ?: [];
+            $this->_status = opcache_get_status() ?: [];
         }
 
         public function getPageTitle()
