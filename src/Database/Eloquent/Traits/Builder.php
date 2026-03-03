@@ -98,14 +98,94 @@ trait Builder
         $model = $this->getModel();
         $keyName = $model->getKeyName();
 
-        $filtered = [];
+        $validPks = [];
         foreach ($pks as $value) {
             if ($model->isMatchPk($value)) {
-                $filtered[] = $value;
+                $validPks[] = $value;
             }
         }
 
-        return $this->findByOneUniqueColumnValues($keyName, $filtered);
+        if (empty($validPks)) {
+            return $model->newCollection();
+        }
+
+        /** 为每个 PK 构建 cacheKey */
+        $cacheKeys = [];
+        foreach ($validPks as $index => $pk) {
+            $cacheKeys[$index] = $model->makeColumnsCacheKey([$keyName => $pk]);
+        }
+
+        /** 批量读取缓存 */
+        $cache = $this->getCache();
+        $fromCacheRows = $cache->getMultiple($cacheKeys);
+
+        /** 分拣命中/未命中 */
+        $results = [];
+        $missedIndexes = [];
+        foreach ($cacheKeys as $index => $cacheKey) {
+            $cached = isset($fromCacheRows[$cacheKey]) ? $fromCacheRows[$cacheKey] : null;
+
+            if ($cached instanceof IlluminateModel) {
+                if (method_exists($cached, 'setIsFromCache')) {
+                    $cached->setIsFromCache();
+                }
+                $results[$index] = $cached;
+            } elseif (null === $cached || !$model->isCachePlaceholder($cached)) {
+                $missedIndexes[] = $index;
+            }
+            /** 占位符 → 跳过（已知不存在） */
+        }
+
+        /** 缓存全部命中，直接返回 */
+        if (empty($missedIndexes)) {
+            $collection = $model->newCollection();
+            foreach ($validPks as $index => $pk) {
+                if (isset($results[$index])) {
+                    $collection->put($pk, $results[$index]);
+                }
+            }
+
+            return $collection;
+        }
+
+        /** 查询数据库中未命中的 PK */
+        $missConditions = Collection::make();
+        foreach ($missedIndexes as $index) {
+            $missConditions->push([$keyName => $validPks[$index]]);
+        }
+        $fromDbRows = $this->queryByUniqueConditions($missConditions);
+
+        /** 缓存 DB 结果和占位符 */
+        $cacheItems = [];
+        foreach ($missedIndexes as $index) {
+            $cacheKey = $cacheKeys[$index];
+            if ($fromDbRows->has($cacheKey)) {
+                $cacheItems[$cacheKey] = $fromDbRows->get($cacheKey);
+            } elseif ($model->hasCachePlaceholder()) {
+                $cacheItems[$cacheKey] = $model->getCachePlaceholder();
+            }
+        }
+        if (!empty($cacheItems)) {
+            $cache->setMultiple($cacheItems, $model->getCacheTtl());
+        }
+
+        /** 将 DB 结果合并到 results（以 index 为 key） */
+        foreach ($missedIndexes as $index) {
+            $cacheKey = $cacheKeys[$index];
+            if ($fromDbRows->has($cacheKey)) {
+                $results[$index] = $fromDbRows->get($cacheKey);
+            }
+        }
+
+        /** 按输入顺序组装最终集合 */
+        $collection = $model->newCollection();
+        foreach ($validPks as $index => $pk) {
+            if (isset($results[$index])) {
+                $collection->put($pk, $results[$index]);
+            }
+        }
+
+        return $collection;
     }
 
     public function findByOneUniqueColumnValues($column, $values): EloquentCollection

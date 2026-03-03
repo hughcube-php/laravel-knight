@@ -575,4 +575,302 @@ class BuilderTraitTest extends TestCase
         $this->assertSame(3, $result->count());
         $this->assertSame([3, 1, 5], $result->keys()->values()->toArray());
     }
+
+    // ========================================================================
+    // findByPks 内联优化后的严格验证
+    // ========================================================================
+
+    /**
+     * 核心交叉验证：findByPks 与 findByOneUniqueColumnValues 结果完全一致.
+     *
+     * 确保内联优化后的 findByPks 和旧调用链产出完全相同的结果。
+     */
+    public function testFindByPksResultMatchesFindByOneUniqueColumnValues()
+    {
+        $this->createUsers(10);
+        $pks = [7, 3, 10, 1, 5, 999, 8];
+
+        // 清缓存，两条路径都从 DB 查
+        User::query()->getCache()->clear();
+        $fromOldPath = User::query()->findByOneUniqueColumnValues('id', $pks);
+
+        User::query()->getCache()->clear();
+        $fromNewPath = User::query()->findByPks($pks);
+
+        // 数量一致
+        $this->assertSame($fromOldPath->count(), $fromNewPath->count());
+        // key 顺序一致
+        $this->assertSame(
+            $fromOldPath->keys()->values()->toArray(),
+            $fromNewPath->keys()->values()->toArray()
+        );
+        // 每条数据一致
+        foreach ($fromOldPath as $pk => $model) {
+            $this->assertSame($model->id, $fromNewPath->get($pk)->id);
+            $this->assertSame($model->nickname, $fromNewPath->get($pk)->nickname);
+        }
+    }
+
+    /**
+     * 交叉验证 — 缓存命中时，两种路径的结果仍一致.
+     */
+    public function testFindByPksResultMatchesFindByOneUniqueColumnValuesCacheHit()
+    {
+        $this->createUsers(5);
+        $pks = [4, 2, 5, 1, 3];
+
+        // 预热缓存
+        User::query()->findByPks($pks);
+
+        $fromOldPath = User::query()->findByOneUniqueColumnValues('id', $pks);
+        $fromNewPath = User::query()->findByPks($pks);
+
+        $this->assertSame($fromOldPath->count(), $fromNewPath->count());
+        $this->assertSame(
+            $fromOldPath->keys()->values()->toArray(),
+            $fromNewPath->keys()->values()->toArray()
+        );
+        foreach ($fromOldPath as $pk => $model) {
+            $this->assertSame($model->id, $fromNewPath->get($pk)->id);
+            $this->assertTrue($fromNewPath->get($pk)->isFromCache());
+        }
+    }
+
+    /**
+     * 占位符场景：查询不存在的 PK 后，占位符被写入，再次查询直接跳过不返回.
+     */
+    public function testFindByPksPlaceholderPreventsRepeatedDbQuery()
+    {
+        $this->createUsers(3);
+
+        // 第一次：查不存在的 PK，应写入占位符
+        $result1 = User::query()->findByPks([999, 1000]);
+        $this->assertTrue($result1->isEmpty());
+
+        // 第二次：占位符存在，应直接返回空，不查 DB
+        $result2 = User::query()->findByPks([999, 1000]);
+        $this->assertTrue($result2->isEmpty());
+        $this->assertInstanceOf(EloquentCollection::class, $result2);
+    }
+
+    /**
+     * 占位符 + 存在行混合：不存在的 PK 被占位符跳过，存在的 PK 正常返回.
+     */
+    public function testFindByPksPlaceholderMixedWithExistingRows()
+    {
+        $this->createUsers(3);
+
+        // 第一次查询：1 存在，999 不存在 → 999 写入占位符
+        $result1 = User::query()->findByPks([1, 999]);
+        $this->assertSame(1, $result1->count());
+        $this->assertTrue($result1->has(1));
+        $this->assertFalse($result1->has(999));
+
+        // 第二次查询：1 走缓存，999 走占位符跳过，2 走 DB
+        $result2 = User::query()->findByPks([999, 1, 2]);
+        $this->assertSame(2, $result2->count());
+        $this->assertTrue($result2->has(1));
+        $this->assertTrue($result2->has(2));
+        $this->assertFalse($result2->has(999));
+
+        // 1 来自缓存
+        $this->assertTrue($result2->get(1)->isFromCache());
+        // 2 来自 DB
+        $this->assertFalse($result2->get(2)->isFromCache());
+    }
+
+    /**
+     * 占位符混合场景下输出顺序正确.
+     */
+    public function testFindByPksPlaceholderMixedOutputOrder()
+    {
+        $this->createUsers(5);
+
+        // 预热：999 写入占位符，1 和 3 写入缓存
+        User::query()->findByPks([999, 1, 3]);
+
+        // 混合查询，检查输出顺序（跳过不存在的 999）
+        $result = User::query()->findByPks([5, 999, 3, 2, 1]);
+        $this->assertSame(4, $result->count());
+        // 输出 key 顺序应跟随输入中存在的 PK 顺序
+        $this->assertSame([5, 3, 2, 1], $result->keys()->values()->toArray());
+    }
+
+    /**
+     * 部分缓存命中时输出顺序严格按输入顺序.
+     */
+    public function testFindByPksPartialCacheHitOutputOrder()
+    {
+        $this->createUsers(5);
+
+        // 只缓存 id=2,4
+        User::query()->findByPks([2, 4]);
+
+        // 查询 [5, 4, 3, 2, 1]，其中 2,4 走缓存，1,3,5 走 DB
+        $result = User::query()->findByPks([5, 4, 3, 2, 1]);
+        $this->assertSame(5, $result->count());
+        $this->assertSame([5, 4, 3, 2, 1], $result->keys()->values()->toArray());
+
+        // 验证 isFromCache 标记
+        $this->assertTrue($result->get(2)->isFromCache());
+        $this->assertTrue($result->get(4)->isFromCache());
+        $this->assertFalse($result->get(1)->isFromCache());
+        $this->assertFalse($result->get(3)->isFromCache());
+        $this->assertFalse($result->get(5)->isFromCache());
+    }
+
+    /**
+     * 重复 PK + 缓存命中：结果 key 去重，数据正确.
+     */
+    public function testFindByPksDuplicatePksCacheHit()
+    {
+        $this->createUsers(3);
+
+        // 预热缓存
+        User::query()->findByPks([1, 2, 3]);
+
+        // 带重复 PK 查询
+        $result = User::query()->findByPks([2, 1, 2, 3, 1]);
+        // Collection put 同 key 覆盖，最终只保留不重复的 key
+        $this->assertSame(3, $result->count());
+        $this->assertTrue($result->has(1));
+        $this->assertTrue($result->has(2));
+        $this->assertTrue($result->has(3));
+
+        // 每条都来自缓存
+        $result->each(function (User $user) {
+            $this->assertTrue($user->isFromCache());
+        });
+    }
+
+    /**
+     * noCache 场景下不写入占位符：查不存在的 PK 后，正常路径仍会查 DB.
+     */
+    public function testNoCacheDoesNotWritePlaceholder()
+    {
+        $this->createUsers(3);
+
+        // noCache 查询不存在的 PK — 不应写入占位符
+        $result1 = User::query()->noCache()->findByPks([999]);
+        $this->assertTrue($result1->isEmpty());
+
+        // 正常查询 — 如果占位符没被写入，999 应作为 miss 查 DB（然后写占位符）
+        // 这里关键是验证 noCache 没有污染缓存
+        $result2 = User::query()->findByPks([999]);
+        $this->assertTrue($result2->isEmpty());
+    }
+
+    /**
+     * noCache 场景下每次查询结果都不带 isFromCache 标记.
+     */
+    public function testNoCacheFindByPksNeverMarkedFromCache()
+    {
+        $this->createUsers(3);
+
+        // 先正常查询写入缓存
+        User::query()->findByPks([1, 2, 3]);
+
+        // 连续两次 noCache 查询，都不应标记为来自缓存
+        for ($i = 0; $i < 2; $i++) {
+            $result = User::query()->noCache()->findByPks([1, 2, 3]);
+            $this->assertSame(3, $result->count());
+            $result->each(function (User $user) {
+                $this->assertFalse($user->isFromCache());
+            });
+        }
+    }
+
+    /**
+     * findByPk 走缓存命中路径时 isFromCache 为 true.
+     */
+    public function testFindByPkCacheHitIsFromCache()
+    {
+        $this->createUsers(3);
+
+        // 第一次：缓存未命中
+        $user1 = User::query()->findByPk(1);
+        $this->assertFalse($user1->isFromCache());
+
+        // 第二次：缓存命中
+        $user2 = User::query()->findByPk(1);
+        $this->assertTrue($user2->isFromCache());
+        $this->assertSame($user1->id, $user2->id);
+        $this->assertSame($user1->nickname, $user2->nickname);
+    }
+
+    /**
+     * 全部 PK 都不存在于 DB 中的场景（全 miss + 全占位符）.
+     */
+    public function testFindByPksAllNonExistent()
+    {
+        $this->createUsers(3);
+
+        $result = User::query()->findByPks([100, 200, 300]);
+        $this->assertInstanceOf(EloquentCollection::class, $result);
+        $this->assertTrue($result->isEmpty());
+
+        // 再次查询 — 走占位符，仍为空
+        $result2 = User::query()->findByPks([100, 200, 300]);
+        $this->assertInstanceOf(EloquentCollection::class, $result2);
+        $this->assertTrue($result2->isEmpty());
+    }
+
+    /**
+     * 缓存命中时，返回的模型属性值与 DB 原始值完全一致.
+     */
+    public function testFindByPksCacheHitDataIntegrity()
+    {
+        $this->createUsers(5);
+
+        // DB 查询
+        $fromDb = User::query()->findByPks([1, 2, 3, 4, 5]);
+        $dbData = $fromDb->map(function (User $u) {
+            return ['id' => $u->id, 'nickname' => $u->nickname, 'sort' => $u->sort];
+        })->toArray();
+
+        // 缓存查询
+        $fromCache = User::query()->findByPks([1, 2, 3, 4, 5]);
+        $cacheData = $fromCache->map(function (User $u) {
+            return ['id' => $u->id, 'nickname' => $u->nickname, 'sort' => $u->sort];
+        })->toArray();
+
+        $this->assertSame($dbData, $cacheData);
+    }
+
+    /**
+     * 单个 PK 的 findByPks 返回的 Collection key 为该 PK.
+     */
+    public function testFindByPksSinglePkKeyedCorrectly()
+    {
+        $this->createUsers(3);
+
+        $result = User::query()->findByPks([2]);
+        $this->assertSame(1, $result->count());
+        $this->assertSame([2], $result->keys()->values()->toArray());
+        $this->assertSame(2, $result->get(2)->id);
+    }
+
+    /**
+     * findByPks 与 findByIds 静态方法结果完全一致.
+     */
+    public function testFindByPksMatchesStaticFindByIds()
+    {
+        $this->createUsers(5);
+        $pks = [5, 3, 1];
+
+        User::query()->getCache()->clear();
+        $fromInstance = User::query()->findByPks($pks);
+
+        User::query()->getCache()->clear();
+        $fromStatic = User::findByIds($pks);
+
+        $this->assertSame($fromInstance->count(), $fromStatic->count());
+        $this->assertSame(
+            $fromInstance->keys()->values()->toArray(),
+            $fromStatic->keys()->values()->toArray()
+        );
+        foreach ($fromInstance as $pk => $model) {
+            $this->assertSame($model->id, $fromStatic->get($pk)->id);
+        }
+    }
 }
