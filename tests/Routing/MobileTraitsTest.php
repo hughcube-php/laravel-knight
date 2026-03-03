@@ -20,7 +20,7 @@ class MobileTraitsGetMobileAction
 
     public Request $request;
 
-    protected function getRequest(): Request
+    public function getRequest(): Request
     {
         return $this->request;
     }
@@ -35,7 +35,7 @@ class PinCodeSmsAction extends Controller
     public bool $checkMobileResult = true;
     public bool $enableSendResult = true;
 
-    protected function getRequest(): Request
+    public function getRequest(): Request
     {
         return $this->request;
     }
@@ -68,7 +68,7 @@ class SendPinCodeSmsAction extends Controller
     public Request $request;
     public bool $sendCalled = false;
 
-    protected function getRequest(): Request
+    public function getRequest(): Request
     {
         return $this->request;
     }
@@ -96,7 +96,7 @@ class ValidatePinCodeSmsAction extends Controller
     public Request $request;
     public bool $validateResult = true;
 
-    protected function getRequest(): Request
+    public function getRequest(): Request
     {
         return $this->request;
     }

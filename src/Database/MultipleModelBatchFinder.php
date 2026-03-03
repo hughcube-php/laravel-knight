@@ -58,6 +58,13 @@ class MultipleModelBatchFinder
     protected array $builders = [];
 
     /**
+     * Model 实例缓存 [模型类名 => Model].
+     *
+     * @var array<string, IlluminateModel>
+     */
+    protected array $models = [];
+
+    /**
      * 创建查询实例.
      */
     public static function make(): self
@@ -110,14 +117,15 @@ class MultipleModelBatchFinder
     public function with(string $class, $ids): self
     {
         $model = $this->getModel($class);
+        $keyName = $model->getKeyName();
 
-        $conditions = Collection::make($ids)
-            ->filter(fn($id) => $model->isMatchPk($id))
-            ->map(fn($id) => [$model->getKeyName() => $id])
-            ->values()
-            ->all();
+        foreach ($ids as $id) {
+            if ($model->isMatchPk($id)) {
+                $this->queries[$class][] = [$keyName => $id];
+            }
+        }
 
-        return $this->withUniqueKeys($class, $conditions);
+        return $this;
     }
 
     /**
@@ -338,13 +346,17 @@ class MultipleModelBatchFinder
      */
     protected function getModel(string $class): IlluminateModel
     {
-        $model = $this->getQuery($class)->getModel();
+        if (!isset($this->models[$class])) {
+            $model = $this->getQuery($class)->getModel();
 
-        if (!in_array(KnightModelTrait::class, class_uses_recursive($model), true)) {
-            throw new \InvalidArgumentException(sprintf('%s must use trait %s', get_class($model), KnightModelTrait::class));
+            if (!in_array(KnightModelTrait::class, class_uses_recursive($model), true)) {
+                throw new \InvalidArgumentException(sprintf('%s must use trait %s', get_class($model), KnightModelTrait::class));
+            }
+
+            $this->models[$class] = $model;
         }
 
-        return $model;
+        return $this->models[$class];
     }
 
     /**

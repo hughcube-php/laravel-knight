@@ -26,7 +26,7 @@ abstract class BaseQueryAction extends Controller
     public Request $request;
     protected ?ParameterBag $parameterBagOverride = null;
 
-    protected function getRequest(): Request
+    public function getRequest(): Request
     {
         return $this->request;
     }

@@ -95,21 +95,27 @@ trait Builder
      */
     public function findByPks($pks): EloquentCollection
     {
-        return static::findByOneUniqueColumnValues(
-            $this->getModel()->getKeyName(),
-            Collection::make($pks)->filter(function ($value) {
-                return $this->getModel()->isMatchPk($value);
-            })
-        );
+        $model = $this->getModel();
+        $keyName = $model->getKeyName();
+
+        $filtered = [];
+        foreach ($pks as $value) {
+            if ($model->isMatchPk($value)) {
+                $filtered[] = $value;
+            }
+        }
+
+        return $this->findByOneUniqueColumnValues($keyName, $filtered);
     }
 
     public function findByOneUniqueColumnValues($column, $values): EloquentCollection
     {
-        $collection = Collection::make($values)->map(function ($value) use ($column) {
-            return [$column => $value];
-        });
+        $conditions = [];
+        foreach ($values as $value) {
+            $conditions[] = [$column => $value];
+        }
 
-        $rows = $this->findUniqueRows($collection->toArray())->keyBy($column);
+        $rows = $this->findUniqueRows($conditions)->keyBy($column);
 
         $collection = $this->getModel()->newCollection();
         foreach ($values as $value) {
@@ -145,21 +151,29 @@ trait Builder
      */
     public function findUniqueRows($ids): EloquentCollection
     {
-        /** @var Collection $ids */
-        $ids = Collection::make($ids)->values();
-        $rows = $this->getModel()->newCollection();
+        if ($ids instanceof Collection) {
+            $idsArray = $ids->values()->all();
+        } elseif (is_array($ids)) {
+            $idsArray = array_values($ids);
+        } else {
+            $idsArray = array_values(iterator_to_array($ids));
+        }
 
-        if ($ids->isEmpty()) {
+        $model = $this->getModel();
+        $rows = $model->newCollection();
+
+        if (empty($idsArray)) {
             return $rows;
         }
 
-        $cacheKeys = $ids->mapWithKeys(function ($id, $key) {
-            return [$key => $this->getModel()->makeColumnsCacheKey($id)];
-        });
+        $cacheKeys = [];
+        foreach ($idsArray as $key => $id) {
+            $cacheKeys[$key] = $model->makeColumnsCacheKey($id);
+        }
 
         /** 缓存读取 */
-        $missIndexes = Collection::make();
-        $fromCacheRows = $this->getCache()->getMultiple($cacheKeys->toArray());
+        $missIndexes = [];
+        $fromCacheRows = $this->getCache()->getMultiple($cacheKeys);
         foreach ($cacheKeys as $cacheKeyIndex => $cacheKey) {
             if (isset($fromCacheRows[$cacheKey]) && $fromCacheRows[$cacheKey] instanceof IlluminateModel) {
                 if (method_exists($fromCacheRows[$cacheKey], 'setIsFromCache')) {
@@ -167,32 +181,35 @@ trait Builder
                 }
                 $rows->push($fromCacheRows[$cacheKey]);
                 /** @codingStandardsIgnoreStart */
-            } elseif (!isset($fromCacheRows[$cacheKey]) || !$this->getModel()->isCachePlaceholder($fromCacheRows[$cacheKey])) {
+            } elseif (!isset($fromCacheRows[$cacheKey]) || !$model->isCachePlaceholder($fromCacheRows[$cacheKey])) {
                 /** @codingStandardsIgnoreEnd */
-                $missIndexes->push($cacheKeyIndex);
+                $missIndexes[] = $cacheKeyIndex;
             }
         }
 
-        /** @phpstan-ignore-next-line */
-        if ($missIndexes->isEmpty()) {
+        if (empty($missIndexes)) {
             return $rows->values();
         }
 
         /** db 查询没有命中缓存的数据 */
-        $missIds = $ids->only($missIndexes->toArray());
-        $fromDbRows = $this->queryByUniqueConditions($missIds);
+        $missIds = Collection::make();
+        foreach ($missIndexes as $index) {
+            $missIds->put($index, $idsArray[$index]);
+        }
+        $fromDbRows = $this->queryByUniqueConditions($missIds->values());
 
         /** 把db的查询结果缓存起来 */
         $cacheItems = [];
-        foreach ($cacheKeys->only($missIndexes->toArray()) as $cacheKey) {
+        foreach ($missIndexes as $index) {
+            $cacheKey = $cacheKeys[$index];
             if ($fromDbRows->has($cacheKey)) {
                 $cacheItems[$cacheKey] = $fromDbRows->get($cacheKey);
-            } elseif ($this->getModel()->hasCachePlaceholder()) {
-                $cacheItems[$cacheKey] = $this->getModel()->getCachePlaceholder();
+            } elseif ($model->hasCachePlaceholder()) {
+                $cacheItems[$cacheKey] = $model->getCachePlaceholder();
             }
         }
         if (!empty($cacheItems)) {
-            $this->getCache()->setMultiple($cacheItems, $this->getModel()->getCacheTtl());
+            $this->getCache()->setMultiple($cacheItems, $model->getCacheTtl());
         }
 
         /** 合并db的查询结果 */
