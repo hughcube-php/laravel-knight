@@ -14,13 +14,14 @@ class UserCodeException extends UserException
     /**
      * @param string $code
      * @param string $message
+     * @param int $intCode
      * @param Throwable|null $previous
      */
-    public function __construct($code, $message = '', $previous = null)
+    public function __construct($code, $message = '', $intCode = 0, $previous = null)
     {
         $this->stringCode = $code;
 
-        parent::__construct($message, 0, $previous);
+        parent::__construct($message, $intCode, $previous);
     }
 
     /**

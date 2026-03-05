@@ -11,6 +11,8 @@ namespace HughCube\Laravel\Knight\Routing;
 
 use BadMethodCallException;
 use Closure;
+use HughCube\Laravel\Knight\Exceptions\BusinessRuleException;
+use HughCube\Laravel\Knight\Exceptions\UserCodeException;
 use HughCube\Laravel\Knight\Http\JsonResponse as KJsonResponse;
 use HughCube\Laravel\Knight\Http\Request as KnightRequest;
 use HughCube\Laravel\Knight\Ide\Http\KIdeRequest;
@@ -72,6 +74,8 @@ trait Action
             try {
                 $this->beforeAction();
                 $result = $this->action();
+            } catch (BusinessRuleException $e) {
+                throw new UserCodeException($e->getStringCode(), $e->getMessage(), $e->getCode(), $e);
             } finally {
                 $this->afterAction();
             }
