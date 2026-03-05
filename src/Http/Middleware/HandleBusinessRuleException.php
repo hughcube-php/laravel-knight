@@ -8,6 +8,9 @@ use HughCube\Laravel\Knight\Exceptions\UserException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @deprecated Action 已内置 BusinessRuleException 到 UserCodeException 的转换，无需再使用此中间件
+ */
 class HandleBusinessRuleException
 {
     /**
