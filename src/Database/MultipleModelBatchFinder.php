@@ -60,7 +60,7 @@ class MultipleModelBatchFinder
     /**
      * Model 实例缓存 [模型类名 => Model].
      *
-     * @var array<string, IlluminateModel>
+     * @var array<string, Model>
      */
     protected array $models = [];
 
@@ -342,9 +342,9 @@ class MultipleModelBatchFinder
      *
      * @param class-string<Model> $class 模型类名
      *
-     * @return IlluminateModel|KnightModelTrait
+     * @return Model
      */
-    protected function getModel(string $class): IlluminateModel
+    protected function getModel(string $class): Model
     {
         if (!isset($this->models[$class])) {
             $model = $this->getQuery($class)->getModel();

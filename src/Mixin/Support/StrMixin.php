@@ -449,7 +449,7 @@ class StrMixin
         return function ($string, $index): string {
             $char = substr($string, $index, 1);
 
-            return false === $char ? '' : $char;
+            return is_string($char) ? $char : '';
         };
     }
 

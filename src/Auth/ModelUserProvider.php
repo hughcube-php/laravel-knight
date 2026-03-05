@@ -77,6 +77,6 @@ class ModelUserProvider implements UserProvider
      */
     public function rehashPasswordIfRequired(Authenticatable $user, array $credentials, bool $force = false)
     {
-        return $this->callModelMethod(__FUNCTION__, $user, $credentials, $force);
+        $this->callModelMethod(__FUNCTION__, $user, $credentials, $force);
     }
 }

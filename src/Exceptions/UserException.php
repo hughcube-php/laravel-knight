@@ -11,4 +11,11 @@ namespace HughCube\Laravel\Knight\Exceptions;
 
 class UserException extends Exception
 {
+    /**
+     * @return string
+     */
+    public function getStringCode(): string
+    {
+        return 'UserException';
+    }
 }

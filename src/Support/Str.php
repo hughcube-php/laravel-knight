@@ -378,7 +378,7 @@ class Str extends \Illuminate\Support\Str
     {
         $char = substr($string, $index, 1);
 
-        return false === $char ? '' : $char;
+        return is_string($char) ? $char : '';
     }
 
     /**

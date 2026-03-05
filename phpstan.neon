@@ -80,13 +80,39 @@ parameters:
             identifier: arguments.count
             path: src/Mixin/Database/Query/BuilderMixin.php
         -
+            identifier: argument.type
+            path: src/Database/Eloquent/Traits/Builder.php
+        -
             identifier: varTag.trait
             path: src/Database/Eloquent/Traits/Builder.php
         -
             identifier: class.notFound
             path: src/Database/Eloquent/Traits/Builder.php
+        # DebugHandler/Handler::$dontReport 包含接口类名
         -
-            identifier: throws.notThrowable
+            identifier: property.defaultValue
+            path: src/Exceptions/DebugHandler.php
+        -
+            identifier: property.defaultValue
+            path: src/Exceptions/Handler.php
+        # property_exists 在特定类型下总是 true
+        -
+            identifier: function.alreadyNarrowedType
+        # Mixin 中 $this->attributes 属性访问
+        -
+            identifier: property.notFound
+            path: src/Mixin/Http/RequestMixin.php
+        # Action::getRequest() 返回类型
+        -
+            identifier: class.notFound
+            path: src/Routing/Action.php
+        -
+            identifier: return.phpDocType
+            path: src/Routing/Action.php
+        # PostgresGrammar::createInstance() new static()
+        -
+            identifier: new.static
+            path: src/Database/Query/Grammars/PostgresGrammar.php
         -
             identifier: class.notFound
             path: src/Http/Middleware/RequestSignatureValidate.php
