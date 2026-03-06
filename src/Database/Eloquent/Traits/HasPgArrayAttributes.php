@@ -2,7 +2,7 @@
 
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
-use HughCube\Base\Base;
+use HughCube\Laravel\Knight\Support\PgArray;
 use Illuminate\Support\Collection;
 
 /**
@@ -37,19 +37,7 @@ trait HasPgArrayAttributes
      */
     protected function parsePgIntArray($value): Collection
     {
-        if (!is_string($value) || $value === '' || $value === '{}') {
-            return Collection::make();
-        }
-
-        return Collection::make(explode(',', trim($value, '{}')))->map(function ($v) {
-            $v = trim($v);
-            // 检查是否在 PHP int 安全范围内
-            if (is_numeric($v) && $this->isIntegerInPhpRange($v)) {
-                return (int) $v;
-            }
-            // bigint 超出范围时保持字符串，避免精度损失
-            return $v;
-        });
+        return PgArray::parseIntArray($value);
     }
 
     /**
@@ -58,32 +46,7 @@ trait HasPgArrayAttributes
      */
     protected function isIntegerInPhpRange(string $value): bool
     {
-        // 优先使用 bccomp（如果可用）
-        if (function_exists('bccomp')) {
-            return bccomp($value, Base::toString(PHP_INT_MIN), 0) >= 0
-                && bccomp($value, Base::toString(PHP_INT_MAX), 0) <= 0;
-        }
-
-        // 回退方案：字符串比较
-        $value = ltrim($value, '+');
-        $isNegative = isset($value[0]) && $value[0] === '-';
-        $absValue = $isNegative ? substr($value, 1) : $value;
-        $absValue = ltrim($absValue, '0') ?: '0';
-
-        // PHP_INT_MIN 绝对值比 PHP_INT_MAX 大 1
-        $maxAbs = $isNegative ? substr(Base::toString(PHP_INT_MIN), 1) : Base::toString(PHP_INT_MAX);
-        $maxLen = strlen($maxAbs);
-
-        $absLen = strlen($absValue);
-        if ($absLen < $maxLen) {
-            return true;
-        }
-        if ($absLen > $maxLen) {
-            return false;
-        }
-
-        // 长度相同时按字符串比较
-        return strcmp($absValue, $maxAbs) <= 0;
+        return PgArray::isIntegerInPhpRange($value);
     }
 
     /**
@@ -92,10 +55,7 @@ trait HasPgArrayAttributes
      */
     protected function parsePgSimpleTextArray($value): Collection
     {
-        if (!is_string($value) || $value === '' || $value === '{}') {
-            return Collection::make();
-        }
-        return Collection::make(explode(',', trim($value, '{}')));
+        return PgArray::parseSimpleTextArray($value);
     }
 
     /**
@@ -103,7 +63,7 @@ trait HasPgArrayAttributes
      */
     protected function serializePgIntArray($value): string
     {
-        return sprintf('{%s}', Collection::make($value)->filter(fn($v) => Base::isInteger($v))->map(fn($v) => Base::toString($v))->implode(','));
+        return PgArray::serializeIntArray($value);
     }
 
     /**
@@ -113,6 +73,6 @@ trait HasPgArrayAttributes
      */
     protected function serializePgSimpleTextArray($value): string
     {
-        return sprintf('{%s}', Collection::make($value)->filter(fn($v) => is_string($v) && preg_match('/^[a-zA-Z0-9:_.\/\-@+=#~]+$/', $v))->implode(','));
+        return PgArray::serializeSimpleTextArray($value);
     }
 }
