@@ -344,7 +344,7 @@ class MultipleModelBatchFinder
      *
      * @return Model
      */
-    protected function getModel(string $class): Model
+    protected function getModel(string $class)
     {
         if (!isset($this->models[$class])) {
             $model = $this->getQuery($class)->getModel();

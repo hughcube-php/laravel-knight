@@ -56,7 +56,15 @@ class WalEventDispatchCommand extends Command
 
         $this->info(sprintf(
             'WAL event dispatch started, slot: %s, mode: %s, interval: %.2fs, batch: %d, memory: %dMB, max-errors: %s, tables: %d, handlers: %d, partitions: %d',
-            $slot, $this->getMode(), $interval, $batch, $memoryLimit, ($maxErrors > 0 ? $maxErrors : 'unlimited'), count($handlers), $handlerCount, count($partitionMap)
+            $slot,
+            $this->getMode(),
+            $interval,
+            $batch,
+            $memoryLimit,
+            ($maxErrors > 0 ? $maxErrors : 'unlimited'),
+            count($handlers),
+            $handlerCount,
+            count($partitionMap)
         ));
         foreach ($handlers as $table => $metas) {
             foreach ($metas as $meta) {

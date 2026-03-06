@@ -88,7 +88,7 @@ class DebugHandler extends ExceptionHandler
         } elseif ($e instanceof HttpException) {
             $results = ['Code' => 'HttpError', 'Message' => Response::$statusTexts[$e->getStatusCode()] ?? ''];
         } elseif ($e instanceof UserException) {
-            $results = ['Code' => $e->getStringCode() ?: 'UserException', 'Message' => $e->getMessage()];
+            $results = ['Code' => $e->getStringCode(), 'Message' => $e->getMessage()];
         } elseif ($e instanceof KnightException) {
             $results = ['Code' => 'Failure', 'Message' => $e->getMessage()];
         } elseif ($e instanceof EasySmsMobileInvalidException) {

@@ -72,8 +72,12 @@ class WalMonitorSlotsCommand extends Command
 
             if ($retainedBytes >= $thresholdBytes) {
                 $hasAlert = true;
-                $message = sprintf('[wal:monitor-slots] ALERT: slot "%s" retained WAL %.2fMB exceeds threshold %dMB (%s)',
-                    $slotName, $retainedMB, $thresholdMB, $detail
+                $message = sprintf(
+                    '[wal:monitor-slots] ALERT: slot "%s" retained WAL %.2fMB exceeds threshold %dMB (%s)',
+                    $slotName,
+                    $retainedMB,
+                    $thresholdMB,
+                    $detail
                 );
 
                 $this->error($message);

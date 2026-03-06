@@ -12,6 +12,7 @@ namespace HughCube\Laravel\Knight\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 
+// @codingStandardsIgnoreStart
 if (class_exists(\Illuminate\Http\Middleware\HandleCors::class)) {
     abstract class HandleAllPathCorsBase extends \Illuminate\Http\Middleware\HandleCors
     {
@@ -41,6 +42,7 @@ if (class_exists(\Illuminate\Http\Middleware\HandleCors::class)) {
         }
     }
 }
+// @codingStandardsIgnoreEnd
 
 class HandleAllPathCors extends HandleAllPathCorsBase
 {
