@@ -4,9 +4,9 @@ namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
 use DateTimeInterface;
 use HughCube\Laravel\Knight\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use HughCube\Laravel\Knight\Support\Json;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
@@ -40,6 +40,37 @@ trait Model
      * @var array
      */
     protected static array $modelCacheKeyMakeCache = [];
+
+    /**
+     * 缓存每个 Model 子类的 setKeysForSaveQueryFrom{TraitName} 方法列表
+     *
+     * @var array<string, string[]>
+     */
+    protected static array $setKeysForSaveQueryMethods = [];
+
+    /**
+     * 统一入口：自动调用所有 trait 的 setKeysForSaveQueryFrom{TraitName}() 方法
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function setKeysForSaveQuery($query)
+    {
+        $query = parent::setKeysForSaveQuery($query);
+
+        if (!isset(static::$setKeysForSaveQueryMethods[static::class])) {
+            static::$setKeysForSaveQueryMethods[static::class] = Collection::make(class_uses_recursive($this))
+                ->map(fn($trait) => 'setKeysForSaveQueryFrom' . class_basename($trait))
+                ->filter(fn($method) => method_exists($this, $method))
+                ->values()->all();
+        }
+
+        foreach (static::$setKeysForSaveQueryMethods[static::class] as $method) {
+            $query = $this->{$method}($query);
+        }
+
+        return $query;
+    }
 
     /**
      * @param DateTimeInterface|int|float|string|null $date

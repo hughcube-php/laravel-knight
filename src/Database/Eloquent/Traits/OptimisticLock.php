@@ -10,7 +10,6 @@
 namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
 use HughCube\Laravel\Knight\Exceptions\OptimisticLockException;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 
 /**
@@ -65,15 +64,13 @@ trait OptimisticLock
     }
 
     /**
-     * 重写 setKeysForSaveQuery 添加版本条件
+     * 为 setKeysForSaveQuery 添加乐观锁版本条件
      *
-     * @param Builder $query
-     * @return Builder
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
      */
-    protected function setKeysForSaveQuery($query)
+    protected function setKeysForSaveQueryFromOptimisticLock($query)
     {
-        $query = parent::setKeysForSaveQuery($query);
-
         // 更新操作且启用乐观锁时，添加版本条件
         if ($this->exists && $this->isOptimisticLockEnabled()) {
             $column = $this->lockDataVersionColumn();
