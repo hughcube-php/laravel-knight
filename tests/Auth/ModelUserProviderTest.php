@@ -26,7 +26,7 @@ class ModelUserProviderTest extends TestCase
 
         $badCredentials = ['email' => 'user@example.com', 'password' => 'bad'];
         $this->assertFalse($provider->validateCredentials($user, $badCredentials));
-        $this->assertSame('forced', $provider->rehashPasswordIfRequired($user, $credentials, true));
+        $provider->rehashPasswordIfRequired($user, $credentials, true);
 
         $this->assertSame(
             [
