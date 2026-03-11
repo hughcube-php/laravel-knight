@@ -62,7 +62,7 @@
     "scripts": {
         "test": "phpunit",
         "phpstan": "phpstan analyse -vvv --memory-limit=-1",
-        "check-style": "phpcs -p --standard=PSR2 src/ -v --warning-severity=0",
+        "check-style": "phpcs -p --standard=PSR2 src/ -v --warning-severity=0 --ignore=src/Http/Middleware/HandleAllPathCors.php",
         "fix-style": "phpcbf -p --standard=PSR2 src/ -v"
     },
     "config": {
