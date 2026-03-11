@@ -102,13 +102,6 @@ parameters:
         -
             identifier: property.notFound
             path: src/Mixin/Http/RequestMixin.php
-        # Action::getRequest() 返回类型
-        -
-            identifier: class.notFound
-            path: src/Routing/Action.php
-        -
-            identifier: return.phpDocType
-            path: src/Routing/Action.php
         # PostgresGrammar::createInstance() new static()
         -
             identifier: new.static
