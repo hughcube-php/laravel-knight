@@ -34,11 +34,16 @@ class RequestSignatureValidate
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($this->validate($request) || $this->isOptional($request)) {
+        if ($this->isDisabled() || $this->validate($request) || $this->isOptional($request)) {
             return $next($request);
         }
 
         throw new ValidateSignatureException();
+    }
+
+    protected function isDisabled(): bool
+    {
+        return true === config('knight.request.signature.disabled');
     }
 
     /**

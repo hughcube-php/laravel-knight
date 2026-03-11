@@ -249,7 +249,17 @@ class TestCase extends OrchestraTestCase
      */
     protected function isPgsqlConfigured(): bool
     {
-        return $this->resolvePgsqlConfig() !== null;
+        $config = $this->resolvePgsqlConfig();
+        if ($config === null) {
+            return false;
+        }
+
+        try {
+            $this->app['db']->connection('pgsql')->getPdo();
+            return true;
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     /**

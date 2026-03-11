@@ -166,6 +166,33 @@ class MiscMiddlewareTest extends TestCase
         });
     }
 
+    public function testRequestSignatureValidateDisabledByConfig()
+    {
+        config(['knight.request.signature.disabled' => true]);
+
+        $middleware = new RequestSignatureValidate();
+        $request = $this->makeSignedRequest('/signed', 'GET', [], '');
+
+        $response = $middleware->handle($request, function () {
+            return new Response('ok');
+        });
+
+        $this->assertSame('ok', $response->getContent());
+    }
+
+    public function testRequestSignatureValidateNotDisabledByDefault()
+    {
+        config(['knight.request.signature.disabled' => false]);
+
+        $middleware = new RequestSignatureValidate();
+        $request = $this->makeSignedRequest('/signed', 'GET', [], '');
+
+        $this->expectException(\HughCube\Laravel\Knight\Exceptions\ValidateSignatureException::class);
+        $middleware->handle($request, function () {
+            return new Response('ok');
+        });
+    }
+
     public function testParseRequestDatePrefersClientDate()
     {
         $middleware = new RequestSignatureValidate();

@@ -91,7 +91,7 @@ class DebugHandlerTest extends TestCase
             [$dataException, 499],
             [$emptyDataException, 'Failure'],
             [new NotFoundHttpException(), 'HttpError'],
-            [new UserException('user', 403), 403],
+            [new UserException('user', 403), 'UserException'],
             [new KnightException('knight'), 'Failure'],
             [new EasySmsMobileInvalidException('mobile-invalid'), 'MobileInvalid'],
             [new EasySmsThrottleRequestsException('sms-throttled'), 'SmsThrottled'],
