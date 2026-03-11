@@ -867,7 +867,7 @@ class HasPgArrayAttributesTest extends TestCase
     }
 
     /**
-     * Helper method to invoke protected/private methods
+     * Helper method to invoke protected/private methods.
      */
     protected function invokeMethod($object, string $methodName, array $parameters = [])
     {
@@ -881,7 +881,7 @@ class HasPgArrayAttributesTest extends TestCase
 
 /**
  * Test model that uses HasPgArrayAttributes trait
- * Default behavior: removes ARRAY casts
+ * Default behavior: removes ARRAY casts.
  */
 class TestPgArrayModel extends Model
 {
@@ -890,14 +890,14 @@ class TestPgArrayModel extends Model
     protected $table = 'test_pg_array';
 
     protected $casts = [
-        'id' => 'integer',
-        'tags' => 'ARRAY',
+        'id'     => 'integer',
+        'tags'   => 'ARRAY',
         'scores' => 'ARRAY',
     ];
 }
 
 /**
- * Test model that preserves ARRAY casts by defining shouldPreserveUppercaseArrayCast method
+ * Test model that preserves ARRAY casts by defining shouldPreserveUppercaseArrayCast method.
  */
 class TestPgArrayModelPreserveCasts extends Model
 {
@@ -906,13 +906,13 @@ class TestPgArrayModelPreserveCasts extends Model
     protected $table = 'test_pg_array';
 
     protected $casts = [
-        'id' => 'integer',
-        'tags' => 'ARRAY',
+        'id'     => 'integer',
+        'tags'   => 'ARRAY',
         'scores' => 'ARRAY',
     ];
 
     /**
-     * Override to preserve ARRAY casts
+     * Override to preserve ARRAY casts.
      */
     public function shouldPreserveUppercaseArrayCast(): bool
     {

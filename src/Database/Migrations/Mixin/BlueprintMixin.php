@@ -41,7 +41,6 @@ class BlueprintMixin
     {
         return function () {
             /** @var Blueprint $this */
-
             $this->timestamp('created_at')->nullable()->default(null)->comment('Record creation timestamp');
             $this->timestamp('updated_at')->nullable()->default(null)->comment('Record last update timestamp');
             $this->timestamp('deleted_at')->nullable()->default(null)->comment('Soft delete timestamp');
@@ -72,7 +71,6 @@ class BlueprintMixin
     {
         return function () {
             /** @var Blueprint $this */
-
             $this->bigInteger('sort')->default(0)->comment('Sorting weight');
             $this->jsonb('options')->default('{}')->comment('Extra options');
             $this->string('ukey', 255)->nullable()->default('')->comment('Unique key for composite unique index');
@@ -133,8 +131,8 @@ class BlueprintMixin
             $indexName = $indexName ?? "idx_{$tableName}_{$columnSuffix}_gin";
 
             $this->addCommand('knightGinIndexWhere', [
-                'columns' => $columns,
-                'where' => $whereCondition,
+                'columns'   => $columns,
+                'where'     => $whereCondition,
                 'indexName' => $indexName,
             ]);
 
@@ -181,8 +179,8 @@ class BlueprintMixin
             $indexName = $indexName ?? "uk_{$tableName}_{$columnSuffix}";
 
             $this->addCommand('knightUniqueWhere', [
-                'columns' => $columns,
-                'where' => $whereCondition,
+                'columns'   => $columns,
+                'where'     => $whereCondition,
                 'indexName' => $indexName,
             ]);
 
@@ -209,8 +207,8 @@ class BlueprintMixin
             $indexName = $indexName ?? "idx_{$tableName}_{$columnSuffix}";
 
             $this->addCommand('knightIndexWhere', [
-                'columns' => $columns,
-                'where' => $whereCondition,
+                'columns'   => $columns,
+                'where'     => $whereCondition,
                 'indexName' => $indexName,
             ]);
 
@@ -424,7 +422,7 @@ class BlueprintMixin
             /** @var Blueprint $this */
             return $this->addColumn('knightNumericArray', $column, [
                 'precision' => $precision,
-                'scale' => $scale,
+                'scale'     => $scale,
             ]);
         };
     }
@@ -545,8 +543,8 @@ class BlueprintMixin
             $sequenceName = $sequenceName ?? "{$tableName}_{$column}_seq";
 
             $this->addCommand('knightSetSequenceValue', [
-                'column' => $column,
-                'value' => $value,
+                'column'       => $column,
+                'value'        => $value,
                 'sequenceName' => $sequenceName,
             ]);
 
@@ -577,8 +575,8 @@ class BlueprintMixin
             $sequenceName = $sequenceName ?? "{$tableName}_{$column}_seq";
 
             $this->addCommand('knightRestartSequence', [
-                'column' => $column,
-                'value' => $value,
+                'column'       => $column,
+                'value'        => $value,
                 'sequenceName' => $sequenceName,
             ]);
 
@@ -646,12 +644,12 @@ class BlueprintMixin
             /** @var Blueprint $this */
             $this->addCommand('knightCreateSequence', [
                 'sequenceName' => $sequenceName,    // 序列名称，全局唯一标识符
-                'startWith' => $startWith,          // 起始值，首次 nextval() 返回此值
-                'incrementBy' => $incrementBy,      // 步频，每次递增的值（可为负数实现递减）
-                'maxValue' => $maxValue,            // 最大值，null=无限制，达到后根据 cycle 决定行为
-                'minValue' => $minValue,            // 最小值，递减序列或 cycle=true 时的下限
-                'cycle' => $cycle,                  // 是否循环，true=达到边界后循环，false=达到边界后报错
-                'cache' => max(1, $cache),    // 缓存数量，每会话预分配值数量，>=1
+                'startWith'    => $startWith,          // 起始值，首次 nextval() 返回此值
+                'incrementBy'  => $incrementBy,      // 步频，每次递增的值（可为负数实现递减）
+                'maxValue'     => $maxValue,            // 最大值，null=无限制，达到后根据 cycle 决定行为
+                'minValue'     => $minValue,            // 最小值，递减序列或 cycle=true 时的下限
+                'cycle'        => $cycle,                  // 是否循环，true=达到边界后循环，false=达到边界后报错
+                'cache'        => max(1, $cache),    // 缓存数量，每会话预分配值数量，>=1
             ]);
 
             return $this;
@@ -673,7 +671,7 @@ class BlueprintMixin
             /** @var Blueprint $this */
             $this->addCommand('knightDropSequence', [
                 'sequenceName' => $sequenceName,
-                'ifExists' => $ifExists,
+                'ifExists'     => $ifExists,
             ]);
 
             return $this;
@@ -700,9 +698,9 @@ class BlueprintMixin
         return function (string $column, string $sequenceName, bool $primary = true) {
             /** @var Blueprint $this */
             $this->addCommand('knightIdWithSequence', [
-                'column' => $column,
+                'column'       => $column,
                 'sequenceName' => $sequenceName,
-                'primary' => $primary,
+                'primary'      => $primary,
             ]);
 
             return $this;
@@ -725,7 +723,7 @@ class BlueprintMixin
         return function (string $column, string $sequenceName) {
             /** @var Blueprint $this */
             $this->addCommand('knightUseSequence', [
-                'column' => $column,
+                'column'       => $column,
                 'sequenceName' => $sequenceName,
             ]);
 

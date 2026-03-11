@@ -33,7 +33,7 @@ class WalEventDispatchIntegrationTest extends TestCase
             return;
         }
 
-        $this->slotName = 'knight_integration_' . getmypid() . '_' . time();
+        $this->slotName = 'knight_integration_'.getmypid().'_'.time();
 
         // Create test table in PostgreSQL
         $connection = $this->app['db']->connection('pgsql');
@@ -98,7 +98,7 @@ class WalEventDispatchIntegrationTest extends TestCase
     {
         try {
             $connection = $this->app['db']->connection('pgsql');
-            $tmpSlot = 'knight_wal2json_chk_' . time();
+            $tmpSlot = 'knight_wal2json_chk_'.time();
 
             $connection->statement(
                 "SELECT pg_create_logical_replication_slot(?, 'wal2json')",
@@ -106,7 +106,7 @@ class WalEventDispatchIntegrationTest extends TestCase
             );
             $connection->statement('SELECT pg_drop_replication_slot(?)', [$tmpSlot]);
         } catch (\Throwable $e) {
-            $this->markTestSkipped('wal2json is not available: ' . $e->getMessage());
+            $this->markTestSkipped('wal2json is not available: '.$e->getMessage());
         }
     }
 
@@ -491,7 +491,7 @@ class WalEventDispatchIntegrationTest extends TestCase
 
         // Insert multiple rows
         for ($i = 1; $i <= 5; $i++) {
-            $connection->table('wal_integration_items')->insert(['name' => 'batch_' . $i]);
+            $connection->table('wal_integration_items')->insert(['name' => 'batch_'.$i]);
         }
 
         $handler = new WalIntegrationItem();

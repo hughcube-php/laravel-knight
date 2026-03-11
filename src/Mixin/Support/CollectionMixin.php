@@ -429,8 +429,8 @@ class CollectionMixin
     public function splitNested(): Closure
     {
         return function (string $string, string $firstPattern = '#[;；]#', string $secondPattern = '#[\/／]#') {
-            return static::make(preg_split($firstPattern, $string) ?: [])->map(fn($item) => trim($item))->filter()->values()->map(function ($item) use ($secondPattern) {
-                return static::make(preg_split($secondPattern, $item) ?: [])->map(fn($v) => trim($v))->filter()->values();
+            return static::make(preg_split($firstPattern, $string) ?: [])->map(fn ($item) => trim($item))->filter()->values()->map(function ($item) use ($secondPattern) {
+                return static::make(preg_split($secondPattern, $item) ?: [])->map(fn ($v) => trim($v))->filter()->values();
             });
         };
     }
@@ -455,7 +455,7 @@ class CollectionMixin
     public function sortKnightModel(): Closure
     {
         return function () {
-            return $this->sortByDesc(fn(GetKnightSortValue $item) => $item->getKSortValue());
+            return $this->sortByDesc(fn (GetKnightSortValue $item) => $item->getKSortValue());
         };
     }
 }

@@ -29,7 +29,7 @@ class StrMixin
                 return $subject;
             }
 
-            $position = strrpos($subject, (string)$search);
+            $position = strrpos($subject, (string) $search);
 
             if ($position === false) {
                 return $subject;
@@ -427,7 +427,7 @@ class StrMixin
                 $slice = join('', array_slice($match[0], $start, $length));
             }
 
-            return $slice . $suffix;
+            return $slice.$suffix;
         };
     }
 

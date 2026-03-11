@@ -6,7 +6,7 @@ use HughCube\Laravel\Knight\Support\PgArray;
 use Illuminate\Support\Collection;
 
 /**
- * PostgreSQL 原生数组字段辅助 Trait
+ * PostgreSQL 原生数组字段辅助 Trait.
  *
  * 支持格式: {1,2,3} 和 {o:1,o:2}
  *
@@ -22,18 +22,18 @@ trait HasPgArrayAttributes
     /**
      * 初始化 Trait，在 Model boot 时自动调用
      * 默认移除 casts 中值为 'ARRAY' (全大写) 的项
-     * 如 Model 定义了 shouldPreserveUppercaseArrayCast() 方法且返回 true 则跳过移除
+     * 如 Model 定义了 shouldPreserveUppercaseArrayCast() 方法且返回 true 则跳过移除.
      */
     public function initializeHasPgArrayAttributes(): void
     {
         if (!method_exists($this, 'shouldPreserveUppercaseArrayCast') || !$this->shouldPreserveUppercaseArrayCast()) {
-            $this->casts = array_filter($this->casts, fn($cast) => $cast !== 'ARRAY');
+            $this->casts = array_filter($this->casts, fn ($cast) => $cast !== 'ARRAY');
         }
     }
 
     /**
      * 解析 int[]: {1,2,3} → [1,2,3]
-     * 注意：为避免 bigint 溢出，超过 PHP_INT_MAX 的值保持为字符串
+     * 注意：为避免 bigint 溢出，超过 PHP_INT_MAX 的值保持为字符串.
      */
     protected function parsePgIntArray($value): Collection
     {
@@ -42,7 +42,7 @@ trait HasPgArrayAttributes
 
     /**
      * 判断数值字符串是否在 PHP int 范围内
-     * 兼容没有安装 BC Math 扩展的环境
+     * 兼容没有安装 BC Math 扩展的环境.
      */
     protected function isIntegerInPhpRange(string $value): bool
     {
@@ -51,7 +51,7 @@ trait HasPgArrayAttributes
 
     /**
      * 解析简单 text[]: {o:1,o:2} → ['o:1','o:2']
-     * 仅支持字母、数字、冒号、下划线、点、连字符
+     * 仅支持字母、数字、冒号、下划线、点、连字符.
      */
     protected function parsePgSimpleTextArray($value): Collection
     {
@@ -59,7 +59,7 @@ trait HasPgArrayAttributes
     }
 
     /**
-     * 序列化 int[]: [1,2,3] → {1,2,3}
+     * 序列化 int[]: [1,2,3] → {1,2,3}.
      */
     protected function serializePgIntArray($value): string
     {
@@ -69,7 +69,7 @@ trait HasPgArrayAttributes
     /**
      * 序列化简单 text[]: ['o:1','o:2'] → {o:1,o:2}
      * 支持字母、数字、冒号、下划线、点、连字符、斜杠、@、+、=、#、~
-     * 不支持: 空格、逗号、花括号、引号、反斜杠（这些是 PostgreSQL 数组特殊字符）
+     * 不支持: 空格、逗号、花括号、引号、反斜杠（这些是 PostgreSQL 数组特殊字符）.
      */
     protected function serializePgSimpleTextArray($value): string
     {

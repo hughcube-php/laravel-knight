@@ -11,7 +11,7 @@ trait HasRefreshModelCache
 {
     /**
      * @param Builder $query
-     * @param bool $force 是否强制刷新, false 时仅在缓存与数据库不一致时刷新
+     * @param bool    $force 是否强制刷新, false 时仅在缓存与数据库不一致时刷新
      *
      * @throws Exception
      */
@@ -21,6 +21,7 @@ trait HasRefreshModelCache
 
         if ($count <= 0) {
             $this->info(sprintf('刷新 %s 缓存, 未查询到数据', get_class($query->getModel())));
+
             return;
         }
 
@@ -28,7 +29,6 @@ trait HasRefreshModelCache
 
         $query->clone()->eachById(function (EloquentModel $model) use (&$doneCount, $count, $force) {
             /** @var KnightModelTrait $model */
-
             $modelClass = get_class($model);
 
             $cacheModel = $modelClass::findById($model->getKey());

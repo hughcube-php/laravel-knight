@@ -41,7 +41,7 @@ class IsEqualAttributesTest extends TestCase
     // ===================== 基础行为 =====================
 
     /**
-     * null 参数应返回 false
+     * null 参数应返回 false.
      */
     public function testNullReturnsFalse()
     {
@@ -52,7 +52,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 非 Model 对象应返回 false
+     * 非 Model 对象应返回 false.
      */
     public function testNonModelReturnsFalse()
     {
@@ -65,7 +65,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 不同类的 Model 应返回 false (is() 检查表名和连接)
+     * 不同类的 Model 应返回 false (is() 检查表名和连接).
      */
     public function testDifferentModelClassReturnsFalse()
     {
@@ -79,7 +79,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 不同主键应返回 false
+     * 不同主键应返回 false.
      */
     public function testDifferentPrimaryKeyReturnsFalse()
     {
@@ -93,7 +93,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 未持久化模型(主键均为 null)不应被判定为同一条记录
+     * 未持久化模型(主键均为 null)不应被判定为同一条记录.
      */
     public function testUnsavedModelsReturnFalse()
     {
@@ -107,7 +107,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 完全相同的属性应返回 true
+     * 完全相同的属性应返回 true.
      */
     public function testIdenticalAttributesReturnsTrue()
     {
@@ -121,7 +121,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 属性数量不同应返回 false
+     * 属性数量不同应返回 false.
      */
     public function testDifferentAttributeCountReturnsFalse()
     {
@@ -135,7 +135,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * deprecated 的 equal() 方法应与 hasSameAttributes() 行为一致
+     * deprecated 的 equal() 方法应与 hasSameAttributes() 行为一致.
      */
     public function testEqualIsAliasForIsEqualAttributes()
     {
@@ -154,7 +154,7 @@ class IsEqualAttributesTest extends TestCase
     // ===================== 数值类型 =====================
 
     /**
-     * int vs string 的数值比较: "1" === 1 应视为相等
+     * int vs string 的数值比较: "1" === 1 应视为相等.
      */
     public function testNumericIntVsString()
     {
@@ -168,7 +168,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 不同数值应返回 false
+     * 不同数值应返回 false.
      */
     public function testDifferentNumericValues()
     {
@@ -182,7 +182,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * int vs 科学计数法字符串不应视为相等
+     * int vs 科学计数法字符串不应视为相等.
      */
     public function testScientificNotationStringVsIntNotEqual()
     {
@@ -196,7 +196,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * int vs 0e... 字符串不应视为相等
+     * int vs 0e... 字符串不应视为相等.
      */
     public function testZeroExponentialStringVsIntNotEqual()
     {
@@ -210,13 +210,13 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * int vs 超出整型范围字符串不应误判相等
+     * int vs 超出整型范围字符串不应误判相等.
      */
     public function testIntMaxPlusOneStringNotEqual()
     {
         $intMaxString = (string) PHP_INT_MAX;
         $digits = str_split($intMaxString);
-        for ($i = count($digits) - 1; $i >= 0; --$i) {
+        for ($i = count($digits) - 1; $i >= 0; $i--) {
             if ('9' !== $digits[$i]) {
                 $digits[$i] = (string) ((int) $digits[$i] + 1);
                 break;
@@ -238,7 +238,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * float vs string: 99.99 !== "99.99", 只归一化 int 不归一化 float, 避免大数精度丢失
+     * float vs string: 99.99 !== "99.99", 只归一化 int 不归一化 float, 避免大数精度丢失.
      */
     public function testFloatVsStringNotEqual()
     {
@@ -252,7 +252,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 同类型 float 相同值应相等
+     * 同类型 float 相同值应相等.
      */
     public function testSameFloatEqual()
     {
@@ -266,7 +266,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 主键 int vs string: id=1 和 id="1" 应视为相等
+     * 主键 int vs string: id=1 和 id="1" 应视为相等.
      */
     public function testPrimaryKeyIntVsString()
     {
@@ -282,7 +282,7 @@ class IsEqualAttributesTest extends TestCase
     // ===================== 日期时间类型 =====================
 
     /**
-     * 两个不同 Carbon 实例但相同时间应视为相等
+     * 两个不同 Carbon 实例但相同时间应视为相等.
      */
     public function testCarbonInstancesWithSameTime()
     {
@@ -298,7 +298,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * Carbon 对象 vs 时间字符串应视为相等
+     * Carbon 对象 vs 时间字符串应视为相等.
      */
     public function testCarbonVsDatetimeString()
     {
@@ -314,7 +314,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 字符串 vs Carbon 对象 (反向)
+     * 字符串 vs Carbon 对象 (反向).
      */
     public function testDatetimeStringVsCarbon()
     {
@@ -330,7 +330,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 不同时间应返回 false
+     * 不同时间应返回 false.
      */
     public function testDifferentDatetimeReturnsFalse()
     {
@@ -344,7 +344,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 两个不同 Carbon 实例但不同时间应返回 false
+     * 两个不同 Carbon 实例但不同时间应返回 false.
      */
     public function testDifferentCarbonInstancesReturnFalse()
     {
@@ -358,7 +358,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * null 时间 vs null 应相等
+     * null 时间 vs null 应相等.
      */
     public function testNullDatetimeEqual()
     {
@@ -372,7 +372,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * null vs Carbon 应不相等
+     * null vs Carbon 应不相等.
      */
     public function testNullVsCarbonNotEqual()
     {
@@ -388,7 +388,7 @@ class IsEqualAttributesTest extends TestCase
     // ===================== 字符串类型 =====================
 
     /**
-     * 相同字符串应相等
+     * 相同字符串应相等.
      */
     public function testSameStringsEqual()
     {
@@ -402,7 +402,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 不同字符串应不相等
+     * 不同字符串应不相等.
      */
     public function testDifferentStringsNotEqual()
     {
@@ -416,7 +416,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 空字符串 vs null 应不相等
+     * 空字符串 vs null 应不相等.
      */
     public function testEmptyStringVsNullNotEqual()
     {
@@ -432,7 +432,7 @@ class IsEqualAttributesTest extends TestCase
     // ===================== JSON / 数组类型 =====================
 
     /**
-     * 相同 JSON 字符串应相等
+     * 相同 JSON 字符串应相等.
      */
     public function testSameJsonStringsEqual()
     {
@@ -448,7 +448,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 不同 JSON 字符串应不相等
+     * 不同 JSON 字符串应不相等.
      */
     public function testDifferentJsonStringsNotEqual()
     {
@@ -462,7 +462,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 相同数组应相等 (array 类型属性值)
+     * 相同数组应相等 (array 类型属性值).
      */
     public function testSameArraysEqual()
     {
@@ -478,7 +478,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 不同数组应不相等
+     * 不同数组应不相等.
      */
     public function testDifferentArraysNotEqual()
     {
@@ -494,7 +494,7 @@ class IsEqualAttributesTest extends TestCase
     // ===================== Boolean 类型 =====================
 
     /**
-     * true vs 1: 非数值的 bool 比较不应误判
+     * true vs 1: 非数值的 bool 比较不应误判.
      */
     public function testBoolVsIntNotMixed()
     {
@@ -508,7 +508,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * true vs false 应不相等
+     * true vs false 应不相等.
      */
     public function testDifferentBoolNotEqual()
     {
@@ -524,7 +524,7 @@ class IsEqualAttributesTest extends TestCase
     // ===================== DB 实际读写场景 =====================
 
     /**
-     * 从 DB 加载的两个相同记录应 equal
+     * 从 DB 加载的两个相同记录应 equal.
      */
     public function testTwoDbLoadsEqual()
     {
@@ -537,7 +537,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * DB 加载 vs 缓存加载 (经过 resetRowCache) 应 equal
+     * DB 加载 vs 缓存加载 (经过 resetRowCache) 应 equal.
      */
     public function testDbVsCacheLoadEqual()
     {
@@ -555,7 +555,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * DB 修改后, DB 记录与旧缓存应 not equal
+     * DB 修改后, DB 记录与旧缓存应 not equal.
      */
     public function testDbModifiedVsOldCacheNotEqual()
     {
@@ -578,14 +578,14 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 包含时间戳的记录 DB vs 缓存应 equal
+     * 包含时间戳的记录 DB vs 缓存应 equal.
      */
     public function testTimestampFieldsDbVsCache()
     {
         $model = EqualTestModel::create([
-            'name' => 'Alice',
+            'name'  => 'Alice',
             'email' => 'alice@test.com',
-            'age' => 25,
+            'age'   => 25,
         ]);
 
         // 确保 created_at/updated_at 有值
@@ -602,15 +602,15 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 包含 null 字段的记录 DB vs 缓存应 equal
+     * 包含 null 字段的记录 DB vs 缓存应 equal.
      */
     public function testNullableFieldsDbVsCache()
     {
         $model = EqualTestModel::create([
-            'name' => 'Alice',
-            'email' => 'alice@test.com',
+            'name'      => 'Alice',
+            'email'     => 'alice@test.com',
             'json_data' => null,
-            'tags' => null,
+            'tags'      => null,
         ]);
 
         $dbModel = EqualTestModel::noCacheQuery()->find($model->id);
@@ -623,13 +623,13 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 含 JSON 字符串的记录 DB vs 缓存应 equal
+     * 含 JSON 字符串的记录 DB vs 缓存应 equal.
      */
     public function testJsonStringFieldDbVsCache()
     {
         $model = EqualTestModel::create([
-            'name' => 'Alice',
-            'email' => 'alice@test.com',
+            'name'      => 'Alice',
+            'email'     => 'alice@test.com',
             'json_data' => '{"role":"admin","permissions":["read","write"]}',
         ]);
 
@@ -643,15 +643,15 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 多条记录逐一比较, 全部应 equal
+     * 多条记录逐一比较, 全部应 equal.
      */
     public function testBatchDbVsCacheEqual()
     {
         for ($i = 1; $i <= 5; $i++) {
             EqualTestModel::create([
-                'name' => "User{$i}",
+                'name'  => "User{$i}",
                 'email' => "user{$i}@test.com",
-                'age' => 20 + $i,
+                'age'   => 20 + $i,
                 'price' => 10.50 + $i,
             ]);
         }
@@ -671,7 +671,7 @@ class IsEqualAttributesTest extends TestCase
     // ===================== isEqualAttributeValue 边界 =====================
 
     /**
-     * int vs string 的宽松匹配: PDO 返回 "1" vs 代码赋值 1
+     * int vs string 的宽松匹配: PDO 返回 "1" vs 代码赋值 1.
      */
     public function testIntVsStringLooseMatch()
     {
@@ -685,7 +685,7 @@ class IsEqualAttributesTest extends TestCase
     }
 
     /**
-     * 非数值的 string vs int 不应误判为相等
+     * 非数值的 string vs int 不应误判为相等.
      */
     public function testStringVsIntWithNonNumericNotEqual()
     {

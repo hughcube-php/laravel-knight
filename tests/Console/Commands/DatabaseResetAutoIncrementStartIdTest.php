@@ -4,11 +4,9 @@ namespace HughCube\Laravel\Knight\Tests\Console\Commands;
 
 use HughCube\Laravel\Knight\Console\Commands\DatabaseResetAutoIncrementStartId;
 use HughCube\Laravel\Knight\Tests\TestCase;
+use Illuminate\Console\OutputStyle;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use ReflectionClass;
-use Illuminate\Console\OutputStyle;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 
@@ -54,7 +52,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
         /** @var Connection $connection */
         $connection = DB::connection('mysql');
 
-        $tableName = 'test_auto_increment_' . uniqid();
+        $tableName = 'test_auto_increment_'.uniqid();
 
         $connection->statement("
             CREATE TABLE `{$tableName}` (
@@ -80,7 +78,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
         /** @var Connection $connection */
         $connection = DB::connection('pgsql');
 
-        $tableName = 'test_auto_increment_' . uniqid();
+        $tableName = 'test_auto_increment_'.uniqid();
 
         $connection->statement("
             CREATE TABLE \"{$tableName}\" (
@@ -106,7 +104,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
         /** @var Connection $connection */
         $connection = DB::connection('mysql');
 
-        $tableName = 'test_auto_increment_' . uniqid();
+        $tableName = 'test_auto_increment_'.uniqid();
 
         $connection->statement("
             CREATE TABLE `{$tableName}` (
@@ -134,7 +132,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
         /** @var Connection $connection */
         $connection = DB::connection('pgsql');
 
-        $tableName = 'test_auto_increment_' . uniqid();
+        $tableName = 'test_auto_increment_'.uniqid();
 
         $connection->statement("
             CREATE TABLE \"{$tableName}\" (
@@ -162,7 +160,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
         /** @var Connection $connection */
         $connection = DB::connection('mysql');
 
-        $tableName = 'test_auto_increment_' . uniqid();
+        $tableName = 'test_auto_increment_'.uniqid();
 
         $connection->statement("
             CREATE TABLE `{$tableName}` (
@@ -188,7 +186,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
         /** @var Connection $connection */
         $connection = DB::connection('mysql');
 
-        $tableName = 'test_auto_increment_' . uniqid();
+        $tableName = 'test_auto_increment_'.uniqid();
 
         $connection->statement("
             CREATE TABLE `{$tableName}` (
@@ -217,7 +215,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
         /** @var Connection $connection */
         $connection = DB::connection('pgsql');
 
-        $tableName = 'test_auto_increment_' . uniqid();
+        $tableName = 'test_auto_increment_'.uniqid();
 
         $connection->statement("
             CREATE TABLE \"{$tableName}\" (
@@ -246,7 +244,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
         /** @var Connection $connection */
         $connection = DB::connection('pgsql');
 
-        $tableName = 'test_auto_increment_' . uniqid();
+        $tableName = 'test_auto_increment_'.uniqid();
 
         $connection->statement("
             CREATE TABLE \"{$tableName}\" (
@@ -273,7 +271,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
         /** @var Connection $connection */
         $connection = DB::connection('mysql');
 
-        $tableName = 'test_auto_increment_' . uniqid();
+        $tableName = 'test_auto_increment_'.uniqid();
 
         $connection->statement("
             CREATE TABLE `{$tableName}` (
@@ -306,7 +304,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
         /** @var Connection $connection */
         $connection = DB::connection('mysql');
 
-        $tableName = 'test_auto_increment_' . uniqid();
+        $tableName = 'test_auto_increment_'.uniqid();
 
         $connection->statement("
             CREATE TABLE `{$tableName}` (
@@ -352,7 +350,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
         /** @var Connection $connection */
         $connection = DB::connection('mysql');
 
-        $tableName = 'test_no_pk_' . uniqid();
+        $tableName = 'test_no_pk_'.uniqid();
 
         $connection->statement("
             CREATE TABLE `{$tableName}` (
@@ -375,7 +373,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
     {
         $this->skipIfMysqlNotConfigured();
 
-        $tableName = 'test_integration_' . uniqid();
+        $tableName = 'test_integration_'.uniqid();
 
         /** @var Connection $connection */
         $connection = DB::connection('mysql');
@@ -392,10 +390,10 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
 
             $this->artisan('database:reset-auto-increment-start-id', [
                 '--connection' => 'mysql',
-                '--table' => $tableName,
-                '--min' => 5000,
-                '--offset' => 100,
-                '--force' => true,
+                '--table'      => $tableName,
+                '--min'        => 5000,
+                '--offset'     => 100,
+                '--force'      => true,
             ]);
 
             $connection->insert("INSERT INTO `{$tableName}` (`name`) VALUES ('test3')");
@@ -411,7 +409,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
     {
         $this->skipIfPgsqlNotConfigured();
 
-        $tableName = 'test_integration_' . uniqid();
+        $tableName = 'test_integration_'.uniqid();
 
         /** @var Connection $connection */
         $connection = DB::connection('pgsql');
@@ -428,10 +426,10 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
 
             $this->artisan('database:reset-auto-increment-start-id', [
                 '--connection' => 'pgsql',
-                '--table' => $tableName,
-                '--min' => 5000,
-                '--offset' => 100,
-                '--force' => true,
+                '--table'      => $tableName,
+                '--min'        => 5000,
+                '--offset'     => 100,
+                '--force'      => true,
             ]);
 
             $connection->insert("INSERT INTO \"{$tableName}\" (\"name\") VALUES ('test3')");
@@ -447,7 +445,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
     {
         $this->skipIfMysqlNotConfigured();
 
-        $tableName = 'test_high_max_' . uniqid();
+        $tableName = 'test_high_max_'.uniqid();
 
         /** @var Connection $connection */
         $connection = DB::connection('mysql');
@@ -464,10 +462,10 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
 
             $this->artisan('database:reset-auto-increment-start-id', [
                 '--connection' => 'mysql',
-                '--table' => $tableName,
-                '--min' => 1000,
-                '--offset' => 500,
-                '--force' => true,
+                '--table'      => $tableName,
+                '--min'        => 1000,
+                '--offset'     => 500,
+                '--force'      => true,
             ]);
 
             $connection->insert("INSERT INTO `{$tableName}` (`name`) VALUES ('test2')");
@@ -483,7 +481,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
     {
         $this->artisan('database:reset-auto-increment-start-id', [
             '--connection' => 'sqlite',
-            '--force' => true,
+            '--force'      => true,
         ])->assertExitCode(0);
     }
 
@@ -495,6 +493,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
             public function exec(string $sql)
             {
                 $this->queries[] = $sql;
+
                 return 0;
             }
         };
@@ -512,8 +511,8 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
 
         $this->artisan('database:reset-auto-increment-start-id', [
             '--connection' => 'mysql',
-            '--database' => 'local_test',
-            '--force' => true,
+            '--database'   => 'local_test',
+            '--force'      => true,
         ])->assertExitCode(0);
 
         $this->assertContains('use `local_test`;', $pdo->queries);
@@ -535,8 +534,8 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
 
         $this->artisan('database:reset-auto-increment-start-id', [
             '--connection' => 'mysql',
-            '--table' => 'not_exists',
-            '--force' => true,
+            '--table'      => 'not_exists',
+            '--force'      => true,
         ])->assertExitCode(0);
     }
 
@@ -557,7 +556,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
 
     public function testProcessTableReturnsWhenPrimaryKeyMissing(): void
     {
-        $command = new class extends DatabaseResetAutoIncrementStartId {
+        $command = new class() extends DatabaseResetAutoIncrementStartId {
             public bool $setAutoIncrementCalled = false;
 
             protected function getPrimaryKeyColumn(Connection $connection, $driver, $table)
@@ -584,7 +583,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
 
     public function testProcessTableSkipsWhenNotForcedAndNotConfirmed(): void
     {
-        $command = new class extends DatabaseResetAutoIncrementStartId {
+        $command = new class() extends DatabaseResetAutoIncrementStartId {
             public bool $setAutoIncrementCalled = false;
 
             protected function getPrimaryKeyColumn(Connection $connection, $driver, $table)
@@ -621,7 +620,7 @@ class DatabaseResetAutoIncrementStartIdTest extends TestCase
 
     public function testSetAutoIncrementForPgsqlReturnsWhenNoSequenceFound(): void
     {
-        $command = new class extends DatabaseResetAutoIncrementStartId {
+        $command = new class() extends DatabaseResetAutoIncrementStartId {
             protected function getSequenceName(Connection $connection, $table, $column)
             {
                 return null;

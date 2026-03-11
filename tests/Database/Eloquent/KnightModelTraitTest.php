@@ -3,9 +3,9 @@
 namespace HughCube\Laravel\Knight\Tests\Database\Eloquent;
 
 use HughCube\Laravel\Knight\Database\Eloquent\Builder as KnightBuilder;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use HughCube\Laravel\Knight\Database\Eloquent\Traits\KnightModelTrait;
 use HughCube\Laravel\Knight\Tests\TestCase;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as EloquentModel;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

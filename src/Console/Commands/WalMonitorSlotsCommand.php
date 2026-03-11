@@ -30,11 +30,13 @@ class WalMonitorSlotsCommand extends Command
             );
             $this->error($message);
             Log::error($message);
+
             return;
         }
 
         if (empty($slots)) {
             $this->info('No replication slots found.');
+
             return;
         }
 
@@ -58,8 +60,8 @@ class WalMonitorSlotsCommand extends Command
 
             $detail = sprintf(
                 'slot_type: %s, plugin: %s, database: %s, active: %s,'
-                . ' active_pid: %s, restart_lsn: %s,'
-                . ' confirmed_flush_lsn: %s, wal_status: %s',
+                .' active_pid: %s, restart_lsn: %s,'
+                .' confirmed_flush_lsn: %s, wal_status: %s',
                 $slotType,
                 $plugin,
                 $database,
@@ -102,7 +104,7 @@ class WalMonitorSlotsCommand extends Command
         $connection = $this->getConnection();
 
         return $connection->select(
-            "SELECT
+            'SELECT
                 slot_name,
                 plugin,
                 slot_type,
@@ -114,7 +116,7 @@ class WalMonitorSlotsCommand extends Command
                 wal_status,
                 pg_wal_lsn_diff(pg_current_wal_lsn(), restart_lsn) AS retained_bytes
             FROM pg_replication_slots
-            WHERE restart_lsn IS NOT NULL"
+            WHERE restart_lsn IS NOT NULL'
         );
     }
 
@@ -124,6 +126,7 @@ class WalMonitorSlotsCommand extends Command
     protected function getConnection()
     {
         $name = $this->option('connection');
+
         return app('db')->connection($name ?: null);
     }
 }

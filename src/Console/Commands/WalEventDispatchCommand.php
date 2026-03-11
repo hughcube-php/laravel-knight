@@ -61,7 +61,7 @@ class WalEventDispatchCommand extends Command
             $interval,
             $batch,
             $memoryLimit,
-            ($maxErrors > 0 ? $maxErrors : 'unlimited'),
+            $maxErrors > 0 ? $maxErrors : 'unlimited',
             count($handlers),
             $handlerCount,
             count($partitionMap)
@@ -88,6 +88,7 @@ class WalEventDispatchCommand extends Command
                 $this->error(sprintf("Poll error (streak %d, backoff %ds): %s\n%s", $this->errorStreak, $backoff, $e->getMessage(), $e->getTraceAsString()));
                 $this->getExceptionHandler()->report($e);
                 $this->reconnectDatabase();
+
                 try {
                     $this->ensureSlotExists($slot);
                 } catch (Throwable $re) {
@@ -152,7 +153,7 @@ class WalEventDispatchCommand extends Command
                 $pathname = str_replace('\\', '/', $file->getPathname());
                 $baseDir = str_replace('\\', '/', $dir);
                 $relativePath = substr($pathname, strlen($baseDir) + 1);
-                $className = $namespace . str_replace('/', '\\', substr($relativePath, 0, -4));
+                $className = $namespace.str_replace('/', '\\', substr($relativePath, 0, -4));
 
                 if (!class_exists($className)) {
                     continue;
@@ -207,7 +208,7 @@ class WalEventDispatchCommand extends Command
             }
 
             $absDir = base_path($dir);
-            $result[$absDir] = rtrim($ns, '\\') . '\\';
+            $result[$absDir] = rtrim($ns, '\\').'\\';
         }
 
         return $result;
@@ -233,9 +234,11 @@ class WalEventDispatchCommand extends Command
             foreach ($results as $row) {
                 $map[$row->child_table] = $row->parent_table;
             }
+
             return $map;
         } catch (Throwable $e) {
             $this->warn(sprintf('Failed to build partition map: %s', $e->getMessage()));
+
             return [];
         }
     }
@@ -257,6 +260,7 @@ class WalEventDispatchCommand extends Command
         if (in_array($mode, ['auto', 'advance', 'peek'], true)) {
             return $mode;
         }
+
         return 'advance';
     }
 
@@ -351,8 +355,9 @@ class WalEventDispatchCommand extends Command
      *
      * #6 支持任意类型主键（int/string/uuid），不再硬限 int
      *
-     * @param array $change
+     * @param array  $change
      * @param string $keyName
+     *
      * @return int|string|null
      */
     protected function extractPrimaryKey(array $change, string $keyName)
@@ -366,6 +371,7 @@ class WalEventDispatchCommand extends Command
             if (false !== $index && isset($keyValues[$index])) {
                 return $keyValues[$index];
             }
+
             return null;
         }
 
@@ -387,7 +393,8 @@ class WalEventDispatchCommand extends Command
         }
 
         $appName = config('app.name', 'app');
-        return strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $appName)) . '_wal_event';
+
+        return strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $appName)).'_wal_event';
     }
 
     /**
@@ -396,6 +403,7 @@ class WalEventDispatchCommand extends Command
     protected function getConnection()
     {
         $name = $this->option('connection');
+
         return app('db')->connection($name ?: null);
     }
 

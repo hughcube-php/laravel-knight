@@ -15,9 +15,9 @@ class IdempotencyGuardTest extends TestCase
 
         $app['config']->set('cache', [
             'default' => 'array',
-            'stores' => [
+            'stores'  => [
                 'array' => [
-                    'driver' => 'array',
+                    'driver'    => 'array',
                     'serialize' => true,
                 ],
             ],
@@ -33,6 +33,7 @@ class IdempotencyGuardTest extends TestCase
         $callCount = 0;
         $handler = function () use (&$callCount) {
             $callCount++;
+
             return new Response('created', 201);
         };
 
@@ -73,6 +74,7 @@ class IdempotencyGuardTest extends TestCase
         $callCount = 0;
         $handler = function () use (&$callCount) {
             $callCount++;
+
             return new Response('created', 201);
         };
 
@@ -91,6 +93,7 @@ class IdempotencyGuardTest extends TestCase
         $callCount = 0;
         $handler = function () use (&$callCount) {
             $callCount++;
+
             return new Response('updated', 200);
         };
 

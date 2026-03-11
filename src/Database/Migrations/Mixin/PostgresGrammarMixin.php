@@ -359,10 +359,10 @@ class PostgresGrammarMixin
             if ($maxValue !== null) {
                 $sql .= " MAXVALUE {$maxValue}";
             } else {
-                $sql .= " NO MAXVALUE";
+                $sql .= ' NO MAXVALUE';
             }
 
-            $sql .= $cycle ? " CYCLE" : " NO CYCLE";
+            $sql .= $cycle ? ' CYCLE' : ' NO CYCLE';
             $sql .= " CACHE {$cache}";
 
             return $sql;
@@ -380,9 +380,9 @@ class PostgresGrammarMixin
             $sequenceName = $command->sequenceName;
             $ifExists = $command->ifExists;
 
-            $sql = "DROP SEQUENCE";
+            $sql = 'DROP SEQUENCE';
             if ($ifExists) {
-                $sql .= " IF EXISTS";
+                $sql .= ' IF EXISTS';
             }
             $sql .= " \"{$sequenceName}\"";
 

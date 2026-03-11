@@ -25,6 +25,7 @@ class ActionWithMiddleware
 
     /**
      * @param array $middlewares
+     *
      * @return $this
      */
     public function setMiddlewares(array $middlewares)

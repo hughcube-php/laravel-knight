@@ -10,7 +10,7 @@ namespace HughCube\Laravel\Knight\Contracts\Support;
 interface GetKnightSortValue
 {
     /**
-     * 获取排序值字符串
+     * 获取排序值字符串.
      *
      * @return string
      */

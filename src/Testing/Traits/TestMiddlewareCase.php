@@ -2,20 +2,20 @@
 
 namespace HughCube\Laravel\Knight\Testing\Traits;
 
-use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 trait TestMiddlewareCase
 {
     /**
-     * 快速创建 Request
+     * 快速创建 Request.
      *
      * @param string $method
      * @param string $uri
-     * @param array $headers
-     * @param array $server
+     * @param array  $headers
+     * @param array  $server
      * @param string $content
+     *
      * @return Request
      */
     protected function createMiddlewareTestRequest(
@@ -35,10 +35,11 @@ trait TestMiddlewareCase
     }
 
     /**
-     * 断言中间件通过
+     * 断言中间件通过.
      *
-     * @param object $middleware
+     * @param object       $middleware
      * @param Request|null $request
+     *
      * @return Response
      */
     protected function assertMiddlewarePasses($middleware, ?Request $request = null): Response
@@ -55,11 +56,12 @@ trait TestMiddlewareCase
     }
 
     /**
-     * 断言中间件拒绝（抛出指定异常）
+     * 断言中间件拒绝（抛出指定异常）.
      *
-     * @param object $middleware
-     * @param string $exceptionClass
+     * @param object       $middleware
+     * @param string       $exceptionClass
      * @param Request|null $request
+     *
      * @return void
      */
     protected function assertMiddlewareBlocks($middleware, string $exceptionClass, ?Request $request = null): void

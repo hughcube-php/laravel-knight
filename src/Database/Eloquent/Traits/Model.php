@@ -42,16 +42,17 @@ trait Model
     protected static array $modelCacheKeyMakeCache = [];
 
     /**
-     * 缓存每个 Model 子类的 setKeysForSaveQueryFrom{TraitName} 方法列表
+     * 缓存每个 Model 子类的 setKeysForSaveQueryFrom{TraitName} 方法列表.
      *
      * @var array<string, string[]>
      */
     protected static array $setKeysForSaveQueryMethods = [];
 
     /**
-     * 统一入口：自动调用所有 trait 的 setKeysForSaveQueryFrom{TraitName}() 方法
+     * 统一入口：自动调用所有 trait 的 setKeysForSaveQueryFrom{TraitName}() 方法.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     protected function setKeysForSaveQuery($query)
@@ -60,8 +61,8 @@ trait Model
 
         if (!isset(static::$setKeysForSaveQueryMethods[static::class])) {
             static::$setKeysForSaveQueryMethods[static::class] = Collection::make(class_uses_recursive($this))
-                ->map(fn($trait) => 'setKeysForSaveQueryFrom' . class_basename($trait))
-                ->filter(fn($method) => method_exists($this, $method))
+                ->map(fn ($trait) => 'setKeysForSaveQueryFrom'.class_basename($trait))
+                ->filter(fn ($method) => method_exists($this, $method))
                 ->values()->all();
         }
 
@@ -74,7 +75,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|string|null $date
-     * @param string|null $format
+     * @param string|null                             $format
      *
      * @return Carbon|null
      */
@@ -96,7 +97,7 @@ trait Model
 
     /**
      * @param DateTimeInterface|int|float|null $dateTime
-     * @param string $format
+     * @param string                           $format
      *
      * @return string|null
      */
@@ -421,7 +422,7 @@ trait Model
             static::$modelCacheKeyMakeCache['classCacheKeyPrefix'][$class] = sprintf(
                 '%s-%s',
                 Str::snake(Str::afterLast($class, '\\')),
-                base_convert((string)abs(crc32($class)), 10, 36)
+                base_convert((string) abs(crc32($class)), 10, 36)
             );
         }
 
@@ -431,7 +432,7 @@ trait Model
             static::$modelCacheKeyMakeCache['classCacheKeyPrefix'][$class],
             $this->getCacheVersion(),
             md5($string = sprintf('%s:%s', $class, $cacheKey)),
-            base_convert((string)abs(crc32($string)), 10, 32)
+            base_convert((string) abs(crc32($string)), 10, 32)
         );
     }
 
@@ -627,6 +628,7 @@ trait Model
 
     /**
      * @param mixed $value
+     *
      * @return mixed
      */
     protected function convertEmptyStringsToNull($value)

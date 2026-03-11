@@ -2,7 +2,6 @@
 
 namespace HughCube\Laravel\Knight\Tests\Mixin\Http;
 
-use HughCube\Laravel\Knight\Mixin\Http\RequestMixin;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Http\Request;
 

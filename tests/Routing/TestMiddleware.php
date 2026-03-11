@@ -27,8 +27,9 @@ class TestMiddleware
     }
 
     /**
-     * @param mixed $action
+     * @param mixed   $action
      * @param Closure $next
+     *
      * @return mixed
      */
     public function handle($action, Closure $next)

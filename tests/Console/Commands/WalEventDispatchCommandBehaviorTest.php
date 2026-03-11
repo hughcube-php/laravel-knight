@@ -21,7 +21,7 @@ namespace HughCube\Laravel\Knight\Console\Commands {
         }
     }
 
-    if (!function_exists(__NAMESPACE__ . '\\extension_loaded')) {
+    if (!function_exists(__NAMESPACE__.'\\extension_loaded')) {
         function extension_loaded($name)
         {
             if ($name === 'pcntl' && WalEventDispatchCommandRuntimeState::$mockPcntl) {
@@ -32,27 +32,30 @@ namespace HughCube\Laravel\Knight\Console\Commands {
         }
     }
 
-    if (!function_exists(__NAMESPACE__ . '\\pcntl_async_signals')) {
+    if (!function_exists(__NAMESPACE__.'\\pcntl_async_signals')) {
         function pcntl_async_signals($enable)
         {
             WalEventDispatchCommandRuntimeState::$asyncSignalCalls[] = $enable;
+
             return true;
         }
     }
 
-    if (!function_exists(__NAMESPACE__ . '\\pcntl_signal')) {
+    if (!function_exists(__NAMESPACE__.'\\pcntl_signal')) {
         function pcntl_signal($signal, $handler)
         {
             WalEventDispatchCommandRuntimeState::$signalHandlers[$signal] = $handler;
+
             return true;
         }
     }
 
-    if (!function_exists(__NAMESPACE__ . '\\usleep')) {
+    if (!function_exists(__NAMESPACE__.'\\usleep')) {
         function usleep($microseconds)
         {
             if (WalEventDispatchCommandRuntimeState::$mockSleep) {
                 WalEventDispatchCommandRuntimeState::$sleepCalls[] = (int) $microseconds;
+
                 return 0;
             }
 
@@ -60,7 +63,7 @@ namespace HughCube\Laravel\Knight\Console\Commands {
         }
     }
 
-    if (!function_exists(__NAMESPACE__ . '\\class_exists')) {
+    if (!function_exists(__NAMESPACE__.'\\class_exists')) {
         function class_exists($class, $autoload = true)
         {
             if (array_key_exists($class, WalEventDispatchCommandRuntimeState::$classExistsOverrides)) {
@@ -73,210 +76,211 @@ namespace HughCube\Laravel\Knight\Console\Commands {
 }
 
 namespace HughCube\Laravel\Knight\Tests\Console\Commands {
+    use HughCube\Laravel\Knight\Console\Commands\WalEventDispatchCommand;
+    use HughCube\Laravel\Knight\Console\Commands\WalEventDispatchCommandRuntimeState;
+    use HughCube\Laravel\Knight\Contracts\Database\HasWalHandler;
+    use HughCube\Laravel\Knight\Events\WalChangesDetected;
+    use HughCube\Laravel\Knight\Tests\TestCase;
+    use Illuminate\Console\OutputStyle;
+    use Illuminate\Contracts\Debug\ExceptionHandler;
+    use Illuminate\Contracts\Events\Dispatcher as EventsDispatcher;
+    use Symfony\Component\Console\Input\ArrayInput;
+    use Symfony\Component\Console\Output\BufferedOutput;
 
-use HughCube\Laravel\Knight\Console\Commands\WalEventDispatchCommand;
-use HughCube\Laravel\Knight\Console\Commands\WalEventDispatchCommandRuntimeState;
-use HughCube\Laravel\Knight\Contracts\Database\HasWalHandler;
-use HughCube\Laravel\Knight\Events\WalChangesDetected;
-use HughCube\Laravel\Knight\Tests\TestCase;
-use Illuminate\Console\OutputStyle;
-use Illuminate\Contracts\Debug\ExceptionHandler;
-use Illuminate\Contracts\Events\Dispatcher as EventsDispatcher;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\BufferedOutput;
-
-class WalEventDispatchCommandBehaviorTest extends TestCase
-{
-    protected function setUp(): void
+    class WalEventDispatchCommandBehaviorTest extends TestCase
     {
-        parent::setUp();
-        WalEventDispatchCommandRuntimeState::reset();
-    }
+        protected function setUp(): void
+        {
+            parent::setUp();
+            WalEventDispatchCommandRuntimeState::reset();
+        }
 
-    protected function tearDown(): void
-    {
-        WalEventDispatchCommandRuntimeState::reset();
-        parent::tearDown();
-    }
+        protected function tearDown(): void
+        {
+            WalEventDispatchCommandRuntimeState::reset();
+            parent::tearDown();
+        }
 
-    public function testHandleRunsSingleIterationAndStops(): void
-    {
-        config(['app.name' => 'TestApp']);
+        public function testHandleRunsSingleIterationAndStops(): void
+        {
+            config(['app.name' => 'TestApp']);
 
-        $command = new TestableWalEventDispatchCommand();
-        $command->handlers = [
-            'users' => [
-                ['handler' => new DummyWalHandler('users', 'id'), 'keyName' => 'id'],
-                ['handler' => new DummyWalHandlerNoKey('users'), 'keyName' => 'id'],
-            ],
-        ];
-        $command->partitionMap = ['users_2024' => 'users'];
-        $command->pollReturn = false;
-        $command->exceptionHandler = $this->createMock(ExceptionHandler::class);
+            $command = new TestableWalEventDispatchCommand();
+            $command->handlers = [
+                'users' => [
+                    ['handler' => new DummyWalHandler('users', 'id'), 'keyName' => 'id'],
+                    ['handler' => new DummyWalHandlerNoKey('users'), 'keyName' => 'id'],
+                ],
+            ];
+            $command->partitionMap = ['users_2024' => 'users'];
+            $command->pollReturn = false;
+            $command->exceptionHandler = $this->createMock(ExceptionHandler::class);
 
-        WalEventDispatchCommandRuntimeState::$mockSleep = true;
+            WalEventDispatchCommandRuntimeState::$mockSleep = true;
 
-        $this->initializeCommand($command, [
-            '--interval' => '0.25',
-            '--batch' => '5',
-        ]);
+            $this->initializeCommand($command, [
+                '--interval' => '0.25',
+                '--batch'    => '5',
+            ]);
 
-        $command->handle();
+            $command->handle();
 
-        $this->assertSame('ensureSlotExists', $command->calls[0][0]);
-        $this->assertSame('testapp_wal_event', $command->calls[0][1]);
-        $this->assertSame('pollChanges', $command->calls[1][0]);
-        $this->assertFalse($command->reconnectCalled);
-        $this->assertContains(250000, WalEventDispatchCommandRuntimeState::$sleepCalls);
-    }
+            $this->assertSame('ensureSlotExists', $command->calls[0][0]);
+            $this->assertSame('testapp_wal_event', $command->calls[0][1]);
+            $this->assertSame('pollChanges', $command->calls[1][0]);
+            $this->assertFalse($command->reconnectCalled);
+            $this->assertContains(250000, WalEventDispatchCommandRuntimeState::$sleepCalls);
+        }
 
-    public function testHandlePollErrorReportsAndReconnectsWithBackoff(): void
-    {
-        $exceptionHandler = $this->createMock(ExceptionHandler::class);
-        $exceptionHandler->expects($this->once())->method('report');
+        public function testHandlePollErrorReportsAndReconnectsWithBackoff(): void
+        {
+            $exceptionHandler = $this->createMock(ExceptionHandler::class);
+            $exceptionHandler->expects($this->once())->method('report');
 
-        $command = new TestableWalEventDispatchCommand();
-        $command->handlers = [];
-        $command->pollThrowable = new \RuntimeException('poll failed');
-        $command->exceptionHandler = $exceptionHandler;
+            $command = new TestableWalEventDispatchCommand();
+            $command->handlers = [];
+            $command->pollThrowable = new \RuntimeException('poll failed');
+            $command->exceptionHandler = $exceptionHandler;
 
-        WalEventDispatchCommandRuntimeState::$mockSleep = true;
+            WalEventDispatchCommandRuntimeState::$mockSleep = true;
 
-        $this->initializeCommand($command, [
-            '--interval' => '0.1',
-            '--batch' => '10',
-        ]);
+            $this->initializeCommand($command, [
+                '--interval' => '0.1',
+                '--batch'    => '10',
+            ]);
 
-        $command->handle();
+            $command->handle();
 
-        $this->assertTrue($command->reconnectCalled);
-        $this->assertContains(1000000, WalEventDispatchCommandRuntimeState::$sleepCalls);
-        $this->assertSame(1, self::getProperty($command, 'errorStreak'));
+            $this->assertTrue($command->reconnectCalled);
+            $this->assertContains(1000000, WalEventDispatchCommandRuntimeState::$sleepCalls);
+            $this->assertSame(1, self::getProperty($command, 'errorStreak'));
 
-        $ensureSlotCalls = array_filter($command->calls, static function ($call) {
-            return $call[0] === 'ensureSlotExists';
-        });
-        $this->assertCount(2, $ensureSlotCalls, 'ensureSlotExists should be called at startup and in error recovery');
-    }
+            $ensureSlotCalls = array_filter($command->calls, static function ($call) {
+                return $call[0] === 'ensureSlotExists';
+            });
+            $this->assertCount(2, $ensureSlotCalls, 'ensureSlotExists should be called at startup and in error recovery');
+        }
 
-    public function testHandlePollErrorEnsureSlotExistsFailureDoesNotCrash(): void
-    {
-        $exceptionHandler = $this->createMock(ExceptionHandler::class);
-        $exceptionHandler->expects($this->once())->method('report');
+        public function testHandlePollErrorEnsureSlotExistsFailureDoesNotCrash(): void
+        {
+            $exceptionHandler = $this->createMock(ExceptionHandler::class);
+            $exceptionHandler->expects($this->once())->method('report');
 
-        $command = new TestableWalEnsureSlotFailsCommand();
-        $command->handlers = [];
-        $command->pollThrowable = new \RuntimeException('slot deleted');
-        $command->exceptionHandler = $exceptionHandler;
-        $command->ensureSlotException = new \RuntimeException('create slot failed');
+            $command = new TestableWalEnsureSlotFailsCommand();
+            $command->handlers = [];
+            $command->pollThrowable = new \RuntimeException('slot deleted');
+            $command->exceptionHandler = $exceptionHandler;
+            $command->ensureSlotException = new \RuntimeException('create slot failed');
 
-        WalEventDispatchCommandRuntimeState::$mockSleep = true;
+            WalEventDispatchCommandRuntimeState::$mockSleep = true;
 
-        $this->initializeCommand($command, [
-            '--interval' => '0.1',
-            '--batch' => '10',
-        ]);
+            $this->initializeCommand($command, [
+                '--interval' => '0.1',
+                '--batch'    => '10',
+            ]);
 
-        $command->handle();
+            $command->handle();
 
-        $this->assertTrue($command->reconnectCalled);
-        $this->assertContains(1000000, WalEventDispatchCommandRuntimeState::$sleepCalls);
-        $this->assertSame(1, self::getProperty($command, 'errorStreak'));
-        $this->assertTrue($command->ensureSlotCalledInErrorPath);
-    }
+            $this->assertTrue($command->reconnectCalled);
+            $this->assertContains(1000000, WalEventDispatchCommandRuntimeState::$sleepCalls);
+            $this->assertSame(1, self::getProperty($command, 'errorStreak'));
+            $this->assertTrue($command->ensureSlotCalledInErrorPath);
+        }
 
-    public function testHandleExitsWhenConsecutiveErrorsReachMaxErrors(): void
-    {
-        $exceptionHandler = $this->createMock(ExceptionHandler::class);
+        public function testHandleExitsWhenConsecutiveErrorsReachMaxErrors(): void
+        {
+            $exceptionHandler = $this->createMock(ExceptionHandler::class);
 
-        $command = new TestableWalMultiErrorCommand();
-        $command->handlers = [];
-        $command->pollThrowable = new \RuntimeException('persistent failure');
-        $command->exceptionHandler = $exceptionHandler;
+            $command = new TestableWalMultiErrorCommand();
+            $command->handlers = [];
+            $command->pollThrowable = new \RuntimeException('persistent failure');
+            $command->exceptionHandler = $exceptionHandler;
 
-        WalEventDispatchCommandRuntimeState::$mockSleep = true;
+            WalEventDispatchCommandRuntimeState::$mockSleep = true;
 
-        $this->initializeCommand($command, [
-            '--interval' => '0.1',
-            '--batch' => '10',
-            '--max-errors' => '3',
-        ]);
+            $this->initializeCommand($command, [
+                '--interval'   => '0.1',
+                '--batch'      => '10',
+                '--max-errors' => '3',
+            ]);
 
-        $command->handle();
+            $command->handle();
 
-        $this->assertSame(3, self::getProperty($command, 'errorStreak'));
+            $this->assertSame(3, self::getProperty($command, 'errorStreak'));
 
-        $pollCalls = array_filter($command->calls, static function ($call) {
-            return $call[0] === 'pollChanges';
-        });
-        $this->assertCount(3, $pollCalls);
-    }
+            $pollCalls = array_filter($command->calls, static function ($call) {
+                return $call[0] === 'pollChanges';
+            });
+            $this->assertCount(3, $pollCalls);
+        }
 
-    public function testHandleContinuesWhenErrorsRecoverBeforeMaxErrors(): void
-    {
-        $exceptionHandler = $this->createMock(ExceptionHandler::class);
+        public function testHandleContinuesWhenErrorsRecoverBeforeMaxErrors(): void
+        {
+            $exceptionHandler = $this->createMock(ExceptionHandler::class);
 
-        $command = new TestableWalMultiErrorCommand();
-        $command->handlers = [];
-        $command->failCount = 2;
-        $command->pollThrowable = new \RuntimeException('transient failure');
-        $command->exceptionHandler = $exceptionHandler;
+            $command = new TestableWalMultiErrorCommand();
+            $command->handlers = [];
+            $command->failCount = 2;
+            $command->pollThrowable = new \RuntimeException('transient failure');
+            $command->exceptionHandler = $exceptionHandler;
 
-        WalEventDispatchCommandRuntimeState::$mockSleep = true;
+            WalEventDispatchCommandRuntimeState::$mockSleep = true;
 
-        $this->initializeCommand($command, [
-            '--interval' => '0.1',
-            '--batch' => '10',
-            '--max-errors' => '5',
-        ]);
+            $this->initializeCommand($command, [
+                '--interval'   => '0.1',
+                '--batch'      => '10',
+                '--max-errors' => '5',
+            ]);
 
-        $command->handle();
+            $command->handle();
 
-        $this->assertSame(0, self::getProperty($command, 'errorStreak'));
+            $this->assertSame(0, self::getProperty($command, 'errorStreak'));
 
-        $pollCalls = array_filter($command->calls, static function ($call) {
-            return $call[0] === 'pollChanges';
-        });
-        $this->assertCount(3, $pollCalls);
-    }
+            $pollCalls = array_filter($command->calls, static function ($call) {
+                return $call[0] === 'pollChanges';
+            });
+            $this->assertCount(3, $pollCalls);
+        }
 
-    public function testHandleUnlimitedErrorsWhenMaxErrorsIsZero(): void
-    {
-        $exceptionHandler = $this->createMock(ExceptionHandler::class);
+        public function testHandleUnlimitedErrorsWhenMaxErrorsIsZero(): void
+        {
+            $exceptionHandler = $this->createMock(ExceptionHandler::class);
 
-        $command = new TestableWalMultiErrorCommand();
-        $command->handlers = [];
-        $command->failCount = 5;
-        $command->pollThrowable = new \RuntimeException('failure');
-        $command->exceptionHandler = $exceptionHandler;
+            $command = new TestableWalMultiErrorCommand();
+            $command->handlers = [];
+            $command->failCount = 5;
+            $command->pollThrowable = new \RuntimeException('failure');
+            $command->exceptionHandler = $exceptionHandler;
 
-        WalEventDispatchCommandRuntimeState::$mockSleep = true;
+            WalEventDispatchCommandRuntimeState::$mockSleep = true;
 
-        $this->initializeCommand($command, [
-            '--interval' => '0.1',
-            '--batch' => '10',
-            '--max-errors' => '0',
-        ]);
+            $this->initializeCommand($command, [
+                '--interval'   => '0.1',
+                '--batch'      => '10',
+                '--max-errors' => '0',
+            ]);
 
-        $command->handle();
+            $command->handle();
 
-        $this->assertSame(0, self::getProperty($command, 'errorStreak'));
+            $this->assertSame(0, self::getProperty($command, 'errorStreak'));
 
-        $pollCalls = array_filter($command->calls, static function ($call) {
-            return $call[0] === 'pollChanges';
-        });
-        $this->assertCount(6, $pollCalls);
-    }
+            $pollCalls = array_filter($command->calls, static function ($call) {
+                return $call[0] === 'pollChanges';
+            });
+            $this->assertCount(6, $pollCalls);
+        }
 
-    public function testDiscoverWalHandlersScansValidAndInvalidClasses(): void
-    {
-        $relativeDir = 'tests/.temp/wal_scan_' . md5((string) microtime(true));
-        $absoluteDir = base_path($relativeDir);
-        @mkdir($absoluteDir, 0777, true);
+        public function testDiscoverWalHandlersScansValidAndInvalidClasses(): void
+        {
+            $relativeDir = 'tests/.temp/wal_scan_'.md5((string) microtime(true));
+            $absoluteDir = base_path($relativeDir);
+            @mkdir($absoluteDir, 0777, true);
 
-        file_put_contents($absoluteDir . '/NoClass.php', "<?php\nnamespace TestWal;\n// no class\n");
-        file_put_contents($absoluteDir . '/PlainClass.php', "<?php\nnamespace TestWal;\nclass PlainClass {}\n");
-        file_put_contents($absoluteDir . '/AbstractWal.php', <<<'PHP'
+            file_put_contents($absoluteDir.'/NoClass.php', "<?php\nnamespace TestWal;\n// no class\n");
+            file_put_contents($absoluteDir.'/PlainClass.php', "<?php\nnamespace TestWal;\nclass PlainClass {}\n");
+            file_put_contents(
+                $absoluteDir.'/AbstractWal.php',
+                <<<'PHP'
 <?php
 namespace TestWal;
 abstract class AbstractWal implements \HughCube\Laravel\Knight\Contracts\Database\HasWalHandler
@@ -285,8 +289,10 @@ abstract class AbstractWal implements \HughCube\Laravel\Knight\Contracts\Databas
     public function onKnightModelChanged(): void {}
 }
 PHP
-        );
-        file_put_contents($absoluteDir . '/ValidWal.php', <<<'PHP'
+            );
+            file_put_contents(
+                $absoluteDir.'/ValidWal.php',
+                <<<'PHP'
 <?php
 namespace TestWal;
 class ValidWal implements \HughCube\Laravel\Knight\Contracts\Database\HasWalHandler
@@ -296,8 +302,10 @@ class ValidWal implements \HughCube\Laravel\Knight\Contracts\Database\HasWalHand
     public function onKnightModelChanged(): void {}
 }
 PHP
-        );
-        file_put_contents($absoluteDir . '/ValidWalDefaultKey.php', <<<'PHP'
+            );
+            file_put_contents(
+                $absoluteDir.'/ValidWalDefaultKey.php',
+                <<<'PHP'
 <?php
 namespace TestWal;
 class ValidWalDefaultKey implements \HughCube\Laravel\Knight\Contracts\Database\HasWalHandler
@@ -306,654 +314,666 @@ class ValidWalDefaultKey implements \HughCube\Laravel\Knight\Contracts\Database\
     public function onKnightModelChanged(): void {}
 }
 PHP
-        );
-        file_put_contents($absoluteDir . '/BrokenReflection.php', "<?php\nnamespace TestWal;\n// intentionally no class\n");
-        file_put_contents($absoluteDir . '/README.txt', 'ignore');
+            );
+            file_put_contents($absoluteDir.'/BrokenReflection.php', "<?php\nnamespace TestWal;\n// intentionally no class\n");
+            file_put_contents($absoluteDir.'/README.txt', 'ignore');
 
-        WalEventDispatchCommandRuntimeState::$classExistsOverrides['TestWal\\BrokenReflection'] = true;
+            WalEventDispatchCommandRuntimeState::$classExistsOverrides['TestWal\\BrokenReflection'] = true;
 
-        $loader = function ($class) use ($absoluteDir) {
-            $prefix = 'TestWal\\';
-            if (strpos($class, $prefix) !== 0) {
+            $loader = function ($class) use ($absoluteDir) {
+                $prefix = 'TestWal\\';
+                if (strpos($class, $prefix) !== 0) {
+                    return;
+                }
+
+                $relative = substr($class, strlen($prefix));
+                $path = $absoluteDir.'/'.str_replace('\\', '/', $relative).'.php';
+                if (is_file($path)) {
+                    require_once $path;
+                }
+            };
+            spl_autoload_register($loader);
+
+            try {
+                $command = new WalEventDispatchCommand();
+                $this->initializeCommand($command, [
+                    '--model-path' => [$relativeDir.':TestWal'],
+                ]);
+
+                $handlers = self::callMethod($command, 'discoverWalHandlers');
+
+                $this->assertArrayHasKey('orders', $handlers);
+                $this->assertCount(2, $handlers['orders']);
+
+                $keyNames = array_values(array_map(static function ($meta) {
+                    return $meta['keyName'];
+                }, $handlers['orders']));
+                sort($keyNames);
+                $this->assertSame(['id', 'uuid'], $keyNames);
+            } finally {
+                spl_autoload_unregister($loader);
+                $this->deleteDirectory($absoluteDir);
+            }
+        }
+
+        public function testBuildPartitionMapMapsReturnedRows(): void
+        {
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+            };
+            $command->connection = new class() {
+                public function select($query, array $bindings = [])
+                {
+                    return [
+                        (object) ['child_table' => 'orders_2024_01', 'parent_table' => 'orders'],
+                        (object) ['child_table' => 'orders_2024_02', 'parent_table' => 'orders'],
+                    ];
+                }
+            };
+
+            $partitionMap = self::callMethod($command, 'buildPartitionMap');
+
+            $this->assertSame([
+                'orders_2024_01' => 'orders',
+                'orders_2024_02' => 'orders',
+            ], $partitionMap);
+        }
+
+        public function testPollChangesSkipsInvalidRowsAndAdvancesSlot(): void
+        {
+            $dispatcher = $this->createMock(EventsDispatcher::class);
+            $dispatcher->expects($this->once())
+                ->method('dispatch')
+                ->with($this->callback(static function ($event) {
+                    return $event instanceof WalChangesDetected
+                        && $event->handler instanceof DummyWalHandler
+                        && $event->ids === [1];
+                }));
+
+            $rows = [
+                (object) ['lsn' => '0/1', 'data' => '{invalid-json'],
+                (object) ['lsn' => '0/2', 'data' => json_encode(['change' => []])],
+                (object) ['lsn' => '0/3', 'data' => json_encode(['change' => [
+                    ['kind' => 'update', 'columnnames' => ['id'], 'columnvalues' => [1]],
+                ]])],
+                (object) ['lsn' => '0/4', 'data' => json_encode(['change' => [
+                    ['kind' => 'update', 'table' => 'users', 'columnnames' => ['name'], 'columnvalues' => ['alice']],
+                ]])],
+                (object) ['lsn' => '0/5', 'data' => json_encode(['change' => [
+                    ['kind' => 'update', 'table' => 'users', 'columnnames' => ['id'], 'columnvalues' => [1]],
+                ]])],
+                (object) ['lsn' => '0/6', 'data' => json_encode(['change' => [
+                    ['kind' => 'update', 'table' => 'users', 'columnnames' => ['id'], 'columnvalues' => [1]],
+                ]])],
+            ];
+
+            $connection = new class($rows) {
+                public array $rows;
+                public array $statements = [];
+
+                public function __construct(array $rows)
+                {
+                    $this->rows = $rows;
+                }
+
+                public function select($query, array $bindings = [])
+                {
+                    return $this->rows;
+                }
+
+                public function statement($query, array $bindings = [])
+                {
+                    $this->statements[] = ['query' => $query, 'bindings' => $bindings];
+
+                    return true;
+                }
+            };
+
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+                public ?EventsDispatcher $dispatcher = null;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+
+                protected function getEventsDispatcher(): EventsDispatcher
+                {
+                    if ($this->dispatcher !== null) {
+                        return $this->dispatcher;
+                    }
+
+                    return parent::getEventsDispatcher();
+                }
+            };
+
+            $this->initializeCommand($command, ['--mode' => 'advance']);
+            $command->connection = $connection;
+            $command->dispatcher = $dispatcher;
+
+            $handlers = [
+                'users' => [
+                    ['handler' => new DummyWalHandler('users', 'id'), 'keyName' => 'id'],
+                ],
+            ];
+
+            $result = self::callMethod($command, 'pollChanges', ['slot_test', $handlers, 1000, []]);
+
+            $this->assertTrue($result);
+            $this->assertCount(1, $connection->statements);
+            $this->assertStringContainsString('pg_replication_slot_advance', $connection->statements[0]['query']);
+            $this->assertSame(['slot_test', '0/6'], $connection->statements[0]['bindings']);
+        }
+
+        public function testPollChangesInAutoModeUsesGetChangesAndDoesNotAdvanceSlot(): void
+        {
+            $dispatcher = $this->createMock(EventsDispatcher::class);
+            $dispatcher->expects($this->once())
+                ->method('dispatch')
+                ->with($this->callback(static function ($event) {
+                    return $event instanceof WalChangesDetected
+                        && $event->handler instanceof DummyWalHandler
+                        && $event->ids === [10];
+                }));
+
+            $rows = [
+                (object) ['lsn' => '0/A', 'data' => json_encode(['change' => [
+                    ['kind' => 'update', 'table' => 'users', 'columnnames' => ['id'], 'columnvalues' => [10]],
+                ]])],
+            ];
+
+            $connection = new class($rows) {
+                public array $rows;
+                public array $selects = [];
+                public array $statements = [];
+
+                public function __construct(array $rows)
+                {
+                    $this->rows = $rows;
+                }
+
+                public function select($query, array $bindings = [])
+                {
+                    $this->selects[] = ['query' => $query, 'bindings' => $bindings];
+
+                    return $this->rows;
+                }
+
+                public function statement($query, array $bindings = [])
+                {
+                    $this->statements[] = ['query' => $query, 'bindings' => $bindings];
+
+                    return true;
+                }
+            };
+
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+                public ?EventsDispatcher $dispatcher = null;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+
+                protected function getEventsDispatcher(): EventsDispatcher
+                {
+                    if ($this->dispatcher !== null) {
+                        return $this->dispatcher;
+                    }
+
+                    return parent::getEventsDispatcher();
+                }
+            };
+
+            $this->initializeCommand($command, ['--mode' => 'auto']);
+            $command->connection = $connection;
+            $command->dispatcher = $dispatcher;
+
+            $handlers = [
+                'users' => [
+                    ['handler' => new DummyWalHandler('users', 'id'), 'keyName' => 'id'],
+                ],
+            ];
+
+            $result = self::callMethod($command, 'pollChanges', ['slot_test_auto', $handlers, 1000, []]);
+
+            $this->assertTrue($result);
+            $this->assertCount(1, $connection->selects);
+            $this->assertStringContainsString('pg_logical_slot_get_changes', $connection->selects[0]['query']);
+            $this->assertEmpty($connection->statements);
+        }
+
+        public function testPollChangesInPeekModeDoesNotAdvanceSlot(): void
+        {
+            $dispatcher = $this->createMock(EventsDispatcher::class);
+            $dispatcher->expects($this->once())
+                ->method('dispatch')
+                ->with($this->callback(static function ($event) {
+                    return $event instanceof WalChangesDetected
+                        && $event->handler instanceof DummyWalHandler
+                        && $event->ids === [11];
+                }));
+
+            $rows = [
+                (object) ['lsn' => '0/B', 'data' => json_encode(['change' => [
+                    ['kind' => 'insert', 'table' => 'users', 'columnnames' => ['id'], 'columnvalues' => [11]],
+                ]])],
+            ];
+
+            $connection = new class($rows) {
+                public array $rows;
+                public array $selects = [];
+                public array $statements = [];
+
+                public function __construct(array $rows)
+                {
+                    $this->rows = $rows;
+                }
+
+                public function select($query, array $bindings = [])
+                {
+                    $this->selects[] = ['query' => $query, 'bindings' => $bindings];
+
+                    return $this->rows;
+                }
+
+                public function statement($query, array $bindings = [])
+                {
+                    $this->statements[] = ['query' => $query, 'bindings' => $bindings];
+
+                    return true;
+                }
+            };
+
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+                public ?EventsDispatcher $dispatcher = null;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+
+                protected function getEventsDispatcher(): EventsDispatcher
+                {
+                    if ($this->dispatcher !== null) {
+                        return $this->dispatcher;
+                    }
+
+                    return parent::getEventsDispatcher();
+                }
+            };
+
+            $this->initializeCommand($command, ['--mode' => 'peek']);
+            $command->connection = $connection;
+            $command->dispatcher = $dispatcher;
+
+            $handlers = [
+                'users' => [
+                    ['handler' => new DummyWalHandler('users', 'id'), 'keyName' => 'id'],
+                ],
+            ];
+
+            $result = self::callMethod($command, 'pollChanges', ['slot_test_peek', $handlers, 1000, []]);
+
+            $this->assertTrue($result);
+            $this->assertCount(1, $connection->selects);
+            $this->assertStringContainsString('pg_logical_slot_peek_changes', $connection->selects[0]['query']);
+            $this->assertEmpty($connection->statements);
+        }
+
+        public function testPollChangesAdvanceModeIgnoresSlotAdvanceFailure(): void
+        {
+            $dispatcher = $this->createMock(EventsDispatcher::class);
+            $dispatcher->expects($this->once())
+                ->method('dispatch')
+                ->with($this->callback(static function ($event) {
+                    return $event instanceof WalChangesDetected
+                        && $event->handler instanceof DummyWalHandler
+                        && $event->ids === [12];
+                }));
+
+            $rows = [
+                (object) ['lsn' => '0/C', 'data' => json_encode(['change' => [
+                    ['kind' => 'insert', 'table' => 'users', 'columnnames' => ['id'], 'columnvalues' => [12]],
+                ]])],
+            ];
+
+            $connection = new class($rows) {
+                public array $rows;
+                public int $statementCalls = 0;
+
+                public function __construct(array $rows)
+                {
+                    $this->rows = $rows;
+                }
+
+                public function select($query, array $bindings = [])
+                {
+                    return $this->rows;
+                }
+
+                public function statement($query, array $bindings = [])
+                {
+                    $this->statementCalls++;
+
+                    throw new \RuntimeException('advance failed');
+                }
+            };
+
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+                public ?EventsDispatcher $dispatcher = null;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+
+                protected function getEventsDispatcher(): EventsDispatcher
+                {
+                    if ($this->dispatcher !== null) {
+                        return $this->dispatcher;
+                    }
+
+                    return parent::getEventsDispatcher();
+                }
+            };
+
+            $this->initializeCommand($command, ['--mode' => 'advance']);
+            $command->connection = $connection;
+            $command->dispatcher = $dispatcher;
+
+            $handlers = [
+                'users' => [
+                    ['handler' => new DummyWalHandler('users', 'id'), 'keyName' => 'id'],
+                ],
+            ];
+
+            $result = self::callMethod($command, 'pollChanges', ['slot_test_advance', $handlers, 1000, []]);
+
+            $this->assertTrue($result);
+            $this->assertSame(1, $connection->statementCalls);
+        }
+
+        public function testRegisterSignalHandlersUsesPcntlWhenAvailable(): void
+        {
+            if (!defined('SIGTERM')) {
+                define('SIGTERM', 15);
+            }
+            if (!defined('SIGINT')) {
+                define('SIGINT', 2);
+            }
+
+            WalEventDispatchCommandRuntimeState::$mockPcntl = true;
+
+            $command = new WalEventDispatchCommand();
+            $this->initializeCommand($command);
+
+            self::setProperty($command, 'shouldRun', true);
+            self::callMethod($command, 'registerSignalHandlers');
+
+            $this->assertNotEmpty(WalEventDispatchCommandRuntimeState::$asyncSignalCalls);
+            $this->assertArrayHasKey(SIGTERM, WalEventDispatchCommandRuntimeState::$signalHandlers);
+            $this->assertArrayHasKey(SIGINT, WalEventDispatchCommandRuntimeState::$signalHandlers);
+
+            $handler = WalEventDispatchCommandRuntimeState::$signalHandlers[SIGTERM];
+            $this->assertIsCallable($handler);
+            $handler();
+
+            $this->assertFalse(self::getProperty($command, 'shouldRun'));
+
+            self::setProperty($command, 'shouldRun', true);
+            $interruptHandler = WalEventDispatchCommandRuntimeState::$signalHandlers[SIGINT];
+            $this->assertIsCallable($interruptHandler);
+            $interruptHandler();
+
+            $this->assertFalse(self::getProperty($command, 'shouldRun'));
+        }
+
+        public function testReconnectDatabaseHandlesReconnectFailure(): void
+        {
+            $command = new class() extends WalEventDispatchCommand {
+                protected function getConnection()
+                {
+                    return new class() {
+                        public function reconnect(): void
+                        {
+                            throw new \RuntimeException('reconnect failed');
+                        }
+                    };
+                }
+            };
+
+            $this->initializeCommand($command);
+
+            self::callMethod($command, 'reconnectDatabase');
+            $this->assertTrue(true);
+        }
+
+        private function initializeCommand(WalEventDispatchCommand $command, array $options = []): WalEventDispatchCommand
+        {
+            $command->setLaravel($this->app);
+
+            $input = new ArrayInput($options, $command->getDefinition());
+            self::setProperty($command, 'input', $input);
+
+            $bufferedOutput = new BufferedOutput();
+            self::setProperty($command, 'output', new OutputStyle($input, $bufferedOutput));
+
+            return $command;
+        }
+
+        private function deleteDirectory(string $dir): void
+        {
+            if (!is_dir($dir)) {
                 return;
             }
 
-            $relative = substr($class, strlen($prefix));
-            $path = $absoluteDir . '/' . str_replace('\\', '/', $relative) . '.php';
-            if (is_file($path)) {
-                require_once $path;
-            }
-        };
-        spl_autoload_register($loader);
+            $items = scandir($dir);
+            if (!is_array($items)) {
+                @rmdir($dir);
 
-        try {
-            $command = new WalEventDispatchCommand();
-            $this->initializeCommand($command, [
-                '--model-path' => [$relativeDir . ':TestWal'],
-            ]);
-
-            $handlers = self::callMethod($command, 'discoverWalHandlers');
-
-            $this->assertArrayHasKey('orders', $handlers);
-            $this->assertCount(2, $handlers['orders']);
-
-            $keyNames = array_values(array_map(static function ($meta) {
-                return $meta['keyName'];
-            }, $handlers['orders']));
-            sort($keyNames);
-            $this->assertSame(['id', 'uuid'], $keyNames);
-        } finally {
-            spl_autoload_unregister($loader);
-            $this->deleteDirectory($absoluteDir);
-        }
-    }
-
-    public function testBuildPartitionMapMapsReturnedRows(): void
-    {
-        $command = new class extends WalEventDispatchCommand {
-            public $connection;
-
-            protected function getConnection()
-            {
-                return $this->connection;
-            }
-        };
-        $command->connection = new class() {
-            public function select($query, array $bindings = [])
-            {
-                return [
-                    (object) ['child_table' => 'orders_2024_01', 'parent_table' => 'orders'],
-                    (object) ['child_table' => 'orders_2024_02', 'parent_table' => 'orders'],
-                ];
-            }
-        };
-
-        $partitionMap = self::callMethod($command, 'buildPartitionMap');
-
-        $this->assertSame([
-            'orders_2024_01' => 'orders',
-            'orders_2024_02' => 'orders',
-        ], $partitionMap);
-    }
-
-    public function testPollChangesSkipsInvalidRowsAndAdvancesSlot(): void
-    {
-        $dispatcher = $this->createMock(EventsDispatcher::class);
-        $dispatcher->expects($this->once())
-            ->method('dispatch')
-            ->with($this->callback(static function ($event) {
-                return $event instanceof WalChangesDetected
-                    && $event->handler instanceof DummyWalHandler
-                    && $event->ids === [1];
-            }));
-
-        $rows = [
-            (object) ['lsn' => '0/1', 'data' => '{invalid-json'],
-            (object) ['lsn' => '0/2', 'data' => json_encode(['change' => []])],
-            (object) ['lsn' => '0/3', 'data' => json_encode(['change' => [
-                ['kind' => 'update', 'columnnames' => ['id'], 'columnvalues' => [1]],
-            ]])],
-            (object) ['lsn' => '0/4', 'data' => json_encode(['change' => [
-                ['kind' => 'update', 'table' => 'users', 'columnnames' => ['name'], 'columnvalues' => ['alice']],
-            ]])],
-            (object) ['lsn' => '0/5', 'data' => json_encode(['change' => [
-                ['kind' => 'update', 'table' => 'users', 'columnnames' => ['id'], 'columnvalues' => [1]],
-            ]])],
-            (object) ['lsn' => '0/6', 'data' => json_encode(['change' => [
-                ['kind' => 'update', 'table' => 'users', 'columnnames' => ['id'], 'columnvalues' => [1]],
-            ]])],
-        ];
-
-        $connection = new class($rows) {
-            public array $rows;
-            public array $statements = [];
-
-            public function __construct(array $rows)
-            {
-                $this->rows = $rows;
+                return;
             }
 
-            public function select($query, array $bindings = [])
-            {
-                return $this->rows;
-            }
-
-            public function statement($query, array $bindings = [])
-            {
-                $this->statements[] = ['query' => $query, 'bindings' => $bindings];
-                return true;
-            }
-        };
-
-        $command = new class extends WalEventDispatchCommand {
-            public $connection;
-            public ?EventsDispatcher $dispatcher = null;
-
-            protected function getConnection()
-            {
-                return $this->connection;
-            }
-
-            protected function getEventsDispatcher(): EventsDispatcher
-            {
-                if ($this->dispatcher !== null) {
-                    return $this->dispatcher;
+            foreach ($items as $item) {
+                if ($item === '.' || $item === '..') {
+                    continue;
                 }
 
-                return parent::getEventsDispatcher();
-            }
-        };
-
-        $this->initializeCommand($command, ['--mode' => 'advance']);
-        $command->connection = $connection;
-        $command->dispatcher = $dispatcher;
-
-        $handlers = [
-            'users' => [
-                ['handler' => new DummyWalHandler('users', 'id'), 'keyName' => 'id'],
-            ],
-        ];
-
-        $result = self::callMethod($command, 'pollChanges', ['slot_test', $handlers, 1000, []]);
-
-        $this->assertTrue($result);
-        $this->assertCount(1, $connection->statements);
-        $this->assertStringContainsString('pg_replication_slot_advance', $connection->statements[0]['query']);
-        $this->assertSame(['slot_test', '0/6'], $connection->statements[0]['bindings']);
-    }
-
-    public function testPollChangesInAutoModeUsesGetChangesAndDoesNotAdvanceSlot(): void
-    {
-        $dispatcher = $this->createMock(EventsDispatcher::class);
-        $dispatcher->expects($this->once())
-            ->method('dispatch')
-            ->with($this->callback(static function ($event) {
-                return $event instanceof WalChangesDetected
-                    && $event->handler instanceof DummyWalHandler
-                    && $event->ids === [10];
-            }));
-
-        $rows = [
-            (object) ['lsn' => '0/A', 'data' => json_encode(['change' => [
-                ['kind' => 'update', 'table' => 'users', 'columnnames' => ['id'], 'columnvalues' => [10]],
-            ]])],
-        ];
-
-        $connection = new class($rows) {
-            public array $rows;
-            public array $selects = [];
-            public array $statements = [];
-
-            public function __construct(array $rows)
-            {
-                $this->rows = $rows;
-            }
-
-            public function select($query, array $bindings = [])
-            {
-                $this->selects[] = ['query' => $query, 'bindings' => $bindings];
-                return $this->rows;
-            }
-
-            public function statement($query, array $bindings = [])
-            {
-                $this->statements[] = ['query' => $query, 'bindings' => $bindings];
-                return true;
-            }
-        };
-
-        $command = new class extends WalEventDispatchCommand {
-            public $connection;
-            public ?EventsDispatcher $dispatcher = null;
-
-            protected function getConnection()
-            {
-                return $this->connection;
-            }
-
-            protected function getEventsDispatcher(): EventsDispatcher
-            {
-                if ($this->dispatcher !== null) {
-                    return $this->dispatcher;
+                $path = $dir.DIRECTORY_SEPARATOR.$item;
+                if (is_dir($path)) {
+                    $this->deleteDirectory($path);
+                } else {
+                    @unlink($path);
                 }
-
-                return parent::getEventsDispatcher();
-            }
-        };
-
-        $this->initializeCommand($command, ['--mode' => 'auto']);
-        $command->connection = $connection;
-        $command->dispatcher = $dispatcher;
-
-        $handlers = [
-            'users' => [
-                ['handler' => new DummyWalHandler('users', 'id'), 'keyName' => 'id'],
-            ],
-        ];
-
-        $result = self::callMethod($command, 'pollChanges', ['slot_test_auto', $handlers, 1000, []]);
-
-        $this->assertTrue($result);
-        $this->assertCount(1, $connection->selects);
-        $this->assertStringContainsString('pg_logical_slot_get_changes', $connection->selects[0]['query']);
-        $this->assertEmpty($connection->statements);
-    }
-
-    public function testPollChangesInPeekModeDoesNotAdvanceSlot(): void
-    {
-        $dispatcher = $this->createMock(EventsDispatcher::class);
-        $dispatcher->expects($this->once())
-            ->method('dispatch')
-            ->with($this->callback(static function ($event) {
-                return $event instanceof WalChangesDetected
-                    && $event->handler instanceof DummyWalHandler
-                    && $event->ids === [11];
-            }));
-
-        $rows = [
-            (object) ['lsn' => '0/B', 'data' => json_encode(['change' => [
-                ['kind' => 'insert', 'table' => 'users', 'columnnames' => ['id'], 'columnvalues' => [11]],
-            ]])],
-        ];
-
-        $connection = new class($rows) {
-            public array $rows;
-            public array $selects = [];
-            public array $statements = [];
-
-            public function __construct(array $rows)
-            {
-                $this->rows = $rows;
             }
 
-            public function select($query, array $bindings = [])
-            {
-                $this->selects[] = ['query' => $query, 'bindings' => $bindings];
-                return $this->rows;
-            }
-
-            public function statement($query, array $bindings = [])
-            {
-                $this->statements[] = ['query' => $query, 'bindings' => $bindings];
-                return true;
-            }
-        };
-
-        $command = new class extends WalEventDispatchCommand {
-            public $connection;
-            public ?EventsDispatcher $dispatcher = null;
-
-            protected function getConnection()
-            {
-                return $this->connection;
-            }
-
-            protected function getEventsDispatcher(): EventsDispatcher
-            {
-                if ($this->dispatcher !== null) {
-                    return $this->dispatcher;
-                }
-
-                return parent::getEventsDispatcher();
-            }
-        };
-
-        $this->initializeCommand($command, ['--mode' => 'peek']);
-        $command->connection = $connection;
-        $command->dispatcher = $dispatcher;
-
-        $handlers = [
-            'users' => [
-                ['handler' => new DummyWalHandler('users', 'id'), 'keyName' => 'id'],
-            ],
-        ];
-
-        $result = self::callMethod($command, 'pollChanges', ['slot_test_peek', $handlers, 1000, []]);
-
-        $this->assertTrue($result);
-        $this->assertCount(1, $connection->selects);
-        $this->assertStringContainsString('pg_logical_slot_peek_changes', $connection->selects[0]['query']);
-        $this->assertEmpty($connection->statements);
-    }
-
-    public function testPollChangesAdvanceModeIgnoresSlotAdvanceFailure(): void
-    {
-        $dispatcher = $this->createMock(EventsDispatcher::class);
-        $dispatcher->expects($this->once())
-            ->method('dispatch')
-            ->with($this->callback(static function ($event) {
-                return $event instanceof WalChangesDetected
-                    && $event->handler instanceof DummyWalHandler
-                    && $event->ids === [12];
-            }));
-
-        $rows = [
-            (object) ['lsn' => '0/C', 'data' => json_encode(['change' => [
-                ['kind' => 'insert', 'table' => 'users', 'columnnames' => ['id'], 'columnvalues' => [12]],
-            ]])],
-        ];
-
-        $connection = new class($rows) {
-            public array $rows;
-            public int $statementCalls = 0;
-
-            public function __construct(array $rows)
-            {
-                $this->rows = $rows;
-            }
-
-            public function select($query, array $bindings = [])
-            {
-                return $this->rows;
-            }
-
-            public function statement($query, array $bindings = [])
-            {
-                $this->statementCalls++;
-                throw new \RuntimeException('advance failed');
-            }
-        };
-
-        $command = new class extends WalEventDispatchCommand {
-            public $connection;
-            public ?EventsDispatcher $dispatcher = null;
-
-            protected function getConnection()
-            {
-                return $this->connection;
-            }
-
-            protected function getEventsDispatcher(): EventsDispatcher
-            {
-                if ($this->dispatcher !== null) {
-                    return $this->dispatcher;
-                }
-
-                return parent::getEventsDispatcher();
-            }
-        };
-
-        $this->initializeCommand($command, ['--mode' => 'advance']);
-        $command->connection = $connection;
-        $command->dispatcher = $dispatcher;
-
-        $handlers = [
-            'users' => [
-                ['handler' => new DummyWalHandler('users', 'id'), 'keyName' => 'id'],
-            ],
-        ];
-
-        $result = self::callMethod($command, 'pollChanges', ['slot_test_advance', $handlers, 1000, []]);
-
-        $this->assertTrue($result);
-        $this->assertSame(1, $connection->statementCalls);
-    }
-
-    public function testRegisterSignalHandlersUsesPcntlWhenAvailable(): void
-    {
-        if (!defined('SIGTERM')) {
-            define('SIGTERM', 15);
-        }
-        if (!defined('SIGINT')) {
-            define('SIGINT', 2);
-        }
-
-        WalEventDispatchCommandRuntimeState::$mockPcntl = true;
-
-        $command = new WalEventDispatchCommand();
-        $this->initializeCommand($command);
-
-        self::setProperty($command, 'shouldRun', true);
-        self::callMethod($command, 'registerSignalHandlers');
-
-        $this->assertNotEmpty(WalEventDispatchCommandRuntimeState::$asyncSignalCalls);
-        $this->assertArrayHasKey(SIGTERM, WalEventDispatchCommandRuntimeState::$signalHandlers);
-        $this->assertArrayHasKey(SIGINT, WalEventDispatchCommandRuntimeState::$signalHandlers);
-
-        $handler = WalEventDispatchCommandRuntimeState::$signalHandlers[SIGTERM];
-        $this->assertIsCallable($handler);
-        $handler();
-
-        $this->assertFalse(self::getProperty($command, 'shouldRun'));
-
-        self::setProperty($command, 'shouldRun', true);
-        $interruptHandler = WalEventDispatchCommandRuntimeState::$signalHandlers[SIGINT];
-        $this->assertIsCallable($interruptHandler);
-        $interruptHandler();
-
-        $this->assertFalse(self::getProperty($command, 'shouldRun'));
-    }
-
-    public function testReconnectDatabaseHandlesReconnectFailure(): void
-    {
-        $command = new class extends WalEventDispatchCommand {
-            protected function getConnection()
-            {
-                return new class() {
-                    public function reconnect(): void
-                    {
-                        throw new \RuntimeException('reconnect failed');
-                    }
-                };
-            }
-        };
-
-        $this->initializeCommand($command);
-
-        self::callMethod($command, 'reconnectDatabase');
-        $this->assertTrue(true);
-    }
-
-    private function initializeCommand(WalEventDispatchCommand $command, array $options = []): WalEventDispatchCommand
-    {
-        $command->setLaravel($this->app);
-
-        $input = new ArrayInput($options, $command->getDefinition());
-        self::setProperty($command, 'input', $input);
-
-        $bufferedOutput = new BufferedOutput();
-        self::setProperty($command, 'output', new OutputStyle($input, $bufferedOutput));
-
-        return $command;
-    }
-
-    private function deleteDirectory(string $dir): void
-    {
-        if (!is_dir($dir)) {
-            return;
-        }
-
-        $items = scandir($dir);
-        if (!is_array($items)) {
             @rmdir($dir);
-            return;
+        }
+    }
+
+    class TestableWalEventDispatchCommand extends WalEventDispatchCommand
+    {
+        public array $handlers = [];
+        public array $partitionMap = [];
+        public bool $pollReturn = false;
+        public ?\Throwable $pollThrowable = null;
+        public array $calls = [];
+        public $connection = null;
+        public ?EventsDispatcher $eventsDispatcher = null;
+        public ?ExceptionHandler $exceptionHandler = null;
+        public bool $reconnectCalled = false;
+
+        protected function ensureSlotExists(string $slot): void
+        {
+            $this->calls[] = ['ensureSlotExists', $slot];
         }
 
-        foreach ($items as $item) {
-            if ($item === '.' || $item === '..') {
-                continue;
+        protected function discoverWalHandlers(): array
+        {
+            return $this->handlers;
+        }
+
+        protected function buildPartitionMap(): array
+        {
+            return $this->partitionMap;
+        }
+
+        protected function pollChanges(string $slot, array $handlers, int $batch, array $partitionMap): bool
+        {
+            $this->calls[] = ['pollChanges', $slot, $batch, count($handlers), count($partitionMap)];
+
+            if ($this->pollThrowable !== null) {
+                $this->shouldRun = false;
+
+                throw $this->pollThrowable;
             }
 
-            $path = $dir . DIRECTORY_SEPARATOR . $item;
-            if (is_dir($path)) {
-                $this->deleteDirectory($path);
-            } else {
-                @unlink($path);
+            $this->shouldRun = false;
+
+            return $this->pollReturn;
+        }
+
+        protected function getExceptionHandler(): ExceptionHandler
+        {
+            if ($this->exceptionHandler !== null) {
+                return $this->exceptionHandler;
             }
+
+            return parent::getExceptionHandler();
         }
 
-        @rmdir($dir);
-    }
-}
+        protected function getEventsDispatcher(): EventsDispatcher
+        {
+            if ($this->eventsDispatcher !== null) {
+                return $this->eventsDispatcher;
+            }
 
-class TestableWalEventDispatchCommand extends WalEventDispatchCommand
-{
-    public array $handlers = [];
-    public array $partitionMap = [];
-    public bool $pollReturn = false;
-    public ?\Throwable $pollThrowable = null;
-    public array $calls = [];
-    public $connection = null;
-    public ?EventsDispatcher $eventsDispatcher = null;
-    public ?ExceptionHandler $exceptionHandler = null;
-    public bool $reconnectCalled = false;
+            return parent::getEventsDispatcher();
+        }
 
-    protected function ensureSlotExists(string $slot): void
-    {
-        $this->calls[] = ['ensureSlotExists', $slot];
-    }
+        protected function getConnection()
+        {
+            if ($this->connection !== null) {
+                return $this->connection;
+            }
 
-    protected function discoverWalHandlers(): array
-    {
-        return $this->handlers;
-    }
+            return parent::getConnection();
+        }
 
-    protected function buildPartitionMap(): array
-    {
-        return $this->partitionMap;
-    }
-
-    protected function pollChanges(string $slot, array $handlers, int $batch, array $partitionMap): bool
-    {
-        $this->calls[] = ['pollChanges', $slot, $batch, count($handlers), count($partitionMap)];
-
-        if ($this->pollThrowable !== null) {
+        protected function reconnectDatabase(): void
+        {
+            $this->reconnectCalled = true;
             $this->shouldRun = false;
-            throw $this->pollThrowable;
         }
-
-        $this->shouldRun = false;
-        return $this->pollReturn;
     }
 
-    protected function getExceptionHandler(): ExceptionHandler
+    class TestableWalMultiErrorCommand extends TestableWalEventDispatchCommand
     {
-        if ($this->exceptionHandler !== null) {
-            return $this->exceptionHandler;
-        }
+        /** @var int 0 means always fail */
+        public int $failCount = 0;
+        private int $pollAttempt = 0;
 
-        return parent::getExceptionHandler();
-    }
+        protected function pollChanges(string $slot, array $handlers, int $batch, array $partitionMap): bool
+        {
+            $this->pollAttempt++;
+            $this->calls[] = ['pollChanges', $slot, $batch, count($handlers), count($partitionMap)];
 
-    protected function getEventsDispatcher(): EventsDispatcher
-    {
-        if ($this->eventsDispatcher !== null) {
-            return $this->eventsDispatcher;
-        }
+            if ($this->failCount > 0 && $this->pollAttempt > $this->failCount) {
+                $this->shouldRun = false;
 
-        return parent::getEventsDispatcher();
-    }
+                return false;
+            }
 
-    protected function getConnection()
-    {
-        if ($this->connection !== null) {
-            return $this->connection;
-        }
+            if ($this->pollThrowable !== null) {
+                throw $this->pollThrowable;
+            }
 
-        return parent::getConnection();
-    }
-
-    protected function reconnectDatabase(): void
-    {
-        $this->reconnectCalled = true;
-        $this->shouldRun = false;
-    }
-}
-
-class TestableWalMultiErrorCommand extends TestableWalEventDispatchCommand
-{
-    /** @var int 0 means always fail */
-    public int $failCount = 0;
-    private int $pollAttempt = 0;
-
-    protected function pollChanges(string $slot, array $handlers, int $batch, array $partitionMap): bool
-    {
-        $this->pollAttempt++;
-        $this->calls[] = ['pollChanges', $slot, $batch, count($handlers), count($partitionMap)];
-
-        if ($this->failCount > 0 && $this->pollAttempt > $this->failCount) {
             $this->shouldRun = false;
+
             return false;
         }
 
-        if ($this->pollThrowable !== null) {
-            throw $this->pollThrowable;
-        }
-
-        $this->shouldRun = false;
-        return false;
-    }
-
-    protected function reconnectDatabase(): void
-    {
-        $this->reconnectCalled = true;
-    }
-}
-
-class TestableWalEnsureSlotFailsCommand extends TestableWalEventDispatchCommand
-{
-    public ?\Throwable $ensureSlotException = null;
-    public bool $ensureSlotCalledInErrorPath = false;
-    private bool $firstCall = true;
-
-    protected function ensureSlotExists(string $slot): void
-    {
-        if ($this->firstCall) {
-            $this->firstCall = false;
-            parent::ensureSlotExists($slot);
-            return;
-        }
-
-        $this->ensureSlotCalledInErrorPath = true;
-
-        if ($this->ensureSlotException !== null) {
-            throw $this->ensureSlotException;
+        protected function reconnectDatabase(): void
+        {
+            $this->reconnectCalled = true;
         }
     }
-}
 
-class DummyWalHandler implements HasWalHandler
-{
-    private string $table;
-    private string $keyName;
-
-    public function __construct(string $table, string $keyName)
+    class TestableWalEnsureSlotFailsCommand extends TestableWalEventDispatchCommand
     {
-        $this->table = $table;
-        $this->keyName = $keyName;
+        public ?\Throwable $ensureSlotException = null;
+        public bool $ensureSlotCalledInErrorPath = false;
+        private bool $firstCall = true;
+
+        protected function ensureSlotExists(string $slot): void
+        {
+            if ($this->firstCall) {
+                $this->firstCall = false;
+                parent::ensureSlotExists($slot);
+
+                return;
+            }
+
+            $this->ensureSlotCalledInErrorPath = true;
+
+            if ($this->ensureSlotException !== null) {
+                throw $this->ensureSlotException;
+            }
+        }
     }
 
-    public function getTable()
+    class DummyWalHandler implements HasWalHandler
     {
-        return $this->table;
+        private string $table;
+        private string $keyName;
+
+        public function __construct(string $table, string $keyName)
+        {
+            $this->table = $table;
+            $this->keyName = $keyName;
+        }
+
+        public function getTable()
+        {
+            return $this->table;
+        }
+
+        public function getKeyName(): string
+        {
+            return $this->keyName;
+        }
+
+        public function onKnightModelChanged(): void
+        {
+        }
     }
 
-    public function getKeyName(): string
+    class DummyWalHandlerNoKey implements HasWalHandler
     {
-        return $this->keyName;
-    }
+        private string $table;
 
-    public function onKnightModelChanged(): void
-    {
-    }
-}
+        public function __construct(string $table)
+        {
+            $this->table = $table;
+        }
 
-class DummyWalHandlerNoKey implements HasWalHandler
-{
-    private string $table;
+        public function getTable()
+        {
+            return $this->table;
+        }
 
-    public function __construct(string $table)
-    {
-        $this->table = $table;
+        public function onKnightModelChanged(): void
+        {
+        }
     }
-
-    public function getTable()
-    {
-        return $this->table;
-    }
-
-    public function onKnightModelChanged(): void
-    {
-    }
-}
 }

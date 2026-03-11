@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 class Runtime
 {
     /**
-     * 是否在 CLI 模式下运行
+     * 是否在 CLI 模式下运行.
      */
     public static function isConsole(): bool
     {
@@ -15,7 +15,7 @@ class Runtime
     }
 
     /**
-     * 当前运行的 artisan 命令名（非 CLI 返回 null）
+     * 当前运行的 artisan 命令名（非 CLI 返回 null）.
      */
     public static function getCommand(): ?string
     {
@@ -29,7 +29,7 @@ class Runtime
     }
 
     /**
-     * 是否正在运行指定命令（支持通配符，如 'ide-helper:*'）
+     * 是否正在运行指定命令（支持通配符，如 'ide-helper:*'）.
      */
     public static function isRunningCommand(string $pattern): bool
     {
@@ -43,7 +43,7 @@ class Runtime
     }
 
     /**
-     * 是否在 Octane worker 中运行
+     * 是否在 Octane worker 中运行.
      */
     public static function isOctane(): bool
     {
@@ -51,7 +51,7 @@ class Runtime
     }
 
     /**
-     * 是否在队列 worker 中运行
+     * 是否在队列 worker 中运行.
      */
     public static function isQueueWorker(): bool
     {
@@ -61,7 +61,7 @@ class Runtime
     }
 
     /**
-     * 当前应用环境是否匹配
+     * 当前应用环境是否匹配.
      */
     public static function isEnv(string $env): bool
     {
@@ -69,7 +69,7 @@ class Runtime
     }
 
     /**
-     * 是否为本地开发环境
+     * 是否为本地开发环境.
      */
     public static function isLocal(): bool
     {
@@ -77,7 +77,7 @@ class Runtime
     }
 
     /**
-     * 是否为生产环境
+     * 是否为生产环境.
      */
     public static function isProduction(): bool
     {
@@ -85,7 +85,7 @@ class Runtime
     }
 
     /**
-     * 是否开启了调试模式
+     * 是否开启了调试模式.
      */
     public static function isDebug(): bool
     {

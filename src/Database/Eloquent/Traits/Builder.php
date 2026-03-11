@@ -11,13 +11,13 @@ namespace HughCube\Laravel\Knight\Database\Eloquent\Traits;
 
 use Carbon\CarbonPeriod;
 use HughCube\Laravel\Knight\Database\Eloquent\Builder as KnightEloquentBuilder;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use HughCube\Laravel\Knight\Support\ParameterBag;
 use Illuminate\Cache\NullStore;
 use Illuminate\Cache\Repository;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Connection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -27,13 +27,13 @@ use Traversable;
 /**
  * Trait Builder.
  *
- * @method EloquentCollection                get()
- * @method Model                            getModel()
- * @method KnightEloquentBuilder            kCanUsable()
- * @method KnightEloquentBuilder            available()
- * @method KnightEloquentBuilder            sort()
- * @method KnightEloquentBuilder            sortAvailable()
- * @method Connection                       getConnection()
+ * @method EloquentCollection    get()
+ * @method Model                 getModel()
+ * @method KnightEloquentBuilder kCanUsable()
+ * @method KnightEloquentBuilder available()
+ * @method KnightEloquentBuilder sort()
+ * @method KnightEloquentBuilder sortAvailable()
+ * @method Connection            getConnection()
  *
  * @mixin \Illuminate\Database\Eloquent\Builder
  */
@@ -223,11 +223,11 @@ trait Builder
      *
      * @param array|Arrayable|Traversable $ids 必需是keyValue的格式, [['id' => 1, 'id2' => 1], ['id' => 1, 'id2' => 1]]
      *
+     * @throws
+     *
      * @return EloquentCollection
      *
      * @phpstan-ignore-next-line
-     * @throws
-     *
      */
     public function findUniqueRows($ids): EloquentCollection
     {
@@ -328,7 +328,7 @@ trait Builder
                 }
 
                 /** 联合唯一健, 但是只有一个In操作的 */
-                if (1 === $condition->filter(fn($v) => is_array($v) && 1 < count($v))->count()) {
+                if (1 === $condition->filter(fn ($v) => is_array($v) && 1 < count($v))->count()) {
                     foreach ($condition as $name => $values) {
                         $this->applyConditionWithNullSupport($query, $name, $values);
                     }
@@ -363,9 +363,9 @@ trait Builder
      *
      * 处理数组值中包含 NULL 的情况，因为 SQL 的 IN 子句不能正确匹配 NULL 值。
      *
-     * @param self $query
-     * @param string $name 字段名
-     * @param mixed $values 值或值数组
+     * @param self   $query
+     * @param string $name   字段名
+     * @param mixed  $values 值或值数组
      *
      * @return void
      */
@@ -402,10 +402,10 @@ trait Builder
     }
 
     /**
-     * @param bool|int $when
+     * @param bool|int     $when
      * @param ParameterBag $bag
-     * @param string|int $key
-     * @param callable $callable
+     * @param string|int   $key
+     * @param callable     $callable
      *
      * @return $this
      */
@@ -422,8 +422,8 @@ trait Builder
 
     /**
      * @param ParameterBag $bag
-     * @param string|int $key
-     * @param callable $callable
+     * @param string|int   $key
+     * @param callable     $callable
      *
      * @return $this
      *
@@ -436,8 +436,8 @@ trait Builder
 
     /**
      * @param ParameterBag $bag
-     * @param string|int $key
-     * @param callable $callable
+     * @param string|int   $key
+     * @param callable     $callable
      *
      * @return $this
      *
@@ -450,8 +450,8 @@ trait Builder
 
     /**
      * @param ParameterBag $bag
-     * @param string|int $key
-     * @param callable $callable
+     * @param string|int   $key
+     * @param callable     $callable
      *
      * @return $this
      *
@@ -464,8 +464,8 @@ trait Builder
 
     /**
      * @param ParameterBag $bag
-     * @param string|int $key
-     * @param callable $callable
+     * @param string|int   $key
+     * @param callable     $callable
      *
      * @return $this
      *
@@ -478,8 +478,8 @@ trait Builder
 
     /**
      * @param ParameterBag $bag
-     * @param string|int $key
-     * @param callable $callable
+     * @param string|int   $key
+     * @param callable     $callable
      *
      * @return $this
      *
@@ -492,8 +492,8 @@ trait Builder
 
     /**
      * @param ParameterBag $bag
-     * @param string|int $key
-     * @param callable $callable
+     * @param string|int   $key
+     * @param callable     $callable
      *
      * @return $this
      *
@@ -543,7 +543,7 @@ trait Builder
      *   $query->whereLike('name', '%test%');
      *
      * @param string $column 列名
-     * @param string $value LIKE 模式
+     * @param string $value  LIKE 模式
      *
      * @return static
      */
@@ -570,15 +570,15 @@ trait Builder
      * 注意: 不会转义通配符，如需转义请使用 whereEscapeLeftLike.
      *
      * @param string $column 列名
-     * @param string $value 模式值
+     * @param string $value  模式值
      *
      * @return static
+     *
      * @deprecated 使用 whereEscapeLeftLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
      *
      * 示例:
      *   $query->whereLeftLike('name', 'test');
      *   // 生成: WHERE name LIKE 'test%'
-     *
      */
     public function whereLeftLike(string $column, string $value, bool $caseSensitive = false, string $boolean = 'and', bool $not = false)
     {
@@ -591,15 +591,15 @@ trait Builder
      * 注意: 不会转义通配符，如需转义请使用 whereEscapeRightLike.
      *
      * @param string $column 列名
-     * @param string $value 模式值
+     * @param string $value  模式值
      *
      * @return static
+     *
      * @deprecated 使用 whereEscapeRightLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
      *
      * 示例:
      *   $query->whereRightLike('name', 'test');
      *   // 生成: WHERE name LIKE '%test'
-     *
      */
     public function whereRightLike(string $column, string $value, bool $caseSensitive = false, string $boolean = 'and', bool $not = false)
     {
@@ -610,11 +610,11 @@ trait Builder
      * OR 模糊查询：使用 LIKE 模式匹配.
      *
      * @param string $column 列名
-     * @param string $value LIKE 模式
+     * @param string $value  LIKE 模式
      *
      * @return static
-     * @deprecated 使用 orWhereEscapeLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
      *
+     * @deprecated 使用 orWhereEscapeLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
      */
     public function orWhereLike(string $column, string $value, bool $caseSensitive = false)
     {
@@ -625,11 +625,11 @@ trait Builder
      * OR 左模糊查询：匹配以指定模式开头的记录.
      *
      * @param string $column 列名
-     * @param string $value 模式值
+     * @param string $value  模式值
      *
      * @return static
-     * @deprecated 使用 orWhereEscapeLeftLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
      *
+     * @deprecated 使用 orWhereEscapeLeftLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
      */
     public function orWhereLeftLike(string $column, string $value, bool $caseSensitive = false)
     {
@@ -640,11 +640,11 @@ trait Builder
      * OR 右模糊查询：匹配以指定模式结尾的记录.
      *
      * @param string $column 列名
-     * @param string $value 模式值
+     * @param string $value  模式值
      *
      * @return static
-     * @deprecated 使用 orWhereEscapeRightLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
      *
+     * @deprecated 使用 orWhereEscapeRightLike 代替，当前实现与 Laravel 的 whereLike* 行为不一致。
      */
     public function orWhereRightLike(string $column, string $value, bool $caseSensitive = false)
     {
@@ -655,7 +655,7 @@ trait Builder
      * 模糊查询：转义通配符并进行包含匹配.
      *
      * @param string $column 列名
-     * @param string $value 搜索值（会自动转义特殊字符）
+     * @param string $value  搜索值（会自动转义特殊字符）
      *
      * @return static
      */
@@ -668,7 +668,7 @@ trait Builder
      * OR 模糊查询：转义通配符并进行包含匹配.
      *
      * @param string $column 列名
-     * @param string $value 搜索值（会自动转义特殊字符）
+     * @param string $value  搜索值（会自动转义特殊字符）
      *
      * @return static
      */
@@ -681,7 +681,7 @@ trait Builder
      * 左模糊查询：转义通配符并匹配以指定值开头的记录.
      *
      * @param string $column 列名
-     * @param string $value 搜索值（会自动转义特殊字符）
+     * @param string $value  搜索值（会自动转义特殊字符）
      *
      * @return static
      */
@@ -694,7 +694,7 @@ trait Builder
      * OR 左模糊查询：转义通配符并匹配以指定值开头的记录.
      *
      * @param string $column 列名
-     * @param string $value 搜索值（会自动转义特殊字符）
+     * @param string $value  搜索值（会自动转义特殊字符）
      *
      * @return static
      */
@@ -707,7 +707,7 @@ trait Builder
      * 右模糊查询：转义通配符并匹配以指定值结尾的记录.
      *
      * @param string $column 列名
-     * @param string $value 搜索值（会自动转义特殊字符）
+     * @param string $value  搜索值（会自动转义特殊字符）
      *
      * @return static
      */
@@ -720,7 +720,7 @@ trait Builder
      * OR 右模糊查询：转义通配符并匹配以指定值结尾的记录.
      *
      * @param string $column 列名
-     * @param string $value 搜索值（会自动转义特殊字符）
+     * @param string $value  搜索值（会自动转义特殊字符）
      *
      * @return static
      */
@@ -730,10 +730,10 @@ trait Builder
     }
 
     /**
-     * @param string $column
+     * @param string   $column
      * @param iterable $values
-     * @param string $boolean
-     * @param bool $not
+     * @param string   $boolean
+     * @param bool     $not
      *
      * @return $this
      */
@@ -744,11 +744,11 @@ trait Builder
         }
 
         $values = Collection::make(
-        /** @phpstan-ignore-next-line */
+            /** @phpstan-ignore-next-line */
             $values instanceof CarbonPeriod ? [$values->start, $values->end] : $values
         )->values()->slice(0, 2)->toArray();
 
-        $boolean = $not ? $boolean . ' not' : $boolean;
+        $boolean = $not ? $boolean.' not' : $boolean;
 
         return $this->where(function ($builder) use ($values, $column) {
             if (isset($values[0])) {
@@ -762,7 +762,7 @@ trait Builder
     }
 
     /**
-     * @param string $column
+     * @param string   $column
      * @param iterable $values
      *
      * @return $this
@@ -773,7 +773,7 @@ trait Builder
     }
 
     /**
-     * @param string $column
+     * @param string   $column
      * @param iterable $values
      *
      * @return $this
@@ -784,7 +784,7 @@ trait Builder
     }
 
     /**
-     * @param string $column
+     * @param string   $column
      * @param iterable $values
      *
      * @return $this
@@ -798,6 +798,7 @@ trait Builder
      * 重写 update 方法，检查乐观锁
      *
      * @param array $values
+     *
      * @return int
      */
     public function update(array $values)

@@ -236,6 +236,7 @@ class RequestMixin
     {
         return function (): bool {
             $ua = $this->userAgent();
+
             return str_contains($ua, 'Lark') || str_contains($ua, 'Feishu');
         };
     }
@@ -257,6 +258,7 @@ class RequestMixin
     {
         return function (): bool {
             $ua = $this->userAgent();
+
             return str_contains($ua, 'QQ/') && !str_contains($ua, 'MQQBrowser');
         };
     }
@@ -298,6 +300,7 @@ class RequestMixin
     {
         return function (): bool {
             $ua = $this->userAgent();
+
             return str_contains($ua, 'Aweme') || str_contains($ua, 'BytedanceWebview');
         };
     }

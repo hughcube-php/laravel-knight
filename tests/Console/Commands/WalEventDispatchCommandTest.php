@@ -14,6 +14,7 @@ class WalEventDispatchCommandTest extends TestCase
      * Create command with proper input/output initialized.
      *
      * @param array $options
+     *
      * @return WalEventDispatchCommand
      */
     protected function makeCommand(array $options = [])
@@ -37,9 +38,9 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'insert',
-            'table' => 'users',
-            'columnnames' => ['id', 'name', 'email'],
+            'kind'         => 'insert',
+            'table'        => 'users',
+            'columnnames'  => ['id', 'name', 'email'],
             'columnvalues' => [42, 'John', 'john@example.com'],
         ];
 
@@ -52,9 +53,9 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'update',
-            'table' => 'users',
-            'columnnames' => ['id', 'name', 'email'],
+            'kind'         => 'update',
+            'table'        => 'users',
+            'columnnames'  => ['id', 'name', 'email'],
             'columnvalues' => [7, 'Jane', 'jane@example.com'],
         ];
 
@@ -67,10 +68,10 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'delete',
-            'table' => 'users',
+            'kind'    => 'delete',
+            'table'   => 'users',
             'oldkeys' => [
-                'keynames' => ['id'],
+                'keynames'  => ['id'],
                 'keyvalues' => [15],
             ],
         ];
@@ -84,10 +85,10 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'delete',
-            'table' => 'items',
+            'kind'    => 'delete',
+            'table'   => 'items',
             'oldkeys' => [
-                'keynames' => ['uuid'],
+                'keynames'  => ['uuid'],
                 'keyvalues' => ['abc-def-123'],
             ],
         ];
@@ -101,10 +102,10 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'delete',
-            'table' => 'order_items',
+            'kind'    => 'delete',
+            'table'   => 'order_items',
             'oldkeys' => [
-                'keynames' => ['order_id', 'item_id'],
+                'keynames'  => ['order_id', 'item_id'],
                 'keyvalues' => [10, 20],
             ],
         ];
@@ -118,9 +119,9 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'insert',
-            'table' => 'users',
-            'columnnames' => ['name', 'email'],
+            'kind'         => 'insert',
+            'table'        => 'users',
+            'columnnames'  => ['name', 'email'],
             'columnvalues' => ['John', 'john@example.com'],
         ];
 
@@ -133,10 +134,10 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'delete',
-            'table' => 'users',
+            'kind'    => 'delete',
+            'table'   => 'users',
             'oldkeys' => [
-                'keynames' => ['other_key'],
+                'keynames'  => ['other_key'],
                 'keyvalues' => [1],
             ],
         ];
@@ -150,10 +151,10 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'delete',
-            'table' => 'users',
+            'kind'    => 'delete',
+            'table'   => 'users',
             'oldkeys' => [
-                'keynames' => [],
+                'keynames'  => [],
                 'keyvalues' => [],
             ],
         ];
@@ -167,7 +168,7 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'delete',
+            'kind'  => 'delete',
             'table' => 'users',
         ];
 
@@ -180,8 +181,8 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'table' => 'users',
-            'columnnames' => ['id', 'name'],
+            'table'        => 'users',
+            'columnnames'  => ['id', 'name'],
             'columnvalues' => [5, 'test'],
         ];
 
@@ -202,9 +203,9 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'insert',
-            'table' => 'items',
-            'columnnames' => ['uuid', 'name'],
+            'kind'         => 'insert',
+            'table'        => 'items',
+            'columnnames'  => ['uuid', 'name'],
             'columnvalues' => ['550e8400-e29b-41d4-a716-446655440000', 'Widget'],
         ];
 
@@ -217,9 +218,9 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'insert',
-            'table' => 'items',
-            'columnnames' => ['id', 'name'],
+            'kind'         => 'insert',
+            'table'        => 'items',
+            'columnnames'  => ['id', 'name'],
             'columnvalues' => [0, 'zero'],
         ];
 
@@ -232,9 +233,9 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'insert',
-            'table' => 'items',
-            'columnnames' => ['id', 'name'],
+            'kind'         => 'insert',
+            'table'        => 'items',
+            'columnnames'  => ['id', 'name'],
             'columnvalues' => [-1, 'negative'],
         ];
 
@@ -247,9 +248,9 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'insert',
-            'table' => 'items',
-            'columnnames' => ['id', 'name'],
+            'kind'         => 'insert',
+            'table'        => 'items',
+            'columnnames'  => ['id', 'name'],
             'columnvalues' => [9999999999, 'large'],
         ];
 
@@ -262,9 +263,9 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'insert',
-            'table' => 'items',
-            'columnnames' => ['id', 'name'],
+            'kind'         => 'insert',
+            'table'        => 'items',
+            'columnnames'  => ['id', 'name'],
             'columnvalues' => ['', 'empty_id'],
         ];
 
@@ -277,10 +278,10 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'delete',
-            'table' => 'pivot',
+            'kind'    => 'delete',
+            'table'   => 'pivot',
             'oldkeys' => [
-                'keynames' => ['user_id', 'role_id'],
+                'keynames'  => ['user_id', 'role_id'],
                 'keyvalues' => [100, 200],
             ],
         ];
@@ -295,10 +296,10 @@ class WalEventDispatchCommandTest extends TestCase
 
         $uuid = '550e8400-e29b-41d4-a716-446655440000';
         $change = [
-            'kind' => 'delete',
-            'table' => 'documents',
+            'kind'    => 'delete',
+            'table'   => 'documents',
             'oldkeys' => [
-                'keynames' => ['uuid'],
+                'keynames'  => ['uuid'],
                 'keyvalues' => [$uuid],
             ],
         ];
@@ -313,9 +314,9 @@ class WalEventDispatchCommandTest extends TestCase
 
         // columnnames has more entries than columnvalues
         $change = [
-            'kind' => 'insert',
-            'table' => 'items',
-            'columnnames' => ['id', 'name', 'extra'],
+            'kind'         => 'insert',
+            'table'        => 'items',
+            'columnnames'  => ['id', 'name', 'extra'],
             'columnvalues' => [1, 'test'],
         ];
 
@@ -333,9 +334,9 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'insert',
-            'table' => 'items',
-            'columnnames' => ['id', 'name'],
+            'kind'         => 'insert',
+            'table'        => 'items',
+            'columnnames'  => ['id', 'name'],
             'columnvalues' => [null, 'test'],
         ];
 
@@ -350,9 +351,9 @@ class WalEventDispatchCommandTest extends TestCase
         $command = $this->makeCommand();
 
         $change = [
-            'kind' => 'update',
-            'table' => 'slugs',
-            'columnnames' => ['slug', 'title'],
+            'kind'         => 'update',
+            'table'        => 'slugs',
+            'columnnames'  => ['slug', 'title'],
             'columnvalues' => ['my-article', 'My Article'],
         ];
 
@@ -620,7 +621,7 @@ class WalEventDispatchCommandTest extends TestCase
 
         $command = $this->makeCommand(['--connection' => 'pgsql']);
 
-        $slotName = 'knight_test_wal_' . time();
+        $slotName = 'knight_test_wal_'.time();
 
         try {
             self::callMethod($command, 'ensureSlotExists', [$slotName]);
@@ -728,7 +729,7 @@ class WalEventDispatchCommandTest extends TestCase
 
         // Only one level of partition mapping is performed
         $partitionMap = [
-            'child_partition' => 'parent_partition',
+            'child_partition'  => 'parent_partition',
             'parent_partition' => 'grandparent',
         ];
 
@@ -825,7 +826,7 @@ class WalEventDispatchCommandTest extends TestCase
     {
         try {
             $connection = $this->app['db']->connection('pgsql');
-            $slotName = 'knight_wal2json_check_' . time();
+            $slotName = 'knight_wal2json_check_'.time();
 
             $connection->statement(
                 "SELECT pg_create_logical_replication_slot(?, 'wal2json')",
@@ -834,7 +835,7 @@ class WalEventDispatchCommandTest extends TestCase
 
             $connection->statement('SELECT pg_drop_replication_slot(?)', [$slotName]);
         } catch (\Throwable $e) {
-            $this->markTestSkipped('wal2json is not available: ' . $e->getMessage());
+            $this->markTestSkipped('wal2json is not available: '.$e->getMessage());
         }
     }
 }

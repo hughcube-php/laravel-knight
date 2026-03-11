@@ -28,7 +28,9 @@ use Illuminate\Database\Query\Grammars\Grammar;
  *   - 遵循 Laravel 的标准 Grammar 编译模式
  *
  * @mixin-target \Illuminate\Database\Query\Grammars\Grammar
+ *
  * @property-read Grammar $connection
+ *
  * @see \HughCube\Laravel\Knight\Mixin\Database\Query\BuilderMixin 对应的 Builder 扩展
  */
 class GrammarMixin
@@ -49,9 +51,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::integer[]' : 'ARRAY[]::integer[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::integer[]' : 'ARRAY[]::integer[]';
 
-            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
+            return $not.'('.$column.' @> '.$arrayExpr.')';
         };
     }
 
@@ -69,9 +71,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::integer[]' : 'ARRAY[]::integer[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::integer[]' : 'ARRAY[]::integer[]';
 
-            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
+            return $not.'('.$column.' <@ '.$arrayExpr.')';
         };
     }
 
@@ -89,9 +91,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::integer[]' : 'ARRAY[]::integer[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::integer[]' : 'ARRAY[]::integer[]';
 
-            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
+            return $not.'('.$column.' && '.$arrayExpr.')';
         };
     }
 
@@ -111,9 +113,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::bigint[]' : 'ARRAY[]::bigint[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::bigint[]' : 'ARRAY[]::bigint[]';
 
-            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
+            return $not.'('.$column.' @> '.$arrayExpr.')';
         };
     }
 
@@ -131,9 +133,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::bigint[]' : 'ARRAY[]::bigint[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::bigint[]' : 'ARRAY[]::bigint[]';
 
-            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
+            return $not.'('.$column.' <@ '.$arrayExpr.')';
         };
     }
 
@@ -151,9 +153,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::bigint[]' : 'ARRAY[]::bigint[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::bigint[]' : 'ARRAY[]::bigint[]';
 
-            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
+            return $not.'('.$column.' && '.$arrayExpr.')';
         };
     }
 
@@ -173,9 +175,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::smallint[]' : 'ARRAY[]::smallint[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::smallint[]' : 'ARRAY[]::smallint[]';
 
-            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
+            return $not.'('.$column.' @> '.$arrayExpr.')';
         };
     }
 
@@ -193,9 +195,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::smallint[]' : 'ARRAY[]::smallint[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::smallint[]' : 'ARRAY[]::smallint[]';
 
-            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
+            return $not.'('.$column.' <@ '.$arrayExpr.')';
         };
     }
 
@@ -213,9 +215,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::smallint[]' : 'ARRAY[]::smallint[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::smallint[]' : 'ARRAY[]::smallint[]';
 
-            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
+            return $not.'('.$column.' && '.$arrayExpr.')';
         };
     }
 
@@ -235,9 +237,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::text[]' : 'ARRAY[]::text[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::text[]' : 'ARRAY[]::text[]';
 
-            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
+            return $not.'('.$column.' @> '.$arrayExpr.')';
         };
     }
 
@@ -255,9 +257,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::text[]' : 'ARRAY[]::text[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::text[]' : 'ARRAY[]::text[]';
 
-            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
+            return $not.'('.$column.' <@ '.$arrayExpr.')';
         };
     }
 
@@ -275,9 +277,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::text[]' : 'ARRAY[]::text[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::text[]' : 'ARRAY[]::text[]';
 
-            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
+            return $not.'('.$column.' && '.$arrayExpr.')';
         };
     }
 
@@ -297,9 +299,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::boolean[]' : 'ARRAY[]::boolean[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::boolean[]' : 'ARRAY[]::boolean[]';
 
-            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
+            return $not.'('.$column.' @> '.$arrayExpr.')';
         };
     }
 
@@ -317,9 +319,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::boolean[]' : 'ARRAY[]::boolean[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::boolean[]' : 'ARRAY[]::boolean[]';
 
-            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
+            return $not.'('.$column.' <@ '.$arrayExpr.')';
         };
     }
 
@@ -337,9 +339,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::boolean[]' : 'ARRAY[]::boolean[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::boolean[]' : 'ARRAY[]::boolean[]';
 
-            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
+            return $not.'('.$column.' && '.$arrayExpr.')';
         };
     }
 
@@ -359,9 +361,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::double precision[]' : 'ARRAY[]::double precision[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::double precision[]' : 'ARRAY[]::double precision[]';
 
-            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
+            return $not.'('.$column.' @> '.$arrayExpr.')';
         };
     }
 
@@ -379,9 +381,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::double precision[]' : 'ARRAY[]::double precision[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::double precision[]' : 'ARRAY[]::double precision[]';
 
-            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
+            return $not.'('.$column.' <@ '.$arrayExpr.')';
         };
     }
 
@@ -399,9 +401,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::double precision[]' : 'ARRAY[]::double precision[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::double precision[]' : 'ARRAY[]::double precision[]';
 
-            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
+            return $not.'('.$column.' && '.$arrayExpr.')';
         };
     }
 
@@ -421,9 +423,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::real[]' : 'ARRAY[]::real[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::real[]' : 'ARRAY[]::real[]';
 
-            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
+            return $not.'('.$column.' @> '.$arrayExpr.')';
         };
     }
 
@@ -441,9 +443,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::real[]' : 'ARRAY[]::real[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::real[]' : 'ARRAY[]::real[]';
 
-            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
+            return $not.'('.$column.' <@ '.$arrayExpr.')';
         };
     }
 
@@ -461,9 +463,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::real[]' : 'ARRAY[]::real[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::real[]' : 'ARRAY[]::real[]';
 
-            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
+            return $not.'('.$column.' && '.$arrayExpr.')';
         };
     }
 
@@ -483,9 +485,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::uuid[]' : 'ARRAY[]::uuid[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::uuid[]' : 'ARRAY[]::uuid[]';
 
-            return $not . '(' . $column . ' @> ' . $arrayExpr . ')';
+            return $not.'('.$column.' @> '.$arrayExpr.')';
         };
     }
 
@@ -503,9 +505,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::uuid[]' : 'ARRAY[]::uuid[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::uuid[]' : 'ARRAY[]::uuid[]';
 
-            return $not . '(' . $column . ' <@ ' . $arrayExpr . ')';
+            return $not.'('.$column.' <@ '.$arrayExpr.')';
         };
     }
 
@@ -523,9 +525,9 @@ class GrammarMixin
             $valueArray = $value instanceof Arrayable ? $value->toArray() : (array) $value;
             $count = count($valueArray);
             $placeholders = $count > 0 ? implode(', ', array_fill(0, $count, '?')) : '';
-            $arrayExpr = $count > 0 ? 'ARRAY[' . $placeholders . ']::uuid[]' : 'ARRAY[]::uuid[]';
+            $arrayExpr = $count > 0 ? 'ARRAY['.$placeholders.']::uuid[]' : 'ARRAY[]::uuid[]';
 
-            return $not . '(' . $column . ' && ' . $arrayExpr . ')';
+            return $not.'('.$column.' && '.$arrayExpr.')';
         };
     }
 
@@ -550,7 +552,7 @@ class GrammarMixin
                 $operator = '=';
             }
 
-            return 'COALESCE(array_length(' . $column . ', 1), 0) ' . $operator . ' ?';
+            return 'COALESCE(array_length('.$column.', 1), 0) '.$operator.' ?';
         };
     }
 
@@ -569,12 +571,11 @@ class GrammarMixin
 
             if ($not) {
                 // 非空: cardinality > 0
-                return 'cardinality(' . $column . ') > 0';
+                return 'cardinality('.$column.') > 0';
             }
 
             // 为空: cardinality = 0 OR IS NULL
-            return '(cardinality(' . $column . ') = 0 OR ' . $column . ' IS NULL)';
+            return '(cardinality('.$column.') = 0 OR '.$column.' IS NULL)';
         };
     }
-
 }

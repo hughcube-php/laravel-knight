@@ -26,7 +26,7 @@ class GenerateMixinIdeHelperCommandTest extends TestCase
     protected $uniqueId;
 
     /**
-     * 获取项目根目录
+     * 获取项目根目录.
      */
     protected function getProjectRoot(): string
     {
@@ -38,7 +38,7 @@ class GenerateMixinIdeHelperCommandTest extends TestCase
         parent::setUp();
 
         $this->uniqueId = md5(uniqid(mt_rand(), true));
-        $this->outputFile = $this->getProjectRoot() . '/tests/.temp/ide_helper_test_' . $this->uniqueId . '.php';
+        $this->outputFile = $this->getProjectRoot().'/tests/.temp/ide_helper_test_'.$this->uniqueId.'.php';
 
         $outputDir = dirname($this->outputFile);
         if (!is_dir($outputDir)) {
@@ -60,10 +60,10 @@ class GenerateMixinIdeHelperCommandTest extends TestCase
      */
     public function testDirectoryNotExists()
     {
-        $nonExistentPath = $this->getProjectRoot() . '/tests/.temp/non_existent_' . md5(uniqid());
+        $nonExistentPath = $this->getProjectRoot().'/tests/.temp/non_existent_'.md5(uniqid());
 
         $this->artisan('ide:generate-mixin-helper', [
-            '--path' => $nonExistentPath,
+            '--path'   => $nonExistentPath,
             '--output' => $this->outputFile,
         ])->assertExitCode(1);
 
@@ -76,9 +76,9 @@ class GenerateMixinIdeHelperCommandTest extends TestCase
     public function testNoMatchingFiles()
     {
         $this->artisan('ide:generate-mixin-helper', [
-            '--path' => $this->getProjectRoot() . '/src',
+            '--path'    => $this->getProjectRoot().'/src',
             '--pattern' => '*NonExistentPattern*.php',
-            '--output' => $this->outputFile,
+            '--output'  => $this->outputFile,
         ])->assertExitCode(1);
 
         $this->assertFileDoesNotExist($this->outputFile);
@@ -90,12 +90,12 @@ class GenerateMixinIdeHelperCommandTest extends TestCase
     public function testDryRunOption()
     {
         // src/Mixin/Support/CollectionMixin.php 有 @mixin 注解
-        $path = $this->getProjectRoot() . '/src/Mixin/Support';
+        $path = $this->getProjectRoot().'/src/Mixin/Support';
 
         $this->artisan('ide:generate-mixin-helper', [
-            '--path' => $path,
+            '--path'    => $path,
             '--pattern' => 'CollectionMixin.php',
-            '--output' => $this->outputFile,
+            '--output'  => $this->outputFile,
             '--dry-run' => true,
         ])->assertExitCode(0);
 
@@ -108,9 +108,9 @@ class GenerateMixinIdeHelperCommandTest extends TestCase
     public function testGenerateIdeHelperForSrcMixins()
     {
         $this->artisan('ide:generate-mixin-helper', [
-            '--path' => $this->getProjectRoot() . '/src',
+            '--path'    => $this->getProjectRoot().'/src',
             '--pattern' => '*Mixin.php',
-            '--output' => $this->outputFile,
+            '--output'  => $this->outputFile,
         ])->assertExitCode(0);
 
         $this->assertFileExists($this->outputFile);
@@ -128,9 +128,9 @@ class GenerateMixinIdeHelperCommandTest extends TestCase
     public function testGenerateWithCustomPattern()
     {
         $this->artisan('ide:generate-mixin-helper', [
-            '--path' => $this->getProjectRoot() . '/src/Mixin/Support',
+            '--path'    => $this->getProjectRoot().'/src/Mixin/Support',
             '--pattern' => 'CollectionMixin.php',
-            '--output' => $this->outputFile,
+            '--output'  => $this->outputFile,
         ])->assertExitCode(0);
 
         $this->assertFileExists($this->outputFile);
@@ -145,9 +145,9 @@ class GenerateMixinIdeHelperCommandTest extends TestCase
     public function testGenerateSpecificMixinDirectory()
     {
         $this->artisan('ide:generate-mixin-helper', [
-            '--path' => $this->getProjectRoot() . '/src/Mixin/Support',
+            '--path'    => $this->getProjectRoot().'/src/Mixin/Support',
             '--pattern' => '*Mixin.php',
-            '--output' => $this->outputFile,
+            '--output'  => $this->outputFile,
         ])->assertExitCode(0);
 
         $this->assertFileExists($this->outputFile);
@@ -164,9 +164,9 @@ class GenerateMixinIdeHelperCommandTest extends TestCase
     {
         // StrMixin.php 有 @mixin Str 注解，应该成功生成
         $this->artisan('ide:generate-mixin-helper', [
-            '--path' => $this->getProjectRoot() . '/src/Mixin/Support',
+            '--path'    => $this->getProjectRoot().'/src/Mixin/Support',
             '--pattern' => 'StrMixin.php',
-            '--output' => $this->outputFile,
+            '--output'  => $this->outputFile,
         ])->assertExitCode(0);
 
         $this->assertFileExists($this->outputFile);
@@ -196,7 +196,7 @@ class GenerateMixinIdeHelperCommandTest extends TestCase
         $command = new GenerateMixinIdeHelperCommand($filesystem);
 
         // 使用真实的 Mixin 文件测试
-        $testFile = $this->getProjectRoot() . '/src/Mixin/Support/CollectionMixin.php';
+        $testFile = $this->getProjectRoot().'/src/Mixin/Support/CollectionMixin.php';
 
         $reflection = new \ReflectionClass($command);
         $method = $reflection->getMethod('getClassNameFromFile');
@@ -282,7 +282,7 @@ class GenerateMixinIdeHelperCommandTest extends TestCase
         $method = $reflection->getMethod('findMatchingFiles');
         $method->setAccessible(true);
 
-        $files = $method->invoke($command, $this->getProjectRoot() . '/src/Mixin/Support', '*Mixin.php');
+        $files = $method->invoke($command, $this->getProjectRoot().'/src/Mixin/Support', '*Mixin.php');
 
         $this->assertIsArray($files);
         $this->assertNotEmpty($files);
@@ -300,7 +300,7 @@ class GenerateMixinIdeHelperCommandTest extends TestCase
     {
         // 测试不传 pattern 参数时使用默认值
         $this->artisan('ide:generate-mixin-helper', [
-            '--path' => $this->getProjectRoot() . '/src/Mixin/Support',
+            '--path'   => $this->getProjectRoot().'/src/Mixin/Support',
             '--output' => $this->outputFile,
         ])->assertExitCode(0);
 
@@ -311,18 +311,18 @@ class GenerateMixinIdeHelperCommandTest extends TestCase
     }
 
     /**
-     * 测试扫描 src 及其所有子目录的 *Mixin.php 文件并生成 IDE 帮助文件
+     * 测试扫描 src 及其所有子目录的 *Mixin.php 文件并生成 IDE 帮助文件.
      *
      * @return void
      */
     public function testGenerateAllMixinsFromSrcToIdeHelper()
     {
-        $outputFile = $this->getProjectRoot() . '/_ide_helper.php';
+        $outputFile = $this->getProjectRoot().'/_ide_helper.php';
 
         $this->artisan('ide:generate-mixin-helper', [
-            '--path' => $this->getProjectRoot() . '/src',
+            '--path'    => $this->getProjectRoot().'/src',
             '--pattern' => '*Mixin.php',
-            '--output' => $outputFile,
+            '--output'  => $outputFile,
         ])->assertExitCode(0);
 
         $this->assertFileExists($outputFile);

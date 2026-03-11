@@ -182,7 +182,7 @@ class OPcacheTest extends TestCase
     public function testGetHistoryScriptsReturnsEmptyArrayForInvalidCacheValue()
     {
         config([
-            'cache.default' => 'array',
+            'cache.default'      => 'array',
             'cache.stores.array' => ['driver' => 'array'],
         ]);
 

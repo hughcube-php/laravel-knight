@@ -2,7 +2,6 @@
 
 namespace HughCube\Laravel\Knight\Tests\Console\Traits;
 
-use Exception;
 use HughCube\Laravel\Knight\Console\Command;
 use HughCube\Laravel\Knight\Console\Traits\HasRefreshModelCache;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
@@ -44,7 +43,7 @@ class HasRefreshModelCacheTest extends TestCase
     }
 
     /**
-     * 空查询结果应提前返回并输出提示信息
+     * 空查询结果应提前返回并输出提示信息.
      */
     public function testEmptyQueryEarlyReturn()
     {
@@ -60,7 +59,7 @@ class HasRefreshModelCacheTest extends TestCase
     }
 
     /**
-     * 空查询结果不应进入 eachById 循环
+     * 空查询结果不应进入 eachById 循环.
      */
     public function testEmptyQueryNoIteration()
     {
@@ -78,7 +77,7 @@ class HasRefreshModelCacheTest extends TestCase
     }
 
     /**
-     * force=true 时应强制刷新所有记录的缓存
+     * force=true 时应强制刷新所有记录的缓存.
      */
     public function testForceRefreshAll()
     {
@@ -102,7 +101,7 @@ class HasRefreshModelCacheTest extends TestCase
     }
 
     /**
-     * force=true 时即使缓存已一致也应强制刷新
+     * force=true 时即使缓存已一致也应强制刷新.
      */
     public function testForceRefreshEvenWhenCacheConsistent()
     {
@@ -122,7 +121,7 @@ class HasRefreshModelCacheTest extends TestCase
 
     /**
      * force=false 且缓存一致时应跳过刷新
-     * 先通过 force refresh 建立与 DB 一致的缓存, 然后 non-force 应跳过
+     * 先通过 force refresh 建立与 DB 一致的缓存, 然后 non-force 应跳过.
      */
     public function testSkipWhenCacheConsistent()
     {
@@ -141,7 +140,7 @@ class HasRefreshModelCacheTest extends TestCase
     }
 
     /**
-     * force=false 且缓存不一致时应刷新
+     * force=false 且缓存不一致时应刷新.
      */
     public function testRefreshWhenCacheInconsistent()
     {
@@ -166,7 +165,7 @@ class HasRefreshModelCacheTest extends TestCase
     }
 
     /**
-     * force=false 且缓存不存在时, findById 穿透到 DB, 与 eachById 结果一致应跳过
+     * force=false 且缓存不存在时, findById 穿透到 DB, 与 eachById 结果一致应跳过.
      */
     public function testSkipWhenCacheNotExistsButDbConsistent()
     {
@@ -183,7 +182,7 @@ class HasRefreshModelCacheTest extends TestCase
     }
 
     /**
-     * 刷新成功后缓存应与数据库一致
+     * 刷新成功后缓存应与数据库一致.
      */
     public function testCacheConsistencyAfterRefresh()
     {
@@ -202,7 +201,7 @@ class HasRefreshModelCacheTest extends TestCase
     }
 
     /**
-     * 刷新成功后, 再次 non-force 应全部跳过
+     * 刷新成功后, 再次 non-force 应全部跳过.
      */
     public function testAllSkipAfterForceRefresh()
     {
@@ -224,7 +223,7 @@ class HasRefreshModelCacheTest extends TestCase
     }
 
     /**
-     * 多条记录应按序全部处理, 计数器正确递增
+     * 多条记录应按序全部处理, 计数器正确递增.
      */
     public function testMultipleRecordsProcessedInOrder()
     {
@@ -240,13 +239,13 @@ class HasRefreshModelCacheTest extends TestCase
         $this->assertCount(5, $command->infoMessages);
 
         for ($i = 0; $i < 5; $i++) {
-            $expected = ($i + 1) . '/5';
+            $expected = ($i + 1).'/5';
             $this->assertStringContainsString($expected, $command->infoMessages[$i]);
         }
     }
 
     /**
-     * 使用带条件的 query 应只处理匹配的记录
+     * 使用带条件的 query 应只处理匹配的记录.
      */
     public function testFilteredQuery()
     {
@@ -264,7 +263,7 @@ class HasRefreshModelCacheTest extends TestCase
     }
 
     /**
-     * 带条件的 query 不应影响其他记录的缓存
+     * 带条件的 query 不应影响其他记录的缓存.
      */
     public function testFilteredQueryDoesNotAffectOtherRecords()
     {
@@ -296,7 +295,7 @@ class HasRefreshModelCacheTest extends TestCase
     }
 
     /**
-     * info 输出应包含正确的模型类名和主键
+     * info 输出应包含正确的模型类名和主键.
      */
     public function testInfoMessageContainsModelClassAndKey()
     {
@@ -313,7 +312,7 @@ class HasRefreshModelCacheTest extends TestCase
     }
 
     /**
-     * 默认 force 参数应为 true
+     * 默认 force 参数应为 true.
      */
     public function testDefaultForceIsTrue()
     {
@@ -360,6 +359,7 @@ class HasRefreshModelCacheTest extends TestCase
             if (strpos($msg, '成功') !== false) {
                 return '成功';
             }
+
             return '未知';
         }, $command2->infoMessages);
 
@@ -384,7 +384,7 @@ class HasRefreshModelCacheTest extends TestCase
     }
 
     /**
-     * deleteRowCache + resetRowCache 被调用后缓存确实更新
+     * deleteRowCache + resetRowCache 被调用后缓存确实更新.
      */
     public function testDeleteAndResetCacheActuallyWork()
     {
@@ -410,7 +410,7 @@ class HasRefreshModelCacheTest extends TestCase
     }
 
     /**
-     * query clone 应不影响原始 query
+     * query clone 应不影响原始 query.
      */
     public function testQueryCloneDoesNotAffectOriginal()
     {
@@ -428,7 +428,7 @@ class HasRefreshModelCacheTest extends TestCase
     }
 
     /**
-     * 单条记录 force refresh 后 resetRowCache 验证不应抛异常
+     * 单条记录 force refresh 后 resetRowCache 验证不应抛异常.
      */
     public function testRefreshDoesNotThrowOnSuccess()
     {
@@ -444,7 +444,7 @@ class HasRefreshModelCacheTest extends TestCase
     }
 
     /**
-     * 大批量记录应全部处理且计数正确
+     * 大批量记录应全部处理且计数正确.
      */
     public function testLargeBatchProcessing()
     {
@@ -468,7 +468,7 @@ class HasRefreshModelCacheTest extends TestCase
 }
 
 /**
- * 测试用的 Model
+ * 测试用的 Model.
  */
 class RefreshCacheTestModel extends Model
 {
@@ -502,7 +502,7 @@ class RefreshCacheTestModel extends Model
 }
 
 /**
- * 测试用的 Command
+ * 测试用的 Command.
  */
 class RefreshModelCacheTestCommand extends Command
 {

@@ -316,7 +316,7 @@ class HasTimeRangeTraitTest extends TestCase
 }
 
 /**
- * 测试用的时间范围对象（非 Model，验证 trait 的通用性）
+ * 测试用的时间范围对象（非 Model，验证 trait 的通用性）.
  */
 class TestTimeRangeObject implements HasTimeRange
 {

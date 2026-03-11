@@ -11,8 +11,8 @@ namespace HughCube\Laravel\Knight\Database;
 
 use ArrayIterator;
 use Countable;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model as IlluminateModel;
 use Illuminate\Support\Collection;
 use IteratorAggregate;
@@ -165,7 +165,7 @@ class MultipleModelBatchResult implements Countable, IteratorAggregate, Arrayabl
     /**
      * 遍历指定模型类的每一个模型实例.
      *
-     * @param class-string $class 模型类名
+     * @param class-string                         $class    模型类名
      * @param callable(IlluminateModel, int): void $callback
      *
      * @return $this
