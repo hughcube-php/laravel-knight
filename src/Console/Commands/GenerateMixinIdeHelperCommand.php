@@ -46,14 +46,16 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
 
         if (!$this->files->isDirectory($path)) {
             $this->error("目录不存在: {$path}");
+
             return self::FAILURE;
         }
 
         $files = $this->findMatchingFiles($path, $pattern);
-        $this->line("找到 " . count($files) . " 个匹配文件");
+        $this->line('找到 '.count($files).' 个匹配文件');
 
         if (empty($files)) {
             $this->warn("未找到匹配 {$pattern} 的文件");
+
             return self::FAILURE;
         }
 
@@ -64,14 +66,14 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
 
             $className = $this->getClassNameFromFile($file);
             if ($className === null) {
-                $this->warn("  无法解析类名");
+                $this->warn('  无法解析类名');
                 continue;
             }
 
             $this->line("  类名: {$className}");
 
             if (!class_exists($className)) {
-                $this->warn("  类不存在，尝试加载...");
+                $this->warn('  类不存在，尝试加载...');
             }
 
             if (!class_exists($className)) {
@@ -85,7 +87,8 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
         }
 
         if (empty($this->targetClassMethods)) {
-            $this->warn("未找到任何可导出的 Mixin 方法");
+            $this->warn('未找到任何可导出的 Mixin 方法');
+
             return self::FAILURE;
         }
 
@@ -97,10 +100,11 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
     }
 
     /**
-     * 递归查找匹配模式的文件
+     * 递归查找匹配模式的文件.
      *
      * @param string $path
      * @param string $pattern
+     *
      * @return array<string>
      */
     protected function findMatchingFiles(string $path, string $pattern): array
@@ -122,10 +126,11 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
     }
 
     /**
-     * 检查文件名是否匹配模式
+     * 检查文件名是否匹配模式.
      *
      * @param string $filename
      * @param string $pattern
+     *
      * @return bool
      */
     protected function matchesPattern(string $filename, string $pattern): bool
@@ -134,9 +139,10 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
     }
 
     /**
-     * 解析路径，支持相对路径和绝对路径
+     * 解析路径，支持相对路径和绝对路径.
      *
      * @param string $path
+     *
      * @return string
      */
     protected function resolvePath(string $path): string
@@ -165,7 +171,7 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
         }
 
         if ($namespace && $class) {
-            return $namespace . '\\' . $class;
+            return $namespace.'\\'.$class;
         }
 
         return null;
@@ -176,16 +182,17 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
         $reflection = new ReflectionClass($mixinClass);
         $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
 
-        $this->line("  获取 @mixin 目标类...");
+        $this->line('  获取 @mixin 目标类...');
 
         // 获取 Mixin 类的 @mixin-target 注解，确定目标类（只读取当前类）
         $targetClasses = $this->getTargetClasses($reflection);
         if (empty($targetClasses)) {
             $this->warn("  未找到 {$mixinClass} 的目标类 (@mixin-target 注解)");
+
             return false;
         }
 
-        $this->line("  目标类: " . implode(', ', $targetClasses));
+        $this->line('  目标类: '.implode(', ', $targetClasses));
 
         $methodInfos = [];
         foreach ($methods as $method) {
@@ -201,7 +208,8 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
         }
 
         if (empty($methodInfos)) {
-            $this->warn("  未找到可导出的公共方法");
+            $this->warn('  未找到可导出的公共方法');
+
             return false;
         }
 
@@ -210,7 +218,7 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
             if (!isset($this->targetClassMethods[$targetClass])) {
                 $this->targetClassMethods[$targetClass] = [
                     'mixinClass' => $mixinClass,
-                    'methods' => [],
+                    'methods'    => [],
                 ];
             }
             $this->targetClassMethods[$targetClass]['methods'] = array_merge(
@@ -227,7 +235,8 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
         // 直接从源文件读取，因为 OPcache 可能禁用了注释保存
         $filename = $reflection->getFileName();
         if ($filename === false) {
-            $this->line("    无法获取文件路径");
+            $this->line('    无法获取文件路径');
+
             return [];
         }
 
@@ -235,9 +244,10 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
         $className = $reflection->getShortName();
 
         // 找到类定义的位置
-        $classPattern = '/\bclass\s+' . preg_quote($className, '/') . '\b/';
+        $classPattern = '/\bclass\s+'.preg_quote($className, '/').'\b/';
         if (!preg_match($classPattern, $content, $classMatch, PREG_OFFSET_CAPTURE)) {
-            $this->line("    未找到类定义");
+            $this->line('    未找到类定义');
+
             return [];
         }
 
@@ -248,7 +258,8 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
 
         // 查找最后一个 /** ... */ 块
         if (!preg_match_all('/\/\*\*[\s\S]*?\*\//', $beforeClass, $docMatches, PREG_OFFSET_CAPTURE)) {
-            $this->line("    未找到文档注释");
+            $this->line('    未找到文档注释');
+
             return [];
         }
 
@@ -260,7 +271,8 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
         // 确保文档注释和类定义之间只有空白
         $between = substr($content, $docEndPos, $classPos - $docEndPos);
         if (trim($between) !== '') {
-            $this->line("    文档注释和类定义之间有其他代码");
+            $this->line('    文档注释和类定义之间有其他代码');
+
             return [];
         }
 
@@ -279,7 +291,7 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
                     if (isset($uses[$class])) {
                         $resolved = $uses[$class];
                     } else {
-                        $resolved = $namespace . '\\' . $class;
+                        $resolved = $namespace.'\\'.$class;
                     }
 
                     $this->line("    解析为: {$resolved}");
@@ -296,7 +308,7 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
                 }
             }
         } else {
-            $this->line("    未找到 @mixin-target 注解");
+            $this->line('    未找到 @mixin-target 注解');
         }
 
         return $classes;
@@ -349,14 +361,14 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
                 $type = $param->getType();
 
                 if ($type !== null) {
-                    $paramStr .= $this->formatType($type) . ' ';
+                    $paramStr .= $this->formatType($type).' ';
                 }
 
-                $paramStr .= '$' . $param->getName();
+                $paramStr .= '$'.$param->getName();
 
                 if ($param->isDefaultValueAvailable()) {
                     $default = $param->getDefaultValue();
-                    $paramStr .= ' = ' . $this->formatDefaultValue($default);
+                    $paramStr .= ' = '.$this->formatDefaultValue($default);
                 }
 
                 $parameters[] = $paramStr;
@@ -384,22 +396,24 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
             }
 
             return [
-                'name' => $method->getName(),
-                'parameters' => $parameters,
-                'returnType' => $returnTypeStr,
+                'name'          => $method->getName(),
+                'parameters'    => $parameters,
+                'returnType'    => $returnTypeStr,
                 'docReturnType' => $docReturnType,
-                'docComment' => $docComment,
-                'mixinClass' => $mixinClass,
+                'docComment'    => $docComment,
+                'mixinClass'    => $mixinClass,
             ];
         } catch (\Throwable $e) {
             $this->warn("无法解析方法 {$method->getName()}: {$e->getMessage()}");
+
             return null;
         }
     }
 
     /**
      * @param ReflectionType|null $type
-     * @param bool $isUnionPart
+     * @param bool                $isUnionPart
+     *
      * @return string
      */
     protected function formatType($type, bool $isUnionPart = false): string
@@ -413,6 +427,7 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
             $types = array_map(function ($t) {
                 return $this->formatType($t, true);
             }, $type->getTypes());
+
             return implode('|', $types);
         }
 
@@ -421,6 +436,7 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
             $types = array_map(function ($t) {
                 return $this->formatType($t, true);
             }, $type->getTypes());
+
             return implode('&', $types);
         }
 
@@ -435,12 +451,12 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
         if ($type->isBuiltin()) {
             $typeStr = $name;
         } else {
-            $typeStr = '\\' . $name;
+            $typeStr = '\\'.$name;
         }
 
         // 只有非 union 部分才添加 ? 前缀
         if (!$isUnionPart && $type->allowsNull() && $name !== 'null' && $name !== 'mixed') {
-            $typeStr = '?' . $typeStr;
+            $typeStr = '?'.$typeStr;
         }
 
         return $typeStr;
@@ -448,6 +464,7 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
 
     /**
      * @param mixed $value
+     *
      * @return string
      */
     protected function formatDefaultValue($value): string
@@ -459,11 +476,12 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
             return $value ? 'true' : 'false';
         }
         if (is_string($value)) {
-            return "'" . addslashes($value) . "'";
+            return "'".addslashes($value)."'";
         }
         if (is_array($value)) {
             return '[]';
         }
+
         return (string) $value;
     }
 
@@ -474,6 +492,7 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
         if ($dryRun) {
             $this->line("[dry-run] 将生成: {$outputFile}");
             $this->line($content);
+
             return;
         }
 
@@ -493,9 +512,9 @@ class GenerateMixinIdeHelperCommand extends \HughCube\Laravel\Knight\Console\Com
             $methods = $this->buildMethodsForClass($data['methods'], $data['mixinClass']);
 
             $namespaceBlocks[$namespace][] = [
-                'className' => $className,
+                'className'  => $className,
                 'mixinClass' => $data['mixinClass'],
-                'methods' => $methods,
+                'methods'    => $methods,
             ];
         }
 
@@ -564,7 +583,7 @@ PHP;
             foreach ($docLines as $line) {
                 $docComment .= "         * {$line}\n";
             }
-            $docComment .= "         */";
+            $docComment .= '         */';
 
             $methods[] = <<<METHOD
 {$docComment}
@@ -574,6 +593,6 @@ PHP;
 METHOD;
         }
 
-        return implode("\n\n", $methods) . "\n";
+        return implode("\n\n", $methods)."\n";
     }
 }

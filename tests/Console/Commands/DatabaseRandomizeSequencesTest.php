@@ -12,7 +12,6 @@ namespace HughCube\Laravel\Knight\Tests\Console\Commands;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class DatabaseRandomizeSequencesTest extends TestCase
 {
@@ -86,14 +85,14 @@ class DatabaseRandomizeSequencesTest extends TestCase
 
         // Get current sequence value
         $before = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         // Run in dry-run mode
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_*',
-            '--dry-run' => true,
+            '--pattern'    => 'randomize_test_*',
+            '--dry-run'    => true,
         ]);
 
         $this->assertEquals(0, $exitCode);
@@ -101,7 +100,7 @@ class DatabaseRandomizeSequencesTest extends TestCase
 
         // Verify sequence was not changed
         $after = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         $this->assertEquals($before, $after);
@@ -124,22 +123,22 @@ class DatabaseRandomizeSequencesTest extends TestCase
         $connection->table('randomize_test_users')->insert(['name' => 'test']);
 
         $before = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         // Run randomization
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_users_*',
-            '--min' => 100,
-            '--max' => 200,
-            '--force' => true,
+            '--pattern'    => 'randomize_test_users_*',
+            '--min'        => 100,
+            '--max'        => 200,
+            '--force'      => true,
         ]);
 
         $this->assertEquals(0, $exitCode);
 
         $after = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         // Should have increased by 100-200 + 1 (for the nextval call)
@@ -168,28 +167,28 @@ class DatabaseRandomizeSequencesTest extends TestCase
 
         // Get baseline values
         $usersBefore = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         $ordersBefore = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_orders_id_seq"
+            'SELECT last_value FROM randomize_test_orders_id_seq'
         )->last_value;
 
         // Run randomization only on users sequence
         Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => '*_users_*',
-            '--min' => 500,
-            '--max' => 500,
-            '--force' => true,
+            '--pattern'    => '*_users_*',
+            '--min'        => 500,
+            '--max'        => 500,
+            '--force'      => true,
         ]);
 
         $usersAfter = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         $ordersAfter = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_orders_id_seq"
+            'SELECT last_value FROM randomize_test_orders_id_seq'
         )->last_value;
 
         // Users sequence should have changed
@@ -218,29 +217,29 @@ class DatabaseRandomizeSequencesTest extends TestCase
         });
 
         $usersBefore = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         $logsBefore = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_logs_id_seq"
+            'SELECT last_value FROM randomize_test_logs_id_seq'
         )->last_value;
 
         // Run randomization, excluding logs
         Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_*',
-            '--exclude' => '*_logs_*',
-            '--min' => 300,
-            '--max' => 300,
-            '--force' => true,
+            '--pattern'    => 'randomize_test_*',
+            '--exclude'    => '*_logs_*',
+            '--min'        => 300,
+            '--max'        => 300,
+            '--force'      => true,
         ]);
 
         $usersAfter = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         $logsAfter = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_logs_id_seq"
+            'SELECT last_value FROM randomize_test_logs_id_seq'
         )->last_value;
 
         // Users should have changed
@@ -276,10 +275,10 @@ class DatabaseRandomizeSequencesTest extends TestCase
         // Run with multiple patterns (users and orders, not logs)
         Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => ['*_users_*', '*_orders_*'],
-            '--min' => 100,
-            '--max' => 100,
-            '--force' => true,
+            '--pattern'    => ['*_users_*', '*_orders_*'],
+            '--min'        => 100,
+            '--max'        => 100,
+            '--force'      => true,
         ]);
 
         $output = Artisan::output();
@@ -299,8 +298,8 @@ class DatabaseRandomizeSequencesTest extends TestCase
         // Test min < 1
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--min' => 0,
-            '--force' => true,
+            '--min'        => 0,
+            '--force'      => true,
         ]);
 
         $this->assertEquals(1, $exitCode);
@@ -309,9 +308,9 @@ class DatabaseRandomizeSequencesTest extends TestCase
         // Test max < min
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--min' => 100,
-            '--max' => 50,
-            '--force' => true,
+            '--min'        => 100,
+            '--max'        => 50,
+            '--force'      => true,
         ]);
 
         $this->assertEquals(1, $exitCode);
@@ -324,8 +323,8 @@ class DatabaseRandomizeSequencesTest extends TestCase
 
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'nonexistent_pattern_xyz_*',
-            '--force' => true,
+            '--pattern'    => 'nonexistent_pattern_xyz_*',
+            '--force'      => true,
         ]);
 
         $this->assertEquals(0, $exitCode);
@@ -360,10 +359,10 @@ class DatabaseRandomizeSequencesTest extends TestCase
         // Use * wildcard
         Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_u*',  // 匹配 users 开头
-            '--min' => 100,
-            '--max' => 100,
-            '--force' => true,
+            '--pattern'    => 'randomize_test_u*',  // 匹配 users 开头
+            '--min'        => 100,
+            '--max'        => 100,
+            '--force'      => true,
         ]);
 
         $output = Artisan::output();
@@ -420,9 +419,9 @@ class DatabaseRandomizeSequencesTest extends TestCase
         // Run with --no-lock option
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_*',
-            '--no-lock' => true,
-            '--force' => true,
+            '--pattern'    => 'randomize_test_*',
+            '--no-lock'    => true,
+            '--force'      => true,
         ]);
 
         $this->assertEquals(0, $exitCode);
@@ -450,21 +449,21 @@ class DatabaseRandomizeSequencesTest extends TestCase
         });
 
         $usersBefore = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         $ordersBefore = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_orders_id_seq"
+            'SELECT last_value FROM randomize_test_orders_id_seq'
         )->last_value;
 
         // Run WITHOUT specifying --pattern (should match all)
         // Use exclude to limit to our test sequences only
         Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--exclude' => ['*_test_logs_*'],  // 排除 logs，但不排除 users 和 orders
-            '--min' => 100,
-            '--max' => 100,
-            '--force' => true,
+            '--exclude'    => ['*_test_logs_*'],  // 排除 logs，但不排除 users 和 orders
+            '--min'        => 100,
+            '--max'        => 100,
+            '--force'      => true,
         ]);
 
         $output = Artisan::output();
@@ -474,11 +473,11 @@ class DatabaseRandomizeSequencesTest extends TestCase
         $this->assertStringContainsString('randomize_test_orders_id_seq', $output);
 
         $usersAfter = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         $ordersAfter = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_orders_id_seq"
+            'SELECT last_value FROM randomize_test_orders_id_seq'
         )->last_value;
 
         // Both should have changed
@@ -512,11 +511,11 @@ class DatabaseRandomizeSequencesTest extends TestCase
         // Run with multiple exclude patterns
         Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_*',
-            '--exclude' => ['*_orders_*', '*_logs_*'],  // Exclude both orders and logs
-            '--min' => 100,
-            '--max' => 100,
-            '--force' => true,
+            '--pattern'    => 'randomize_test_*',
+            '--exclude'    => ['*_orders_*', '*_logs_*'],  // Exclude both orders and logs
+            '--min'        => 100,
+            '--max'        => 100,
+            '--force'      => true,
         ]);
 
         $output = Artisan::output();
@@ -552,39 +551,39 @@ class DatabaseRandomizeSequencesTest extends TestCase
 
         // Get baseline values
         $usersBefore = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         $ordersBefore = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_orders_id_seq"
+            'SELECT last_value FROM randomize_test_orders_id_seq'
         )->last_value;
 
         $logsBefore = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_logs_id_seq"
+            'SELECT last_value FROM randomize_test_logs_id_seq'
         )->last_value;
 
         // Run randomization on all test sequences
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_*',
-            '--min' => 200,
-            '--max' => 200,
-            '--force' => true,
+            '--pattern'    => 'randomize_test_*',
+            '--min'        => 200,
+            '--max'        => 200,
+            '--force'      => true,
         ]);
 
         $this->assertEquals(0, $exitCode);
 
         // Get new values
         $usersAfter = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         $ordersAfter = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_orders_id_seq"
+            'SELECT last_value FROM randomize_test_orders_id_seq'
         )->last_value;
 
         $logsAfter = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_logs_id_seq"
+            'SELECT last_value FROM randomize_test_logs_id_seq'
         )->last_value;
 
         // All three should have changed by 200 (increment value)
@@ -610,22 +609,22 @@ class DatabaseRandomizeSequencesTest extends TestCase
         });
 
         $before = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         // Run with min == max (fixed increment)
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_*',
-            '--min' => 777,
-            '--max' => 777,
-            '--force' => true,
+            '--pattern'    => 'randomize_test_*',
+            '--min'        => 777,
+            '--max'        => 777,
+            '--force'      => true,
         ]);
 
         $this->assertEquals(0, $exitCode);
 
         $after = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         // Should increase by exactly 777 (the increment value)
@@ -646,10 +645,10 @@ class DatabaseRandomizeSequencesTest extends TestCase
 
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_*',
-            '--min' => 100,
-            '--max' => 100,
-            '--force' => true,
+            '--pattern'    => 'randomize_test_*',
+            '--min'        => 100,
+            '--max'        => 100,
+            '--force'      => true,
         ]);
 
         $this->assertEquals(0, $exitCode);
@@ -680,22 +679,22 @@ class DatabaseRandomizeSequencesTest extends TestCase
         });
 
         $before = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         // min=1 是允许的最小值
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_*',
-            '--min' => 1,
-            '--max' => 1,
-            '--force' => true,
+            '--pattern'    => 'randomize_test_*',
+            '--min'        => 1,
+            '--max'        => 1,
+            '--force'      => true,
         ]);
 
         $this->assertEquals(0, $exitCode);
 
         $after = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         // 增量为 1
@@ -715,22 +714,22 @@ class DatabaseRandomizeSequencesTest extends TestCase
         });
 
         $before = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         // 大增量值
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_*',
-            '--min' => 1000000,
-            '--max' => 1000000,
-            '--force' => true,
+            '--pattern'    => 'randomize_test_*',
+            '--min'        => 1000000,
+            '--max'        => 1000000,
+            '--force'      => true,
         ]);
 
         $this->assertEquals(0, $exitCode);
 
         $after = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         $this->assertEquals(1000000, $after - $before);
@@ -756,19 +755,19 @@ class DatabaseRandomizeSequencesTest extends TestCase
             });
 
             $before = $connection->selectOne(
-                "SELECT last_value FROM randomize_test_users_id_seq"
+                'SELECT last_value FROM randomize_test_users_id_seq'
             )->last_value;
 
             Artisan::call('database:randomize-sequences', [
                 '--connection' => 'pgsql',
-                '--pattern' => 'randomize_test_*',
-                '--min' => 1,
-                '--max' => 10000,
-                '--force' => true,
+                '--pattern'    => 'randomize_test_*',
+                '--min'        => 1,
+                '--max'        => 10000,
+                '--force'      => true,
             ]);
 
             $after = $connection->selectOne(
-                "SELECT last_value FROM randomize_test_users_id_seq"
+                'SELECT last_value FROM randomize_test_users_id_seq'
             )->last_value;
 
             $increments[] = $after - $before;
@@ -794,9 +793,9 @@ class DatabaseRandomizeSequencesTest extends TestCase
         // 负数 min 值应该被拒绝
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--min' => -1,
-            '--max' => 100,
-            '--force' => true,
+            '--min'        => -1,
+            '--max'        => 100,
+            '--force'      => true,
         ]);
 
         $this->assertEquals(1, $exitCode);
@@ -818,8 +817,8 @@ class DatabaseRandomizeSequencesTest extends TestCase
         // 空字符串 pattern 不应该匹配任何序列
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => '',
-            '--force' => true,
+            '--pattern'    => '',
+            '--force'      => true,
         ]);
 
         $output = Artisan::output();
@@ -843,9 +842,9 @@ class DatabaseRandomizeSequencesTest extends TestCase
         // 排除所有 randomize_test_* 序列
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_*',
-            '--exclude' => 'randomize_test_*',  // 同时排除
-            '--force' => true,
+            '--pattern'    => 'randomize_test_*',
+            '--exclude'    => 'randomize_test_*',  // 同时排除
+            '--force'      => true,
         ]);
 
         $this->assertEquals(0, $exitCode);
@@ -874,7 +873,7 @@ class DatabaseRandomizeSequencesTest extends TestCase
         $connection->table('randomize_test_users')->insert(['name' => 'user3']);
 
         $before = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         // 此时 last_value = 3, is_called = true
@@ -882,16 +881,16 @@ class DatabaseRandomizeSequencesTest extends TestCase
 
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_*',
-            '--min' => 100,
-            '--max' => 100,
-            '--force' => true,
+            '--pattern'    => 'randomize_test_*',
+            '--min'        => 100,
+            '--max'        => 100,
+            '--force'      => true,
         ]);
 
         $this->assertEquals(0, $exitCode);
 
         $after = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         // 由于 is_called = true，nextval() 返回 4
@@ -921,10 +920,10 @@ class DatabaseRandomizeSequencesTest extends TestCase
         // 正常的序列名
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_users_id_seq',  // 精确匹配
-            '--min' => 50,
-            '--max' => 50,
-            '--force' => true,
+            '--pattern'    => 'randomize_test_users_id_seq',  // 精确匹配
+            '--min'        => 50,
+            '--max'        => 50,
+            '--force'      => true,
         ]);
 
         $this->assertEquals(0, $exitCode);
@@ -956,11 +955,11 @@ class DatabaseRandomizeSequencesTest extends TestCase
         // pattern 匹配 randomize_test_*，但排除 *_logs_* 和 *_orders_*
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_*',
-            '--exclude' => ['*_logs_*', '*_orders_*'],
-            '--min' => 100,
-            '--max' => 100,
-            '--force' => true,
+            '--pattern'    => 'randomize_test_*',
+            '--exclude'    => ['*_logs_*', '*_orders_*'],
+            '--min'        => 100,
+            '--max'        => 100,
+            '--force'      => true,
         ]);
 
         $this->assertEquals(0, $exitCode);
@@ -988,10 +987,10 @@ class DatabaseRandomizeSequencesTest extends TestCase
         // 正常运行（带锁）
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_*',
-            '--min' => 100,
-            '--max' => 100,
-            '--force' => true,
+            '--pattern'    => 'randomize_test_*',
+            '--min'        => 100,
+            '--max'        => 100,
+            '--force'      => true,
         ]);
 
         $this->assertEquals(0, $exitCode);
@@ -1015,22 +1014,22 @@ class DatabaseRandomizeSequencesTest extends TestCase
         });
 
         $initial = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         // 多次运行随机化
         for ($i = 0; $i < 3; $i++) {
             Artisan::call('database:randomize-sequences', [
                 '--connection' => 'pgsql',
-                '--pattern' => 'randomize_test_*',
-                '--min' => 100,
-                '--max' => 100,
-                '--force' => true,
+                '--pattern'    => 'randomize_test_*',
+                '--min'        => 100,
+                '--max'        => 100,
+                '--force'      => true,
             ]);
         }
 
         $final = $connection->selectOne(
-            "SELECT last_value FROM randomize_test_users_id_seq"
+            'SELECT last_value FROM randomize_test_users_id_seq'
         )->last_value;
 
         // 每次 randomize 增加 101（nextval + 100）
@@ -1057,10 +1056,10 @@ class DatabaseRandomizeSequencesTest extends TestCase
         // 使用固定增量便于验证输出
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_*',
-            '--min' => 500,
-            '--max' => 500,
-            '--force' => true,
+            '--pattern'    => 'randomize_test_*',
+            '--min'        => 500,
+            '--max'        => 500,
+            '--force'      => true,
         ]);
 
         $this->assertEquals(0, $exitCode);
@@ -1085,10 +1084,10 @@ class DatabaseRandomizeSequencesTest extends TestCase
 
         $exitCode = Artisan::call('database:randomize-sequences', [
             '--connection' => 'pgsql',
-            '--pattern' => 'randomize_test_*',
-            '--min' => 100,
-            '--max' => 100,
-            '--force' => true,
+            '--pattern'    => 'randomize_test_*',
+            '--min'        => 100,
+            '--max'        => 100,
+            '--force'      => true,
         ]);
 
         $this->assertEquals(0, $exitCode);

@@ -44,7 +44,9 @@ class OpcacheViewTest extends TestCase
         }
 
         $samplePath = $dir.DIRECTORY_SEPARATOR.'data-sample.php';
-        file_put_contents($samplePath, <<<'PHP'
+        file_put_contents(
+            $samplePath,
+            <<<'PHP'
 <?php
 if (!function_exists('opcache_get_configuration')) {
     function opcache_get_configuration()

@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Model as EloquentModel;
 trait OptimisticLock
 {
     /**
-     * 是否启用乐观锁检查
+     * 是否启用乐观锁检查.
      */
     protected bool $optimisticLockEnabled = false;
 
@@ -46,11 +46,12 @@ trait OptimisticLock
     }
 
     /**
-     * 更新后检查乐观锁（由 Builder::update 调用）
+     * 更新后检查乐观锁（由 Builder::update 调用）.
      *
      * 只在单个模型的 save() 操作时检查，不影响批量更新
      *
      * @param int $affectedRows 影响的行数
+     *
      * @throws OptimisticLockException
      */
     public function checkOptimisticLockAfterUpdate(int $affectedRows): void
@@ -64,9 +65,10 @@ trait OptimisticLock
     }
 
     /**
-     * 为 setKeysForSaveQuery 添加乐观锁版本条件
+     * 为 setKeysForSaveQuery 添加乐观锁版本条件.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
+     *
      * @return \Illuminate\Database\Eloquent\Builder
      */
     protected function setKeysForSaveQueryFromOptimisticLock($query)
@@ -81,15 +83,15 @@ trait OptimisticLock
     }
 
     /**
-     * 获取版本号字段名
+     * 获取版本号字段名.
      */
     public static function lockDataVersionColumn(): string
     {
-        return defined(static::class . '::DATA_VERSION') ? static::DATA_VERSION : 'data_version';
+        return defined(static::class.'::DATA_VERSION') ? static::DATA_VERSION : 'data_version';
     }
 
     /**
-     * 获取默认版本号
+     * 获取默认版本号.
      */
     public static function defaultModelDataVersion(): int
     {
@@ -97,15 +99,15 @@ trait OptimisticLock
     }
 
     /**
-     * 是否自动递增版本号
+     * 是否自动递增版本号.
      */
     public function isAutoIncrementDataVersion(): bool
     {
-        return !defined(static::class . '::AUTO_INCREMENT_DATA_VERSION') || static::AUTO_INCREMENT_DATA_VERSION;
+        return !defined(static::class.'::AUTO_INCREMENT_DATA_VERSION') || static::AUTO_INCREMENT_DATA_VERSION;
     }
 
     /**
-     * 是否启用乐观锁检查
+     * 是否启用乐观锁检查.
      */
     public function isOptimisticLockEnabled(): bool
     {
@@ -113,7 +115,7 @@ trait OptimisticLock
     }
 
     /**
-     * 禁用乐观锁检查
+     * 禁用乐观锁检查.
      */
     public function disableOptimisticLock()
     {
@@ -123,7 +125,7 @@ trait OptimisticLock
     }
 
     /**
-     * 启用乐观锁检查
+     * 启用乐观锁检查.
      */
     public function enableOptimisticLock()
     {
@@ -133,11 +135,13 @@ trait OptimisticLock
     }
 
     /**
-     * 启用乐观锁检查并保存模型
+     * 启用乐观锁检查并保存模型.
      *
      * @param array $options
-     * @return bool
+     *
      * @throws OptimisticLockException
+     *
+     * @return bool
      */
     public function useOptimisticLockSave(array $options = [])
     {
@@ -152,12 +156,14 @@ trait OptimisticLock
     }
 
     /**
-     * 启用乐观锁检查并更新模型
+     * 启用乐观锁检查并更新模型.
      *
      * @param array $attributes
      * @param array $options
-     * @return bool
+     *
      * @throws OptimisticLockException
+     *
+     * @return bool
      */
     public function useOptimisticLockUpdate(array $attributes = [], array $options = [])
     {

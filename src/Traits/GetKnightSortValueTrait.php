@@ -5,7 +5,7 @@ namespace HughCube\Laravel\Knight\Traits;
 use HughCube\Base\Base;
 
 /**
- * 排序值计算 trait
+ * 排序值计算 trait.
  *
  * 将 sort 和 id 各填充到 40 个字符长度，拼接为排序值字符串
  * 需要对象具有 sort 和 id 属性
@@ -18,7 +18,7 @@ use HughCube\Base\Base;
 trait GetKnightSortValueTrait
 {
     /**
-     * 获取排序值字符串
+     * 获取排序值字符串.
      *
      * @return string
      */
@@ -27,6 +27,6 @@ trait GetKnightSortValueTrait
         $sort = Base::toStringWithPad($this->sort ?? 0, 40);
         $id = Base::toStringWithPad($this->id ?? 0, 40);
 
-        return $sort . $id;
+        return $sort.$id;
     }
 }

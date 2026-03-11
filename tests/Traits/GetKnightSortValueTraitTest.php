@@ -49,7 +49,7 @@ class GetKnightSortValueTraitTest extends TestCase
         $this->assertSame(80, strlen($value));
         $this->assertSame(
             str_pad(strval(PHP_INT_MAX), 40, '0', STR_PAD_LEFT)
-            . str_pad(strval(PHP_INT_MAX), 40, '0', STR_PAD_LEFT),
+            .str_pad(strval(PHP_INT_MAX), 40, '0', STR_PAD_LEFT),
             $value
         );
     }
@@ -117,7 +117,6 @@ class GetKnightSortValueTraitTest extends TestCase
 
         $this->assertSame([], $sorted->toArray());
     }
-
 }
 
 /**

@@ -1,9 +1,10 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * User: hugh.li
  * Date: 2026/1/19
- * Time: 19:08
+ * Time: 19:08.
  */
 
 namespace HughCube\Laravel\Knight\Database\Migrations;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 use ReflectionException;
 
 /**
- * 迁移文件基类
+ * 迁移文件基类.
  *
  * 继承此类后，Blueprint 将自动获得以下扩展方法:
  * - knightColumnsReversed(): 添加常用字段 (created_at, updated_at, deleted_at, ukey, data_version)
@@ -65,7 +66,7 @@ class Migration extends IlluminateMigration
     }
 
     /**
-     * 注册 Migration Mixin
+     * 注册 Migration Mixin.
      *
      * @throws ReflectionException
      */
@@ -82,7 +83,7 @@ class Migration extends IlluminateMigration
     }
 
     /**
-     * 获取数据库连接实例
+     * 获取数据库连接实例.
      *
      * @return Connection
      */

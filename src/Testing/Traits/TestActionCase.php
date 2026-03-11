@@ -33,6 +33,7 @@ trait TestActionCase
         }
 
         $exception = null;
+
         try {
             $job->handle();
         } catch (Throwable $e) {

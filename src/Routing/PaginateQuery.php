@@ -123,8 +123,8 @@ trait PaginateQuery
 
     /**
      * @param QueryBuilder|EloquentBuilder|mixed $query
-     * @param int|null                          $offset
-     * @param int|null                          $limit
+     * @param int|null                           $offset
+     * @param int|null                           $limit
      *
      * @return Collection|array
      */

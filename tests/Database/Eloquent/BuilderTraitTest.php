@@ -43,7 +43,7 @@ class BuilderTraitTest extends TestCase
     {
         for ($i = 1; $i <= $count; $i++) {
             $user = new User();
-            $user->nickname = 'user-' . $i;
+            $user->nickname = 'user-'.$i;
             $user->sort = $i;
             $user->save();
         }

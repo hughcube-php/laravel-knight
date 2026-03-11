@@ -44,9 +44,9 @@ trait Auditable
                 }
 
                 $changes[] = [
-                    'column' => $column,
-                    'old' => $model->getOriginal($column),
-                    'new' => $newValue,
+                    'column'     => $column,
+                    'old'        => $model->getOriginal($column),
+                    'new'        => $newValue,
                     'changed_at' => Carbon::now()->toDateTimeString(),
                 ];
             }
@@ -59,7 +59,7 @@ trait Auditable
     }
 
     /**
-     * 获取需要审计的字段（默认全部，子类可覆盖）
+     * 获取需要审计的字段（默认全部，子类可覆盖）.
      *
      * @return array|null
      */
@@ -69,7 +69,7 @@ trait Auditable
     }
 
     /**
-     * 获取不需要审计的字段（子类可覆盖）
+     * 获取不需要审计的字段（子类可覆盖）.
      *
      * @return array
      */
@@ -79,7 +79,7 @@ trait Auditable
     }
 
     /**
-     * 获取变更记录
+     * 获取变更记录.
      *
      * @return array
      */
@@ -123,9 +123,10 @@ trait Auditable
     }
 
     /**
-     * 审计记录存储方式
+     * 审计记录存储方式.
      *
      * @param array $changes
+     *
      * @return void
      */
     protected function recordAuditLog(array $changes): void

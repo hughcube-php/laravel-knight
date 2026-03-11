@@ -1740,8 +1740,7 @@ class BuilderMixin
     public function dieRawSql(): Closure
     {
         return function (): void {
-            die($this->toRawSql());
+            exit($this->toRawSql());
         };
     }
-
 }

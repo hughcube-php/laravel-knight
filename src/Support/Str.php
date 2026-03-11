@@ -546,7 +546,7 @@ class Str extends \Illuminate\Support\Str
     }
 
     /**
-     * 邮箱脱敏: u**r@example.com
+     * 邮箱脱敏: u**r@example.com.
      */
     public static function maskEmail($string): string
     {
@@ -564,18 +564,18 @@ class Str extends \Illuminate\Support\Str
         $localLen = strlen($local);
 
         if ($localLen <= 1) {
-            return '*' . $domain;
+            return '*'.$domain;
         }
 
         if ($localLen <= 2) {
-            return $local[0] . '*' . $domain;
+            return $local[0].'*'.$domain;
         }
 
-        return $local[0] . str_repeat('*', $localLen - 2) . $local[$localLen - 1] . $domain;
+        return $local[0].str_repeat('*', $localLen - 2).$local[$localLen - 1].$domain;
     }
 
     /**
-     * 银行卡脱敏: 6222 **** **** 1234
+     * 银行卡脱敏: 6222 **** **** 1234.
      */
     public static function maskBankCard($string): string
     {
@@ -588,11 +588,11 @@ class Str extends \Illuminate\Support\Str
             return $string;
         }
 
-        return substr($string, 0, 4) . str_repeat('*', $len - 8) . substr($string, -4);
+        return substr($string, 0, 4).str_repeat('*', $len - 8).substr($string, -4);
     }
 
     /**
-     * 中文姓名脱敏: 张*、张*丰
+     * 中文姓名脱敏: 张*、张*丰.
      */
     public static function maskName($string): string
     {
@@ -606,16 +606,16 @@ class Str extends \Illuminate\Support\Str
         }
 
         if ($len == 2) {
-            return mb_substr($string, 0, 1, 'UTF-8') . '*';
+            return mb_substr($string, 0, 1, 'UTF-8').'*';
         }
 
         return mb_substr($string, 0, 1, 'UTF-8')
-            . str_repeat('*', $len - 2)
-            . mb_substr($string, -1, 1, 'UTF-8');
+            .str_repeat('*', $len - 2)
+            .mb_substr($string, -1, 1, 'UTF-8');
     }
 
     /**
-     * 地址脱敏: 保留前N个字符，其余用*替换
+     * 地址脱敏: 保留前N个字符，其余用*替换.
      */
     public static function maskAddress($string, int $keepLength = 6): string
     {
@@ -628,11 +628,11 @@ class Str extends \Illuminate\Support\Str
             return $string;
         }
 
-        return mb_substr($string, 0, $keepLength, 'UTF-8') . str_repeat('*', $len - $keepLength);
+        return mb_substr($string, 0, $keepLength, 'UTF-8').str_repeat('*', $len - $keepLength);
     }
 
     /**
-     * 车牌号脱敏: 京A****8
+     * 车牌号脱敏: 京A****8.
      */
     public static function maskPlateNumber($string): string
     {
@@ -646,7 +646,7 @@ class Str extends \Illuminate\Support\Str
         }
 
         return mb_substr($string, 0, 2, 'UTF-8')
-            . str_repeat('*', $len - 3)
-            . mb_substr($string, -1, 1, 'UTF-8');
+            .str_repeat('*', $len - 3)
+            .mb_substr($string, -1, 1, 'UTF-8');
     }
 }

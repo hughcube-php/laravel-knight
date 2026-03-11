@@ -205,7 +205,7 @@ class BlueprintMixinTest extends TestCase
 
         // Query using GIN index
         $results = $connection->table('knight_gin_test_pg')
-            ->whereRaw("tags @> ?", [json_encode(['php'])])
+            ->whereRaw('tags @> ?', [json_encode(['php'])])
             ->get();
 
         $this->assertCount(2, $results);
@@ -371,7 +371,7 @@ class BlueprintMixinTest extends TestCase
         // Query using GIN index on non-deleted records
         $results = $connection->table('knight_gin_test_pg')
             ->whereNull('deleted_at')
-            ->whereRaw("tags @> ?", [json_encode(['php'])])
+            ->whereRaw('tags @> ?', [json_encode(['php'])])
             ->get();
 
         $this->assertCount(2, $results);
@@ -906,7 +906,7 @@ class BlueprintMixinTest extends TestCase
         $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'scores'));
 
         // Insert and verify data
-        $connection->statement("INSERT INTO knight_mixin_test_pg (scores) VALUES (ARRAY[1, 2, 3]::integer[])");
+        $connection->statement('INSERT INTO knight_mixin_test_pg (scores) VALUES (ARRAY[1, 2, 3]::integer[])');
         $record = $connection->table('knight_mixin_test_pg')->first();
         $this->assertNotNull($record);
     }
@@ -927,7 +927,7 @@ class BlueprintMixinTest extends TestCase
         $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'user_ids'));
 
         // Insert and verify data
-        $connection->statement("INSERT INTO knight_mixin_test_pg (user_ids) VALUES (ARRAY[9223372036854775807]::bigint[])");
+        $connection->statement('INSERT INTO knight_mixin_test_pg (user_ids) VALUES (ARRAY[9223372036854775807]::bigint[])');
         $record = $connection->table('knight_mixin_test_pg')->first();
         $this->assertNotNull($record);
     }
@@ -948,7 +948,7 @@ class BlueprintMixinTest extends TestCase
         $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'ratings'));
 
         // Insert and verify data
-        $connection->statement("INSERT INTO knight_mixin_test_pg (ratings) VALUES (ARRAY[1, 2, 3]::smallint[])");
+        $connection->statement('INSERT INTO knight_mixin_test_pg (ratings) VALUES (ARRAY[1, 2, 3]::smallint[])');
         $record = $connection->table('knight_mixin_test_pg')->first();
         $this->assertNotNull($record);
     }
@@ -1011,7 +1011,7 @@ class BlueprintMixinTest extends TestCase
         $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'flags'));
 
         // Insert and verify data
-        $connection->statement("INSERT INTO knight_mixin_test_pg (flags) VALUES (ARRAY[true, false]::boolean[])");
+        $connection->statement('INSERT INTO knight_mixin_test_pg (flags) VALUES (ARRAY[true, false]::boolean[])');
         $record = $connection->table('knight_mixin_test_pg')->first();
         $this->assertNotNull($record);
     }
@@ -1032,7 +1032,7 @@ class BlueprintMixinTest extends TestCase
         $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'prices'));
 
         // Insert and verify data
-        $connection->statement("INSERT INTO knight_mixin_test_pg (prices) VALUES (ARRAY[1.5, 2.5]::double precision[])");
+        $connection->statement('INSERT INTO knight_mixin_test_pg (prices) VALUES (ARRAY[1.5, 2.5]::double precision[])');
         $record = $connection->table('knight_mixin_test_pg')->first();
         $this->assertNotNull($record);
     }
@@ -1053,7 +1053,7 @@ class BlueprintMixinTest extends TestCase
         $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'coordinates'));
 
         // Insert and verify data
-        $connection->statement("INSERT INTO knight_mixin_test_pg (coordinates) VALUES (ARRAY[1.5, 2.5]::real[])");
+        $connection->statement('INSERT INTO knight_mixin_test_pg (coordinates) VALUES (ARRAY[1.5, 2.5]::real[])');
         $record = $connection->table('knight_mixin_test_pg')->first();
         $this->assertNotNull($record);
     }
@@ -1095,7 +1095,7 @@ class BlueprintMixinTest extends TestCase
         $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'amounts'));
 
         // Insert and verify data
-        $connection->statement("INSERT INTO knight_mixin_test_pg (amounts) VALUES (ARRAY[123.45, 678.90]::numeric(10,2)[])");
+        $connection->statement('INSERT INTO knight_mixin_test_pg (amounts) VALUES (ARRAY[123.45, 678.90]::numeric(10,2)[])');
         $record = $connection->table('knight_mixin_test_pg')->first();
         $this->assertNotNull($record);
     }
@@ -1314,7 +1314,7 @@ class BlueprintMixinTest extends TestCase
         $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'amounts'));
 
         // Insert and verify data with precision 12 and scale 4
-        $connection->statement("INSERT INTO knight_mixin_test_pg (amounts) VALUES (ARRAY[12345678.1234, 87654321.4321]::numeric(12,4)[])");
+        $connection->statement('INSERT INTO knight_mixin_test_pg (amounts) VALUES (ARRAY[12345678.1234, 87654321.4321]::numeric(12,4)[])');
         $record = $connection->table('knight_mixin_test_pg')->first();
         $this->assertNotNull($record);
     }
@@ -1335,7 +1335,7 @@ class BlueprintMixinTest extends TestCase
         $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'values'));
 
         // Insert and verify data with precision 8
-        $connection->statement("INSERT INTO knight_mixin_test_pg (values) VALUES (ARRAY[12345678, 87654321]::numeric(8)[])");
+        $connection->statement('INSERT INTO knight_mixin_test_pg (values) VALUES (ARRAY[12345678, 87654321]::numeric(8)[])');
         $record = $connection->table('knight_mixin_test_pg')->first();
         $this->assertNotNull($record);
     }
@@ -1356,7 +1356,7 @@ class BlueprintMixinTest extends TestCase
         $this->assertTrue($schema->hasColumn('knight_mixin_test_pg', 'numbers'));
 
         // Insert and verify data
-        $connection->statement("INSERT INTO knight_mixin_test_pg (numbers) VALUES (ARRAY[123.456, 789.012]::numeric[])");
+        $connection->statement('INSERT INTO knight_mixin_test_pg (numbers) VALUES (ARRAY[123.456, 789.012]::numeric[])');
         $record = $connection->table('knight_mixin_test_pg')->first();
         $this->assertNotNull($record);
     }
@@ -1594,7 +1594,7 @@ class BlueprintMixinTest extends TestCase
         $indexes = $connection->select(
             "SELECT indexname FROM pg_indexes WHERE tablename = 'knight_mixin_test_pg'"
         );
-        $indexNames = array_map(fn($i) => $i->indexname, $indexes);
+        $indexNames = array_map(fn ($i) => $i->indexname, $indexes);
 
         $this->assertContains('idx_search_gin', $indexNames);
         $this->assertContains('idx_tags_gin', $indexNames);
@@ -1902,7 +1902,7 @@ class BlueprintMixinTest extends TestCase
 
         // Verify the sequence value using direct query
         $result = $connection->selectOne(
-            "SELECT last_value, is_called FROM knight_sequence_test_pg_id_seq"
+            'SELECT last_value, is_called FROM knight_sequence_test_pg_id_seq'
         );
 
         // After setval with false, last_value should be 7777 and is_called should be false
@@ -1965,7 +1965,7 @@ class BlueprintMixinTest extends TestCase
         $schema = $connection->getSchemaBuilder();
 
         // First create a sequence
-        $connection->statement("CREATE SEQUENCE global_test_seq START WITH 1");
+        $connection->statement('CREATE SEQUENCE global_test_seq START WITH 1');
 
         // Verify sequence exists
         $result = $connection->selectOne(
@@ -2013,10 +2013,10 @@ class BlueprintMixinTest extends TestCase
         $schema = $connection->getSchemaBuilder();
 
         // Create a shared sequence
-        $connection->statement("CREATE SEQUENCE shared_id_seq START WITH 5000");
+        $connection->statement('CREATE SEQUENCE shared_id_seq START WITH 5000');
 
         // Create table using the shared sequence
-        $connection->statement("CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))");
+        $connection->statement('CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))');
         $schema->table('knight_shared_seq_table1', function (Blueprint $table) {
             $table->knightIdWithSequence('id', 'shared_id_seq');
         });
@@ -2036,7 +2036,7 @@ class BlueprintMixinTest extends TestCase
         $schema = $connection->getSchemaBuilder();
 
         // Create a shared sequence
-        $connection->statement("CREATE SEQUENCE shared_id_seq START WITH 1000");
+        $connection->statement('CREATE SEQUENCE shared_id_seq START WITH 1000');
 
         // Create table with regular id and secondary column using sequence
         $schema->create('knight_shared_seq_table1', function (Blueprint $table) {
@@ -2064,16 +2064,16 @@ class BlueprintMixinTest extends TestCase
         $schema = $connection->getSchemaBuilder();
 
         // Create a shared sequence starting at 10000
-        $connection->statement("CREATE SEQUENCE shared_id_seq START WITH 10000");
+        $connection->statement('CREATE SEQUENCE shared_id_seq START WITH 10000');
 
         // Create first table using the shared sequence
-        $connection->statement("CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))");
+        $connection->statement('CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))');
         $schema->table('knight_shared_seq_table1', function (Blueprint $table) {
             $table->knightIdWithSequence('id', 'shared_id_seq');
         });
 
         // Create second table using the same sequence
-        $connection->statement("CREATE TABLE knight_shared_seq_table2 (title VARCHAR(255))");
+        $connection->statement('CREATE TABLE knight_shared_seq_table2 (title VARCHAR(255))');
         $schema->table('knight_shared_seq_table2', function (Blueprint $table) {
             $table->knightIdWithSequence('id', 'shared_id_seq');
         });
@@ -2105,20 +2105,20 @@ class BlueprintMixinTest extends TestCase
         $schema = $connection->getSchemaBuilder();
 
         // Create a shared sequence
-        $connection->statement("CREATE SEQUENCE shared_id_seq START WITH 1");
+        $connection->statement('CREATE SEQUENCE shared_id_seq START WITH 1');
 
         // Create three tables all using the same sequence
-        $connection->statement("CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))");
+        $connection->statement('CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))');
         $schema->table('knight_shared_seq_table1', function (Blueprint $table) {
             $table->knightIdWithSequence('id', 'shared_id_seq');
         });
 
-        $connection->statement("CREATE TABLE knight_shared_seq_table2 (name VARCHAR(255))");
+        $connection->statement('CREATE TABLE knight_shared_seq_table2 (name VARCHAR(255))');
         $schema->table('knight_shared_seq_table2', function (Blueprint $table) {
             $table->knightIdWithSequence('id', 'shared_id_seq');
         });
 
-        $connection->statement("CREATE TABLE knight_shared_seq_table3 (name VARCHAR(255))");
+        $connection->statement('CREATE TABLE knight_shared_seq_table3 (name VARCHAR(255))');
         $schema->table('knight_shared_seq_table3', function (Blueprint $table) {
             $table->knightIdWithSequence('id', 'shared_id_seq');
         });
@@ -2154,7 +2154,7 @@ class BlueprintMixinTest extends TestCase
         $schema = $connection->getSchemaBuilder();
 
         // Create a sequence
-        $connection->statement("CREATE SEQUENCE custom_seq START WITH 8000");
+        $connection->statement('CREATE SEQUENCE custom_seq START WITH 8000');
 
         // Create table with standard id
         $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
@@ -2182,7 +2182,7 @@ class BlueprintMixinTest extends TestCase
         $schema = $connection->getSchemaBuilder();
 
         // Create a sequence
-        $connection->statement("CREATE SEQUENCE custom_seq START WITH 100 INCREMENT BY 5");
+        $connection->statement('CREATE SEQUENCE custom_seq START WITH 100 INCREMENT BY 5');
 
         // Create table
         $schema->create('knight_sequence_test_pg', function (Blueprint $table) {
@@ -2221,13 +2221,13 @@ class BlueprintMixinTest extends TestCase
         });
 
         // Create first table
-        $connection->statement("CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))");
+        $connection->statement('CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))');
         $schema->table('knight_shared_seq_table1', function (Blueprint $table) {
             $table->knightIdWithSequence('id', 'global_test_seq');
         });
 
         // Create second table
-        $connection->statement("CREATE TABLE knight_shared_seq_table2 (name VARCHAR(255))");
+        $connection->statement('CREATE TABLE knight_shared_seq_table2 (name VARCHAR(255))');
         $schema->table('knight_shared_seq_table2', function (Blueprint $table) {
             $table->knightIdWithSequence('id', 'global_test_seq');
         });
@@ -2465,10 +2465,10 @@ class BlueprintMixinTest extends TestCase
         $schema = $connection->getSchemaBuilder();
 
         // 创建共享序列
-        $connection->statement("CREATE SEQUENCE shared_id_seq START WITH 1");
+        $connection->statement('CREATE SEQUENCE shared_id_seq START WITH 1');
 
         // 创建表
-        $connection->statement("CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))");
+        $connection->statement('CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))');
         $schema->table('knight_shared_seq_table1', function (Blueprint $table) {
             $table->knightIdWithSequence('id', 'shared_id_seq');
         });
@@ -2637,10 +2637,10 @@ class BlueprintMixinTest extends TestCase
         $schema = $connection->getSchemaBuilder();
 
         // 创建共享序列
-        $connection->statement("CREATE SEQUENCE shared_id_seq START WITH 1000");
+        $connection->statement('CREATE SEQUENCE shared_id_seq START WITH 1000');
 
         // 创建使用该序列的表
-        $connection->statement("CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))");
+        $connection->statement('CREATE TABLE knight_shared_seq_table1 (name VARCHAR(255))');
         $schema->table('knight_shared_seq_table1', function (Blueprint $table) {
             $table->knightIdWithSequence('id', 'shared_id_seq');
         });
@@ -2651,7 +2651,7 @@ class BlueprintMixinTest extends TestCase
         $this->assertEquals(1000, $record1->id);
 
         // 删除序列（CASCADE 会同时删除依赖）
-        $connection->statement("DROP SEQUENCE shared_id_seq CASCADE");
+        $connection->statement('DROP SEQUENCE shared_id_seq CASCADE');
 
         // 现在插入应该失败
         $this->expectException(\Throwable::class);
@@ -2698,7 +2698,7 @@ class BlueprintMixinTest extends TestCase
 
         // 验证 is_called 为 false（下一次 nextval 返回设置的值）
         $result = $connection->selectOne(
-            "SELECT last_value, is_called FROM knight_sequence_test_pg_id_seq"
+            'SELECT last_value, is_called FROM knight_sequence_test_pg_id_seq'
         );
 
         $this->assertEquals(500, $result->last_value);
@@ -2711,7 +2711,7 @@ class BlueprintMixinTest extends TestCase
 
         // 再次检查 is_called
         $result2 = $connection->selectOne(
-            "SELECT last_value, is_called FROM knight_sequence_test_pg_id_seq"
+            'SELECT last_value, is_called FROM knight_sequence_test_pg_id_seq'
         );
         $this->assertTrue($result2->is_called);
     }
@@ -2735,11 +2735,11 @@ class BlueprintMixinTest extends TestCase
                 try {
                     $connection->statement('CREATE EXTENSION IF NOT EXISTS btree_gin');
                 } catch (\Throwable $e) {
-                    $this->markTestSkipped('btree_gin extension is not available: ' . $e->getMessage());
+                    $this->markTestSkipped('btree_gin extension is not available: '.$e->getMessage());
                 }
             }
         } catch (\Throwable $e) {
-            $this->markTestSkipped('Could not check btree_gin extension: ' . $e->getMessage());
+            $this->markTestSkipped('Could not check btree_gin extension: '.$e->getMessage());
         }
     }
 }

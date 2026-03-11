@@ -90,9 +90,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function handle(): void
     {
@@ -172,7 +172,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
             return null;
         }
 
-        $startedAt = (float)$this->getActionStartedAt(true)->format('U.u');
+        $startedAt = (float) $this->getActionStartedAt(true)->format('U.u');
 
         return round(($startedAt - $this->dispatchedAt) * 1000, 2);
     }
@@ -247,9 +247,9 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * @return void
      * @throws Exception
      *
+     * @return void
      */
     public function log($level, string $message, array $context = [])
     {
@@ -270,7 +270,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     /**
      * @param string $key
-     * @param null $default
+     * @param null   $default
      *
      * @return mixed
      *
@@ -295,7 +295,7 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
 
     /**
      * @param string $key
-     * @param mixed $value
+     * @param mixed  $value
      *
      * @return $this
      *
@@ -309,9 +309,10 @@ abstract class Job implements ShouldQueue, StaticInstanceInterface, FromFlowJob
     }
 
     /**
-     * 同步执行 Job，日志输出到 stdout（适用于 artisan 命令行场景）
+     * 同步执行 Job，日志输出到 stdout（适用于 artisan 命令行场景）.
      *
      * @param array<int|string, mixed> ...$arguments
+     *
      * @return void
      */
     public static function dispatchStdout(...$arguments): void

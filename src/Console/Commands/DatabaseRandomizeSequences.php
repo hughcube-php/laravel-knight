@@ -83,6 +83,7 @@ class DatabaseRandomizeSequences extends \HughCube\Laravel\Knight\Console\Comman
                 'This command only supports PostgreSQL. Current driver: %s',
                 $driver
             ));
+
             return 1;
         }
 
@@ -92,11 +93,13 @@ class DatabaseRandomizeSequences extends \HughCube\Laravel\Knight\Console\Comman
         // 验证参数
         if ($min < 1) {
             $this->error('Minimum increment must be at least 1.');
+
             return 1;
         }
 
         if ($max < $min) {
             $this->error('Maximum increment must be greater than or equal to minimum.');
+
             return 1;
         }
 
@@ -105,6 +108,7 @@ class DatabaseRandomizeSequences extends \HughCube\Laravel\Knight\Console\Comman
 
         if ($sequences->isEmpty()) {
             $this->info('No sequences found.');
+
             return 0;
         }
 
@@ -113,6 +117,7 @@ class DatabaseRandomizeSequences extends \HughCube\Laravel\Knight\Console\Comman
 
         if ($sequences->isEmpty()) {
             $this->info('No sequences match the specified patterns.');
+
             return 0;
         }
 
@@ -131,12 +136,14 @@ class DatabaseRandomizeSequences extends \HughCube\Laravel\Knight\Console\Comman
         if ($this->option('dry-run')) {
             $this->newLine();
             $this->warn('Dry run mode - no changes made.');
+
             return 0;
         }
 
         // 确认执行
         if (!$this->option('force') && !$this->confirm('Proceed with randomization?')) {
             $this->info('Operation cancelled.');
+
             return 0;
         }
 
@@ -244,12 +251,13 @@ class DatabaseRandomizeSequences extends \HughCube\Laravel\Knight\Console\Comman
 
         // 尝试获取锁
         $result = $connection->selectOne(sprintf(
-            "SELECT pg_try_advisory_lock(%d) as locked",
+            'SELECT pg_try_advisory_lock(%d) as locked',
             self::ADVISORY_LOCK_ID
         ));
 
         if (!$result->locked) {
             $this->error('Failed to acquire lock. Another instance may be running.');
+
             return 1;
         }
 
@@ -260,7 +268,7 @@ class DatabaseRandomizeSequences extends \HughCube\Laravel\Knight\Console\Comman
         } finally {
             // 确保释放锁
             $connection->statement(sprintf(
-                "SELECT pg_advisory_unlock(%d)",
+                'SELECT pg_advisory_unlock(%d)',
                 self::ADVISORY_LOCK_ID
             ));
             $this->info('Lock released.');

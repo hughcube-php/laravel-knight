@@ -17,7 +17,7 @@ class WalChangesDetected
     public $ids;
 
     /**
-     * @param HasWalHandler $handler
+     * @param HasWalHandler     $handler
      * @param array<int|string> $ids
      */
     public function __construct(HasWalHandler $handler, array $ids)

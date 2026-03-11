@@ -9,7 +9,6 @@ use HughCube\Laravel\Knight\Events\WalChangesDetected;
 use HughCube\Laravel\Knight\Listeners\WalChangesListener;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Schema;
 
 class WalChangesListenerTest extends TestCase
@@ -159,7 +158,7 @@ class WalChangesListenerTest extends TestCase
 
         // Insert 50 records
         for ($i = 1; $i <= 50; $i++) {
-            $connection->table('wal_test_items')->insert(['name' => 'item' . $i]);
+            $connection->table('wal_test_items')->insert(['name' => 'item'.$i]);
         }
 
         $handler = new WalTestItem();

@@ -37,7 +37,7 @@ class LogQuerySql
     }
 
     /**
-     * 慢查询阈值（毫秒），默认 0 表示记录所有查询
+     * 慢查询阈值（毫秒），默认 0 表示记录所有查询.
      *
      * @return float
      */
@@ -83,12 +83,12 @@ class LogQuerySql
             } elseif (is_bool($binding)) {
                 $value = $binding ? 'true' : 'false';
             } elseif (is_string($binding)) {
-                $value = "'" . addslashes($binding) . "'";
+                $value = "'".addslashes($binding)."'";
             } else {
                 $value = (string) $binding;
             }
 
-            $result .= $value . $parts[$i + 1];
+            $result .= $value.$parts[$i + 1];
         }
 
         return $result;

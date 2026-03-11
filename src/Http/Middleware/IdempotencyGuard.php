@@ -13,7 +13,8 @@ class IdempotencyGuard
     /**
      * @param Request $request
      * @param Closure $next
-     * @param int $ttl
+     * @param int     $ttl
+     *
      * @return Response
      */
     public function handle(Request $request, Closure $next, $ttl = 86400)
@@ -36,6 +37,7 @@ class IdempotencyGuard
         if (null !== $cached) {
             $response = $this->unserializeResponse($cached);
             $response->headers->set('X-Idempotent-Replayed', 'true');
+
             return $response;
         }
 
@@ -48,21 +50,24 @@ class IdempotencyGuard
 
     /**
      * @param Request $request
+     *
      * @return string|null
      */
     protected function getIdempotencyKey(Request $request): ?string
     {
         $key = $request->header('X-Idempotency-Key');
+
         return is_string($key) && strlen($key) > 0 ? $key : null;
     }
 
     /**
      * @param string $idempotencyKey
+     *
      * @return string
      */
     protected function getCacheKey(string $idempotencyKey): string
     {
-        return 'knight_idempotency:' . md5($idempotencyKey);
+        return 'knight_idempotency:'.md5($idempotencyKey);
     }
 
     /**
@@ -75,6 +80,7 @@ class IdempotencyGuard
 
     /**
      * @param Request $request
+     *
      * @return bool
      */
     protected function shouldApply(Request $request): bool
@@ -84,12 +90,13 @@ class IdempotencyGuard
 
     /**
      * @param Response $response
+     *
      * @return string
      */
     protected function serializeResponse(Response $response): string
     {
         return serialize([
-            'status' => $response->getStatusCode(),
+            'status'  => $response->getStatusCode(),
             'headers' => $response->headers->all(),
             'content' => $response->getContent(),
         ]);
@@ -97,6 +104,7 @@ class IdempotencyGuard
 
     /**
      * @param string $data
+     *
      * @return Response
      */
     protected function unserializeResponse(string $data): Response

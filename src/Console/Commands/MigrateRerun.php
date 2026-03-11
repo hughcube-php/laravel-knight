@@ -52,6 +52,7 @@ class MigrateRerun extends Command
             $migrationKeywords = $this->askForMigrations();
             if (empty($migrationKeywords)) {
                 $this->error('No migrations specified.');
+
                 return 1;
             }
         }
@@ -70,6 +71,7 @@ class MigrateRerun extends Command
         // 检查 migrations 目录是否存在
         if (!is_dir($migrationPath)) {
             $this->error(sprintf('Migration path does not exist: %s', $migrationPath));
+
             return 1;
         }
 
@@ -78,6 +80,7 @@ class MigrateRerun extends Command
 
         if ($allMigrationFiles->isEmpty()) {
             $this->error('No migration files found.');
+
             return 1;
         }
 
@@ -91,6 +94,7 @@ class MigrateRerun extends Command
             $allMigrationFiles->each(function ($file, $name) {
                 $this->line(sprintf('  - %s', $name));
             });
+
             return 1;
         }
 
@@ -104,6 +108,7 @@ class MigrateRerun extends Command
         // 确认执行
         if (!$this->option('force') && !$this->confirm('Do you want to re-run these migrations?', true)) {
             $this->info('Aborted.');
+
             return 0;
         }
 
@@ -142,7 +147,7 @@ class MigrateRerun extends Command
     }
 
     /**
-     * 交互式选择 migrations
+     * 交互式选择 migrations.
      *
      * @return array
      */
@@ -158,16 +163,17 @@ class MigrateRerun extends Command
     }
 
     /**
-     * 获取所有 migration 文件
+     * 获取所有 migration 文件.
      *
      * @param string $path
+     *
      * @return Collection
      */
     protected function getMigrationFiles(string $path): Collection
     {
         $files = Collection::make([]);
 
-        foreach (glob($path . '/*.php') as $file) {
+        foreach (glob($path.'/*.php') as $file) {
             $filename = basename($file, '.php');
             $files->put($filename, $file);
         }
@@ -176,10 +182,11 @@ class MigrateRerun extends Command
     }
 
     /**
-     * 匹配 migrations
+     * 匹配 migrations.
      *
      * @param Collection $allFiles
-     * @param array $keywords
+     * @param array      $keywords
+     *
      * @return Collection
      */
     protected function matchMigrations(Collection $allFiles, array $keywords): Collection
@@ -207,9 +214,10 @@ class MigrateRerun extends Command
     }
 
     /**
-     * 确保 migrations 表存在
+     * 确保 migrations 表存在.
      *
      * @param Connection $connection
+     *
      * @return void
      */
     protected function ensureMigrationsTableExists($connection): void
@@ -230,13 +238,15 @@ class MigrateRerun extends Command
     }
 
     /**
-     * 重新执行单个 migration
+     * 重新执行单个 migration.
      *
      * @param Connection $connection
-     * @param string $migrationName
-     * @param string $migrationFile
-     * @return void
+     * @param string     $migrationName
+     * @param string     $migrationFile
+     *
      * @throws Throwable
+     *
+     * @return void
      */
     protected function rerunMigration($connection, string $migrationName, string $migrationFile): void
     {
@@ -276,14 +286,15 @@ class MigrateRerun extends Command
     }
 
     /**
-     * 执行 migration
+     * 执行 migration.
      *
      * @param Connection $connection
-     * @param string $migrationName
-     * @param object $migrationInstance
-     * @param int $batch
-     * @param string $connectionName
-     * @param bool $existingRecord
+     * @param string     $migrationName
+     * @param object     $migrationInstance
+     * @param int        $batch
+     * @param string     $connectionName
+     * @param bool       $existingRecord
+     *
      * @return void
      */
     protected function executeMigration($connection, string $migrationName, $migrationInstance, int $batch, string $connectionName, bool $existingRecord): void
@@ -321,7 +332,7 @@ class MigrateRerun extends Command
             // 4. 插入新记录到 migrations 表
             $connection->table($this->migrationsTable)->insert([
                 'migration' => $migrationName,
-                'batch' => $batch,
+                'batch'     => $batch,
             ]);
 
             $this->line(sprintf('  Inserted record to migrations table (batch: %d)', $batch));
@@ -331,17 +342,20 @@ class MigrateRerun extends Command
     }
 
     /**
-     * 处理 down() 方法的执行逻辑
+     * 处理 down() 方法的执行逻辑.
      *
      * @param object $migrationInstance
-     * @return void
+     *
      * @throws \RuntimeException
+     *
+     * @return void
      */
     protected function handleDownMethod($migrationInstance): void
     {
         // --skip-down 强制跳过
         if ($this->option('skip-down')) {
             $this->line('  Skipped down() rollback (--skip-down)');
+
             return;
         }
 
@@ -355,6 +369,7 @@ class MigrateRerun extends Command
 
         if (!$shouldRunDown) {
             $this->line('  Skipped down() rollback');
+
             return;
         }
 
@@ -370,6 +385,7 @@ class MigrateRerun extends Command
             // 询问用户是否继续
             if ($this->option('force')) {
                 $this->warn('  --force mode: continuing with up() despite down() failure');
+
                 return;
             }
 
@@ -382,9 +398,10 @@ class MigrateRerun extends Command
     }
 
     /**
-     * 从文件解析 migration 实例
+     * 从文件解析 migration 实例.
      *
      * @param string $file
+     *
      * @return Migration|null
      */
     protected function resolveMigrationInstance(string $file)
@@ -407,6 +424,7 @@ class MigrateRerun extends Command
             if ($instance instanceof Migration) {
                 return $instance;
             }
+
             return null;
         }
 
@@ -419,7 +437,7 @@ class MigrateRerun extends Command
 
             // 检查是否有命名空间
             if (preg_match('/namespace\s+([\w\\\\]+)\s*;/', $fileContent, $nsMatches)) {
-                $fullClassName = $nsMatches[1] . '\\' . $className;
+                $fullClassName = $nsMatches[1].'\\'.$className;
                 if (class_exists($fullClassName)) {
                     return new $fullClassName();
                 }
@@ -446,6 +464,7 @@ class MigrateRerun extends Command
      * 判断是否应该使用事务
      *
      * @param object $migration
+     *
      * @return bool
      */
     protected function shouldUseTransaction($migration): bool
@@ -454,6 +473,7 @@ class MigrateRerun extends Command
         if (property_exists($migration, 'withinTransaction')) {
             /** @var bool $withinTransaction */
             $withinTransaction = $migration->withinTransaction;
+
             return $withinTransaction;
         }
 
@@ -461,9 +481,10 @@ class MigrateRerun extends Command
     }
 
     /**
-     * 判断路径是否为绝对路径
+     * 判断路径是否为绝对路径.
      *
      * @param string $path
+     *
      * @return bool
      */
     protected function isAbsolutePath(string $path): bool

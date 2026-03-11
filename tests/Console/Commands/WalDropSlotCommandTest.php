@@ -33,7 +33,7 @@ class WalDropSlotCommandTest extends TestCase
         $this->skipIfPgsqlNotConfigured();
 
         $exitCode = Artisan::call('wal:drop-slot', [
-            'slot' => 'nonexistent_slot_' . time(),
+            'slot'         => 'nonexistent_slot_'.time(),
             '--connection' => 'pgsql',
         ]);
 
@@ -46,7 +46,7 @@ class WalDropSlotCommandTest extends TestCase
         $this->skipIfPgsqlNotConfigured();
         $this->skipIfWal2jsonNotAvailable();
 
-        $slotName = 'knight_test_drop_' . time();
+        $slotName = 'knight_test_drop_'.time();
         $connection = $this->app['db']->connection('pgsql');
 
         try {
@@ -65,7 +65,7 @@ class WalDropSlotCommandTest extends TestCase
 
             // Drop it
             Artisan::call('wal:drop-slot', [
-                'slot' => $slotName,
+                'slot'         => $slotName,
                 '--connection' => 'pgsql',
             ]);
 
@@ -85,6 +85,7 @@ class WalDropSlotCommandTest extends TestCase
             } catch (\Throwable $inner) {
                 // ignore
             }
+
             throw $e;
         }
     }
@@ -96,7 +97,7 @@ class WalDropSlotCommandTest extends TestCase
     {
         try {
             $connection = $this->app['db']->connection('pgsql');
-            $slotName = 'knight_wal2json_check_' . time();
+            $slotName = 'knight_wal2json_check_'.time();
 
             $connection->statement(
                 "SELECT pg_create_logical_replication_slot(?, 'wal2json')",
@@ -105,7 +106,7 @@ class WalDropSlotCommandTest extends TestCase
 
             $connection->statement('SELECT pg_drop_replication_slot(?)', [$slotName]);
         } catch (\Throwable $e) {
-            $this->markTestSkipped('wal2json is not available: ' . $e->getMessage());
+            $this->markTestSkipped('wal2json is not available: '.$e->getMessage());
         }
     }
 }

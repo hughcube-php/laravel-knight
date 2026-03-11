@@ -10,13 +10,13 @@
 namespace HughCube\Laravel\Knight\Tests\Database\Eloquent;
 
 use Exception;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Cache\Events\CacheHit;
 use Illuminate\Cache\Events\CacheMissed;
 use Illuminate\Cache\Events\KeyForgotten;
 use Illuminate\Cache\Events\KeyWritten;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -646,7 +646,7 @@ class ModelTest extends TestCase
         // 创建3个用户
         for ($i = 1; $i <= 3; $i++) {
             $user = new User();
-            $user->nickname = 'user' . $i;
+            $user->nickname = 'user'.$i;
             $user->sort = $i;
             $user->save();
         }
@@ -681,7 +681,7 @@ class ModelTest extends TestCase
         $sortValues = [3, 1, 5, 2, 4];
         foreach ($sortValues as $index => $sortValue) {
             $user = new User();
-            $user->nickname = 'user' . ($index + 1);
+            $user->nickname = 'user'.($index + 1);
             $user->sort = $sortValue;
             $user->save();
         }
@@ -711,7 +711,7 @@ class ModelTest extends TestCase
         // 创建用户，相同的 sort 值
         for ($i = 1; $i <= 3; $i++) {
             $user = new User();
-            $user->nickname = 'user' . $i;
+            $user->nickname = 'user'.$i;
             $user->sort = 10; // 相同的 sort 值
             $user->save();
         }
@@ -734,7 +734,7 @@ class ModelTest extends TestCase
         $sortValues = [3, 1, 5, 2, 4];
         foreach ($sortValues as $index => $sortValue) {
             $user = new User();
-            $user->nickname = 'user' . ($index + 1);
+            $user->nickname = 'user'.($index + 1);
             $user->sort = $sortValue;
             $user->save();
         }
@@ -770,7 +770,7 @@ class ModelTest extends TestCase
         // 创建用户
         for ($i = 1; $i <= 5; $i++) {
             $user = new User();
-            $user->nickname = 'user' . $i;
+            $user->nickname = 'user'.$i;
             $user->sort = $i;
             $user->save();
         }

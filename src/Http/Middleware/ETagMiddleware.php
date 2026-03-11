@@ -11,6 +11,7 @@ class ETagMiddleware
     /**
      * @param Request $request
      * @param Closure $next
+     *
      * @return Response
      */
     public function handle(Request $request, Closure $next)
@@ -39,8 +40,9 @@ class ETagMiddleware
     }
 
     /**
-     * @param Request $request
+     * @param Request  $request
      * @param Response $response
+     *
      * @return bool
      */
     protected function shouldProcess(Request $request, Response $response): bool
@@ -58,10 +60,11 @@ class ETagMiddleware
 
     /**
      * @param string $content
+     *
      * @return string
      */
     protected function generateETag(string $content): string
     {
-        return '"' . md5($content) . '"';
+        return '"'.md5($content).'"';
     }
 }

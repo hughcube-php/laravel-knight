@@ -21,13 +21,13 @@ class ETagMiddlewareTest extends TestCase
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertNotNull($response->headers->get('ETag'));
-        $this->assertSame('"' . md5('hello world') . '"', $response->headers->get('ETag'));
+        $this->assertSame('"'.md5('hello world').'"', $response->headers->get('ETag'));
     }
 
     public function testMatchingIfNoneMatchReturns304()
     {
         $middleware = new ETagMiddleware();
-        $etag = '"' . md5('hello world') . '"';
+        $etag = '"'.md5('hello world').'"';
 
         $request = Request::create('/test', 'GET');
         $request->headers->set('If-None-Match', $etag);

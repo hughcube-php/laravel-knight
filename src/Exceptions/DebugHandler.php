@@ -33,7 +33,7 @@ class DebugHandler extends ExceptionHandler
     ];
 
     /**
-     * 子类可重写此方法来自定义异常转换逻辑
+     * 子类可重写此方法来自定义异常转换逻辑.
      */
     protected function convertExceptionToResults(Throwable $e): ?array
     {
@@ -41,8 +41,9 @@ class DebugHandler extends ExceptionHandler
     }
 
     /**
-     * @param $request
+     * @param           $request
      * @param Throwable $e
+     *
      * @return Response
      */
     public function render($request, Throwable $e): Response
@@ -64,7 +65,7 @@ class DebugHandler extends ExceptionHandler
     }
 
     /**
-     * 根据异常构建响应结果
+     * 根据异常构建响应结果.
      */
     protected function buildResults(Throwable $e): array
     {
@@ -72,6 +73,7 @@ class DebugHandler extends ExceptionHandler
         $custom = $this->convertExceptionToResults($e);
         if (!empty($custom)) {
             $custom['Data'] ??= new stdClass();
+
             return $custom;
         }
 
@@ -105,16 +107,16 @@ class DebugHandler extends ExceptionHandler
     }
 
     /**
-     * 将异常转换为调试数组
+     * 将异常转换为调试数组.
      */
     protected function convertExceptionToDebugArray(Throwable $e): array
     {
         $array = [
-            'code' => $e->getCode(),
-            'exception' => get_class($e),
-            'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
+            'code'        => $e->getCode(),
+            'exception'   => get_class($e),
+            'message'     => $e->getMessage(),
+            'file'        => $e->getFile(),
+            'line'        => $e->getLine(),
             'stack-trace' => $e->getTrace(),
         ];
 

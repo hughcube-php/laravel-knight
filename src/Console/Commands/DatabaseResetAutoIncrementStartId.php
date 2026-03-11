@@ -44,6 +44,7 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
 
         if (!in_array($driver, ['mysql', 'pgsql'])) {
             $this->error(sprintf('Unsupported database driver: %s. Only mysql and pgsql are supported.', $driver));
+
             return;
         }
 
@@ -55,6 +56,7 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
 
         if ($tables->isEmpty()) {
             $this->info('No tables found.');
+
             return;
         }
 
@@ -66,6 +68,7 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
 
             if ($tables->isEmpty()) {
                 $this->error(sprintf('Table "%s" not found.', $specificTable));
+
                 return;
             }
         }
@@ -88,7 +91,7 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
 
     /**
      * @param Connection $connection
-     * @param string $driver
+     * @param string     $driver
      *
      * @return Collection
      */
@@ -96,6 +99,7 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
     {
         if ('mysql' === $driver) {
             $rows = $connection->select('SHOW TABLES');
+
             return Collection::wrap($rows)->map(function ($row) {
                 return Collection::wrap((array) $row)->first();
             });
@@ -115,8 +119,8 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
 
     /**
      * @param Connection $connection
-     * @param string $driver
-     * @param string $table
+     * @param string     $driver
+     * @param string     $table
      *
      * @return string|null
      */
@@ -127,16 +131,17 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
             if (!empty($rows)) {
                 return $rows[0]->Column_name;
             }
+
             return null;
         }
 
         // PostgreSQL
-        $rows = $connection->select("
+        $rows = $connection->select('
             SELECT a.attname AS column_name
             FROM pg_index i
             JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
             WHERE i.indrelid = ?::regclass AND i.indisprimary
-        ", [$table]);
+        ', [$table]);
 
         if (!empty($rows)) {
             return $rows[0]->column_name;
@@ -147,9 +152,9 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
 
     /**
      * @param Connection $connection
-     * @param string $driver
-     * @param string $table
-     * @param string $primaryKey
+     * @param string     $driver
+     * @param string     $table
+     * @param string     $primaryKey
      *
      * @return int
      */
@@ -166,11 +171,11 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
 
     /**
      * @param Connection $connection
-     * @param string $driver
-     * @param string $table
-     * @param int $min
-     * @param int $offset
-     * @param bool $force
+     * @param string     $driver
+     * @param string     $table
+     * @param int        $min
+     * @param int        $offset
+     * @param bool       $force
      *
      * @return void
      */
@@ -180,6 +185,7 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
 
         if (null === $primaryKey) {
             $this->warn(sprintf('Table "%s" has no primary key, skipping.', $table));
+
             return;
         }
 
@@ -194,8 +200,9 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
             $newStartId
         );
 
-        if (!$force && true !== $this->confirm($message . ' — Proceed?')) {
+        if (!$force && true !== $this->confirm($message.' — Proceed?')) {
             $this->line(sprintf('Skipped: %s', $table));
+
             return;
         }
 
@@ -205,10 +212,10 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
 
     /**
      * @param Connection $connection
-     * @param string $driver
-     * @param string $table
-     * @param string $primaryKey
-     * @param int $startId
+     * @param string     $driver
+     * @param string     $table
+     * @param string     $primaryKey
+     * @param int        $startId
      *
      * @return void
      */
@@ -216,6 +223,7 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
     {
         if ('mysql' === $driver) {
             $connection->statement(sprintf('ALTER TABLE `%s` AUTO_INCREMENT = %d', $table, $startId));
+
             return;
         }
 
@@ -224,6 +232,7 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
 
         if (null === $sequenceName) {
             $this->warn(sprintf('No sequence found for table "%s" column "%s"', $table, $primaryKey));
+
             return;
         }
 
@@ -232,8 +241,8 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
 
     /**
      * @param Connection $connection
-     * @param string $table
-     * @param string $column
+     * @param string     $table
+     * @param string     $column
      *
      * @return string|null
      */
@@ -241,7 +250,7 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
     {
         // Method 1: Use pg_get_serial_sequence (works for SERIAL/BIGSERIAL columns)
         $result = $connection->selectOne(
-            "SELECT pg_get_serial_sequence(?, ?) AS sequence_name",
+            'SELECT pg_get_serial_sequence(?, ?) AS sequence_name',
             [$table, $column]
         );
 
@@ -250,12 +259,12 @@ class DatabaseResetAutoIncrementStartId extends \HughCube\Laravel\Knight\Console
         }
 
         // Method 2: Parse sequence from column default value (e.g., nextval('sequence_name'::regclass))
-        $result = $connection->selectOne("
+        $result = $connection->selectOne('
             SELECT pg_get_expr(d.adbin, d.adrelid) AS column_default
             FROM pg_attrdef d
             JOIN pg_attribute a ON d.adrelid = a.attrelid AND d.adnum = a.attnum
             WHERE a.attrelid = ?::regclass AND a.attname = ?
-        ", [$table, $column]);
+        ', [$table, $column]);
 
         if (!empty($result->column_default)) {
             // Extract sequence name from nextval('schema.sequence_name'::regclass) or nextval('sequence_name')

@@ -3,9 +3,6 @@
 namespace HughCube\Laravel\Knight\Tests\Database\Eloquent;
 
 use HughCube\Laravel\Knight\Exceptions\OptimisticLockException;
-use HughCube\Laravel\Knight\Tests\Database\Eloquent\TestOptimisticLockModel;
-use HughCube\Laravel\Knight\Tests\Database\Eloquent\TestOptimisticLockModelCustomColumn;
-use HughCube\Laravel\Knight\Tests\Database\Eloquent\TestOptimisticLockModelNoAutoIncrement;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -418,7 +415,7 @@ class OptimisticLockTest extends TestCase
         } catch (OptimisticLockException $e) {
             // 验证异常消息包含模型类名和主键
             $this->assertStringContainsString(TestOptimisticLockModel::class, $e->getMessage());
-            $this->assertStringContainsString((string)$modelId, $e->getMessage());
+            $this->assertStringContainsString((string) $modelId, $e->getMessage());
         }
     }
 

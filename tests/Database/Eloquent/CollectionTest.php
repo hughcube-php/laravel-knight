@@ -2,8 +2,8 @@
 
 namespace HughCube\Laravel\Knight\Tests\Database\Eloquent;
 
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use HughCube\Laravel\Knight\Tests\TestCase;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 class CollectionTest extends TestCase
 {

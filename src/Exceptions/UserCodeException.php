@@ -12,9 +12,9 @@ class UserCodeException extends UserException
     protected $stringCode;
 
     /**
-     * @param string $code
-     * @param string $message
-     * @param int $intCode
+     * @param string         $code
+     * @param string         $message
+     * @param int            $intCode
      * @param Throwable|null $previous
      */
     public function __construct($code, $message = '', $intCode = 0, $previous = null)

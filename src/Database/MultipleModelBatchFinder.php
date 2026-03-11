@@ -110,7 +110,7 @@ class MultipleModelBatchFinder
      * 添加按主键查询.
      *
      * @param class-string<Model> $class 模型类名
-     * @param array|Collection $ids 主键 ID 数组
+     * @param array|Collection    $ids   主键 ID 数组
      *
      * @return $this
      */
@@ -131,8 +131,8 @@ class MultipleModelBatchFinder
     /**
      * 添加按唯一键查询.
      *
-     * @param class-string<Model> $class 模型类名
-     * @param array|Collection $conditions 条件数组
+     * @param class-string<Model> $class      模型类名
+     * @param array|Collection    $conditions 条件数组
      *
      * @return $this
      */
@@ -194,7 +194,7 @@ class MultipleModelBatchFinder
      * 执行单个缓存组的查询.
      *
      * @param CacheInterface $cache
-     * @param array $models [class => conditions]
+     * @param array          $models [class => conditions]
      *
      * @return array<string, array>
      */
@@ -271,8 +271,8 @@ class MultipleModelBatchFinder
      * 查询未命中数据并写入缓存.
      *
      * @param CacheInterface $cache
-     * @param array $missed
-     * @param array $results
+     * @param array          $missed
+     * @param array          $results
      */
     protected function fetchMissedAndCache(CacheInterface $cache, array $missed, array &$results): void
     {

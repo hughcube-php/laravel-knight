@@ -184,7 +184,7 @@ class UniqueIdTest extends TestCase
     }
 
     /**
-     * 用最小值(全0)和最大值(全9)双重验证: 十进制位数 → 编码长度 的映射是否正确
+     * 用最小值(全0)和最大值(全9)双重验证: 十进制位数 → 编码长度 的映射是否正确.
      *
      * 核心断言:
      * - 最大值(全9)自然编码长度 = 期望长度 (不溢出)
@@ -203,26 +203,41 @@ class UniqueIdTest extends TestCase
 
             // 验证公式: ceil(digits * log(10) / log(base)) = expectedLen
             $calculatedLen = (int) ceil($decimalDigits * log(10) / log($base));
-            $this->assertSame($expectedLen, $calculatedLen,
-                "[$caseName] Formula check: $decimalDigits digits in base$base should need $expectedLen chars");
+            $this->assertSame(
+                $expectedLen,
+                $calculatedLen,
+                "[$caseName] Formula check: $decimalDigits digits in base$base should need $expectedLen chars"
+            );
 
             // 最大值 (全9): 自然编码长度恰好等于期望长度 (不溢出 + 不浪费)
             $maxEncoded = Base::conv($maxDecimal, '0123456789', $encoding);
-            $this->assertSame($expectedLen, strlen($maxEncoded),
-                "[$caseName] Max($decimalDigits digits) base$base: natural length must be exactly $expectedLen");
+            $this->assertSame(
+                $expectedLen,
+                strlen($maxEncoded),
+                "[$caseName] Max($decimalDigits digits) base$base: natural length must be exactly $expectedLen"
+            );
 
             // 最大值补齐后长度不变 (已经是最大长度, pad 不应该增长)
             $maxPadded = str_pad($maxEncoded, $expectedLen, $encoding[0], STR_PAD_LEFT);
-            $this->assertSame($expectedLen, strlen($maxPadded),
-                "[$caseName] Max($decimalDigits digits) base$base: padded length must still be $expectedLen");
+            $this->assertSame(
+                $expectedLen,
+                strlen($maxPadded),
+                "[$caseName] Max($decimalDigits digits) base$base: padded length must still be $expectedLen"
+            );
 
             // 最小值 ("1"): 编码后短于期望长度, 补齐后等于期望长度
             $minEncoded = Base::conv('1', '0123456789', $encoding);
-            $this->assertLessThan($expectedLen, strlen($minEncoded),
-                "[$caseName] Min(1) base$base: natural length must be less than $expectedLen");
+            $this->assertLessThan(
+                $expectedLen,
+                strlen($minEncoded),
+                "[$caseName] Min(1) base$base: natural length must be less than $expectedLen"
+            );
             $minPadded = str_pad($minEncoded, $expectedLen, $encoding[0], STR_PAD_LEFT);
-            $this->assertSame($expectedLen, strlen($minPadded),
-                "[$caseName] Min(1) base$base: padded length must be $expectedLen");
+            $this->assertSame(
+                $expectedLen,
+                strlen($minPadded),
+                "[$caseName] Min(1) base$base: padded length must be $expectedLen"
+            );
 
             // 数学证明 expectedLen 是最小必要长度:
             // base^(expectedLen-1) < 10^decimalDigits  (len-1 不够用)
@@ -233,7 +248,7 @@ class UniqueIdTest extends TestCase
 
             $this->assertTrue(
                 bccomp($basePowLenMinus1, $tenPowDigits) < 0,
-                "[$caseName] base$base^" . ($expectedLen - 1) . " must be < 10^$decimalDigits (len-1 would overflow)"
+                "[$caseName] base$base^".($expectedLen - 1)." must be < 10^$decimalDigits (len-1 would overflow)"
             );
             $this->assertTrue(
                 bccomp($tenPowDigits, $basePowLen) <= 0,
@@ -269,7 +284,7 @@ class UniqueIdTest extends TestCase
     }
 
     /**
-     * 验证各字段的实际最大值不超过其声明的十进制位宽
+     * 验证各字段的实际最大值不超过其声明的十进制位宽.
      *
      * 如果字段值超过 pad 宽度, toStringWithPad 输出会比声明的长,
      * 导致总十进制位数增加, 编码后长度突破固定长度.
@@ -278,13 +293,19 @@ class UniqueIdTest extends TestCase
     {
         // time: 14 位十进制, 可用约 3170 年, 当前相对纪元的时间远小于上限
         $currentRelativeTime = (int) (microtime(true) * 1000) - 1577836800000;
-        $this->assertLessThanOrEqual(14, strlen((string) $currentRelativeTime),
-            'Current relative time must fit in 14 decimal digits');
+        $this->assertLessThanOrEqual(
+            14,
+            strlen((string) $currentRelativeTime),
+            'Current relative time must fit in 14 decimal digits'
+        );
 
         // machineId: 63-bit, 贴合 PHP_INT_MAX (2^63-1 = 9223372036854775807), 必须 ≤ 19 位十进制
         $maxMachineId = PHP_INT_MAX;
-        $this->assertLessThanOrEqual(19, strlen((string) $maxMachineId),
-            'machineId max (PHP_INT_MAX) must fit in 19 decimal digits');
+        $this->assertLessThanOrEqual(
+            19,
+            strlen((string) $maxMachineId),
+            'machineId max (PHP_INT_MAX) must fit in 19 decimal digits'
+        );
         // 并且 < 10^19 (确保 toStringWithPad 不会输出 20 位)
         $this->assertTrue(
             bccomp((string) $maxMachineId, bcpow('10', '19')) < 0,
@@ -292,26 +313,41 @@ class UniqueIdTest extends TestCase
         );
 
         // PID: Windows 最大 4294967295 (32-bit unsigned), 必须 ≤ 10 位
-        $this->assertLessThanOrEqual(10, strlen('4294967295'),
-            'PID max must fit in 10 decimal digits');
+        $this->assertLessThanOrEqual(
+            10,
+            strlen('4294967295'),
+            'PID max must fit in 10 decimal digits'
+        );
 
         // seed: max = 999999999999, 正好 12 位
-        $this->assertSame(12, strlen('999999999999'),
-            'seed max must be exactly 12 decimal digits');
+        $this->assertSame(
+            12,
+            strlen('999999999999'),
+            'seed max must be exactly 12 decimal digits'
+        );
 
         // counter: max = 99999, 正好 5 位
-        $this->assertSame(5, strlen((string) UniqueId::MAX_COUNTER),
-            'MAX_COUNTER must be exactly 5 decimal digits');
+        $this->assertSame(
+            5,
+            strlen((string) UniqueId::MAX_COUNTER),
+            'MAX_COUNTER must be exactly 5 decimal digits'
+        );
 
         // random: secure 使用 13 位, distributed 使用 14 位
-        $this->assertSame(13, strlen('9999999999999'),
-            'random (secure) max must be exactly 13 decimal digits');
-        $this->assertSame(14, strlen('99999999999999'),
-            'random (distributed) max must be exactly 14 decimal digits');
+        $this->assertSame(
+            13,
+            strlen('9999999999999'),
+            'random (secure) max must be exactly 13 decimal digits'
+        );
+        $this->assertSame(
+            14,
+            strlen('99999999999999'),
+            'random (distributed) max must be exactly 14 decimal digits'
+        );
     }
 
     /**
-     * 验证 toStringWithPad 输出长度与声明一致
+     * 验证 toStringWithPad 输出长度与声明一致.
      */
     public function testToStringWithPadProducesExactWidth()
     {
@@ -333,13 +369,16 @@ class UniqueIdTest extends TestCase
 
         foreach ($fields as list($value, $width)) {
             $padded = Base::toStringWithPad($value, $width);
-            $this->assertSame($width, strlen($padded),
-                "toStringWithPad($value, $width) should produce exactly $width chars, got '$padded'");
+            $this->assertSame(
+                $width,
+                strlen($padded),
+                "toStringWithPad($value, $width) should produce exactly $width chars, got '$padded'"
+            );
         }
     }
 
     /**
-     * 验证 UNORDERED 字符集是 BASE 字符集的有效排列 (不多不少不重复)
+     * 验证 UNORDERED 字符集是 BASE 字符集的有效排列 (不多不少不重复).
      */
     public function testUnorderedAlphabetsAreValidPermutations()
     {
@@ -349,10 +388,16 @@ class UniqueIdTest extends TestCase
         $shuffled36 = str_split(UniqueId::UNORDERED_BASE36);
         sort($original36);
         sort($shuffled36);
-        $this->assertSame($original36, $shuffled36,
-            'UNORDERED_BASE36 must contain exactly the same chars as BASE36');
-        $this->assertNotSame(UniqueId::BASE36, UniqueId::UNORDERED_BASE36,
-            'UNORDERED_BASE36 must not equal BASE36');
+        $this->assertSame(
+            $original36,
+            $shuffled36,
+            'UNORDERED_BASE36 must contain exactly the same chars as BASE36'
+        );
+        $this->assertNotSame(
+            UniqueId::BASE36,
+            UniqueId::UNORDERED_BASE36,
+            'UNORDERED_BASE36 must not equal BASE36'
+        );
 
         // UNORDERED_BASE62 必须是 BASE62 的排列 (相同字符, 不同顺序)
         $this->assertSame(strlen(UniqueId::BASE62), strlen(UniqueId::UNORDERED_BASE62));
@@ -360,10 +405,16 @@ class UniqueIdTest extends TestCase
         $shuffled62 = str_split(UniqueId::UNORDERED_BASE62);
         sort($original62);
         sort($shuffled62);
-        $this->assertSame($original62, $shuffled62,
-            'UNORDERED_BASE62 must contain exactly the same chars as BASE62');
-        $this->assertNotSame(UniqueId::BASE62, UniqueId::UNORDERED_BASE62,
-            'UNORDERED_BASE62 must not equal BASE62');
+        $this->assertSame(
+            $original62,
+            $shuffled62,
+            'UNORDERED_BASE62 must contain exactly the same chars as BASE62'
+        );
+        $this->assertNotSame(
+            UniqueId::BASE62,
+            UniqueId::UNORDERED_BASE62,
+            'UNORDERED_BASE62 must not equal BASE62'
+        );
     }
 
     public function testShortInitializesPidSnapshotForForkSafety()
@@ -394,10 +445,15 @@ class UniqueIdTest extends TestCase
         UniqueId::short();
 
         $this->assertIsInt($this->getUniqueIdState('seedPid'));
-        $this->assertNotSame($fakePid, $this->getUniqueIdState('seedPid'),
-            'fork detection should refresh pid snapshot for current process');
-        $this->assertNull($this->getUniqueIdState('processSeed'),
-            'short mode should keep process seed null after fork state reset');
+        $this->assertNotSame(
+            $fakePid,
+            $this->getUniqueIdState('seedPid'),
+            'fork detection should refresh pid snapshot for current process'
+        );
+        $this->assertNull(
+            $this->getUniqueIdState('processSeed'),
+            'short mode should keep process seed null after fork state reset'
+        );
     }
 
     public function testShortKeepsProcessSeedNullWhenNoFork()
@@ -409,8 +465,10 @@ class UniqueIdTest extends TestCase
         UniqueId::short();
         UniqueId::short();
 
-        $this->assertNull($this->getUniqueIdState('processSeed'),
-            'short mode should not initialize process seed');
+        $this->assertNull(
+            $this->getUniqueIdState('processSeed'),
+            'short mode should not initialize process seed'
+        );
     }
 
     public function testShortClearsExistingProcessSeedWhenForkDetected()
@@ -423,16 +481,24 @@ class UniqueIdTest extends TestCase
 
         UniqueId::short();
 
-        $this->assertNull($this->getUniqueIdState('processSeed'),
-            'short mode should clear inherited process seed after fork detection');
-        $this->assertSame($this->callUniqueIdMethod('getProcessId'), $this->getUniqueIdState('seedPid'),
-            'pid snapshot should be refreshed to current process');
+        $this->assertNull(
+            $this->getUniqueIdState('processSeed'),
+            'short mode should clear inherited process seed after fork detection'
+        );
+        $this->assertSame(
+            $this->callUniqueIdMethod('getProcessId'),
+            $this->getUniqueIdState('seedPid'),
+            'pid snapshot should be refreshed to current process'
+        );
         $this->assertTrue(
             $this->getUniqueIdState('counter') >= 0 && $this->getUniqueIdState('counter') <= UniqueId::MAX_COUNTER,
             'counter should stay inside declared range'
         );
-        $this->assertGreaterThan(0, $this->getUniqueIdState('lastTimestamp'),
-            'timestamp should be refreshed after state reset');
+        $this->assertGreaterThan(
+            0,
+            $this->getUniqueIdState('lastTimestamp'),
+            'timestamp should be refreshed after state reset'
+        );
     }
 
     public function testCheckForkDoesNotResetStateWhenPidUnchanged()
@@ -463,10 +529,16 @@ class UniqueIdTest extends TestCase
         $id = UniqueId::process();
 
         $this->assertNotEmpty($id);
-        $this->assertNotSame(-1, $this->getUniqueIdState('processSeed'),
-            'process mode should regenerate process seed after fork detection');
-        $this->assertSame($this->callUniqueIdMethod('getProcessId'), $this->getUniqueIdState('seedPid'),
-            'process mode should refresh pid snapshot to current process');
+        $this->assertNotSame(
+            -1,
+            $this->getUniqueIdState('processSeed'),
+            'process mode should regenerate process seed after fork detection'
+        );
+        $this->assertSame(
+            $this->callUniqueIdMethod('getProcessId'),
+            $this->getUniqueIdState('seedPid'),
+            'process mode should refresh pid snapshot to current process'
+        );
         $this->assertTrue(
             $this->getUniqueIdState('counter') >= 0 && $this->getUniqueIdState('counter') <= UniqueId::MAX_COUNTER,
             'counter should stay inside declared range'
@@ -497,10 +569,16 @@ class UniqueIdTest extends TestCase
         $machineSegment2 = substr($decimal2, 14, 19);
         $expectedMachine = Base::toStringWithPad($this->callUniqueIdMethod('getMachineId'), 19);
 
-        $this->assertSame($machineSegment1, $machineSegment2,
-            'distributed mode should keep machine segment stable across calls');
-        $this->assertSame($expectedMachine, $machineSegment1,
-            'distributed mode should use current cached machine id');
+        $this->assertSame(
+            $machineSegment1,
+            $machineSegment2,
+            'distributed mode should keep machine segment stable across calls'
+        );
+        $this->assertSame(
+            $expectedMachine,
+            $machineSegment1,
+            'distributed mode should use current cached machine id'
+        );
     }
 
     public function testGetProcessIdReturnsPositiveInteger()
@@ -535,7 +613,7 @@ class UniqueIdTest extends TestCase
         $original = getenv($env);
 
         try {
-            putenv($env . '=namespace_a');
+            putenv($env.'=namespace_a');
             $this->setUniqueIdState('machineId', null);
             $machineA1 = $this->callUniqueIdMethod('getMachineId');
 
@@ -543,7 +621,7 @@ class UniqueIdTest extends TestCase
             $this->setUniqueIdState('machineId', null);
             $machineA2 = $this->callUniqueIdMethod('getMachineId');
 
-            putenv($env . '=namespace_b');
+            putenv($env.'=namespace_b');
             $this->setUniqueIdState('machineId', null);
             $machineB = $this->callUniqueIdMethod('getMachineId');
 
@@ -553,7 +631,7 @@ class UniqueIdTest extends TestCase
             if (false === $original) {
                 putenv($env);
             } else {
-                putenv($env . '=' . $original);
+                putenv($env.'='.$original);
             }
             $this->setUniqueIdState('machineId', null);
         }
@@ -593,8 +671,10 @@ class UniqueIdTest extends TestCase
 
     /**
      * @param mixed ...$args
-     * @return mixed
+     *
      * @throws \ReflectionException
+     *
+     * @return mixed
      */
     protected function callUniqueIdMethod(string $method, ...$args)
     {
@@ -606,8 +686,9 @@ class UniqueIdTest extends TestCase
     }
 
     /**
-     * @return mixed
      * @throws \ReflectionException
+     *
+     * @return mixed
      */
     protected function getUniqueIdState(string $property)
     {
@@ -620,6 +701,7 @@ class UniqueIdTest extends TestCase
 
     /**
      * @param mixed $value
+     *
      * @throws \ReflectionException
      */
     protected function setUniqueIdState(string $property, $value): void

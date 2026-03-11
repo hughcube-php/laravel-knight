@@ -27,6 +27,7 @@ class WalDropSlotCommand extends Command
 
         if (null === $exists) {
             $this->error(sprintf('Slot [%s] does not exist', $slot));
+
             return;
         }
 

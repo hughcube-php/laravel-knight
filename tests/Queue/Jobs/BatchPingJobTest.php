@@ -62,8 +62,8 @@ class BatchPingJobTest extends TestCase
         $job = new BatchPingJob(['jobs' => [['url' => 'https://example.test']]]);
         $requests = [
             [
-                'method' => 'POST',
-                'url' => 'https://example.test/ping',
+                'method'  => 'POST',
+                'url'     => 'https://example.test/ping',
                 'headers' => ['X-Test' => '1'],
             ],
         ];
