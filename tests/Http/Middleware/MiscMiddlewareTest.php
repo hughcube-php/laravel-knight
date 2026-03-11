@@ -168,7 +168,7 @@ class MiscMiddlewareTest extends TestCase
 
     public function testRequestSignatureValidateDisabledByConfig()
     {
-        config(['knight.request.signature.disabled' => true]);
+        config(['signature.disabled' => true]);
 
         $middleware = new RequestSignatureValidate();
         $request = $this->makeSignedRequest('/signed', 'GET', [], '');
@@ -182,7 +182,7 @@ class MiscMiddlewareTest extends TestCase
 
     public function testRequestSignatureValidateNotDisabledByDefault()
     {
-        config(['knight.request.signature.disabled' => false]);
+        config(['signature.disabled' => false]);
 
         $middleware = new RequestSignatureValidate();
         $request = $this->makeSignedRequest('/signed', 'GET', [], '');

@@ -43,7 +43,7 @@ class RequestSignatureValidate
 
     protected function isDisabled(): bool
     {
-        return true === config('knight.request.signature.disabled');
+        return true === config('signature.disabled');
     }
 
     /**
