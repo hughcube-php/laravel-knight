@@ -10,6 +10,18 @@
     <a href="https://styleci.io/repos/373508253">
         <img src="https://github.styleci.io/repos/373508253/shield?branch=master" alt="StyleCI">
     </a>
+    <a href="https://packagist.org/packages/hughcube/laravel-knight">
+        <img src="https://img.shields.io/packagist/v/hughcube/laravel-knight.svg?style=flat-square" alt="Latest Version on Packagist">
+    </a>
+    <a href="https://packagist.org/packages/hughcube/laravel-knight">
+        <img src="https://img.shields.io/packagist/dt/hughcube/laravel-knight.svg?style=flat-square" alt="Total Downloads">
+    </a>
+    <a href="https://packagist.org/packages/hughcube/laravel-knight">
+        <img src="https://img.shields.io/packagist/php-v/hughcube/laravel-knight.svg?style=flat-square" alt="PHP Version Require">
+    </a>
+    <a href="https://github.com/hughcube-php/laravel-knight/blob/master/LICENSE">
+        <img src="https://img.shields.io/github/license/hughcube-php/laravel-knight.svg?style=flat-square" alt="License">
+    </a>
 </p>
 
 ## Introduction

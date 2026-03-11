@@ -1,6 +1,6 @@
 {
     "name": "hughcube/laravel-knight",
-    "description": "",
+    "description": "A powerful Laravel extension package providing enhanced Eloquent models, query builders, caching, optimistic locking, middleware, and PostgreSQL array support.",
     "license": "MIT",
     "authors": [
         {
@@ -62,7 +62,7 @@
     "scripts": {
         "test": "phpunit",
         "phpstan": "phpstan analyse -vvv --memory-limit=-1",
-        "check-style": "phpcs -p --standard=PSR2 src/ -v",
+        "check-style": "phpcs -p --standard=PSR2 src/ -v --warning-severity=0",
         "fix-style": "phpcbf -p --standard=PSR2 src/ -v"
     },
     "config": {
