@@ -14,7 +14,7 @@ class WalEventDispatchCommand extends Command
 {
     protected $signature = 'wal:event-dispatch
         {--connection= : Database connection name}
-        {--slot= : Replication slot name, default: {APP_NAME}_wal_event}
+        {--slot= : Replication slot name, default: {APP_NAME}_{APP_ENV}_wal_event}
         {--interval=1.0 : Poll interval in seconds, supports decimals}
         {--batch=1000 : Max number of changes per poll}
         {--memory=128 : Memory limit in MB, process stops when exceeded}
@@ -393,8 +393,9 @@ class WalEventDispatchCommand extends Command
         }
 
         $appName = config('app.name', 'app');
+        $appEnv = config('app.env', 'production');
 
-        return strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $appName)).'_wal_event';
+        return strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $appName.'_'.$appEnv)).'_wal_event';
     }
 
     /**
