@@ -392,10 +392,13 @@ class WalEventDispatchCommand extends Command
             return $slot;
         }
 
-        $appName = config('app.name', 'app');
-        $appEnv = config('app.env', 'production');
+        $appName = config('app.name') ?: 'app';
+        $appEnv = config('app.env') ?: 'production';
 
-        return strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $appName.'_'.$appEnv)).'_wal_event';
+        $slug = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', $appName.'_'.$appEnv));
+        $slug = preg_replace('/_+/', '_', trim($slug, '_'));
+
+        return $slug.'_wal_event';
     }
 
     /**
