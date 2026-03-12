@@ -366,12 +366,13 @@ class WalEventDispatchCommandTest extends TestCase
     public function testGetSlotNameDefaultUsesAppName()
     {
         $this->app['config']->set('app.name', 'MyTestApp');
+        $this->app['config']->set('app.env', 'testing');
 
         $command = $this->makeCommand();
 
         $result = self::callMethod($command, 'getSlotName');
 
-        $this->assertSame('mytestapp_wal_event', $result);
+        $this->assertSame('mytestapp_testing_wal_event', $result);
     }
 
     public function testGetSlotNameWithExplicitSlotOption()
@@ -387,24 +388,26 @@ class WalEventDispatchCommandTest extends TestCase
     public function testGetSlotNameWithSpecialCharacters()
     {
         $this->app['config']->set('app.name', 'My-Test.App!');
+        $this->app['config']->set('app.env', 'testing');
 
         $command = $this->makeCommand();
 
         $result = self::callMethod($command, 'getSlotName');
 
-        $this->assertSame('my_test_app__wal_event', $result);
+        $this->assertSame('my_test_app_testing_wal_event', $result);
     }
 
     public function testGetSlotNameWithEmptyAppName()
     {
         $this->app['config']->set('app.name', null);
+        $this->app['config']->set('app.env', 'testing');
 
         $command = $this->makeCommand();
 
         $result = self::callMethod($command, 'getSlotName');
 
-        // config('app.name', 'app') returns null when key exists but value is null
-        $this->assertSame('_wal_event', $result);
+        // config('app.name') is null, fallback to 'app'; env is 'testing'
+        $this->assertSame('app_testing_wal_event', $result);
     }
 
     // ==================== resolveTable ====================
@@ -688,37 +691,42 @@ class WalEventDispatchCommandTest extends TestCase
     public function testGetSlotNameWithNumericAppName()
     {
         $this->app['config']->set('app.name', '123App456');
+        $this->app['config']->set('app.env', 'testing');
 
         $command = $this->makeCommand();
 
         $result = self::callMethod($command, 'getSlotName');
 
-        $this->assertSame('123app456_wal_event', $result);
+        $this->assertSame('123app456_testing_wal_event', $result);
     }
 
     public function testGetSlotNameWithChineseAppName()
     {
         $this->app['config']->set('app.name', '我的应用');
+        $this->app['config']->set('app.env', 'testing');
 
         $command = $this->makeCommand();
 
         $result = self::callMethod($command, 'getSlotName');
 
-        // Chinese chars are multi-byte in UTF-8 (3 bytes each), preg_replace replaces per byte
-        // '我的应用' = 4 chars × 3 bytes = 12 underscores, then + '_wal_event'
-        $this->assertSame('_____________wal_event', $result);
+        // Chinese chars replaced by underscores, env is 'testing'
+        // '我的应用_testing' → underscores cleaned up
+        $appEnvSlug = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', '我的应用_testing'));
+        $appEnvSlug = preg_replace('/_+/', '_', trim($appEnvSlug, '_'));
+        $this->assertSame($appEnvSlug.'_wal_event', $result);
     }
 
     public function testGetSlotNameWithAllSpecialCharacters()
     {
         $this->app['config']->set('app.name', '@#$%^&*');
+        $this->app['config']->set('app.env', 'testing');
 
         $command = $this->makeCommand();
 
         $result = self::callMethod($command, 'getSlotName');
 
-        // 7 special chars → 7 underscores, then + '_wal_event'
-        $this->assertSame('________wal_event', $result);
+        // special chars replaced by underscores, env is 'testing'
+        $this->assertSame('testing_wal_event', $result);
     }
 
     // ==================== resolveTable strict tests ====================

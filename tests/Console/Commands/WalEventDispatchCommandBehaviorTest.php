@@ -103,7 +103,7 @@ namespace HughCube\Laravel\Knight\Tests\Console\Commands {
 
         public function testHandleRunsSingleIterationAndStops(): void
         {
-            config(['app.name' => 'TestApp']);
+            config(['app.name' => 'TestApp', 'app.env' => 'testing']);
 
             $command = new TestableWalEventDispatchCommand();
             $command->handlers = [
@@ -126,7 +126,7 @@ namespace HughCube\Laravel\Knight\Tests\Console\Commands {
             $command->handle();
 
             $this->assertSame('ensureSlotExists', $command->calls[0][0]);
-            $this->assertSame('testapp_wal_event', $command->calls[0][1]);
+            $this->assertSame('testapp_testing_wal_event', $command->calls[0][1]);
             $this->assertSame('pollChanges', $command->calls[1][0]);
             $this->assertFalse($command->reconnectCalled);
             $this->assertContains(250000, WalEventDispatchCommandRuntimeState::$sleepCalls);
