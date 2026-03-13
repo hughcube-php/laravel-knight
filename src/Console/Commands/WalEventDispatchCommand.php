@@ -274,16 +274,33 @@ class WalEventDispatchCommand extends Command
             ? 'pg_logical_slot_get_changes'
             : 'pg_logical_slot_peek_changes';
 
+        /**
+         * Capture WAL LSN before peek so we have a safe advance target.
+         *
+         * In shared PG instances, other databases' WAL pushes pg_current_wal_lsn() forward
+         * while this slot stays put (no changes for our DB), causing ever-growing phantom lag.
+         * When peek returns empty we advance to this pre-peek LSN — guaranteed to not skip
+         * any changes because peek already confirmed nothing exists up to at least this point.
+         */
+        $prePeekLsn = null;
+        if ('advance' === $mode) {
+            try {
+                $row = $connection->selectOne('SELECT pg_current_wal_lsn() AS lsn');
+                $prePeekLsn = null !== $row ? $row->lsn : null;
+            } catch (Throwable $e) {
+                /** best-effort */
+            }
+        }
+
         $results = $connection->select(
             sprintf('SELECT lsn, data FROM %s(?, NULL, ?)', $function),
             [$slot, $batch]
         );
 
         if (empty($results)) {
-            /** No changes for this database; advance slot to current WAL position to prevent phantom lag */
-            if ('advance' === $mode) {
+            if (null !== $prePeekLsn) {
                 try {
-                    $connection->statement('SELECT pg_replication_slot_advance(?, pg_current_wal_lsn())', [$slot]);
+                    $connection->statement('SELECT pg_replication_slot_advance(?, ?)', [$slot, $prePeekLsn]);
                 } catch (Throwable $e) {
                     /** best-effort: advance failure does not affect normal flow */
                 }
