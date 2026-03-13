@@ -280,6 +280,15 @@ class WalEventDispatchCommand extends Command
         );
 
         if (empty($results)) {
+            /** No changes for this database; advance slot to current WAL position to prevent phantom lag */
+            if ('advance' === $mode) {
+                try {
+                    $connection->statement('SELECT pg_replication_slot_advance(?, pg_current_wal_lsn())', [$slot]);
+                } catch (Throwable $e) {
+                    /** best-effort: advance failure does not affect normal flow */
+                }
+            }
+
             return false;
         }
 
