@@ -123,7 +123,17 @@ class RequestSignatureValidate
 
     protected function isOptional(Request $request): bool
     {
-        return $request->is($this->getOptional()) || $request->fullUrlIs($this->getOptional());
+        $optional = Collection::make($this->getOptional())
+            ->map(function ($optional) {
+                if (is_string($optional)) {
+                    return ltrim($optional, '/');
+                }
+
+                return $optional;
+            })
+            ->values()->all();
+
+        return $request->is($optional) || $request->fullUrlIs($optional);
     }
 
     protected function getOptional()
