@@ -2166,7 +2166,7 @@ namespace Illuminate\Support {
          * @see \HughCube\Laravel\Knight\Mixin\Support\CollectionMixin::splitNested()
          * @return static
          */
-        public function splitNested(string $string, string $firstPattern = '#[;；]#', string $secondPattern = '#[\\/／]#'): static
+        public function splitNested(string $string, string $firstPattern = '#[;；]#u', string $secondPattern = '#[\\/／]#u'): static
         {
         }
 

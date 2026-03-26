@@ -29,31 +29,12 @@ class ModelWalHooksTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testOnKnightWalChangedIsCallable()
-    {
-        $model = new ModelWalHooksTestModel();
-
-        $model->onKnightWalChanged();
-        $this->assertTrue(true);
-    }
-
     public function testOnKnightModelChangedDefaultCallsDeleteRowCache()
     {
         $model = new ModelWalHooksTestModelTracked();
         $model->onKnightModelChanged();
 
         $this->assertSame(1, ModelWalHooksTestModelTracked::$deleteRowCacheCalls);
-    }
-
-    public function testOnKnightWalChangedDefaultIsNoop()
-    {
-        $model = new ModelWalHooksTestModelTracked();
-        $before = ModelWalHooksTestModelTracked::$deleteRowCacheCalls;
-
-        $model->onKnightWalChanged();
-
-        // Should not trigger deleteRowCache or any other side-effect
-        $this->assertSame($before, ModelWalHooksTestModelTracked::$deleteRowCacheCalls);
     }
 
     public function testModelChangedCalledOnEloquentCreated()

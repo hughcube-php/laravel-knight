@@ -31,334 +31,90 @@ class WalEventDispatchCommandTest extends TestCase
         return $command;
     }
 
-    // ==================== extractPrimaryKey ====================
+    // ==================== buildWal2jsonParamPlaceholders / buildWal2jsonParamBindings ====================
 
-    public function testExtractPrimaryKeyForInsert()
+    public function testBuildWal2jsonParamPlaceholdersEmpty()
     {
         $command = $this->makeCommand();
 
-        $change = [
-            'kind'         => 'insert',
-            'table'        => 'users',
-            'columnnames'  => ['id', 'name', 'email'],
-            'columnvalues' => [42, 'John', 'john@example.com'],
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'id']);
-        $this->assertSame(42, $result);
-    }
-
-    public function testExtractPrimaryKeyForUpdate()
-    {
-        $command = $this->makeCommand();
-
-        $change = [
-            'kind'         => 'update',
-            'table'        => 'users',
-            'columnnames'  => ['id', 'name', 'email'],
-            'columnvalues' => [7, 'Jane', 'jane@example.com'],
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'id']);
-        $this->assertSame(7, $result);
-    }
-
-    public function testExtractPrimaryKeyForDelete()
-    {
-        $command = $this->makeCommand();
-
-        $change = [
-            'kind'    => 'delete',
-            'table'   => 'users',
-            'oldkeys' => [
-                'keynames'  => ['id'],
-                'keyvalues' => [15],
-            ],
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'id']);
-        $this->assertSame(15, $result);
-    }
-
-    public function testExtractPrimaryKeyForDeleteWithStringKey()
-    {
-        $command = $this->makeCommand();
-
-        $change = [
-            'kind'    => 'delete',
-            'table'   => 'items',
-            'oldkeys' => [
-                'keynames'  => ['uuid'],
-                'keyvalues' => ['abc-def-123'],
-            ],
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'uuid']);
-        $this->assertSame('abc-def-123', $result);
-    }
-
-    public function testExtractPrimaryKeyForDeleteWithCompositeKey()
-    {
-        $command = $this->makeCommand();
-
-        $change = [
-            'kind'    => 'delete',
-            'table'   => 'order_items',
-            'oldkeys' => [
-                'keynames'  => ['order_id', 'item_id'],
-                'keyvalues' => [10, 20],
-            ],
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'item_id']);
-        $this->assertSame(20, $result);
-    }
-
-    public function testExtractPrimaryKeyReturnsNullWhenKeyNotFound()
-    {
-        $command = $this->makeCommand();
-
-        $change = [
-            'kind'         => 'insert',
-            'table'        => 'users',
-            'columnnames'  => ['name', 'email'],
-            'columnvalues' => ['John', 'john@example.com'],
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'id']);
-        $this->assertNull($result);
-    }
-
-    public function testExtractPrimaryKeyForDeleteReturnsNullWhenKeyNotInOldkeys()
-    {
-        $command = $this->makeCommand();
-
-        $change = [
-            'kind'    => 'delete',
-            'table'   => 'users',
-            'oldkeys' => [
-                'keynames'  => ['other_key'],
-                'keyvalues' => [1],
-            ],
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'id']);
-        $this->assertNull($result);
-    }
-
-    public function testExtractPrimaryKeyForDeleteWithEmptyOldkeys()
-    {
-        $command = $this->makeCommand();
-
-        $change = [
-            'kind'    => 'delete',
-            'table'   => 'users',
-            'oldkeys' => [
-                'keynames'  => [],
-                'keyvalues' => [],
-            ],
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'id']);
-        $this->assertNull($result);
-    }
-
-    public function testExtractPrimaryKeyForDeleteWithMissingOldkeys()
-    {
-        $command = $this->makeCommand();
-
-        $change = [
-            'kind'  => 'delete',
-            'table' => 'users',
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'id']);
-        $this->assertNull($result);
-    }
-
-    public function testExtractPrimaryKeyWithNoKind()
-    {
-        $command = $this->makeCommand();
-
-        $change = [
-            'table'        => 'users',
-            'columnnames'  => ['id', 'name'],
-            'columnvalues' => [5, 'test'],
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'id']);
-        $this->assertSame(5, $result);
-    }
-
-    public function testExtractPrimaryKeyWithEmptyChange()
-    {
-        $command = $this->makeCommand();
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [[], 'id']);
-        $this->assertNull($result);
-    }
-
-    public function testExtractPrimaryKeyWithStringIdInsert()
-    {
-        $command = $this->makeCommand();
-
-        $change = [
-            'kind'         => 'insert',
-            'table'        => 'items',
-            'columnnames'  => ['uuid', 'name'],
-            'columnvalues' => ['550e8400-e29b-41d4-a716-446655440000', 'Widget'],
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'uuid']);
-        $this->assertSame('550e8400-e29b-41d4-a716-446655440000', $result);
-    }
-
-    public function testExtractPrimaryKeyWithZeroId()
-    {
-        $command = $this->makeCommand();
-
-        $change = [
-            'kind'         => 'insert',
-            'table'        => 'items',
-            'columnnames'  => ['id', 'name'],
-            'columnvalues' => [0, 'zero'],
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'id']);
-        $this->assertSame(0, $result);
-    }
-
-    public function testExtractPrimaryKeyWithNegativeId()
-    {
-        $command = $this->makeCommand();
-
-        $change = [
-            'kind'         => 'insert',
-            'table'        => 'items',
-            'columnnames'  => ['id', 'name'],
-            'columnvalues' => [-1, 'negative'],
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'id']);
-        $this->assertSame(-1, $result);
-    }
-
-    public function testExtractPrimaryKeyWithLargeIntegerId()
-    {
-        $command = $this->makeCommand();
-
-        $change = [
-            'kind'         => 'insert',
-            'table'        => 'items',
-            'columnnames'  => ['id', 'name'],
-            'columnvalues' => [9999999999, 'large'],
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'id']);
-        $this->assertSame(9999999999, $result);
-    }
-
-    public function testExtractPrimaryKeyWithEmptyStringId()
-    {
-        $command = $this->makeCommand();
-
-        $change = [
-            'kind'         => 'insert',
-            'table'        => 'items',
-            'columnnames'  => ['id', 'name'],
-            'columnvalues' => ['', 'empty_id'],
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'id']);
+        $result = self::callMethod($command, 'buildWal2jsonParamPlaceholders');
         $this->assertSame('', $result);
     }
 
-    public function testExtractPrimaryKeyDeleteWithMultipleKeysFirstKey()
+    public function testBuildWal2jsonParamPlaceholdersWithParams()
     {
-        $command = $this->makeCommand();
+        $command = $this->makeCommand(['--wal2json-params' => ['filter-columns=content', 'add-tables=users']]);
 
-        $change = [
-            'kind'    => 'delete',
-            'table'   => 'pivot',
-            'oldkeys' => [
-                'keynames'  => ['user_id', 'role_id'],
-                'keyvalues' => [100, 200],
-            ],
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'user_id']);
-        $this->assertSame(100, $result);
+        $result = self::callMethod($command, 'buildWal2jsonParamPlaceholders');
+        $this->assertSame(', ?, ?, ?, ?', $result);
     }
 
-    public function testExtractPrimaryKeyDeleteWithUuidKey()
+    public function testBuildWal2jsonParamBindingsEmpty()
     {
         $command = $this->makeCommand();
 
-        $uuid = '550e8400-e29b-41d4-a716-446655440000';
-        $change = [
-            'kind'    => 'delete',
-            'table'   => 'documents',
-            'oldkeys' => [
-                'keynames'  => ['uuid'],
-                'keyvalues' => [$uuid],
-            ],
-        ];
-
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'uuid']);
-        $this->assertSame($uuid, $result);
+        $result = self::callMethod($command, 'buildWal2jsonParamBindings');
+        $this->assertSame([], $result);
     }
 
-    public function testExtractPrimaryKeyWithMismatchedColumnArrayLengths()
+    public function testBuildWal2jsonParamBindingsWithParams()
     {
-        $command = $this->makeCommand();
+        $command = $this->makeCommand(['--wal2json-params' => ['filter-columns=content,body', 'add-tables=users']]);
 
-        // columnnames has more entries than columnvalues
-        $change = [
-            'kind'         => 'insert',
-            'table'        => 'items',
-            'columnnames'  => ['id', 'name', 'extra'],
-            'columnvalues' => [1, 'test'],
-        ];
-
-        // 'id' is at index 0, columnvalues[0] exists
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'id']);
-        $this->assertSame(1, $result);
-
-        // 'extra' is at index 2, columnvalues[2] does NOT exist
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'extra']);
-        $this->assertNull($result);
+        $result = self::callMethod($command, 'buildWal2jsonParamBindings');
+        $this->assertSame(['filter-columns', 'content,body', 'add-tables', 'users'], $result);
     }
 
-    public function testExtractPrimaryKeyWithNullKeyValue()
+    public function testBuildWal2jsonParamBindingsWithKeyOnly()
     {
-        $command = $this->makeCommand();
+        $command = $this->makeCommand(['--wal2json-params' => ['include-lsn']]);
 
-        $change = [
-            'kind'         => 'insert',
-            'table'        => 'items',
-            'columnnames'  => ['id', 'name'],
-            'columnvalues' => [null, 'test'],
-        ];
-
-        // null is a valid value (isset returns false for null)
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'id']);
-        // isset($columnValues[0]) is false when value is null, so returns null
-        $this->assertNull($result);
+        $result = self::callMethod($command, 'buildWal2jsonParamBindings');
+        $this->assertSame(['include-lsn', ''], $result);
     }
 
-    public function testExtractPrimaryKeyForUpdateWithStringPk()
+    // ==================== buildChangeSummary ====================
+
+    public function testBuildChangeSummaryMixed()
     {
         $command = $this->makeCommand();
 
-        $change = [
-            'kind'         => 'update',
-            'table'        => 'slugs',
-            'columnnames'  => ['slug', 'title'],
-            'columnvalues' => ['my-article', 'My Article'],
+        $changes = [
+            new \HughCube\Laravel\Knight\Database\Wal\WalChangeRecord('insert', 'users', null, 1, 'id', [], [], 'stdClass'),
+            new \HughCube\Laravel\Knight\Database\Wal\WalChangeRecord('insert', 'users', null, 2, 'id', [], [], 'stdClass'),
+            new \HughCube\Laravel\Knight\Database\Wal\WalChangeRecord('update', 'users', null, 3, 'id', [], [], 'stdClass'),
+            new \HughCube\Laravel\Knight\Database\Wal\WalChangeRecord('delete', 'users', null, 4, 'id', [], [], 'stdClass'),
         ];
 
-        $result = self::callMethod($command, 'extractPrimaryKey', [$change, 'slug']);
-        $this->assertSame('my-article', $result);
+        $result = self::callMethod($command, 'buildChangeSummary', [$changes]);
+        $this->assertSame('users: 2 inserts, 1 update, 1 delete', $result);
+    }
+
+    public function testBuildChangeSummarySingle()
+    {
+        $command = $this->makeCommand();
+
+        $changes = [
+            new \HughCube\Laravel\Knight\Database\Wal\WalChangeRecord('insert', 'users', null, 1, 'id', [], [], 'stdClass'),
+        ];
+
+        $result = self::callMethod($command, 'buildChangeSummary', [$changes]);
+        $this->assertSame('users: 1 insert', $result);
+    }
+
+    public function testBuildChangeSummaryMultipleTables()
+    {
+        $command = $this->makeCommand();
+
+        $changes = [
+            new \HughCube\Laravel\Knight\Database\Wal\WalChangeRecord('insert', 'users', null, 1, 'id', [], [], 'stdClass'),
+            new \HughCube\Laravel\Knight\Database\Wal\WalChangeRecord('update', 'orders', null, 2, 'id', [], [], 'stdClass'),
+            new \HughCube\Laravel\Knight\Database\Wal\WalChangeRecord('update', 'orders', null, 3, 'id', [], [], 'stdClass'),
+            new \HughCube\Laravel\Knight\Database\Wal\WalChangeRecord('delete', 'orders', null, 4, 'id', [], [], 'stdClass'),
+        ];
+
+        $result = self::callMethod($command, 'buildChangeSummary', [$changes]);
+        $this->assertSame('users: 1 insert; orders: 2 updates, 1 delete', $result);
     }
 
     // ==================== getSlotName ====================
@@ -406,7 +162,6 @@ class WalEventDispatchCommandTest extends TestCase
 
         $result = self::callMethod($command, 'getSlotName');
 
-        // config('app.name') is null, fallback to 'app'; env is 'testing'
         $this->assertSame('app_testing_wal_event', $result);
     }
 
@@ -527,6 +282,7 @@ class WalEventDispatchCommandTest extends TestCase
         $this->assertTrue($definition->hasOption('batch'));
         $this->assertTrue($definition->hasOption('mode'));
         $this->assertTrue($definition->hasOption('model-path'));
+        $this->assertTrue($definition->hasOption('wal2json-params'));
     }
 
     public function testCommandOptionDefaults()
@@ -709,8 +465,6 @@ class WalEventDispatchCommandTest extends TestCase
 
         $result = self::callMethod($command, 'getSlotName');
 
-        // Chinese chars replaced by underscores, env is 'testing'
-        // '我的应用_testing' → underscores cleaned up
         $appEnvSlug = strtolower(preg_replace('/[^a-zA-Z0-9]/', '_', '我的应用_testing'));
         $appEnvSlug = preg_replace('/_+/', '_', trim($appEnvSlug, '_'));
         $this->assertSame($appEnvSlug.'_wal_event', $result);
@@ -725,7 +479,6 @@ class WalEventDispatchCommandTest extends TestCase
 
         $result = self::callMethod($command, 'getSlotName');
 
-        // special chars replaced by underscores, env is 'testing'
         $this->assertSame('testing_wal_event', $result);
     }
 
@@ -735,13 +488,11 @@ class WalEventDispatchCommandTest extends TestCase
     {
         $command = $this->makeCommand();
 
-        // Only one level of partition mapping is performed
         $partitionMap = [
             'child_partition'  => 'parent_partition',
             'parent_partition' => 'grandparent',
         ];
 
-        // Should resolve to parent_partition, NOT grandparent
         $result = self::callMethod($command, 'resolveTable', ['child_partition', $partitionMap]);
         $this->assertSame('parent_partition', $result);
     }
@@ -783,15 +534,14 @@ class WalEventDispatchCommandTest extends TestCase
 
     public function testExponentialBackoffFormula()
     {
-        // Verify the formula: min(60, pow(2, errorStreak - 1))
-        $this->assertSame(1, intval(min(60, pow(2, 1 - 1))));   // streak 1 -> 1s
-        $this->assertSame(2, intval(min(60, pow(2, 2 - 1))));   // streak 2 -> 2s
-        $this->assertSame(4, intval(min(60, pow(2, 3 - 1))));   // streak 3 -> 4s
-        $this->assertSame(8, intval(min(60, pow(2, 4 - 1))));   // streak 4 -> 8s
-        $this->assertSame(16, intval(min(60, pow(2, 5 - 1))));  // streak 5 -> 16s
-        $this->assertSame(32, intval(min(60, pow(2, 6 - 1))));  // streak 6 -> 32s
-        $this->assertSame(60, intval(min(60, pow(2, 7 - 1))));  // streak 7 -> 60s (capped)
-        $this->assertSame(60, intval(min(60, pow(2, 10 - 1)))); // streak 10 -> 60s (capped)
+        $this->assertSame(1, intval(min(60, pow(2, 1 - 1))));
+        $this->assertSame(2, intval(min(60, pow(2, 2 - 1))));
+        $this->assertSame(4, intval(min(60, pow(2, 3 - 1))));
+        $this->assertSame(8, intval(min(60, pow(2, 4 - 1))));
+        $this->assertSame(16, intval(min(60, pow(2, 5 - 1))));
+        $this->assertSame(32, intval(min(60, pow(2, 6 - 1))));
+        $this->assertSame(60, intval(min(60, pow(2, 7 - 1))));
+        $this->assertSame(60, intval(min(60, pow(2, 10 - 1))));
     }
 
     // ==================== getModelPaths strict tests ====================
@@ -803,19 +553,37 @@ class WalEventDispatchCommandTest extends TestCase
         $result = self::callMethod($command, 'getModelPaths');
         $values = array_values($result);
 
-        // Should have single trailing backslash
         $this->assertSame('App\\Models\\', $values[0]);
     }
 
     public function testGetModelPathsWithColonInPath()
     {
-        // path:namespace format with namespace containing backslashes
         $command = $this->makeCommand(['--model-path' => ['src/Models:My\\App\\Models']]);
 
         $result = self::callMethod($command, 'getModelPaths');
         $values = array_values($result);
 
         $this->assertSame('My\\App\\Models\\', $values[0]);
+    }
+
+    // ==================== queue options ====================
+
+    public function testCommandHasQueueOptions()
+    {
+        $command = $this->makeCommand();
+        $definition = $command->getDefinition();
+
+        $this->assertTrue($definition->hasOption('queue'));
+        $this->assertTrue($definition->hasOption('queue-connection'));
+    }
+
+    public function testCommandQueueOptionDefaults()
+    {
+        $command = $this->makeCommand();
+        $definition = $command->getDefinition();
+
+        $this->assertNull($definition->getOption('queue')->getDefault());
+        $this->assertSame('sync', $definition->getOption('queue-connection')->getDefault());
     }
 
     // ==================== command description ====================

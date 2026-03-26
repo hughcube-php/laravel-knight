@@ -46,23 +46,6 @@ class HasWalHandlerTraitTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testOnKnightWalChangedDefaultIsEmpty()
-    {
-        $model = new WalHandlerTraitTestModel();
-
-        // Default implementation should be empty (no-op)
-        $model->onKnightWalChanged();
-        $this->assertTrue(true);
-    }
-
-    public function testCustomOnKnightWalChanged()
-    {
-        $model = new WalHandlerTraitTestModelWithCustomWal();
-        $model->onKnightWalChanged();
-
-        $this->assertSame(1, WalHandlerTraitTestModelWithCustomWal::$walChangedCalls);
-    }
-
     public function testCustomOnKnightModelChanged()
     {
         $model = new WalHandlerTraitTestModelWithCustomModelChanged();
@@ -75,7 +58,6 @@ class HasWalHandlerTraitTest extends TestCase
     {
         parent::setUp();
 
-        WalHandlerTraitTestModelWithCustomWal::$walChangedCalls = 0;
         WalHandlerTraitTestModelWithCustomModelChanged::$modelChangedCalls = 0;
     }
 }
@@ -85,21 +67,6 @@ class WalHandlerTraitTestModel extends Model implements HasWalHandler
     use HasWalHandlerTrait;
 
     protected $table = 'wal_trait_test_items';
-}
-
-class WalHandlerTraitTestModelWithCustomWal extends Model implements HasWalHandler
-{
-    use HasWalHandlerTrait;
-
-    protected $table = 'wal_trait_test_items';
-
-    /** @var int */
-    public static $walChangedCalls = 0;
-
-    public function onKnightWalChanged(): void
-    {
-        static::$walChangedCalls++;
-    }
 }
 
 class WalHandlerTraitTestModelWithCustomModelChanged extends Model implements HasWalHandler

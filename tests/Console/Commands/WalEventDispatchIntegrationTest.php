@@ -6,7 +6,7 @@ use HughCube\Laravel\Knight\Console\Commands\WalEventDispatchCommand;
 use HughCube\Laravel\Knight\Contracts\Database\HasWalHandler;
 use HughCube\Laravel\Knight\Database\Eloquent\Model;
 use HughCube\Laravel\Knight\Database\Eloquent\Traits\HasWalHandlerTrait;
-use HughCube\Laravel\Knight\Events\WalChangesDetected;
+use HughCube\Laravel\Knight\Database\Wal\WalChangeRecord;
 use HughCube\Laravel\Knight\Tests\TestCase;
 use Illuminate\Console\OutputStyle;
 use Illuminate\Support\Facades\Event;
@@ -135,10 +135,10 @@ class WalEventDispatchIntegrationTest extends TestCase
             ],
         ];
 
-        // Listen for dispatched events
-        $dispatchedEvents = [];
-        Event::listen(WalChangesDetected::class, function (WalChangesDetected $event) use (&$dispatchedEvents) {
-            $dispatchedEvents[] = $event;
+        // Listen for dispatched records
+        $dispatchedRecords = [];
+        Event::listen('wal:*', function (string $eventName, array $payload) use (&$dispatchedRecords) {
+            $dispatchedRecords[] = $payload[0];
         });
 
         // Poll changes
@@ -147,13 +147,11 @@ class WalEventDispatchIntegrationTest extends TestCase
         ]);
 
         $this->assertTrue($hasChanges, 'pollChanges should detect INSERT changes');
-        $this->assertNotEmpty($dispatchedEvents, 'WalChangesDetected event should be dispatched');
+        $this->assertNotEmpty($dispatchedRecords, 'wal:* event should be dispatched');
 
-        $event = $dispatchedEvents[0];
-        $this->assertInstanceOf(WalChangesDetected::class, $event);
-        $this->assertSame($handler, $event->handler);
-        $this->assertContains(1, $event->ids);
-        $this->assertContains(2, $event->ids);
+        $ids = array_map(function ($r) { return $r->getId(); }, $dispatchedRecords);
+        $this->assertContains(1, $ids);
+        $this->assertContains(2, $ids);
     }
 
     public function testPollChangesDetectsUpdate()
@@ -179,9 +177,9 @@ class WalEventDispatchIntegrationTest extends TestCase
             ],
         ];
 
-        $dispatchedEvents = [];
-        Event::listen(WalChangesDetected::class, function (WalChangesDetected $event) use (&$dispatchedEvents) {
-            $dispatchedEvents[] = $event;
+        $dispatchedRecords = [];
+        Event::listen('wal:*', function (string $eventName, array $payload) use (&$dispatchedRecords) {
+            $dispatchedRecords[] = $payload[0];
         });
 
         $hasChanges = self::callMethod($command, 'pollChanges', [
@@ -189,8 +187,9 @@ class WalEventDispatchIntegrationTest extends TestCase
         ]);
 
         $this->assertTrue($hasChanges);
-        $this->assertNotEmpty($dispatchedEvents);
-        $this->assertContains(1, $dispatchedEvents[0]->ids);
+        $this->assertNotEmpty($dispatchedRecords);
+        $ids = array_map(function ($r) { return $r->getId(); }, $dispatchedRecords);
+        $this->assertContains(1, $ids);
     }
 
     public function testPollChangesDetectsDelete()
@@ -219,9 +218,9 @@ class WalEventDispatchIntegrationTest extends TestCase
             ],
         ];
 
-        $dispatchedEvents = [];
-        Event::listen(WalChangesDetected::class, function (WalChangesDetected $event) use (&$dispatchedEvents) {
-            $dispatchedEvents[] = $event;
+        $dispatchedRecords = [];
+        Event::listen('wal:*', function (string $eventName, array $payload) use (&$dispatchedRecords) {
+            $dispatchedRecords[] = $payload[0];
         });
 
         $hasChanges = self::callMethod($command, 'pollChanges', [
@@ -229,8 +228,9 @@ class WalEventDispatchIntegrationTest extends TestCase
         ]);
 
         $this->assertTrue($hasChanges);
-        $this->assertNotEmpty($dispatchedEvents);
-        $this->assertContains(1, $dispatchedEvents[0]->ids);
+        $this->assertNotEmpty($dispatchedRecords);
+        $ids = array_map(function ($r) { return $r->getId(); }, $dispatchedRecords);
+        $this->assertContains(1, $ids);
     }
 
     public function testPollChangesReturnsNoChangesWhenEmpty()
@@ -271,9 +271,9 @@ class WalEventDispatchIntegrationTest extends TestCase
         // Empty handlers - no table registered
         $handlers = [];
 
-        $dispatchedEvents = [];
-        Event::listen(WalChangesDetected::class, function (WalChangesDetected $event) use (&$dispatchedEvents) {
-            $dispatchedEvents[] = $event;
+        $dispatchedRecords = [];
+        Event::listen('wal:*', function (string $eventName, array $payload) use (&$dispatchedRecords) {
+            $dispatchedRecords[] = $payload[0];
         });
 
         $hasChanges = self::callMethod($command, 'pollChanges', [
@@ -281,7 +281,7 @@ class WalEventDispatchIntegrationTest extends TestCase
         ]);
 
         $this->assertFalse($hasChanges);
-        $this->assertEmpty($dispatchedEvents);
+        $this->assertEmpty($dispatchedRecords);
     }
 
     public function testPollChangesWithMultipleHandlersForSameTable()
@@ -304,9 +304,9 @@ class WalEventDispatchIntegrationTest extends TestCase
             ],
         ];
 
-        $dispatchedEvents = [];
-        Event::listen(WalChangesDetected::class, function (WalChangesDetected $event) use (&$dispatchedEvents) {
-            $dispatchedEvents[] = $event;
+        $dispatchedRecords = [];
+        Event::listen('wal:*', function (string $eventName, array $payload) use (&$dispatchedRecords) {
+            $dispatchedRecords[] = $payload[0];
         });
 
         $hasChanges = self::callMethod($command, 'pollChanges', [
@@ -314,14 +314,13 @@ class WalEventDispatchIntegrationTest extends TestCase
         ]);
 
         $this->assertTrue($hasChanges);
-        // Both handlers should receive events
-        $this->assertCount(2, $dispatchedEvents);
-        $this->assertSame($handler1, $dispatchedEvents[0]->handler);
-        $this->assertSame($handler2, $dispatchedEvents[1]->handler);
-        $this->assertEquals($dispatchedEvents[0]->ids, $dispatchedEvents[1]->ids);
+        // Both handlers should produce records (same WAL change, different modelClass)
+        $this->assertCount(2, $dispatchedRecords);
+        $modelClasses = array_map(function ($r) { return get_class($r->makeModel()); }, $dispatchedRecords);
+        $this->assertCount(2, array_unique($modelClasses));
     }
 
-    public function testPollChangesDeduplicatesIds()
+    public function testPollChangesPreservesAllRecords()
     {
         $this->skipIfPgsqlNotConfigured();
         $this->skipIfWal2jsonNotAvailable();
@@ -341,20 +340,19 @@ class WalEventDispatchIntegrationTest extends TestCase
             ],
         ];
 
-        $dispatchedEvents = [];
-        Event::listen(WalChangesDetected::class, function (WalChangesDetected $event) use (&$dispatchedEvents) {
-            $dispatchedEvents[] = $event;
+        $dispatchedRecords = [];
+        Event::listen('wal:*', function (string $eventName, array $payload) use (&$dispatchedRecords) {
+            $dispatchedRecords[] = $payload[0];
         });
 
         self::callMethod($command, 'pollChanges', [
             $this->slotName, $handlers, 1000, [],
         ]);
 
-        $this->assertCount(1, $dispatchedEvents);
-        // id=1 should appear only once even though there were 2 WAL entries
-        $uniqueIds = array_unique($dispatchedEvents[0]->ids);
-        $this->assertCount(count($dispatchedEvents[0]->ids), $uniqueIds);
-        $this->assertContains(1, $dispatchedEvents[0]->ids);
+        // Both insert and update records should be preserved (no dedup)
+        $this->assertGreaterThanOrEqual(2, count($dispatchedRecords));
+        $ids = array_map(function ($r) { return $r->getId(); }, $dispatchedRecords);
+        $this->assertContains(1, $ids);
     }
 
     public function testPollChangesWithPartitionMap()
@@ -396,9 +394,9 @@ class WalEventDispatchIntegrationTest extends TestCase
             'wal_integration_items_2024' => 'wal_integration_items',
         ];
 
-        $dispatchedEvents = [];
-        Event::listen(WalChangesDetected::class, function (WalChangesDetected $event) use (&$dispatchedEvents) {
-            $dispatchedEvents[] = $event;
+        $dispatchedRecords = [];
+        Event::listen('wal:*', function (string $eventName, array $payload) use (&$dispatchedRecords) {
+            $dispatchedRecords[] = $payload[0];
         });
 
         $hasChanges = self::callMethod($command, 'pollChanges', [
@@ -406,8 +404,7 @@ class WalEventDispatchIntegrationTest extends TestCase
         ]);
 
         $this->assertTrue($hasChanges);
-        $this->assertNotEmpty($dispatchedEvents);
-        $this->assertSame($handler, $dispatchedEvents[0]->handler);
+        $this->assertNotEmpty($dispatchedRecords);
 
         // Cleanup
         try {
@@ -501,9 +498,9 @@ class WalEventDispatchIntegrationTest extends TestCase
             ],
         ];
 
-        $dispatchedEvents = [];
-        Event::listen(WalChangesDetected::class, function (WalChangesDetected $event) use (&$dispatchedEvents) {
-            $dispatchedEvents[] = $event;
+        $dispatchedRecords = [];
+        Event::listen('wal:*', function (string $eventName, array $payload) use (&$dispatchedRecords) {
+            $dispatchedRecords[] = $payload[0];
         });
 
         // Poll with batch=2 (only peek first 2 WAL entries)
@@ -511,9 +508,9 @@ class WalEventDispatchIntegrationTest extends TestCase
             $this->slotName, $handlers, 2, [],
         ]);
 
-        $this->assertNotEmpty($dispatchedEvents);
+        $this->assertNotEmpty($dispatchedRecords);
         // With batch=2, may not see all 5 IDs
-        $this->assertLessThanOrEqual(5, count($dispatchedEvents[0]->ids));
+        $this->assertLessThanOrEqual(5, count($dispatchedRecords));
     }
 
     public function testFullEndToEndWithListenerIntegration()
@@ -535,25 +532,24 @@ class WalEventDispatchIntegrationTest extends TestCase
             ],
         ];
 
-        // Use the real WalChangesListener
-        $listener = new \HughCube\Laravel\Knight\Listeners\WalChangesListener();
-
-        $dispatchedEvents = [];
-        Event::listen(WalChangesDetected::class, function (WalChangesDetected $event) use (&$dispatchedEvents, $listener) {
-            $dispatchedEvents[] = $event;
-            $listener->handle($event);
+        $modelChangedCount = 0;
+        Event::listen('wal:*', function (string $eventName, array $payload) use (&$modelChangedCount) {
+            $record = $payload[0];
+            $model = $record->makeModel();
+            if (method_exists($model, 'onKnightModelChanged')) {
+                $model->onKnightModelChanged();
+            }
+            $modelChangedCount++;
         });
 
         WalIntegrationItem::$modelChangedCount = 0;
-        WalIntegrationItem::$walChangedCount = 0;
 
         self::callMethod($command, 'pollChanges', [
             $this->slotName, $handlers, 1000, [],
         ]);
 
-        $this->assertNotEmpty($dispatchedEvents);
+        $this->assertGreaterThanOrEqual(1, $modelChangedCount);
         $this->assertGreaterThanOrEqual(1, WalIntegrationItem::$modelChangedCount);
-        $this->assertGreaterThanOrEqual(1, WalIntegrationItem::$walChangedCount);
     }
 
     public function testPollChangesWithUuidPrimaryKey()
@@ -592,9 +588,9 @@ class WalEventDispatchIntegrationTest extends TestCase
             ],
         ];
 
-        $dispatchedEvents = [];
-        Event::listen(WalChangesDetected::class, function (WalChangesDetected $event) use (&$dispatchedEvents) {
-            $dispatchedEvents[] = $event;
+        $dispatchedRecords = [];
+        Event::listen('wal:*', function (string $eventName, array $payload) use (&$dispatchedRecords) {
+            $dispatchedRecords[] = $payload[0];
         });
 
         $hasChanges = self::callMethod($command, 'pollChanges', [
@@ -602,8 +598,9 @@ class WalEventDispatchIntegrationTest extends TestCase
         ]);
 
         $this->assertTrue($hasChanges);
-        $this->assertNotEmpty($dispatchedEvents);
-        $this->assertContains($insertedUuid, $dispatchedEvents[0]->ids);
+        $this->assertNotEmpty($dispatchedRecords);
+        $ids = array_map(function ($r) { return $r->getId(); }, $dispatchedRecords);
+        $this->assertContains($insertedUuid, $ids);
 
         // Cleanup
         try {
@@ -641,9 +638,9 @@ class WalEventDispatchIntegrationTest extends TestCase
             ],
         ];
 
-        $dispatchedEvents = [];
-        Event::listen(WalChangesDetected::class, function (WalChangesDetected $event) use (&$dispatchedEvents) {
-            $dispatchedEvents[] = $event;
+        $dispatchedRecords = [];
+        Event::listen('wal:*', function (string $eventName, array $payload) use (&$dispatchedRecords) {
+            $dispatchedRecords[] = $payload[0];
         });
 
         $hasChanges = self::callMethod($command, 'pollChanges', [
@@ -651,9 +648,9 @@ class WalEventDispatchIntegrationTest extends TestCase
         ]);
 
         $this->assertTrue($hasChanges);
-        $this->assertNotEmpty($dispatchedEvents);
+        $this->assertNotEmpty($dispatchedRecords);
 
-        $ids = $dispatchedEvents[0]->ids;
+        $ids = array_map(function ($r) { return $r->getId(); }, $dispatchedRecords);
         $this->assertContains(1, $ids);  // updated + deleted
         $this->assertContains(2, $ids);  // inserted
     }
@@ -679,9 +676,9 @@ class WalEventDispatchIntegrationTest extends TestCase
             ],
         ];
 
-        $dispatchedEvents = [];
-        Event::listen(WalChangesDetected::class, function (WalChangesDetected $event) use (&$dispatchedEvents) {
-            $dispatchedEvents[] = $event;
+        $dispatchedRecords = [];
+        Event::listen('wal:*', function (string $eventName, array $payload) use (&$dispatchedRecords) {
+            $dispatchedRecords[] = $payload[0];
         });
 
         $hasChanges = self::callMethod($command, 'pollChanges', [
@@ -689,12 +686,13 @@ class WalEventDispatchIntegrationTest extends TestCase
         ]);
 
         $this->assertTrue($hasChanges);
-        $this->assertNotEmpty($dispatchedEvents);
-        $this->assertCount(100, $dispatchedEvents[0]->ids);
+        $this->assertNotEmpty($dispatchedRecords);
+        $ids = array_map(function ($r) { return $r->getId(); }, $dispatchedRecords);
+        $this->assertCount(100, $ids);
 
         // Verify all 100 IDs are present
         for ($i = 1; $i <= 100; $i++) {
-            $this->assertContains($i, $dispatchedEvents[0]->ids);
+            $this->assertContains($i, $ids);
         }
     }
 
@@ -736,21 +734,21 @@ class WalEventDispatchIntegrationTest extends TestCase
             ],
         ];
 
-        $dispatchedEvents = [];
-        Event::listen(WalChangesDetected::class, function (WalChangesDetected $event) use (&$dispatchedEvents) {
-            $dispatchedEvents[] = $event;
+        $dispatchedRecords = [];
+        Event::listen('wal:*', function (string $eventName, array $payload) use (&$dispatchedRecords) {
+            $dispatchedRecords[] = $payload[0];
         });
 
         self::callMethod($command, 'pollChanges', [
             $this->slotName, $handlers, 1000, [],
         ]);
 
-        // Should have 2 events, one for each table
-        $this->assertCount(2, $dispatchedEvents);
+        // Should have 2 records, one for each table
+        $this->assertCount(2, $dispatchedRecords);
 
-        $handlers_in_events = array_map(function ($e) { return $e->handler; }, $dispatchedEvents);
-        $this->assertContains($handler1, $handlers_in_events);
-        $this->assertContains($handler2, $handlers_in_events);
+        $modelClasses = array_map(function ($r) { return get_class($r->makeModel()); }, $dispatchedRecords);
+        $this->assertContains(WalIntegrationItem::class, $modelClasses);
+        $this->assertContains(WalIntegrationOtherItem::class, $modelClasses);
 
         // Cleanup
         try {
@@ -780,17 +778,9 @@ class WalIntegrationItem extends Model implements HasWalHandler
     /** @var int */
     public static $modelChangedCount = 0;
 
-    /** @var int */
-    public static $walChangedCount = 0;
-
     public function onKnightModelChanged(): void
     {
         static::$modelChangedCount++;
-    }
-
-    public function onKnightWalChanged(): void
-    {
-        static::$walChangedCount++;
     }
 }
 

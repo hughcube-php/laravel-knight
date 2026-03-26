@@ -79,11 +79,12 @@ namespace HughCube\Laravel\Knight\Tests\Console\Commands {
     use HughCube\Laravel\Knight\Console\Commands\WalEventDispatchCommand;
     use HughCube\Laravel\Knight\Console\Commands\WalEventDispatchCommandRuntimeState;
     use HughCube\Laravel\Knight\Contracts\Database\HasWalHandler;
-    use HughCube\Laravel\Knight\Events\WalChangesDetected;
+    use HughCube\Laravel\Knight\Jobs\WalChangesDispatchJob;
     use HughCube\Laravel\Knight\Tests\TestCase;
     use Illuminate\Console\OutputStyle;
     use Illuminate\Contracts\Debug\ExceptionHandler;
     use Illuminate\Contracts\Events\Dispatcher as EventsDispatcher;
+    use Illuminate\Support\Facades\Queue;
     use Symfony\Component\Console\Input\ArrayInput;
     use Symfony\Component\Console\Output\BufferedOutput;
 
@@ -108,8 +109,8 @@ namespace HughCube\Laravel\Knight\Tests\Console\Commands {
             $command = new TestableWalEventDispatchCommand();
             $command->handlers = [
                 'users' => [
-                    ['handler' => new DummyWalHandler('users', 'id'), 'keyName' => 'id'],
-                    ['handler' => new DummyWalHandlerNoKey('users'), 'keyName' => 'id'],
+                    ['handler' => new DummyWalHandler(), 'keyName' => 'id'],
+                    ['handler' => new DummyWalHandlerNoKey(), 'keyName' => 'id'],
                 ],
             ];
             $command->partitionMap = ['users_2024' => 'users'];
@@ -386,14 +387,7 @@ PHP
 
         public function testPollChangesSkipsInvalidRowsAndAdvancesSlot(): void
         {
-            $dispatcher = $this->createMock(EventsDispatcher::class);
-            $dispatcher->expects($this->once())
-                ->method('dispatch')
-                ->with($this->callback(static function ($event) {
-                    return $event instanceof WalChangesDetected
-                        && $event->handler instanceof DummyWalHandler
-                        && $event->ids === [1];
-                }));
+            Queue::fake();
 
             $rows = [
                 (object) ['lsn' => '0/1', 'data' => '{invalid-json'],
@@ -436,30 +430,19 @@ PHP
 
             $command = new class() extends WalEventDispatchCommand {
                 public $connection;
-                public ?EventsDispatcher $dispatcher = null;
 
                 protected function getConnection()
                 {
                     return $this->connection;
                 }
-
-                protected function getEventsDispatcher(): EventsDispatcher
-                {
-                    if ($this->dispatcher !== null) {
-                        return $this->dispatcher;
-                    }
-
-                    return parent::getEventsDispatcher();
-                }
             };
 
             $this->initializeCommand($command, ['--mode' => 'advance']);
             $command->connection = $connection;
-            $command->dispatcher = $dispatcher;
 
             $handlers = [
                 'users' => [
-                    ['handler' => new DummyWalHandler('users', 'id'), 'keyName' => 'id'],
+                    ['handler' => new DummyWalHandler(), 'keyName' => 'id'],
                 ],
             ];
 
@@ -469,18 +452,17 @@ PHP
             $this->assertCount(1, $connection->statements);
             $this->assertStringContainsString('pg_replication_slot_advance', $connection->statements[0]['query']);
             $this->assertSame(['slot_test', '0/6'], $connection->statements[0]['bindings']);
+
+            // Two WAL entries for id=1 (no dedup), skip rows without table/id
+            Queue::assertPushed(WalChangesDispatchJob::class, 2);
+            Queue::assertPushed(WalChangesDispatchJob::class, function (WalChangesDispatchJob $job) {
+                return $job->getRecord()->getId() == 1;
+            });
         }
 
         public function testPollChangesInAutoModeUsesGetChangesAndDoesNotAdvanceSlot(): void
         {
-            $dispatcher = $this->createMock(EventsDispatcher::class);
-            $dispatcher->expects($this->once())
-                ->method('dispatch')
-                ->with($this->callback(static function ($event) {
-                    return $event instanceof WalChangesDetected
-                        && $event->handler instanceof DummyWalHandler
-                        && $event->ids === [10];
-                }));
+            Queue::fake();
 
             $rows = [
                 (object) ['lsn' => '0/A', 'data' => json_encode(['change' => [
@@ -515,30 +497,19 @@ PHP
 
             $command = new class() extends WalEventDispatchCommand {
                 public $connection;
-                public ?EventsDispatcher $dispatcher = null;
 
                 protected function getConnection()
                 {
                     return $this->connection;
                 }
-
-                protected function getEventsDispatcher(): EventsDispatcher
-                {
-                    if ($this->dispatcher !== null) {
-                        return $this->dispatcher;
-                    }
-
-                    return parent::getEventsDispatcher();
-                }
             };
 
             $this->initializeCommand($command, ['--mode' => 'auto']);
             $command->connection = $connection;
-            $command->dispatcher = $dispatcher;
 
             $handlers = [
                 'users' => [
-                    ['handler' => new DummyWalHandler('users', 'id'), 'keyName' => 'id'],
+                    ['handler' => new DummyWalHandler(), 'keyName' => 'id'],
                 ],
             ];
 
@@ -548,18 +519,16 @@ PHP
             $this->assertCount(1, $connection->selects);
             $this->assertStringContainsString('pg_logical_slot_get_changes', $connection->selects[0]['query']);
             $this->assertEmpty($connection->statements);
+
+            Queue::assertPushed(WalChangesDispatchJob::class, 1);
+            Queue::assertPushed(WalChangesDispatchJob::class, function (WalChangesDispatchJob $job) {
+                return $job->getRecord()->getId() == 10;
+            });
         }
 
         public function testPollChangesInPeekModeDoesNotAdvanceSlot(): void
         {
-            $dispatcher = $this->createMock(EventsDispatcher::class);
-            $dispatcher->expects($this->once())
-                ->method('dispatch')
-                ->with($this->callback(static function ($event) {
-                    return $event instanceof WalChangesDetected
-                        && $event->handler instanceof DummyWalHandler
-                        && $event->ids === [11];
-                }));
+            Queue::fake();
 
             $rows = [
                 (object) ['lsn' => '0/B', 'data' => json_encode(['change' => [
@@ -594,30 +563,19 @@ PHP
 
             $command = new class() extends WalEventDispatchCommand {
                 public $connection;
-                public ?EventsDispatcher $dispatcher = null;
 
                 protected function getConnection()
                 {
                     return $this->connection;
                 }
-
-                protected function getEventsDispatcher(): EventsDispatcher
-                {
-                    if ($this->dispatcher !== null) {
-                        return $this->dispatcher;
-                    }
-
-                    return parent::getEventsDispatcher();
-                }
             };
 
             $this->initializeCommand($command, ['--mode' => 'peek']);
             $command->connection = $connection;
-            $command->dispatcher = $dispatcher;
 
             $handlers = [
                 'users' => [
-                    ['handler' => new DummyWalHandler('users', 'id'), 'keyName' => 'id'],
+                    ['handler' => new DummyWalHandler(), 'keyName' => 'id'],
                 ],
             ];
 
@@ -627,18 +585,16 @@ PHP
             $this->assertCount(1, $connection->selects);
             $this->assertStringContainsString('pg_logical_slot_peek_changes', $connection->selects[0]['query']);
             $this->assertEmpty($connection->statements);
+
+            Queue::assertPushed(WalChangesDispatchJob::class, 1);
+            Queue::assertPushed(WalChangesDispatchJob::class, function (WalChangesDispatchJob $job) {
+                return $job->getRecord()->getId() == 11;
+            });
         }
 
         public function testPollChangesAdvanceModeIgnoresSlotAdvanceFailure(): void
         {
-            $dispatcher = $this->createMock(EventsDispatcher::class);
-            $dispatcher->expects($this->once())
-                ->method('dispatch')
-                ->with($this->callback(static function ($event) {
-                    return $event instanceof WalChangesDetected
-                        && $event->handler instanceof DummyWalHandler
-                        && $event->ids === [12];
-                }));
+            Queue::fake();
 
             $rows = [
                 (object) ['lsn' => '0/C', 'data' => json_encode(['change' => [
@@ -670,30 +626,19 @@ PHP
 
             $command = new class() extends WalEventDispatchCommand {
                 public $connection;
-                public ?EventsDispatcher $dispatcher = null;
 
                 protected function getConnection()
                 {
                     return $this->connection;
                 }
-
-                protected function getEventsDispatcher(): EventsDispatcher
-                {
-                    if ($this->dispatcher !== null) {
-                        return $this->dispatcher;
-                    }
-
-                    return parent::getEventsDispatcher();
-                }
             };
 
             $this->initializeCommand($command, ['--mode' => 'advance']);
             $command->connection = $connection;
-            $command->dispatcher = $dispatcher;
 
             $handlers = [
                 'users' => [
-                    ['handler' => new DummyWalHandler('users', 'id'), 'keyName' => 'id'],
+                    ['handler' => new DummyWalHandler(), 'keyName' => 'id'],
                 ],
             ];
 
@@ -701,6 +646,11 @@ PHP
 
             $this->assertTrue($result);
             $this->assertSame(1, $connection->statementCalls);
+
+            Queue::assertPushed(WalChangesDispatchJob::class, 1);
+            Queue::assertPushed(WalChangesDispatchJob::class, function (WalChangesDispatchJob $job) {
+                return $job->getRecord()->getId() == 12;
+            });
         }
 
         public function testRegisterSignalHandlersUsesPcntlWhenAvailable(): void
@@ -932,45 +882,26 @@ PHP
         }
     }
 
-    class DummyWalHandler implements HasWalHandler
+    class DummyWalHandler extends \HughCube\Laravel\Knight\Database\Eloquent\Model implements HasWalHandler
     {
-        private string $table;
-        private string $keyName;
+        use \HughCube\Laravel\Knight\Database\Eloquent\Traits\HasWalHandlerTrait;
 
-        public function __construct(string $table, string $keyName)
-        {
-            $this->table = $table;
-            $this->keyName = $keyName;
-        }
+        protected $table = 'users';
 
-        public function getTable()
-        {
-            return $this->table;
-        }
-
-        public function getKeyName(): string
-        {
-            return $this->keyName;
-        }
+        protected $fillable = ['id', 'name'];
 
         public function onKnightModelChanged(): void
         {
         }
     }
 
-    class DummyWalHandlerNoKey implements HasWalHandler
+    class DummyWalHandlerNoKey extends \HughCube\Laravel\Knight\Database\Eloquent\Model implements HasWalHandler
     {
-        private string $table;
+        use \HughCube\Laravel\Knight\Database\Eloquent\Traits\HasWalHandlerTrait;
 
-        public function __construct(string $table)
-        {
-            $this->table = $table;
-        }
+        protected $table = 'users';
 
-        public function getTable()
-        {
-            return $this->table;
-        }
+        protected $fillable = ['id', 'name'];
 
         public function onKnightModelChanged(): void
         {

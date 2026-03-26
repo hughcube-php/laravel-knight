@@ -358,14 +358,6 @@ trait Model
     }
 
     /**
-     * Called ONLY by WAL path, after onKnightModelChanged().
-     * Override for WAL-specific side effects (e.g. cascade refresh related models).
-     */
-    public function onKnightWalChanged(): void
-    {
-    }
-
-    /**
      * @throws
      *
      * @phpstan-ignore-next-line
