@@ -33,10 +33,15 @@ trait HasPgArrayAttributes
 
     /**
      * 解析 int[]: {1,2,3} → [1,2,3]
+     * 兼容非字符串输入（array/Collection），直接包装为 Collection 返回.
      * 注意：为避免 bigint 溢出，超过 PHP_INT_MAX 的值保持为字符串.
      */
     protected function parsePgIntArray($value): Collection
     {
+        if (!is_string($value)) {
+            return Collection::make($value ?: []);
+        }
+
         return PgArray::parseIntArray($value);
     }
 
@@ -51,28 +56,43 @@ trait HasPgArrayAttributes
 
     /**
      * 解析简单 text[]: {o:1,o:2} → ['o:1','o:2']
+     * 兼容非字符串输入（array/Collection），直接包装为 Collection 返回.
      * 仅支持字母、数字、冒号、下划线、点、连字符.
      */
     protected function parsePgSimpleTextArray($value): Collection
     {
+        if (!is_string($value)) {
+            return Collection::make($value ?: []);
+        }
+
         return PgArray::parseSimpleTextArray($value);
     }
 
     /**
-     * 序列化 int[]: [1,2,3] → {1,2,3}.
+     * 序列化 int[]: [1,2,3] → {1,2,3}
+     * 兼容字符串输入（PG 格式如 {1,2,3}），先解析再序列化.
      */
     protected function serializePgIntArray($value): string
     {
+        if (is_string($value)) {
+            $value = PgArray::parseIntArray($value);
+        }
+
         return PgArray::serializeIntArray($value);
     }
 
     /**
      * 序列化简单 text[]: ['o:1','o:2'] → {o:1,o:2}
+     * 兼容字符串输入（PG 格式如 {o:1,o:2}），先解析再序列化.
      * 支持字母、数字、冒号、下划线、点、连字符、斜杠、@、+、=、#、~
      * 不支持: 空格、逗号、花括号、引号、反斜杠（这些是 PostgreSQL 数组特殊字符）.
      */
     protected function serializePgSimpleTextArray($value): string
     {
+        if (is_string($value)) {
+            $value = PgArray::parseSimpleTextArray($value);
+        }
+
         return PgArray::serializeSimpleTextArray($value);
     }
 }
