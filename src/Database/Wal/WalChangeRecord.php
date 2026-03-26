@@ -12,6 +12,7 @@ class WalChangeRecord implements JsonSerializable
     const KIND_UPDATE = 'update';
     const KIND_DELETE = 'delete';
 
+
     /** @var string insert|update|delete */
     private $kind;
 
@@ -51,15 +52,16 @@ class WalChangeRecord implements JsonSerializable
      */
     private $context = [];
 
+
     /**
-     * @param string      $kind
-     * @param string      $table
+     * @param string $kind
+     * @param string $table
      * @param string|null $partitionTable
-     * @param int|string  $id
-     * @param string      $keyName
-     * @param array       $columns
-     * @param array       $oldColumns
-     * @param string      $modelClass
+     * @param int|string $id
+     * @param string $keyName
+     * @param array $columns
+     * @param array $oldColumns
+     * @param string $modelClass
      */
     public function __construct($kind, $table, $partitionTable, $id, $keyName, array $columns, array $oldColumns, $modelClass)
     {
@@ -80,11 +82,11 @@ class WalChangeRecord implements JsonSerializable
     /**
      * 从 wal2json change 数组构建 WalChangeRecord。
      *
-     * @param array       $change        wal2json 单条 change 记录
-     * @param string      $resolvedTable 解析后的父表名
-     * @param string|null $rawTable      原始表名（分区子表），与 resolvedTable 相同时传 null
-     * @param string      $keyName       主键列名
-     * @param string      $modelClass    Model 类名
+     * @param array $change wal2json 单条 change 记录
+     * @param string $resolvedTable 解析后的父表名
+     * @param string|null $rawTable 原始表名（分区子表），与 resolvedTable 相同时传 null
+     * @param string $keyName 主键列名
+     * @param string $modelClass Model 类名
      *
      * @return self|null 无法提取主键时返回 null
      */
@@ -185,7 +187,7 @@ class WalChangeRecord implements JsonSerializable
 
     /**
      * @param string $key
-     * @param mixed  $value
+     * @param mixed $value
      *
      * @return $this
      */
@@ -198,13 +200,23 @@ class WalChangeRecord implements JsonSerializable
 
     /**
      * @param string $key
-     * @param mixed  $default
+     * @param mixed $default
      *
      * @return mixed
      */
     public function getContext($key, $default = null)
     {
         return $this->context[$key] ?? $default;
+    }
+
+    /**
+     * @param string $key
+     *
+     * @return bool
+     */
+    public function hasContext($key)
+    {
+        return array_key_exists($key, $this->context);
     }
 
     /** @return bool */
@@ -257,6 +269,53 @@ class WalChangeRecord implements JsonSerializable
         $model->exists = !$this->isDelete();
 
         return $model;
+    }
+
+    /**
+     * 从 DB 查询完整 Model，结果缓存在 context 中供多个 Listener 复用。
+     *
+     * sync 模式下多个 Listener 共享同一个 WalChangeRecord 实例，
+     * 第一个 Listener 触发 DB 查询，后续 Listener 直接取缓存。
+     * queue 模式下反序列化后 context 为空，每个 worker 独立查询一次。
+     *
+     * 优先使用 Model 的 findById()（走 PSR SimpleCache），不存在则 fallback 到 find()。
+     *
+     * @return Model|null DELETE 后记录已不存在时返回 null
+     */
+    public function findModel()
+    {
+        $key = '__kr_fm_9d7e4a1b3f6c82e5';
+
+        if ($this->hasContext($key)) {
+            return $this->getContext($key);
+        }
+
+        /** @var class-string<Model> $class */
+        $class = $this->modelClass;
+
+        $model = method_exists($class, 'findById') ? $class::findById($this->id) : $class::query()->find($this->id);
+
+        $this->setContext($key, $model);
+
+        return $model;
+    }
+
+    /**
+     * 手动设置缓存的 Model 实例。
+     *
+     * 适用于 Listener 已通过自定义条件查询到 Model 的场景，
+     * 后续 Listener 调用 findModel() 时直接复用，避免重复查询。
+     * 传入 null 表示记录不存在（缓存为 null，不再重复查询）。
+     *
+     * @param Model|null $model
+     *
+     * @return $this
+     */
+    public function setModel($model)
+    {
+        $this->setContext('__kr_fm_9d7e4a1b3f6c82e5', $model);
+
+        return $this;
     }
 
     /**

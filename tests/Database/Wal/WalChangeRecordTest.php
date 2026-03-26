@@ -460,6 +460,144 @@ class WalChangeRecordTest extends TestCase
 
         $this->assertSame(99, $model->getKey());
     }
+
+    // ==================== findModel ====================
+
+    public function testFindModelQueriesDbAndCachesResult()
+    {
+        /** 先插入一条记录 */
+        $inserted = new WalRecordTestModel();
+        $inserted->name = 'FindMe';
+        $inserted->email = 'find@example.com';
+        $inserted->save();
+
+        $record = new WalChangeRecord(
+            'update',
+            'wal_record_test_items',
+            null,
+            $inserted->id,
+            'id',
+            ['id' => $inserted->id, 'name' => 'FindMe'],
+            [],
+            WalRecordTestModel::class
+        );
+
+        /** 第一次查询 DB */
+        $model = $record->findModel();
+        $this->assertInstanceOf(WalRecordTestModel::class, $model);
+        $this->assertSame($inserted->id, $model->id);
+        $this->assertSame('find@example.com', $model->email);
+
+        /** 第二次走 context 缓存，返回同一个实例 */
+        $model2 = $record->findModel();
+        $this->assertSame($model, $model2);
+    }
+
+    public function testFindModelReturnsNullForDeletedRecord()
+    {
+        $record = new WalChangeRecord(
+            'delete',
+            'wal_record_test_items',
+            null,
+            999999,
+            'id',
+            [],
+            ['id' => 999999],
+            WalRecordTestModel::class
+        );
+
+        /** 记录不存在，返回 null */
+        $this->assertNull($record->findModel());
+
+        /** 再次调用不会重复查询（context 缓存了 false） */
+        $this->assertNull($record->findModel());
+    }
+
+    public function testFindModelCacheNotSurviveSerialization()
+    {
+        $inserted = new WalRecordTestModel();
+        $inserted->name = 'Serializable';
+        $inserted->email = 'ser@example.com';
+        $inserted->save();
+
+        $record = new WalChangeRecord(
+            'insert',
+            'wal_record_test_items',
+            null,
+            $inserted->id,
+            'id',
+            ['id' => $inserted->id, 'name' => 'Serializable'],
+            [],
+            WalRecordTestModel::class
+        );
+
+        $record->findModel();
+
+        /** 序列化后 context 被清除，findModel 会重新查询 */
+        /** @var WalChangeRecord $unserialized */
+        $unserialized = unserialize(serialize($record));
+        $this->assertNull($unserialized->getContext('__kr_fm_9d7e4a1b3f6c82e5'));
+
+        /** 但依然能正常查询到 */
+        $model = $unserialized->findModel();
+        $this->assertInstanceOf(WalRecordTestModel::class, $model);
+        $this->assertSame($inserted->id, $model->id);
+    }
+
+    // ==================== setModel ====================
+
+    public function testSetModelAllowsFindModelToReturnCached()
+    {
+        $record = new WalChangeRecord(
+            'insert',
+            'wal_record_test_items',
+            null,
+            1,
+            'id',
+            ['id' => 1, 'name' => 'Test'],
+            [],
+            WalRecordTestModel::class
+        );
+
+        $fakeModel = new WalRecordTestModel();
+        $fakeModel->id = 1;
+        $fakeModel->name = 'PreSet';
+
+        $record->setModel($fakeModel);
+
+        /** findModel 直接返回 setModel 设置的实例 */
+        $result = $record->findModel();
+        $this->assertSame($fakeModel, $result);
+        $this->assertSame('PreSet', $result->name);
+    }
+
+    public function testSetModelNullCachesAsNotFound()
+    {
+        $record = new WalChangeRecord(
+            'delete',
+            'wal_record_test_items',
+            null,
+            1,
+            'id',
+            [],
+            ['id' => 1],
+            WalRecordTestModel::class
+        );
+
+        $record->setModel(null);
+
+        /** findModel 返回 null 且不会查询 DB */
+        $this->assertNull($record->findModel());
+    }
+
+    public function testSetModelReturnsSelf()
+    {
+        $record = new WalChangeRecord('insert', 'wal_record_test_items', null, 1, 'id', [], [], WalRecordTestModel::class);
+
+        $result = $record->setModel(new WalRecordTestModel());
+
+        $this->assertSame($record, $result);
+    }
 }
 
 /**
