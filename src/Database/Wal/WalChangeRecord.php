@@ -41,7 +41,7 @@ class WalChangeRecord implements JsonSerializable
      */
     private $oldColumns;
 
-    /** @var string Model 类名（如 App\Models\Question） */
+    /** @var class-string<Model> Model 类名（如 App\Models\Question） */
     private $modelClass;
 
     /**
@@ -51,6 +51,14 @@ class WalChangeRecord implements JsonSerializable
      * @var array<string, mixed>
      */
     private $context = [];
+
+    /**
+     * 自定义 Model 查询回调，用于覆盖 fetchModel 的默认查询逻辑。
+     * 不参与序列化——与 context 相同，属于运行时状态。
+     *
+     * @var callable|null  签名: function(WalChangeRecord $record): Model|null
+     */
+    private $fetcher;
 
 
     /**
@@ -272,13 +280,33 @@ class WalChangeRecord implements JsonSerializable
     }
 
     /**
+     * 设置自定义 Model 查询回调，覆盖 fetchModel 的默认查询逻辑。
+     *
+     * 适用场景：需要带额外条件查询（软删除、分区键）、eager load 关联、
+     * 或使用非标准查询方式获取 Model。
+     *
+     * @param callable $fetcher 签名: function(WalChangeRecord $record): Model|null
+     *
+     * @return $this
+     */
+    public function setFetcher(callable $fetcher)
+    {
+        $this->fetcher = $fetcher;
+
+        return $this;
+    }
+
+    /**
      * 从 DB 查询完整 Model，结果缓存在 context 中供多个 Listener 复用。
      *
      * sync 模式下多个 Listener 共享同一个 WalChangeRecord 实例，
      * 第一个 Listener 触发 DB 查询，后续 Listener 直接取缓存。
      * queue 模式下反序列化后 context 为空，每个 worker 独立查询一次。
      *
-     * 优先使用 Model 的 findById()（走 PSR SimpleCache），不存在则 fallback 到 find()。
+     * 查询优先级：
+     * 1. 自定义 fetcher（通过 setFetcher 设置）
+     * 2. Model 的 findById()（走 PSR SimpleCache）
+     * 3. fallback 到 Model::query()->find()
      *
      * @return Model|null DELETE 后记录已不存在时返回 null
      */
@@ -290,10 +318,13 @@ class WalChangeRecord implements JsonSerializable
             return $this->getContext($key);
         }
 
-        /** @var class-string<Model> $class */
-        $class = $this->modelClass;
-
-        $model = method_exists($class, 'findById') ? $class::findById($this->id) : $class::query()->find($this->id);
+        if ($this->fetcher) {
+            $model = call_user_func($this->fetcher, $this);
+        } elseif (method_exists($this->modelClass, 'findById')) {
+            $model = $this->modelClass::findById($this->id);
+        } else {
+            $model = $this->modelClass::query()->find($this->id);
+        }
 
         $this->setContext($key, $model);
 

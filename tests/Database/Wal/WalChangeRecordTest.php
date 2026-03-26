@@ -598,6 +598,113 @@ class WalChangeRecordTest extends TestCase
 
         $this->assertSame($record, $result);
     }
+
+    // ==================== setFetcher ====================
+
+    public function testSetFetcherCustomQuery()
+    {
+        $inserted = new WalRecordTestModel();
+        $inserted->name = 'CustomFetch';
+        $inserted->email = 'custom@example.com';
+        $inserted->save();
+
+        $record = new WalChangeRecord(
+            'update',
+            'wal_record_test_items',
+            null,
+            $inserted->id,
+            'id',
+            ['id' => $inserted->id, 'name' => 'CustomFetch'],
+            [],
+            WalRecordTestModel::class
+        );
+
+        $fetcherCalled = false;
+        $record->setFetcher(function (WalChangeRecord $r) use (&$fetcherCalled) {
+            $fetcherCalled = true;
+            return WalRecordTestModel::query()->where('email', 'custom@example.com')->first();
+        });
+
+        $model = $record->fetchModel();
+
+        $this->assertTrue($fetcherCalled);
+        $this->assertInstanceOf(WalRecordTestModel::class, $model);
+        $this->assertSame($inserted->id, $model->id);
+        $this->assertSame('custom@example.com', $model->email);
+    }
+
+    public function testSetFetcherReturnsSelf()
+    {
+        $record = new WalChangeRecord('insert', 'wal_record_test_items', null, 1, 'id', [], [], WalRecordTestModel::class);
+
+        $result = $record->setFetcher(function () {
+            return null;
+        });
+
+        $this->assertSame($record, $result);
+    }
+
+    public function testSetFetcherResultIsCached()
+    {
+        $record = new WalChangeRecord(
+            'insert',
+            'wal_record_test_items',
+            null,
+            1,
+            'id',
+            ['id' => 1],
+            [],
+            WalRecordTestModel::class
+        );
+
+        $callCount = 0;
+        $fakeModel = new WalRecordTestModel();
+        $fakeModel->id = 1;
+
+        $record->setFetcher(function () use (&$callCount, $fakeModel) {
+            $callCount++;
+            return $fakeModel;
+        });
+
+        $record->fetchModel();
+        $record->fetchModel();
+
+        $this->assertSame(1, $callCount);
+    }
+
+    public function testSetFetcherNotSurviveSerialization()
+    {
+        $inserted = new WalRecordTestModel();
+        $inserted->name = 'SerFetcher';
+        $inserted->email = 'serfetcher@example.com';
+        $inserted->save();
+
+        $record = new WalChangeRecord(
+            'insert',
+            'wal_record_test_items',
+            null,
+            $inserted->id,
+            'id',
+            ['id' => $inserted->id, 'name' => 'SerFetcher'],
+            [],
+            WalRecordTestModel::class
+        );
+
+        $fetcherCalled = false;
+        $record->setFetcher(function () use (&$fetcherCalled) {
+            $fetcherCalled = true;
+            return null;
+        });
+
+        /** @var WalChangeRecord $unserialized */
+        $unserialized = unserialize(serialize($record));
+
+        /** 反序列化后 fetcher 丢失，走默认查询逻辑 */
+        $model = $unserialized->fetchModel();
+        $this->assertFalse($fetcherCalled);
+        $this->assertInstanceOf(WalRecordTestModel::class, $model);
+        $this->assertSame($inserted->id, $model->id);
+    }
 }
 
 /**
