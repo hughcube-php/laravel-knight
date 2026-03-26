@@ -412,7 +412,8 @@ class WalEventDispatchCommand extends Command
         $prePeekLsn = null;
         if ('advance' === $mode) {
             try {
-                $prePeekLsn = optional($connection->selectOne('SELECT pg_current_wal_lsn() AS lsn'))->lsn;
+                $row = $connection->selectOne('SELECT pg_current_wal_lsn() AS lsn');
+                $prePeekLsn = null !== $row ? $row->lsn : null;
             } catch (Throwable $e) {
                 /** best-effort */
             }
