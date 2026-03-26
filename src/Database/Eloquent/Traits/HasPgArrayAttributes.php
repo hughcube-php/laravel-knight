@@ -39,7 +39,7 @@ trait HasPgArrayAttributes
     protected function parsePgIntArray($value): Collection
     {
         if (!is_string($value)) {
-            return Collection::make($value ?: []);
+            return Collection::make(is_iterable($value) ? $value : []);
         }
 
         return PgArray::parseIntArray($value);
@@ -62,7 +62,7 @@ trait HasPgArrayAttributes
     protected function parsePgSimpleTextArray($value): Collection
     {
         if (!is_string($value)) {
-            return Collection::make($value ?: []);
+            return Collection::make(is_iterable($value) ? $value : []);
         }
 
         return PgArray::parseSimpleTextArray($value);
