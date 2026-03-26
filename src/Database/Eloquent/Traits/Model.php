@@ -49,6 +49,13 @@ trait Model
     protected static array $setKeysForSaveQueryMethods = [];
 
     /**
+     * 缓存每个 Model 子类的 setKeysForSelectQueryFrom{TraitName} 方法列表.
+     *
+     * @var array<string, string[]>
+     */
+    protected static array $setKeysForSelectQueryMethods = [];
+
+    /**
      * 统一入口：自动调用所有 trait 的 setKeysForSaveQueryFrom{TraitName}() 方法.
      *
      * @param \Illuminate\Database\Eloquent\Builder $query
@@ -67,6 +74,33 @@ trait Model
         }
 
         foreach (static::$setKeysForSaveQueryMethods[static::class] as $method) {
+            $query = $this->{$method}($query);
+        }
+
+        return $query;
+    }
+
+    /**
+     * 统一入口：自动调用所有 trait 的 setKeysForSelectQueryFrom{TraitName}() 方法.
+     *
+     * 影响 refresh()、fresh() 等 SELECT 操作，确保分区表查询带上分区键。
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     *
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function setKeysForSelectQuery($query)
+    {
+        $query = parent::setKeysForSelectQuery($query);
+
+        if (!isset(static::$setKeysForSelectQueryMethods[static::class])) {
+            static::$setKeysForSelectQueryMethods[static::class] = Collection::make(class_uses_recursive($this))
+                ->map(fn ($trait) => 'setKeysForSelectQueryFrom'.class_basename($trait))
+                ->filter(fn ($method) => method_exists($this, $method))
+                ->values()->all();
+        }
+
+        foreach (static::$setKeysForSelectQueryMethods[static::class] as $method) {
             $query = $this->{$method}($query);
         }
 
