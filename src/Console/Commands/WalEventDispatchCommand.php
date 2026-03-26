@@ -207,7 +207,8 @@ class WalEventDispatchCommand extends Command
             }
 
             if ($this->isMemoryExceeded($memoryLimit)) {
-                $this->info(sprintf('Memory limit of %dMB exceeded (current: %dMB), stopping...',
+                $this->info(sprintf(
+                    'Memory limit of %dMB exceeded (current: %dMB), stopping...',
                     $memoryLimit,
                     intval(memory_get_usage(true) / 1024 / 1024)
                 ));
@@ -423,9 +424,9 @@ class WalEventDispatchCommand extends Command
          * SQL: SELECT lsn, data FROM pg_logical_slot_peek_changes('slot', NULL, 1000, 'filter-columns', 'content')
          * 第二个参数 NULL = 读到最新 LSN；第三个参数 = 最大行数；后续为 wal2json 插件参数（key, value 交替）。
          */
-        $results = $connection->select(sprintf('SELECT lsn, data FROM %s(?, NULL, ?%s)', $function, $this->buildWal2jsonParamPlaceholders()),
-            array_merge([$slot, $batch], $this->buildWal2jsonParamBindings())
-        );
+        $sql = sprintf('SELECT lsn, data FROM %s(?, NULL, ?%s)', $function, $this->buildWal2jsonParamPlaceholders());
+        $bindings = array_merge([$slot, $batch], $this->buildWal2jsonParamBindings());
+        $results = $connection->select($sql, $bindings);
 
         /** 无变更：advance 模式下推进到 prePeekLsn 消除幻影滞后 */
         if (empty($results)) {
