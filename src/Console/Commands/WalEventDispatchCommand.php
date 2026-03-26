@@ -97,11 +97,11 @@ use Throwable;
  *
  * 1. Model 实现 HasWalHandler 接口（getTable + onKnightModelChanged）
  * 2. 注册字符串事件 Listener（如 Event::listen('wal:questions:update', MyListener::class)）
- * 3. Listener 通过 WalChangeRecord::makeModel() 获取填充好的 Model 实例
+ * 3. Listener 通过 WalChangeRecord::toModel() 获取填充好的 Model 实例
  *
  * 注意：缓存清理等业务逻辑需应用层自行在 Listener 中处理，Job 仅负责事件分发。
  *
- * @see WalChangeRecord      WAL 变更记录值对象，包含 makeModel() 方法
+ * @see WalChangeRecord      WAL 变更记录值对象，包含 toModel() 方法
  * @see WalChangesDispatchJob 事件分发 Job（sync/queue 统一入口）
  * @see HasWalHandler         Model 需实现的接口
  */

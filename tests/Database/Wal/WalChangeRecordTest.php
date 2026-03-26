@@ -288,7 +288,7 @@ class WalChangeRecordTest extends TestCase
         $this->assertSame($record, $result);
     }
 
-    // ==================== makeModel ====================
+    // ==================== toModel ====================
 
     public function testMakeModelForInsert()
     {
@@ -303,7 +303,7 @@ class WalChangeRecordTest extends TestCase
             WalRecordTestModel::class
         );
 
-        $model = $record->makeModel();
+        $model = $record->toModel();
 
         $this->assertInstanceOf(WalRecordTestModel::class, $model);
         $this->assertSame(42, $model->id);
@@ -325,7 +325,7 @@ class WalChangeRecordTest extends TestCase
             WalRecordTestModel::class
         );
 
-        $model = $record->makeModel();
+        $model = $record->toModel();
 
         $this->assertInstanceOf(WalRecordTestModel::class, $model);
         $this->assertSame(7, $model->id);
@@ -346,7 +346,7 @@ class WalChangeRecordTest extends TestCase
             WalRecordTestModel::class
         );
 
-        $model = $record->makeModel();
+        $model = $record->toModel();
 
         $this->assertInstanceOf(WalRecordTestModel::class, $model);
         $this->assertSame(15, $model->id);
@@ -366,7 +366,7 @@ class WalChangeRecordTest extends TestCase
             WalRecordTestModel::class
         );
 
-        $model = $record->makeModel();
+        $model = $record->toModel();
 
         $this->assertSame(15, $model->id);
         $this->assertSame('OldName', $model->name);
@@ -387,7 +387,7 @@ class WalChangeRecordTest extends TestCase
             WalRecordTestModel::class
         );
 
-        $model = $record->makeModel();
+        $model = $record->toModel();
 
         // After syncOriginal, getDirty should be empty
         $this->assertEmpty($model->getDirty());
@@ -456,12 +456,12 @@ class WalChangeRecordTest extends TestCase
             WalRecordTestModel::class
         );
 
-        $model = $record->makeModel();
+        $model = $record->toModel();
 
         $this->assertSame(99, $model->getKey());
     }
 
-    // ==================== findModel ====================
+    // ==================== fetchModel ====================
 
     public function testFindModelQueriesDbAndCachesResult()
     {
@@ -483,13 +483,13 @@ class WalChangeRecordTest extends TestCase
         );
 
         /** 第一次查询 DB */
-        $model = $record->findModel();
+        $model = $record->fetchModel();
         $this->assertInstanceOf(WalRecordTestModel::class, $model);
         $this->assertSame($inserted->id, $model->id);
         $this->assertSame('find@example.com', $model->email);
 
         /** 第二次走 context 缓存，返回同一个实例 */
-        $model2 = $record->findModel();
+        $model2 = $record->fetchModel();
         $this->assertSame($model, $model2);
     }
 
@@ -507,10 +507,10 @@ class WalChangeRecordTest extends TestCase
         );
 
         /** 记录不存在，返回 null */
-        $this->assertNull($record->findModel());
+        $this->assertNull($record->fetchModel());
 
         /** 再次调用不会重复查询（context 缓存了 false） */
-        $this->assertNull($record->findModel());
+        $this->assertNull($record->fetchModel());
     }
 
     public function testFindModelCacheNotSurviveSerialization()
@@ -531,15 +531,15 @@ class WalChangeRecordTest extends TestCase
             WalRecordTestModel::class
         );
 
-        $record->findModel();
+        $record->fetchModel();
 
-        /** 序列化后 context 被清除，findModel 会重新查询 */
+        /** 序列化后 context 被清除，fetchModel 会重新查询 */
         /** @var WalChangeRecord $unserialized */
         $unserialized = unserialize(serialize($record));
         $this->assertNull($unserialized->getContext('__kr_fm_9d7e4a1b3f6c82e5'));
 
         /** 但依然能正常查询到 */
-        $model = $unserialized->findModel();
+        $model = $unserialized->fetchModel();
         $this->assertInstanceOf(WalRecordTestModel::class, $model);
         $this->assertSame($inserted->id, $model->id);
     }
@@ -565,8 +565,8 @@ class WalChangeRecordTest extends TestCase
 
         $record->setModel($fakeModel);
 
-        /** findModel 直接返回 setModel 设置的实例 */
-        $result = $record->findModel();
+        /** fetchModel 直接返回 setModel 设置的实例 */
+        $result = $record->fetchModel();
         $this->assertSame($fakeModel, $result);
         $this->assertSame('PreSet', $result->name);
     }
@@ -586,8 +586,8 @@ class WalChangeRecordTest extends TestCase
 
         $record->setModel(null);
 
-        /** findModel 返回 null 且不会查询 DB */
-        $this->assertNull($record->findModel());
+        /** fetchModel 返回 null 且不会查询 DB */
+        $this->assertNull($record->fetchModel());
     }
 
     public function testSetModelReturnsSelf()

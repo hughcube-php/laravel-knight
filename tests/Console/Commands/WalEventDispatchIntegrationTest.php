@@ -316,7 +316,7 @@ class WalEventDispatchIntegrationTest extends TestCase
         $this->assertTrue($hasChanges);
         // Both handlers should produce records (same WAL change, different modelClass)
         $this->assertCount(2, $dispatchedRecords);
-        $modelClasses = array_map(function ($r) { return get_class($r->makeModel()); }, $dispatchedRecords);
+        $modelClasses = array_map(function ($r) { return get_class($r->toModel()); }, $dispatchedRecords);
         $this->assertCount(2, array_unique($modelClasses));
     }
 
@@ -535,7 +535,7 @@ class WalEventDispatchIntegrationTest extends TestCase
         $modelChangedCount = 0;
         Event::listen('wal:*', function (string $eventName, array $payload) use (&$modelChangedCount) {
             $record = $payload[0];
-            $model = $record->makeModel();
+            $model = $record->toModel();
             if (method_exists($model, 'onKnightModelChanged')) {
                 $model->onKnightModelChanged();
             }
@@ -746,7 +746,7 @@ class WalEventDispatchIntegrationTest extends TestCase
         // Should have 2 records, one for each table
         $this->assertCount(2, $dispatchedRecords);
 
-        $modelClasses = array_map(function ($r) { return get_class($r->makeModel()); }, $dispatchedRecords);
+        $modelClasses = array_map(function ($r) { return get_class($r->toModel()); }, $dispatchedRecords);
         $this->assertContains(WalIntegrationItem::class, $modelClasses);
         $this->assertContains(WalIntegrationOtherItem::class, $modelClasses);
 

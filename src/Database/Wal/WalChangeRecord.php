@@ -252,7 +252,7 @@ class WalChangeRecord implements JsonSerializable
      *
      * @return Model
      */
-    public function makeModel()
+    public function toModel()
     {
         $class = $this->modelClass;
         /** @var Model $model */
@@ -282,7 +282,7 @@ class WalChangeRecord implements JsonSerializable
      *
      * @return Model|null DELETE 后记录已不存在时返回 null
      */
-    public function findModel()
+    public function fetchModel()
     {
         $key = '__kr_fm_9d7e4a1b3f6c82e5';
 
@@ -304,7 +304,7 @@ class WalChangeRecord implements JsonSerializable
      * 手动设置缓存的 Model 实例。
      *
      * 适用于 Listener 已通过自定义条件查询到 Model 的场景，
-     * 后续 Listener 调用 findModel() 时直接复用，避免重复查询。
+     * 后续 Listener 调用 fetchModel() 时直接复用，避免重复查询。
      * 传入 null 表示记录不存在（缓存为 null，不再重复查询）。
      *
      * @param Model|null $model
