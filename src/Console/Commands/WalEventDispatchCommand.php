@@ -603,21 +603,10 @@ class WalEventDispatchCommand extends Command
                 $stmt->execute();
                 unset($stmt);
 
-                while (true) {
-                    if (method_exists($pdo, 'query')) {
-                        $chunk = $pdo->query(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName))
-                            ->fetchAll(\PDO::FETCH_OBJ);
-                    } else {
-                        $fetchStmt = $pdo->prepare(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName));
-                        $fetchStmt->execute();
-                        $chunk = $fetchStmt->fetchAll(\PDO::FETCH_OBJ);
-                        unset($fetchStmt);
-                    }
-
-                    if (empty($chunk)) {
-                        break;
-                    }
-
+                $processChunk = function (array $chunk) use (
+                    $isV2, $partitionMap, $handlers,
+                    &$tableCounts, &$dispatchCount, &$lastLsn
+                ) {
                     foreach ($chunk as $row) {
                         $lastLsn = $row->lsn;
 
@@ -660,16 +649,65 @@ class WalEventDispatchCommand extends Command
                             }
                         }
                     }
+                };
 
-                    unset($chunk);
+                $closed = false;
+
+                try {
+                    while (true) {
+                        if (method_exists($pdo, 'query')) {
+                            $chunk = $pdo->query(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName))
+                                ->fetchAll(\PDO::FETCH_OBJ);
+                        } else {
+                            $fetchStmt = $pdo->prepare(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName));
+                            $fetchStmt->execute();
+                            $chunk = $fetchStmt->fetchAll(\PDO::FETCH_OBJ);
+                            unset($fetchStmt);
+                        }
+
+                        if (empty($chunk)) {
+                            break;
+                        }
+
+                        $processChunk($chunk);
+
+                        unset($chunk);
+                    }
+
+                    if (method_exists($pdo, 'exec')) {
+                        $pdo->exec(sprintf('CLOSE %s', $cursorName));
+                    } else {
+                        $closeStmt = $pdo->prepare(sprintf('CLOSE %s', $cursorName));
+                        $closeStmt->execute();
+                        unset($closeStmt);
+                    }
+                    $closed = true;
+                } catch (\PDOException $e) {
+                    $cursorMissing = false !== stripos($e->getMessage(), sprintf('cursor "%s" does not exist', $cursorName));
+                    if (!$cursorMissing || $dispatchCount > 0) {
+                        throw $e;
+                    }
+
+                    $fallbackStmt = $pdo->prepare($sql);
+                    $fallbackStmt->execute($bindings);
+                    while (false !== ($row = $fallbackStmt->fetch(\PDO::FETCH_OBJ))) {
+                        $processChunk([$row]);
+                    }
+                    unset($fallbackStmt);
                 }
 
-                if (method_exists($pdo, 'exec')) {
-                    $pdo->exec(sprintf('CLOSE %s', $cursorName));
-                } else {
-                    $closeStmt = $pdo->prepare(sprintf('CLOSE %s', $cursorName));
-                    $closeStmt->execute();
-                    unset($closeStmt);
+                if (!$closed) {
+                    try {
+                        if (method_exists($pdo, 'exec')) {
+                            $pdo->exec(sprintf('CLOSE %s', $cursorName));
+                        } else {
+                            $closeStmt = $pdo->prepare(sprintf('CLOSE %s', $cursorName));
+                            $closeStmt->execute();
+                            unset($closeStmt);
+                        }
+                    } catch (\PDOException $e) {
+                        /** best-effort close */
+                    }
                 }
             } finally {
                 if ($canToggleEmulatePrepares && $emulateState) {
