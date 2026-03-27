@@ -921,11 +921,13 @@ PHP
             };
         }
 
+        public function useWriteConnectionWhenReading($value = true) { return $this; }
+
         public function transaction($callback, $attempts = 1)
         {
             $this->beginTransaction();
             try {
-                $result = $callback();
+                $result = $callback($this);
                 return $result;
             } catch (\Throwable $e) {
                 $this->rollBack();

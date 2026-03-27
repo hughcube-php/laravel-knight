@@ -546,31 +546,30 @@ class WalEventDispatchCommand extends Command
         $lastLsn = null;
 
         /**
-         * 游标操作（DECLARE/FETCH/CLOSE）必须通过同一个写连接 PDO 执行。
+         * 游标操作（DECLARE/FETCH/CLOSE）必须通过写连接 PDO 执行。
          *
-         * 不能使用 Laravel Connection 的 select()/unprepared() 等方法，因为：
-         * 1. DECLARE CURSOR 不支持 PDO 参数占位符（PG 限制）
-         * 2. Connection 方法内部有 reconnect/retry 逻辑，可能在中途切换 PDO 实例
-         * 3. 不同 Laravel 版本的 unprepared() 行为不一致
-         *
+         * DECLARE CURSOR 不支持 PDO 参数占位符（PG 限制），需要 quote 拼接。
          * 事务管理通过 $connection->transaction() 走 Laravel 层，
          * 确保 Listener 中 DB::transaction() 能正确使用 SAVEPOINT。
+         *
+         * $pdo 在 transaction closure 内部通过 $connection->getPdo() 获取，
+         * 确保拿到的是 transaction() 正在使用的同一个写连接 PDO 实例。
          */
-        $pdo = $connection->getPdo();
-        $quotedBindings = array_map(function ($v) use ($pdo) {
-            return $pdo->quote((string) $v);
-        }, $bindings);
-        $boundSql = preg_replace_callback('/\?/', function () use (&$quotedBindings) {
-            return array_shift($quotedBindings);
-        }, $sql);
-        $declareSql = sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $boundSql);
-
-        $connection->transaction(function () use (
-            $pdo, $cursorName, $fetchSize, $isV2, $declareSql,
+        $connection->transaction(function ($connection) use (
+            $sql, $bindings, $cursorName, $fetchSize, $isV2,
             $partitionMap, $handlers,
             &$tableCounts, &$dispatchCount, &$lastLsn
         ) {
-            $pdo->exec($declareSql);
+            $pdo = $connection->getPdo();
+
+            $quotedBindings = array_map(function ($v) use ($pdo) {
+                return $pdo->quote((string) $v);
+            }, $bindings);
+            $boundSql = preg_replace_callback('/\?/', function () use (&$quotedBindings) {
+                return array_shift($quotedBindings);
+            }, $sql);
+
+            $pdo->exec(sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $boundSql));
 
             while (true) {
                 $chunk = $pdo->query(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName))
@@ -884,11 +883,20 @@ class WalEventDispatchCommand extends Command
     }
 
     /**
+     * 获取数据库连接，强制所有查询走写连接（主库）。
+     *
+     * WAL 命令的所有操作（游标、WAL 函数调用、slot 管理）都必须在主库上执行。
+     * useWriteConnectionWhenReading() 是 Laravel 原生 API，
+     * 让 getReadPdo() 返回写连接 PDO，所有 select() 也走主库。
+     *
      * @return Connection
      */
     protected function getConnection()
     {
-        return app('db')->connection($this->option('connection') ?: null);
+        $connection = app('db')->connection($this->option('connection') ?: null);
+        $connection->useWriteConnectionWhenReading();
+
+        return $connection;
     }
 
     /**
