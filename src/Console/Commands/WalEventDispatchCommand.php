@@ -431,7 +431,9 @@ class WalEventDispatchCommand extends Command
                 JOIN pg_class child_cls ON inheritance.inhrelid = child_cls.oid
                 JOIN pg_class parent_cls ON inheritance.inhparent = parent_cls.oid
                 WHERE child_cls.relkind = 'r'
-                  AND NOT EXISTS (SELECT 1 FROM pg_inherits x WHERE x.inhparent = child_cls.oid)"
+                  AND NOT EXISTS (SELECT 1 FROM pg_inherits x WHERE x.inhparent = child_cls.oid)",
+                [],
+                false
             );
 
             $map = [];
@@ -507,7 +509,7 @@ class WalEventDispatchCommand extends Command
         $prePeekLsn = null;
         if ('advance' === $mode) {
             try {
-                $row = $connection->selectOne('SELECT pg_current_wal_lsn() AS lsn');
+                $row = $connection->selectOne('SELECT pg_current_wal_lsn() AS lsn', [], false);
                 $prePeekLsn = null !== $row ? $row->lsn : null;
             } catch (Throwable $e) {
                 /** best-effort */
@@ -544,39 +546,24 @@ class WalEventDispatchCommand extends Command
         $lastLsn = null;
 
         /**
-         * 使用 Laravel 的 transaction() 包裹游标操作，
-         * 确保 Listener 中的 DB::transaction() 能正确使用 SAVEPOINT，
-         * 异常时自动 rollback 游标事务。
+         * 使用 Laravel transaction() 包裹游标操作，
+         * Listener 中的 DB::transaction() 会正确使用 SAVEPOINT。
          *
-         * DECLARE CURSOR 不支持 PDO 参数占位符（PG 限制），
-         * 需要手动 quote 拼接 SQL。所有参数均为受控输入（slot name、batch、wal2json 参数），无注入风险。
+         * DECLARE CURSOR 不支持参数占位符（PG 限制），通过 Connection 的 raw 表达式拼接。
+         * FETCH/CLOSE 无参数，直接用 select()/unprepared()。
+         * select() 第三个参数 false 强制使用写连接，确保与事务在同一连接上。
          */
-        $pdo = $connection->getPdo();
-        $quotedBindings = array_map(function ($v) use ($pdo) {
-            return $pdo->quote((string) $v);
-        }, $bindings);
-        $boundSql = preg_replace_callback('/\?/', function () use (&$quotedBindings) {
-            return array_shift($quotedBindings);
-        }, $sql);
-        $declareSql = sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $boundSql);
+        $declareSql = $this->buildCursorDeclareSql($connection, $cursorName, $sql, $bindings);
 
-        /**
-         * 游标操作必须在同一个 PDO 连接上执行。
-         * Laravel 的 select() 默认使用读连接，transaction() 在写连接上，
-         * 导致 DECLARE CURSOR 和 FETCH 不在同一连接。
-         * 因此游标的 DECLARE/FETCH/CLOSE 直接通过写连接 PDO 执行，
-         * 事务管理仍走 Laravel 的 transaction()。
-         */
-        $connection->transaction(function () use (
-            $pdo, $cursorName, $fetchSize, $isV2, $declareSql,
+        $connection->transaction(function ($connection) use (
+            $cursorName, $fetchSize, $isV2, $declareSql,
             $partitionMap, $handlers,
             &$tableCounts, &$dispatchCount, &$lastLsn
         ) {
-            $pdo->exec($declareSql);
+            $connection->unprepared($declareSql);
 
             while (true) {
-                $chunk = $pdo->query(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName))
-                    ->fetchAll(\PDO::FETCH_OBJ);
+                $chunk = $connection->select(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName), [], false);
 
                 if (empty($chunk)) {
                     break;
@@ -628,7 +615,7 @@ class WalEventDispatchCommand extends Command
                 unset($chunk);
             }
 
-            $pdo->exec(sprintf('CLOSE %s', $cursorName));
+            $connection->unprepared(sprintf('CLOSE %s', $cursorName));
         });
 
         /** 无变更：advance 模式下推进到 prePeekLsn 消除幻影滞后 */
@@ -886,6 +873,32 @@ class WalEventDispatchCommand extends Command
     }
 
     /**
+     * 构建 DECLARE CURSOR 的完整 SQL（无占位符）。
+     *
+     * PG 的 DECLARE CURSOR 不支持 PDO 参数占位符，
+     * 通过 Connection::getPdo()->quote() 安全拼接参数值。
+     *
+     * @param Connection $connection
+     * @param string $cursorName
+     * @param string $sql 含 ? 占位符的查询 SQL
+     * @param array $bindings 绑定参数
+     *
+     * @return string 完整的 DECLARE CURSOR SQL
+     */
+    protected function buildCursorDeclareSql($connection, $cursorName, $sql, array $bindings)
+    {
+        $pdo = $connection->getPdo();
+        $quoted = array_map(function ($v) use ($pdo) {
+            return $pdo->quote((string) $v);
+        }, $bindings);
+        $boundSql = preg_replace_callback('/\?/', function () use (&$quoted) {
+            return array_shift($quoted);
+        }, $sql);
+
+        return sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $boundSql);
+    }
+
+    /**
      * @return Connection
      */
     protected function getConnection()
@@ -1000,7 +1013,8 @@ class WalEventDispatchCommand extends Command
                 "SELECT pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn) AS lag_bytes
                  FROM pg_replication_slots
                  WHERE slot_name = ?",
-                [$slot]
+                [$slot],
+                false
             );
 
             if (null === $row || null === $row->lag_bytes) {
@@ -1050,7 +1064,8 @@ class WalEventDispatchCommand extends Command
 
         $exists = $connection->selectOne(
             'SELECT plugin, active, active_pid FROM pg_replication_slots WHERE slot_name = ? AND slot_type = ?',
-            [$slot, 'logical']
+            [$slot, 'logical'],
+            false
         );
 
         if (null !== $exists) {
@@ -1082,7 +1097,8 @@ class WalEventDispatchCommand extends Command
             /** 并发竞态：另一个进程可能在检查与创建之间已创建了同名 slot */
             $exists = $connection->selectOne(
                 'SELECT 1 FROM pg_replication_slots WHERE slot_name = ?',
-                [$slot]
+                [$slot],
+                false
             );
             if (null !== $exists) {
                 $this->info(sprintf('Slot [%s] already exists (created by another process)', $slot));

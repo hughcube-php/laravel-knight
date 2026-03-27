@@ -858,58 +858,8 @@ PHP
     }
 
     /**
-     * Mock PDO for cursor operations (exec/query/quote).
-     */
-    class MockCursorPdo
-    {
-        /** @var array */
-        private $rows;
-        /** @var int */
-        private $fetchIndex = 0;
-        /** @var MockCursorConnection */
-        private $conn;
-
-        public function __construct(array $rows, $conn)
-        {
-            $this->rows = $rows;
-            $this->conn = $conn;
-        }
-
-        public function quote($value)
-        {
-            return "'" . addslashes((string) $value) . "'";
-        }
-
-        public function exec($sql)
-        {
-            if (false !== stripos($sql, 'DECLARE')) {
-                $this->fetchIndex = 0;
-            }
-            return 0;
-        }
-
-        public function query($sql)
-        {
-            $size = 1000;
-            if (preg_match('/FETCH\s+(\d+)/i', $sql, $m)) {
-                $size = (int) $m[1];
-            }
-            $chunk = array_slice($this->rows, $this->fetchIndex, $size);
-            $this->fetchIndex += count($chunk);
-            return new MockPdoStatement($chunk);
-        }
-    }
-
-    class MockPdoStatement
-    {
-        private $data;
-        public function __construct(array $data) { $this->data = $data; }
-        public function fetchAll($mode = \PDO::FETCH_OBJ) { return $this->data; }
-    }
-
-    /**
      * Mock Connection for cursor-based pollChanges tests.
-     * Simulates DECLARE CURSOR / FETCH / CLOSE + beginTransaction/commit/rollBack.
+     * 模拟 Laravel Connection 的 transaction/select/unprepared/statement/selectOne/getPdo。
      */
     class MockCursorConnection
     {
@@ -930,13 +880,20 @@ PHP
         public function beginTransaction() { }
         public function commit() { }
         public function rollBack() { }
-        public function unprepared($query) { return true; }
+
+        public function unprepared($query)
+        {
+            if (false !== stripos($query, 'DECLARE')) {
+                $this->fetchIndex = 0;
+            }
+            return true;
+        }
 
         public function getPdo()
         {
-            $rows = $this->rows;
-            $conn = $this;
-            return new MockCursorPdo($rows, $conn);
+            return new class {
+                public function quote($value) { return "'" . addslashes((string) $value) . "'"; }
+            };
         }
 
         public function transaction($callback, $attempts = 1)
@@ -960,13 +917,8 @@ PHP
             return null;
         }
 
-        public function select($query, array $bindings = [])
+        public function select($query, array $bindings = [], $useReadPdo = true)
         {
-            /** DECLARE CURSOR — 初始化，返回空 */
-            if (false !== stripos($query, 'DECLARE')) {
-                $this->fetchIndex = 0;
-                return [];
-            }
             /** FETCH — 分块返回数据 */
             if (false !== stripos($query, 'FETCH')) {
                 if (preg_match('/FETCH\s+(\d+)/i', $query, $m)) {
@@ -977,10 +929,6 @@ PHP
                 $chunk = array_slice($this->rows, $this->fetchIndex, $size);
                 $this->fetchIndex += count($chunk);
                 return $chunk;
-            }
-            /** CLOSE — 清理，返回空 */
-            if (false !== stripos($query, 'CLOSE')) {
-                return [];
             }
             return $this->rows;
         }
