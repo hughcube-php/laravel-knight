@@ -577,78 +577,105 @@ class WalEventDispatchCommand extends Command
              * 使用 prepare()->execute() 而非 exec()，因为 exec() 在某些
              * PHP/PG 驱动版本组合下可能静默失败不创建游标。
              * prepare()->execute() 走 PDO 完整的语句生命周期，更可靠。
+             *
+             * 但 FETCH/CLOSE 再走 prepare()->execute() 在部分 PHP/PG 驱动组合
+             * 下会导致已声明的命名游标提前失效，因此后续仍使用简单查询协议。
              */
-            $quotedBindings = array_map(function ($v) use ($pdo) {
-                return $pdo->quote((string) $v);
-            }, $bindings);
-            $boundSql = preg_replace_callback('/\?/', function () use (&$quotedBindings) {
-                return array_shift($quotedBindings);
-            }, $sql);
-
-            $declareSql = sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $boundSql);
-            $stmt = $pdo->prepare($declareSql);
-            $stmt->execute();
-            unset($stmt);
-
-            while (true) {
-                $fetchStmt = $pdo->prepare(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName));
-                $fetchStmt->execute();
-                $chunk = $fetchStmt->fetchAll(\PDO::FETCH_OBJ);
-                unset($fetchStmt);
-
-                if (empty($chunk)) {
-                    break;
+            $canToggleEmulatePrepares = method_exists($pdo, 'getAttribute') && method_exists($pdo, 'setAttribute');
+            $emulateState = false;
+            if ($canToggleEmulatePrepares) {
+                $emulateState = (bool) $pdo->getAttribute(\PDO::ATTR_EMULATE_PREPARES);
+                if ($emulateState) {
+                    $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
                 }
+            }
 
-                foreach ($chunk as $row) {
-                    $lastLsn = $row->lsn;
+            try {
+                $quotedBindings = array_map(function ($v) use ($pdo) {
+                    return $pdo->quote((string) $v);
+                }, $bindings);
+                $boundSql = preg_replace_callback('/\?/', function () use (&$quotedBindings) {
+                    return array_shift($quotedBindings);
+                }, $sql);
 
-                    $payload = json_decode($row->data, true);
-                    if (!is_array($payload)) {
-                        if (JSON_ERROR_NONE !== json_last_error()) {
-                            $this->warn(sprintf(
-                                'json_decode failed (LSN %s): %s, data prefix: %s',
-                                $row->lsn, json_last_error_msg(), substr($row->data, 0, 200)
-                            ));
-                        }
-                        continue;
+                $declareSql = sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $boundSql);
+                $stmt = $pdo->prepare($declareSql);
+                $stmt->execute();
+                unset($stmt);
+
+                while (true) {
+                    if (method_exists($pdo, 'query')) {
+                        $chunk = $pdo->query(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName))
+                            ->fetchAll(\PDO::FETCH_OBJ);
+                    } else {
+                        $fetchStmt = $pdo->prepare(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName));
+                        $fetchStmt->execute();
+                        $chunk = $fetchStmt->fetchAll(\PDO::FETCH_OBJ);
+                        unset($fetchStmt);
                     }
 
-                    $changes = $isV2 ? [$payload] : ($payload['change'] ?? []);
+                    if (empty($chunk)) {
+                        break;
+                    }
 
-                    foreach ($changes as $change) {
-                        $rawTable = $change['table'] ?? null;
-                        if (null === $rawTable) {
+                    foreach ($chunk as $row) {
+                        $lastLsn = $row->lsn;
+
+                        $payload = json_decode($row->data, true);
+                        if (!is_array($payload)) {
+                            if (JSON_ERROR_NONE !== json_last_error()) {
+                                $this->warn(sprintf(
+                                    'json_decode failed (LSN %s): %s, data prefix: %s',
+                                    $row->lsn, json_last_error_msg(), substr($row->data, 0, 200)
+                                ));
+                            }
                             continue;
                         }
 
-                        $resolvedTable = $this->resolveTable($rawTable, $partitionMap);
-                        if (!isset($handlers[$resolvedTable])) {
-                            continue;
-                        }
+                        $changes = $isV2 ? [$payload] : ($payload['change'] ?? []);
 
-                        foreach ($handlers[$resolvedTable] as $meta) {
-                            $record = WalChangeRecord::fromWal2json($change, $resolvedTable, $rawTable, $meta['keyName'], get_class($meta['handler']));
-                            if (null === $record) {
+                        foreach ($changes as $change) {
+                            $rawTable = $change['table'] ?? null;
+                            if (null === $rawTable) {
                                 continue;
                             }
 
-                            $this->dispatchWalChange($record);
+                            $resolvedTable = $this->resolveTable($rawTable, $partitionMap);
+                            if (!isset($handlers[$resolvedTable])) {
+                                continue;
+                            }
 
-                            $table = $record->getTable();
-                            $kind = $record->getKind();
-                            $tableCounts[$table][$kind] = ($tableCounts[$table][$kind] ?? 0) + 1;
-                            $dispatchCount++;
+                            foreach ($handlers[$resolvedTable] as $meta) {
+                                $record = WalChangeRecord::fromWal2json($change, $resolvedTable, $rawTable, $meta['keyName'], get_class($meta['handler']));
+                                if (null === $record) {
+                                    continue;
+                                }
+
+                                $this->dispatchWalChange($record);
+
+                                $table = $record->getTable();
+                                $kind = $record->getKind();
+                                $tableCounts[$table][$kind] = ($tableCounts[$table][$kind] ?? 0) + 1;
+                                $dispatchCount++;
+                            }
                         }
                     }
+
+                    unset($chunk);
                 }
 
-                unset($chunk);
+                if (method_exists($pdo, 'exec')) {
+                    $pdo->exec(sprintf('CLOSE %s', $cursorName));
+                } else {
+                    $closeStmt = $pdo->prepare(sprintf('CLOSE %s', $cursorName));
+                    $closeStmt->execute();
+                    unset($closeStmt);
+                }
+            } finally {
+                if ($canToggleEmulatePrepares && $emulateState) {
+                    $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
+                }
             }
-
-            $closeStmt = $pdo->prepare(sprintf('CLOSE %s', $cursorName));
-            $closeStmt->execute();
-            unset($closeStmt);
         });
 
         /** 无变更：advance 模式下推进到 prePeekLsn 消除幻影滞后 */
