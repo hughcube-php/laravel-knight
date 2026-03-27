@@ -546,14 +546,15 @@ class WalEventDispatchCommand extends Command
         $lastLsn = null;
 
         /**
-         * DECLARE CURSOR 不支持 PDO 参数占位符（PG 限制），
-         * 通过 getPdo()->quote() 安全拼接后用 unprepared() 执行。
+         * 游标操作（DECLARE/FETCH/CLOSE）必须通过同一个写连接 PDO 执行。
          *
-         * 游标事务内所有数据库操作强制使用写连接（主库），
-         * 避免读写分离下 DECLARE/FETCH/CLOSE 分散在不同连接上导致游标找不到。
-         * - unprepared() 内部走 getPdo()（写连接）
-         * - selectFromWriteConnection() 强制走写连接
-         * - transaction() 在写连接上开启事务
+         * 不能使用 Laravel Connection 的 select()/unprepared() 等方法，因为：
+         * 1. DECLARE CURSOR 不支持 PDO 参数占位符（PG 限制）
+         * 2. Connection 方法内部有 reconnect/retry 逻辑，可能在中途切换 PDO 实例
+         * 3. 不同 Laravel 版本的 unprepared() 行为不一致
+         *
+         * 事务管理通过 $connection->transaction() 走 Laravel 层，
+         * 确保 Listener 中 DB::transaction() 能正确使用 SAVEPOINT。
          */
         $pdo = $connection->getPdo();
         $quotedBindings = array_map(function ($v) use ($pdo) {
@@ -564,15 +565,16 @@ class WalEventDispatchCommand extends Command
         }, $sql);
         $declareSql = sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $boundSql);
 
-        $connection->transaction(function ($connection) use (
-            $cursorName, $fetchSize, $isV2, $declareSql,
+        $connection->transaction(function () use (
+            $pdo, $cursorName, $fetchSize, $isV2, $declareSql,
             $partitionMap, $handlers,
             &$tableCounts, &$dispatchCount, &$lastLsn
         ) {
-            $connection->unprepared($declareSql);
+            $pdo->exec($declareSql);
 
             while (true) {
-                $chunk = $connection->selectFromWriteConnection(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName));
+                $chunk = $pdo->query(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName))
+                    ->fetchAll(\PDO::FETCH_OBJ);
 
                 if (empty($chunk)) {
                     break;
@@ -624,7 +626,7 @@ class WalEventDispatchCommand extends Command
                 unset($chunk);
             }
 
-            $connection->unprepared(sprintf('CLOSE %s', $cursorName));
+            $pdo->exec(sprintf('CLOSE %s', $cursorName));
         });
 
         /** 无变更：advance 模式下推进到 prePeekLsn 消除幻影滞后 */

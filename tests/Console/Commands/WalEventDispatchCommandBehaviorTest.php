@@ -891,22 +891,41 @@ PHP
 
         public function getPdo()
         {
-            return new class {
+            $conn = $this;
+            return new class($conn) {
+                private $conn;
+                private $fetchIndex = 0;
+                public function __construct($conn) { $this->conn = $conn; }
                 public function quote($value) { return "'" . addslashes((string) $value) . "'"; }
+                public function exec($sql)
+                {
+                    if (false !== stripos($sql, 'DECLARE')) {
+                        $this->fetchIndex = 0;
+                    }
+                    return 0;
+                }
+                public function query($sql)
+                {
+                    $size = 1000;
+                    if (preg_match('/FETCH\s+(\d+)/i', $sql, $m)) {
+                        $size = (int) $m[1];
+                    }
+                    $chunk = array_slice($this->conn->rows, $this->fetchIndex, $size);
+                    $this->fetchIndex += count($chunk);
+                    return new class($chunk) {
+                        private $data;
+                        public function __construct($data) { $this->data = $data; }
+                        public function fetchAll($mode = \PDO::FETCH_OBJ) { return $this->data; }
+                    };
+                }
             };
-        }
-
-        public function selectFromWriteConnection($query, array $bindings = [])
-        {
-            return $this->select($query, $bindings, false);
         }
 
         public function transaction($callback, $attempts = 1)
         {
             $this->beginTransaction();
             try {
-                $result = $callback($this);
-                $this->commit();
+                $result = $callback();
                 return $result;
             } catch (\Throwable $e) {
                 $this->rollBack();
