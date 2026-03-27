@@ -555,160 +555,132 @@ class WalEventDispatchCommand extends Command
         $dispatchCount = 0;
         $lastLsn = null;
 
-        /**
-         * 事务管理通过 $connection->transaction() 走 Laravel 层，
-         * 确保 Listener 中 DB::transaction() 能正确使用 SAVEPOINT。
-         *
-         * 默认分支统一通过 $connection->cursor(..., false, ...) 走主库写连接；
-         * 仅为极简测试替身保留下方 PDO 兼容分支。
-         */
-        $connection->transaction(function ($connection) use (
-            $sql, $bindings, $cursorName, $fetchSize, $isV2,
-            $partitionMap, $handlers,
+        $processChunk = function (array $chunk) use (
+            $isV2, $partitionMap, $handlers,
             &$tableCounts, &$dispatchCount, &$lastLsn
         ) {
-            $processChunk = function (array $chunk) use (
-                $isV2, $partitionMap, $handlers,
-                &$tableCounts, &$dispatchCount, &$lastLsn
-            ) {
-                foreach ($chunk as $row) {
-                    $lastLsn = $row->lsn;
+            foreach ($chunk as $row) {
+                $lastLsn = $row->lsn;
 
-                    $payload = json_decode($row->data, true);
-                    if (!is_array($payload)) {
-                        if (JSON_ERROR_NONE !== json_last_error()) {
-                            $this->warn(sprintf(
-                                'json_decode failed (LSN %s): %s, data prefix: %s',
-                                $row->lsn, json_last_error_msg(), substr($row->data, 0, 200)
-                            ));
-                        }
+                $payload = json_decode($row->data, true);
+                if (!is_array($payload)) {
+                    if (JSON_ERROR_NONE !== json_last_error()) {
+                        $this->warn(sprintf(
+                            'json_decode failed (LSN %s): %s, data prefix: %s',
+                            $row->lsn, json_last_error_msg(), substr($row->data, 0, 200)
+                        ));
+                    }
+                    continue;
+                }
+
+                $changes = $isV2 ? [$payload] : ($payload['change'] ?? []);
+
+                foreach ($changes as $change) {
+                    $rawTable = $change['table'] ?? null;
+                    if (null === $rawTable) {
                         continue;
                     }
 
-                    $changes = $isV2 ? [$payload] : ($payload['change'] ?? []);
+                    $resolvedTable = $this->resolveTable($rawTable, $partitionMap);
+                    if (!isset($handlers[$resolvedTable])) {
+                        continue;
+                    }
 
-                    foreach ($changes as $change) {
-                        $rawTable = $change['table'] ?? null;
-                        if (null === $rawTable) {
+                    foreach ($handlers[$resolvedTable] as $meta) {
+                        $record = WalChangeRecord::fromWal2json($change, $resolvedTable, $rawTable, $meta['keyName'], get_class($meta['handler']));
+                        if (null === $record) {
                             continue;
                         }
 
-                        $resolvedTable = $this->resolveTable($rawTable, $partitionMap);
-                        if (!isset($handlers[$resolvedTable])) {
-                            continue;
-                        }
+                        $this->dispatchWalChange($record);
 
-                        foreach ($handlers[$resolvedTable] as $meta) {
-                            $record = WalChangeRecord::fromWal2json($change, $resolvedTable, $rawTable, $meta['keyName'], get_class($meta['handler']));
-                            if (null === $record) {
-                                continue;
-                            }
-
-                            $this->dispatchWalChange($record);
-
-                            $table = $record->getTable();
-                            $kind = $record->getKind();
-                            $tableCounts[$table][$kind] = ($tableCounts[$table][$kind] ?? 0) + 1;
-                            $dispatchCount++;
-                        }
+                        $table = $record->getTable();
+                        $kind = $record->getKind();
+                        $tableCounts[$table][$kind] = ($tableCounts[$table][$kind] ?? 0) + 1;
+                        $dispatchCount++;
                     }
                 }
-            };
-
-            /**
-             * 正常运行路径：通过 Connection 抽象流式读取，并显式强制使用写连接。
-             */
-            if (method_exists($connection, 'cursor')) {
-                foreach ($connection->cursor($sql, $bindings, false, [\PDO::FETCH_OBJ]) as $row) {
-                    $processChunk([$row]);
-                }
-
-                return;
             }
+        };
 
+        /**
+         * 正常运行路径：通过 Connection 抽象流式读取，并显式强制使用写连接。
+         *
+         * 这里不再额外套 transaction()。新的主路径已经不依赖 DECLARE/FETCH 命名游标，
+         * 事务只会增加与 Laravel/驱动实现耦合的风险；异常时 advance 本来也不会执行，
+         * 因而仍然保留“失败不消费”的语义。
+         */
+        if (method_exists($connection, 'cursor')) {
+            foreach ($connection->cursor($sql, $bindings, false, [\PDO::FETCH_OBJ]) as $row) {
+                $processChunk([$row]);
+            }
+        } else {
             /**
              * 兼容极简测试替身的遗留分支。
              *
-             * DECLARE CURSOR 不支持 PDO 参数占位符（PG 限制），
-             * 通过 quote 拼接后用 prepare()->execute() 执行。
-             *
-             * 使用 prepare()->execute() 而非 exec()，因为 exec() 在某些
-             * PHP/PG 驱动版本组合下可能静默失败不创建游标。
-             * prepare()->execute() 走 PDO 完整的语句生命周期，更可靠。
-             *
-             * 但 FETCH/CLOSE 再走 prepare()->execute() 在部分 PHP/PG 驱动组合
-             * 下会导致已声明的命名游标提前失效，因此后续仍使用简单查询协议。
+             * 这一支仍然使用 DECLARE CURSOR，因此必须放在 transaction() 内执行。
+             * 事务管理通过 Laravel 层处理，确保游标生命周期正确。
              */
-            $pdo = $connection->getPdo();
-            $canToggleEmulatePrepares = method_exists($pdo, 'getAttribute') && method_exists($pdo, 'setAttribute');
-            $emulateState = false;
-            if ($canToggleEmulatePrepares) {
-                $emulateState = (bool) $pdo->getAttribute(\PDO::ATTR_EMULATE_PREPARES);
-                if ($emulateState) {
-                    $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+            $connection->transaction(function ($connection) use (
+                $sql, $bindings, $cursorName, $fetchSize, $processChunk, &$dispatchCount
+            ) {
+                /**
+                 * DECLARE CURSOR 不支持 PDO 参数占位符（PG 限制），
+                 * 通过 quote 拼接后用 prepare()->execute() 执行。
+                 *
+                 * 使用 prepare()->execute() 而非 exec()，因为 exec() 在某些
+                 * PHP/PG 驱动版本组合下可能静默失败不创建游标。
+                 * prepare()->execute() 走 PDO 完整的语句生命周期，更可靠。
+                 *
+                 * 但 FETCH/CLOSE 再走 prepare()->execute() 在部分 PHP/PG 驱动组合
+                 * 下会导致已声明的命名游标提前失效，因此后续仍使用简单查询协议。
+                 */
+                $pdo = $connection->getPdo();
+                $canToggleEmulatePrepares = method_exists($pdo, 'getAttribute') && method_exists($pdo, 'setAttribute');
+                $emulateState = false;
+                if ($canToggleEmulatePrepares) {
+                    $emulateState = (bool) $pdo->getAttribute(\PDO::ATTR_EMULATE_PREPARES);
+                    if ($emulateState) {
+                        $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+                    }
                 }
-            }
-
-            try {
-                $quotedBindings = array_map(function ($v) use ($pdo) {
-                    return $pdo->quote((string) $v);
-                }, $bindings);
-                $boundSql = preg_replace_callback('/\?/', function () use (&$quotedBindings) {
-                    return array_shift($quotedBindings);
-                }, $sql);
-
-                $declareSql = sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $boundSql);
-                $stmt = $pdo->prepare($declareSql);
-                $stmt->execute();
-                unset($stmt);
-
-                $closed = false;
 
                 try {
-                    while (true) {
-                        if (method_exists($pdo, 'query')) {
-                            $chunk = $pdo->query(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName))
-                                ->fetchAll(\PDO::FETCH_OBJ);
-                        } else {
-                            $fetchStmt = $pdo->prepare(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName));
-                            $fetchStmt->execute();
-                            $chunk = $fetchStmt->fetchAll(\PDO::FETCH_OBJ);
-                            unset($fetchStmt);
-                        }
+                    $quotedBindings = array_map(function ($v) use ($pdo) {
+                        return $pdo->quote((string) $v);
+                    }, $bindings);
+                    $boundSql = preg_replace_callback('/\?/', function () use (&$quotedBindings) {
+                        return array_shift($quotedBindings);
+                    }, $sql);
 
-                        if (empty($chunk)) {
-                            break;
-                        }
+                    $declareSql = sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $boundSql);
+                    $stmt = $pdo->prepare($declareSql);
+                    $stmt->execute();
+                    unset($stmt);
 
-                        $processChunk($chunk);
+                    $closed = false;
 
-                        unset($chunk);
-                    }
-
-                    if (method_exists($pdo, 'exec')) {
-                        $pdo->exec(sprintf('CLOSE %s', $cursorName));
-                    } else {
-                        $closeStmt = $pdo->prepare(sprintf('CLOSE %s', $cursorName));
-                        $closeStmt->execute();
-                        unset($closeStmt);
-                    }
-                    $closed = true;
-                } catch (\PDOException $e) {
-                    $cursorMissing = false !== stripos($e->getMessage(), sprintf('cursor "%s" does not exist', $cursorName));
-                    if (!$cursorMissing || $dispatchCount > 0) {
-                        throw $e;
-                    }
-
-                    $fallbackStmt = $pdo->prepare($sql);
-                    $fallbackStmt->execute($bindings);
-                    while (false !== ($row = $fallbackStmt->fetch(\PDO::FETCH_OBJ))) {
-                        $processChunk([$row]);
-                    }
-                    unset($fallbackStmt);
-                }
-
-                if (!$closed) {
                     try {
+                        while (true) {
+                            if (method_exists($pdo, 'query')) {
+                                $chunk = $pdo->query(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName))
+                                    ->fetchAll(\PDO::FETCH_OBJ);
+                            } else {
+                                $fetchStmt = $pdo->prepare(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName));
+                                $fetchStmt->execute();
+                                $chunk = $fetchStmt->fetchAll(\PDO::FETCH_OBJ);
+                                unset($fetchStmt);
+                            }
+
+                            if (empty($chunk)) {
+                                break;
+                            }
+
+                            $processChunk($chunk);
+
+                            unset($chunk);
+                        }
+
                         if (method_exists($pdo, 'exec')) {
                             $pdo->exec(sprintf('CLOSE %s', $cursorName));
                         } else {
@@ -716,16 +688,41 @@ class WalEventDispatchCommand extends Command
                             $closeStmt->execute();
                             unset($closeStmt);
                         }
+                        $closed = true;
                     } catch (\PDOException $e) {
-                        /** best-effort close */
+                        $cursorMissing = false !== stripos($e->getMessage(), sprintf('cursor "%s" does not exist', $cursorName));
+                        if (!$cursorMissing || $dispatchCount > 0) {
+                            throw $e;
+                        }
+
+                        $fallbackStmt = $pdo->prepare($sql);
+                        $fallbackStmt->execute($bindings);
+                        while (false !== ($row = $fallbackStmt->fetch(\PDO::FETCH_OBJ))) {
+                            $processChunk([$row]);
+                        }
+                        unset($fallbackStmt);
+                    }
+
+                    if (!$closed) {
+                        try {
+                            if (method_exists($pdo, 'exec')) {
+                                $pdo->exec(sprintf('CLOSE %s', $cursorName));
+                            } else {
+                                $closeStmt = $pdo->prepare(sprintf('CLOSE %s', $cursorName));
+                                $closeStmt->execute();
+                                unset($closeStmt);
+                            }
+                        } catch (\PDOException $e) {
+                            /** best-effort close */
+                        }
+                    }
+                } finally {
+                    if ($canToggleEmulatePrepares && $emulateState) {
+                        $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
                     }
                 }
-            } finally {
-                if ($canToggleEmulatePrepares && $emulateState) {
-                    $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
-                }
-            }
-        });
+            });
+        }
 
         /** 无变更：advance 模式下推进到 prePeekLsn 消除幻影滞后 */
         if (null === $lastLsn) {
