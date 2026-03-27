@@ -98,6 +98,15 @@ class TestBusDispatcher implements Dispatcher
     {
         return $this;
     }
+
+    public function dispatchAfterResponse($command, $handler = null)
+    {
+    }
+
+    public function chain($jobs = null)
+    {
+        return $this;
+    }
 }
 
 class TestExceptionHandler implements ExceptionHandler

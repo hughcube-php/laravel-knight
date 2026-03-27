@@ -107,6 +107,15 @@ class ScheduleJobTest extends TestCase
             {
                 return $this;
             }
+
+            public function dispatchAfterResponse($command, $handler = null)
+            {
+            }
+
+            public function chain($jobs = null)
+            {
+                return $this;
+            }
         };
 
         $this->app->instance(Dispatcher::class, $dispatcher);
@@ -164,6 +173,15 @@ class ScheduleJobTest extends TestCase
             }
 
             public function map(array $map)
+            {
+                return $this;
+            }
+
+            public function dispatchAfterResponse($command, $handler = null)
+            {
+            }
+
+            public function chain($jobs = null)
             {
                 return $this;
             }

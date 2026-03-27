@@ -90,6 +90,10 @@ class WalChangeRecord implements JsonSerializable
     /**
      * 从 wal2json change 数组构建 WalChangeRecord。
      *
+     * 自动兼容 format-version 1 和 format-version 2：
+     * - v1: kind + columnnames/columnvalues 并行数组 + oldkeys.keynames/keyvalues
+     * - v2: action + columns[{name,type,value}] + identity[{name,type,value}]
+     *
      * @param array $change wal2json 单条 change 记录
      * @param string $resolvedTable 解析后的父表名
      * @param string|null $rawTable 原始表名（分区子表），与 resolvedTable 相同时传 null
@@ -100,6 +104,11 @@ class WalChangeRecord implements JsonSerializable
      */
     public static function fromWal2json(array $change, $resolvedTable, $rawTable, $keyName, $modelClass)
     {
+        /** format-version 2 使用 action 字段 */
+        if (isset($change['action'])) {
+            return self::fromWal2jsonV2($change, $resolvedTable, $rawTable, $keyName, $modelClass);
+        }
+
         $kind = $change['kind'] ?? null;
         if (null === $kind) {
             return null;
@@ -126,6 +135,94 @@ class WalChangeRecord implements JsonSerializable
         $partitionTable = ($rawTable !== $resolvedTable) ? $rawTable : null;
 
         return new self($kind, $resolvedTable, $partitionTable, $id, $keyName, $columns, $oldColumns, $modelClass);
+    }
+
+    /**
+     * 从 wal2json format-version 2 的 change 数组构建 WalChangeRecord。
+     *
+     * v2 格式：
+     * - action: I(insert)/U(update)/D(delete)/T(truncate)
+     * - columns: [{name, type, value}, ...] （INSERT/UPDATE 的新值）
+     * - identity: [{name, type, value}, ...] （UPDATE/DELETE 的旧值/主键）
+     *
+     * @param array $change wal2json v2 单条 change 记录
+     * @param string $resolvedTable 解析后的父表名
+     * @param string|null $rawTable 原始表名
+     * @param string $keyName 主键列名
+     * @param string $modelClass Model 类名
+     *
+     * @return self|null
+     */
+    protected static function fromWal2jsonV2(array $change, $resolvedTable, $rawTable, $keyName, $modelClass)
+    {
+        /** action → kind 映射 */
+        $actionMap = ['I' => self::KIND_INSERT, 'U' => self::KIND_UPDATE, 'D' => self::KIND_DELETE];
+        $kind = $actionMap[$change['action']] ?? null;
+        if (null === $kind) {
+            return null;
+        }
+
+        $columns = self::flattenV2Columns($change['columns'] ?? []);
+        $oldColumns = self::flattenV2Columns($change['identity'] ?? []);
+
+        /** DELETE 从 oldColumns 取主键，INSERT/UPDATE 从 columns 取 */
+        $id = (self::KIND_DELETE === $kind)
+            ? ($oldColumns[$keyName] ?? null)
+            : ($columns[$keyName] ?? null);
+
+        if (null === $id) {
+            return null;
+        }
+
+        $partitionTable = ($rawTable !== $resolvedTable) ? $rawTable : null;
+
+        return new self($kind, $resolvedTable, $partitionTable, $id, $keyName, $columns, $oldColumns, $modelClass);
+    }
+
+    /**
+     * wal2json v2 中未变更 TOAST 列的哨兵值。
+     *
+     * UPDATE 时未变更的 TOAST 列在 v2 格式下 value 为此字符串，
+     * 而非实际值或 null。下游需通过 isToastUnchanged() 检测。
+     */
+    const TOAST_UNCHANGED = 'unchanged-toast-datum';
+
+    /**
+     * 将 format-version 2 的 columns 数组扁平化为 [name => value] 关联数组。
+     *
+     * v2 输入: [{"name":"id","type":"integer","value":1}, {"name":"title","type":"text","value":"hello"}]
+     * 输出:    ["id" => 1, "title" => "hello"]
+     *
+     * TOAST 列哨兵值 "unchanged-toast-datum" 会被替换为 null，
+     * 避免 toModel() 将哨兵字符串填充到 Model 属性中。
+     * 使用 isToastUnchanged() 检测某列是否为未变更的 TOAST 列。
+     *
+     * @param array $v2Columns
+     *
+     * @return array<string, mixed>
+     */
+    protected static function flattenV2Columns(array $v2Columns)
+    {
+        $result = [];
+        foreach ($v2Columns as $col) {
+            if (isset($col['name'])) {
+                $value = $col['value'] ?? null;
+                $result[$col['name']] = (self::TOAST_UNCHANGED === $value) ? null : $value;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * 检查指定列是否为未变更的 TOAST 列（仅 v2 格式 UPDATE 场景有意义）。
+     *
+     * @param string $column
+     *
+     * @return bool
+     */
+    public function isToastUnchanged($column)
+    {
+        return !array_key_exists($column, $this->columns);
     }
 
     /**
@@ -375,5 +472,17 @@ class WalChangeRecord implements JsonSerializable
     public function __sleep()
     {
         return ['kind', 'table', 'partitionTable', 'id', 'keyName', 'columns', 'oldColumns', 'modelClass'];
+    }
+
+    /**
+     * 反序列化时初始化被 __sleep 排除的运行时属性。
+     *
+     * PHP 的 unserialize 不调用构造函数，__sleep 排除的属性在反序列化后为 null
+     * 而非类定义中的默认值，会导致 hasContext() 等方法对 null 调用 array_key_exists 报错。
+     */
+    public function __wakeup()
+    {
+        $this->context = [];
+        $this->fetcher = null;
     }
 }

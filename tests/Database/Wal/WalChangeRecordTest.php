@@ -705,6 +705,81 @@ class WalChangeRecordTest extends TestCase
         $this->assertInstanceOf(WalRecordTestModel::class, $model);
         $this->assertSame($inserted->id, $model->id);
     }
+    // ==================== TOAST sentinel handling (v2) ====================
+
+    public function testFromWal2jsonV2ToastUnchangedReplacedWithNull()
+    {
+        $change = [
+            'action' => 'U',
+            'table' => 'wal_record_test_items',
+            'columns' => [
+                ['name' => 'id', 'type' => 'integer', 'value' => 1],
+                ['name' => 'name', 'type' => 'text', 'value' => 'updated'],
+                ['name' => 'email', 'type' => 'text', 'value' => 'unchanged-toast-datum'],
+            ],
+            'identity' => [
+                ['name' => 'id', 'type' => 'integer', 'value' => 1],
+            ],
+        ];
+
+        $record = WalChangeRecord::fromWal2json($change, 'wal_record_test_items', 'wal_record_test_items', 'id', WalRecordTestModel::class);
+
+        $this->assertNotNull($record);
+        $columns = $record->getColumns();
+
+        /** TOAST 哨兵值应被替换为 null */
+        $this->assertNull($columns['email']);
+        /** 正常值不受影响 */
+        $this->assertSame('updated', $columns['name']);
+        $this->assertSame(1, $columns['id']);
+    }
+
+    public function testToModelDoesNotContainToastSentinel()
+    {
+        $change = [
+            'action' => 'U',
+            'table' => 'wal_record_test_items',
+            'columns' => [
+                ['name' => 'id', 'type' => 'integer', 'value' => 42],
+                ['name' => 'name', 'type' => 'text', 'value' => 'hello'],
+                ['name' => 'email', 'type' => 'text', 'value' => 'unchanged-toast-datum'],
+            ],
+            'identity' => [
+                ['name' => 'id', 'type' => 'integer', 'value' => 42],
+            ],
+        ];
+
+        $record = WalChangeRecord::fromWal2json($change, 'wal_record_test_items', 'wal_record_test_items', 'id', WalRecordTestModel::class);
+        $model = $record->toModel();
+
+        /** Model 属性不应包含 TOAST 哨兵字符串 */
+        $this->assertNotSame('unchanged-toast-datum', $model->email);
+        $this->assertSame('hello', $model->name);
+    }
+
+    public function testIsToastUnchangedForMissingColumn()
+    {
+        /** 手动构建一个 columns 中缺少 email 的 record，模拟 TOAST 列被过滤 */
+        $record = new WalChangeRecord(
+            'update',
+            'wal_record_test_items',
+            null,
+            1,
+            'id',
+            ['id' => 1, 'name' => 'updated'],
+            ['id' => 1],
+            WalRecordTestModel::class
+        );
+
+        $this->assertTrue($record->isToastUnchanged('email'));
+        $this->assertFalse($record->isToastUnchanged('name'));
+        $this->assertFalse($record->isToastUnchanged('id'));
+    }
+
+    public function testToastConstantValue()
+    {
+        $this->assertSame('unchanged-toast-datum', WalChangeRecord::TOAST_UNCHANGED);
+    }
 }
 
 /**

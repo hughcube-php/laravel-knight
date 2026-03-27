@@ -38,23 +38,18 @@ Laravel Knight 是一个 Laravel 扩展包,提供增强的 Eloquent 模型、查
 这是因为 Windows 不能直接执行 Unix shell 脚本，需要通过 `.bat` 批处理文件来调用。
 
 ### 测试
+
+**所有测试命令统一通过 `composer run` 执行。**
+
 ```bash
 # 运行所有测试
-composer test
-# 或 (Linux/Mac)
-./vendor/bin/phpunit
-# 或 (Windows)
-./vendor/bin/phpunit.bat
+composer run test
 
-# 运行单个测试文件 (Linux/Mac)
-./vendor/bin/phpunit tests/Database/Eloquent/ModelTest.php
-# 运行单个测试文件 (Windows)
-./vendor/bin/phpunit.bat tests/Database/Eloquent/ModelTest.php
+# 运行单个测试文件
+composer run test -- tests/Database/Eloquent/ModelTest.php
 
-# 运行特定测试类中的方法 (Linux/Mac)
-./vendor/bin/phpunit --filter testMethodName tests/SomeTest.php
-# 运行特定测试类中的方法 (Windows)
-./vendor/bin/phpunit.bat --filter testMethodName tests/SomeTest.php
+# 运行特定测试方法
+composer run test -- --filter testMethodName tests/SomeTest.php
 ```
 
 ### 代码质量检查

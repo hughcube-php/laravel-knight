@@ -60,6 +60,20 @@ use Throwable;
  * 导致监控指标显示持续增长的"假性滞后"。advance 模式下，每次 peek 前记录当前 LSN，
  * 若 peek 结果为空则 advance 到该 LSN，消除假性滞后。
  *
+ * ## wal2json format-version 2（默认）
+ *
+ * 默认使用 format-version 2，每行变更输出一个独立的 JSON 对象：
+ * - 大事务不会产生巨型单条 record（v1 的 OOM 根因）
+ * - 每条 change 独立可解析，内存消耗恒定
+ * - 使用 --format-version=1 切换回 v1 格式（不推荐）
+ *
+ * ## 自动表过滤 (add-tables)
+ *
+ * 默认自动启用：根据 discoverWalHandlers() 发现的被监听表名，
+ * 自动构建 wal2json 的 add-tables 参数（白名单），只输出被监听表的变更。
+ * 未被监听的表（如 telescope_entries）在 wal2json 插件层直接过滤，不传输到应用层。
+ * 使用 --no-add-tables 禁用此行为。
+ *
  * ## wal2json 参数透传 (--wal2json-params)
  *
  * 支持向 wal2json 插件传递任意参数（key=value 格式），常用于控制输出列：
@@ -89,6 +103,12 @@ use Throwable;
  * # 调试模式：只读不消费
  * php artisan wal:event-dispatch --mode=peek
  *
+ * # 禁用自动 add-tables（接收所有表的 WAL 变更）
+ * php artisan wal:event-dispatch --no-add-tables
+ *
+ * # 使用 v1 格式（不推荐，大事务可能 OOM）
+ * php artisan wal:event-dispatch --format-version=1
+ *
  * # 自定义 Model 扫描路径
  * php artisan wal:event-dispatch --model-path="app/Models:App\\Models" --model-path="app/Domain:App\\Domain"
  * ```
@@ -110,15 +130,21 @@ class WalEventDispatchCommand extends Command
     protected $signature = 'wal:event-dispatch
         {--connection= : Database connection name}
         {--slot= : Replication slot name, default: APP_NAME_APP_ENV_wal_event}
-        {--interval=1.0 : Poll interval in seconds, supports decimals}
+        {--interval=0.5 : Poll interval in seconds, supports decimals}
         {--batch=1000 : Max number of changes per poll}
         {--memory=128 : Memory limit in MB, process stops when exceeded}
         {--max-errors=30 : Max consecutive errors before process exits, 0 means unlimited}
         {--mode=advance : Consume mode: auto(get_changes, read=consume), advance(peek+advance after dispatch, default), peek(read-only for debugging)}
         {--model-path=* : Model scanning paths, can be specified multiple times (default: app/Models)}
         {--wal2json-params=* : wal2json plugin parameters, e.g. --wal2json-params="filter-columns=content,body"}
+        {--no-add-tables : Disable auto add-tables parameter (by default, only monitored tables are included in wal2json output)}
+        {--filter-tables=* : Tables to exclude from wal2json output (blacklist), e.g. --filter-tables=telescope_entries --filter-tables=telescope_entries_tags}
+        {--format-version=2 : wal2json format version (1 or 2). Version 2 outputs one row per change, preventing OOM on large transactions}
         {--queue= : Queue name for WalChangesDispatchJob}
-        {--queue-connection=sync : Queue connection for WalChangesDispatchJob, e.g. sync, redis}';
+        {--queue-connection=sync : Queue connection for WalChangesDispatchJob, e.g. sync, redis}
+        {--partition-refresh=0 : Partition map refresh interval in seconds, 0 means no auto-refresh (default)}
+        {--slot-lag-warning=0 : Slot lag warning threshold in MB, 0 means no check (default). Process logs warning when exceeded}
+        {--slot-lag-critical=0 : Slot lag critical threshold in MB, 0 means no check (default). Process stops when exceeded}';
 
     protected $description = 'Monitor PostgreSQL WAL changes and dispatch corresponding events';
 
@@ -131,6 +157,23 @@ class WalEventDispatchCommand extends Command
      * @var int Consecutive error count for exponential backoff.
      */
     protected $errorStreak = 0;
+
+    /**
+     * 自动生成的 add-tables 参数值，由 handle() 初始化。
+     * 格式为 wal2json 要求的逗号分隔表名（如 "public.users,public.orders"）。
+     * null 表示不自动添加（用户通过 --no-add-tables 禁用，或无被监听表）。
+     *
+     * @var string|null
+     */
+    protected $autoAddTables;
+
+    /**
+     * 分区映射最后刷新的时间戳（Unix timestamp）。
+     * 用于主循环中定期刷新分区映射，确保新增分区能被自动发现。
+     *
+     * @var int
+     */
+    protected $partitionMapRefreshedAt = 0;
 
     /**
      * 主入口：初始化 → 主循环 → 清理退出。
@@ -148,11 +191,20 @@ class WalEventDispatchCommand extends Command
 
         $handlers = $this->discoverWalHandlers();
         $partitionMap = $this->buildPartitionMap();
+        $this->partitionMapRefreshedAt = time();
 
         $handlerCount = array_sum(array_map('count', $handlers));
 
+        /** 自动构建 add-tables 参数，仅输出被监听表的 WAL 变更 */
+        if (!$this->option('no-add-tables')) {
+            $this->autoAddTables = $this->buildAutoAddTables($handlers, $partitionMap);
+        }
+
         $memoryLimit = max(1, intval($this->option('memory')));
         $maxErrors = max(0, intval($this->option('max-errors')));
+        $partitionRefresh = max(0, intval($this->option('partition-refresh')));
+        $slotLagWarning = max(0, intval($this->option('slot-lag-warning')));
+        $slotLagCritical = max(0, intval($this->option('slot-lag-critical')));
 
         $this->info(sprintf(
             'WAL event dispatch started, slot: %s, mode: %s, queue: %s/%s, interval: %.2fs, batch: %d, memory: %dMB, max-errors: %s, tables: %d, handlers: %d, partitions: %d',
@@ -173,20 +225,38 @@ class WalEventDispatchCommand extends Command
                 $this->info(sprintf('  -> %s (table: %s, key: %s)', get_class($meta['handler']), $table, $meta['keyName']));
             }
         }
+        if (null !== $this->autoAddTables) {
+            $this->info(sprintf('Auto add-tables: %s', $this->autoAddTables));
+        }
 
         while ($this->shouldRun) {
             $hasChanges = false;
 
             try {
+                /** P0: WAL 堆积检测，在 poll 前检查 slot 健康状态 */
+                if ($slotLagWarning > 0 || $slotLagCritical > 0) {
+                    $lagAction = $this->checkSlotHealth($slot, $slotLagWarning, $slotLagCritical);
+                    if ('stop' === $lagAction) {
+                        break;
+                    }
+                }
+
                 $hasChanges = $this->pollChanges($slot, $handlers, $batch, $partitionMap);
 
                 $this->errorStreak = 0;
                 $this->flushTelescopeEntries();
+            } catch (\Error $e) {
+                /**
+                 * P1: Error（TypeError/ParseError 等）表示代码逻辑错误，重试无意义。
+                 * 直接报告并停止，避免浪费时间在无意义的指数退避上。
+                 */
+                $this->error(sprintf("Fatal error (not retryable): %s\n%s", $e->getMessage(), $e->getTraceAsString()));
+                $this->getExceptionHandler()->report($e);
+                break;
             } catch (Throwable $e) {
                 $this->errorStreak++;
 
-                /** 指数退避: 1s → 2s → 4s → ... → 60s 上限 */
-                $backoff = min(60, pow(2, $this->errorStreak - 1));
+                $backoff = $this->getBackoffSeconds($this->errorStreak);
                 $this->error(sprintf("Poll error (streak %d, backoff %ds): %s\n%s", $this->errorStreak, $backoff, $e->getMessage(), $e->getTraceAsString()));
                 $this->getExceptionHandler()->report($e);
                 $this->reconnectDatabase();
@@ -214,6 +284,18 @@ class WalEventDispatchCommand extends Command
                 ));
                 break;
             }
+
+            /** 按用户配置的间隔刷新分区映射（默认 0 = 不自动刷新） */
+            if ($partitionRefresh > 0 && time() - $this->partitionMapRefreshedAt >= $partitionRefresh) {
+                $partitionMap = $this->buildPartitionMap();
+                $this->partitionMapRefreshedAt = time();
+                if (!$this->option('no-add-tables')) {
+                    $this->autoAddTables = $this->buildAutoAddTables($handlers, $partitionMap);
+                }
+            }
+
+            /** P1: 清理 Laravel 容器作用域绑定，防止长驻进程内存泄漏 */
+            $this->clearScopedInstances();
 
             if (!$hasChanges) {
                 usleep(intval($interval * 1000000));
@@ -332,12 +414,24 @@ class WalEventDispatchCommand extends Command
     protected function buildPartitionMap(): array
     {
         try {
+            /**
+             * 使用递归 CTE 查询完整的继承链，支持多级分区（如先按 range 再按 list）。
+             * 将所有叶子分区直接映射到顶层父表，跳过中间层。
+             */
             $results = $this->getConnection()->select(
-                "SELECT child_cls.relname AS child_table, parent_cls.relname AS parent_table
-                 FROM pg_inherits
-                 JOIN pg_class child_cls ON pg_inherits.inhrelid = child_cls.oid
-                 JOIN pg_class parent_cls ON pg_inherits.inhparent = parent_cls.oid
-                 WHERE child_cls.relkind = 'r'"
+                "WITH RECURSIVE inheritance AS (
+                    SELECT inhrelid, inhparent FROM pg_inherits
+                    UNION ALL
+                    SELECT i.inhrelid, ih.inhparent
+                    FROM pg_inherits i
+                    JOIN inheritance ih ON i.inhparent = ih.inhrelid
+                )
+                SELECT child_cls.relname AS child_table, parent_cls.relname AS parent_table
+                FROM inheritance
+                JOIN pg_class child_cls ON inheritance.inhrelid = child_cls.oid
+                JOIN pg_class parent_cls ON inheritance.inhparent = parent_cls.oid
+                WHERE child_cls.relkind = 'r'
+                  AND NOT EXISTS (SELECT 1 FROM pg_inherits x WHERE x.inhparent = child_cls.oid)"
             );
 
             $map = [];
@@ -391,6 +485,7 @@ class WalEventDispatchCommand extends Command
      * @param array $partitionMap 分区表映射 [child => parent]
      *
      * @return bool 是否有变更
+     * @throws Throwable
      */
     protected function pollChanges(string $slot, array $handlers, int $batch, array $partitionMap): bool
     {
@@ -422,15 +517,106 @@ class WalEventDispatchCommand extends Command
         /**
          * 调用 wal2json 读取 WAL 变更。
          *
-         * SQL: SELECT lsn, data FROM pg_logical_slot_peek_changes('slot', NULL, 1000, 'filter-columns', 'content')
-         * 第二个参数 NULL = 读到最新 LSN；第三个参数 = 最大行数；后续为 wal2json 插件参数（key, value 交替）。
+         * SQL: SELECT lsn, data FROM pg_logical_slot_peek_changes('slot', NULL, 1000, 'format-version', '2')
+         * 第二个参数 NULL = 读到最新 LSN；第三个参数 = 最大变更数（注意：PG 不会拆分事务，
+         * 单个大事务的变更数可能远超此值）；后续为 wal2json 插件参数（key, value 交替）。
+         *
+         * 使用 PG 服务端游标（DECLARE CURSOR + FETCH）分块读取结果集，
+         * 避免单个大事务（如 50 万行 INSERT）将全部结果加载到 PHP 内存导致 OOM。
          */
-        $sql = sprintf('SELECT lsn, data FROM %s(?, NULL, ?%s)', $function, $this->buildWal2jsonParamPlaceholders());
-        $bindings = array_merge([$slot, $batch], $this->buildWal2jsonParamBindings());
-        $results = $connection->select($sql, $bindings);
+        list($wal2jsonPlaceholders, $wal2jsonBindings) = $this->buildWal2jsonParams();
+        $sql = sprintf('SELECT lsn, data FROM %s(?, NULL, ?%s)', $function, $wal2jsonPlaceholders);
+        $bindings = array_merge([$slot, $batch], $wal2jsonBindings);
+
+        /**
+         * 使用 PG 服务端游标分块读取 + 即时 dispatch。
+         *
+         * 游标事务仅包含 FETCH + json_decode + dispatch 的 CPU 操作，对于绝大多数场景
+         * 事务时间极短（500k 行约 3-4 秒）。如果 Listener 有耗时操作（HTTP 调用、外部写入），
+         * 建议使用 --queue-connection=redis 将 dispatch 推入队列，避免长事务阻塞 VACUUM。
+         */
+        $pdo = $connection->getPdo();
+        $cursorName = 'knight_wal_cursor';
+        $fetchSize = 1000;
+        $isV2 = '2' == $this->option('format-version');
+
+        $tableCounts = [];
+        $dispatchCount = 0;
+        $lastLsn = null;
+
+        $pdo->exec('BEGIN');
+
+        try {
+            $declareStmt = $pdo->prepare(sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $sql));
+            $declareStmt->execute($bindings);
+
+            while (true) {
+                $chunk = $pdo->query(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName))
+                    ->fetchAll(\PDO::FETCH_OBJ);
+
+                if (empty($chunk)) {
+                    break;
+                }
+
+                foreach ($chunk as $row) {
+                    $lastLsn = $row->lsn;
+
+                    $payload = json_decode($row->data, true);
+                    if (!is_array($payload)) {
+                        if (JSON_ERROR_NONE !== json_last_error()) {
+                            $this->warn(sprintf(
+                                'json_decode failed (LSN %s): %s, data prefix: %s',
+                                $row->lsn, json_last_error_msg(), substr($row->data, 0, 200)
+                            ));
+                        }
+                        continue;
+                    }
+
+                    $changes = $isV2 ? [$payload] : ($payload['change'] ?? []);
+
+                    foreach ($changes as $change) {
+                        $rawTable = $change['table'] ?? null;
+                        if (null === $rawTable) {
+                            continue;
+                        }
+
+                        $resolvedTable = $this->resolveTable($rawTable, $partitionMap);
+                        if (!isset($handlers[$resolvedTable])) {
+                            continue;
+                        }
+
+                        foreach ($handlers[$resolvedTable] as $meta) {
+                            $record = WalChangeRecord::fromWal2json($change, $resolvedTable, $rawTable, $meta['keyName'], get_class($meta['handler']));
+                            if (null === $record) {
+                                continue;
+                            }
+
+                            $this->dispatchWalChange($record);
+
+                            $table = $record->getTable();
+                            $kind = $record->getKind();
+                            $tableCounts[$table][$kind] = ($tableCounts[$table][$kind] ?? 0) + 1;
+                            $dispatchCount++;
+                        }
+                    }
+                }
+
+                unset($chunk);
+            }
+
+            $pdo->exec(sprintf('CLOSE %s', $cursorName));
+            $pdo->exec('COMMIT');
+        } catch (Throwable $e) {
+            try {
+                $pdo->exec('ROLLBACK');
+            } catch (Throwable $re) {
+                /** best-effort */
+            }
+            throw $e;
+        }
 
         /** 无变更：advance 模式下推进到 prePeekLsn 消除幻影滞后 */
-        if (empty($results)) {
+        if (null === $lastLsn) {
             if (null !== $prePeekLsn) {
                 try {
                     $connection->statement('SELECT pg_replication_slot_advance(?, ?)', [$slot, $prePeekLsn]);
@@ -442,62 +628,12 @@ class WalEventDispatchCommand extends Command
             return false;
         }
 
-        /** @var WalChangeRecord[] $records */
-        $records = [];
-        $lastLsn = null;
-
-        foreach ($results as $row) {
-            $lastLsn = $row->lsn;
-
-            $payload = json_decode($row->data, true);
-
-            if (!is_array($payload)) {
-                $this->warn(sprintf('JSON decode failed at LSN %s: %s', $row->lsn, substr($row->data, 0, 200)));
-                continue;
-            }
-
-            if (empty($payload['change'])) {
-                continue;
-            }
-
-            foreach ($payload['change'] as $change) {
-                $rawTable = $change['table'] ?? null;
-                if (null === $rawTable) {
-                    continue;
-                }
-
-                $resolvedTable = $this->resolveTable($rawTable, $partitionMap);
-                if (!isset($handlers[$resolvedTable])) {
-                    continue;
-                }
-
-                /**
-                 * 为每个 Handler 通过工厂方法构建 WalChangeRecord 并 dispatch Job。
-                 * 同一张表可能有多个 Handler（如 Question + OrgQuestion 共享 questions 表）。
-                 * 每个 Handler 使用自己的 keyName，因为同表不同 Model 可能有不同主键。
-                 */
-                foreach ($handlers[$resolvedTable] as $meta) {
-                    $record = WalChangeRecord::fromWal2json($change, $resolvedTable, $rawTable, $meta['keyName'], get_class($meta['handler']));
-                    if (null === $record) {
-                        continue;
-                    }
-
-                    WalChangesDispatchJob::dispatch($record)
-                        ->onConnection($this->option('queue-connection'))
-                        ->onQueue($this->option('queue'));
-
-                    $records[] = $record;
-                }
-            }
-        }
-
-        if (!empty($records)) {
-            $summary = $this->buildChangeSummary($records);
-            $this->line(sprintf('[%s] %s', date('Y-m-d H:i:s'), $summary));
+        if ($dispatchCount > 0) {
+            $this->line(sprintf('[%s] %s', date('Y-m-d H:i:s'), $this->formatChangeSummary($tableCounts)));
         }
 
         /** advance 模式：事件分发成功后，手动推进槽位到最后处理的 LSN */
-        if ('advance' === $mode && null !== $lastLsn) {
+        if ('advance' === $mode) {
             try {
                 $connection->statement('SELECT pg_replication_slot_advance(?, ?)', [$slot, $lastLsn]);
             } catch (Throwable $e) {
@@ -506,49 +642,169 @@ class WalEventDispatchCommand extends Command
             }
         }
 
-        return !empty($records);
+        return $dispatchCount > 0;
     }
 
     /**
-     * 构建 wal2json 插件参数的 SQL 占位符。
+     * 收集所有自动生成的 wal2json 参数。
      *
-     * wal2json 参数以 key, value 交替传入 PG 函数，每个参数需要两个占位符。
-     * 例如 --wal2json-params="filter-columns=content" 生成 ", ?, ?"。
+     * @return array<string, string> [key => value]
+     */
+    protected function collectAutoWal2jsonParams()
+    {
+        $userKeys = $this->getUserWal2jsonParamKeys();
+        $params = [];
+
+        /** format-version（用户通过 --wal2json-params 手动指定时跳过，避免重复） */
+        if (!in_array('format-version', $userKeys, true)) {
+            $formatVersion = $this->option('format-version');
+            if (!empty($formatVersion)) {
+                $params['format-version'] = $formatVersion;
+            }
+        }
+
+        /** add-tables（用户通过 --wal2json-params 手动指定时跳过） */
+        if (!in_array('add-tables', $userKeys, true) && null !== $this->autoAddTables) {
+            $params['add-tables'] = $this->autoAddTables;
+        }
+
+        /** filter-tables 黑名单（用户通过 --wal2json-params 手动指定时跳过） */
+        if (!in_array('filter-tables', $userKeys, true)) {
+            $filterTables = $this->option('filter-tables');
+            if (!empty($filterTables)) {
+                $params['filter-tables'] = implode(',', array_map([$this, 'qualifyTableName'], $filterTables));
+            }
+        }
+
+        return $params;
+    }
+
+    /**
+     * 一次性构建 wal2json 参数的 SQL 占位符和绑定值。
      *
-     * @return string 如 ", ?, ?, ?, ?" 或 ""
+     * 合并用户参数和自动参数，避免 collectAutoWal2jsonParams 被分别调用两次
+     * 导致占位符数量与绑定值不匹配的理论风险。
+     *
+     * @return array{string, array} [placeholders, bindings]
+     */
+    protected function buildWal2jsonParams()
+    {
+        $bindings = [];
+
+        $params = $this->option('wal2json-params');
+        if (!empty($params)) {
+            foreach ($params as $param) {
+                $parts = explode('=', $param, 2);
+                $bindings[] = $parts[0];
+                $bindings[] = $parts[1] ?? '';
+            }
+        }
+
+        foreach ($this->collectAutoWal2jsonParams() as $key => $value) {
+            $bindings[] = $key;
+            $bindings[] = $value;
+        }
+
+        $count = intval(count($bindings) / 2);
+        $placeholders = $count > 0 ? str_repeat(', ?, ?', $count) : '';
+
+        return [$placeholders, $bindings];
+    }
+
+    /**
+     * @deprecated 使用 buildWal2jsonParams() 替代
      */
     protected function buildWal2jsonParamPlaceholders(): string
     {
-        $params = $this->option('wal2json-params');
-        if (empty($params)) {
-            return '';
-        }
-
-        return str_repeat(', ?, ?', count($params));
+        list($placeholders) = $this->buildWal2jsonParams();
+        return $placeholders;
     }
 
     /**
-     * 将 --wal2json-params 选项解析为 SQL 绑定参数数组。
-     *
-     * 每个 "key=value" 拆分为两个绑定值 [key, value]，无等号的视为 [key, '']。
-     *
-     * @return array 如 ['filter-columns', 'content,body', 'add-tables', 'users']
+     * @deprecated 使用 buildWal2jsonParams() 替代
      */
     protected function buildWal2jsonParamBindings(): array
     {
-        $params = $this->option('wal2json-params');
-        if (empty($params)) {
-            return [];
-        }
-
-        $bindings = [];
-        foreach ($params as $param) {
-            $parts = explode('=', $param, 2);
-            $bindings[] = $parts[0];
-            $bindings[] = $parts[1] ?? '';
-        }
-
+        list(, $bindings) = $this->buildWal2jsonParams();
         return $bindings;
+    }
+
+    /**
+     * 提取用户通过 --wal2json-params 手动指定的参数 key 列表。
+     *
+     * 用于 collectAutoWal2jsonParams 检测冲突，避免自动参数覆盖用户的手动设置。
+     *
+     * @return string[]
+     */
+    protected function getUserWal2jsonParamKeys()
+    {
+        $keys = [];
+        foreach ($this->option('wal2json-params') ?: [] as $param) {
+            $parts = explode('=', $param, 2);
+            $keys[] = $parts[0];
+        }
+        return $keys;
+    }
+
+    /**
+     * 根据被监听的表名和分区映射自动构建 add-tables 参数。
+     *
+     * wal2json 的 add-tables 参数为白名单，只输出指定表的变更。
+     * WAL 中分区表使用子表名（如 user_syllabuses_p056），不是父表名，
+     * 因此需要把被监听的父表展开为所有分区子表名。
+     *
+     * @param array $handlers Handler 映射 [table => [{handler, keyName}, ...]]
+     * @param array $partitionMap 分区表映射 [child => parent]
+     *
+     * @return string|null add-tables 值，无被监听表时返回 null
+     */
+    protected function buildAutoAddTables(array $handlers, array $partitionMap = [])
+    {
+        $handlerTables = array_keys($handlers);
+
+        if (empty($handlerTables)) {
+            return null;
+        }
+
+        /**
+         * 构建 parent → [child1, child2, ...] 反向映射。
+         * 非分区表没有子表，直接使用父表名。
+         */
+        $parentToChildren = [];
+        foreach ($partitionMap as $child => $parent) {
+            $parentToChildren[$parent][] = $child;
+        }
+
+        $allTables = [];
+        foreach ($handlerTables as $table) {
+            if (isset($parentToChildren[$table])) {
+                /** 分区表：展开为所有子表名 */
+                foreach ($parentToChildren[$table] as $child) {
+                    $allTables[] = $child;
+                }
+            } else {
+                /** 非分区表：直接使用 */
+                $allTables[] = $table;
+            }
+        }
+
+        return implode(',', array_map([$this, 'qualifyTableName'], $allTables));
+    }
+
+    /**
+     * 分发单条 WAL 变更记录。
+     *
+     * 提取为独立方法便于子类覆盖（如测试中替换为计数器跳过真实 Job dispatch）。
+     *
+     * @param WalChangeRecord $record
+     */
+    protected function dispatchWalChange(WalChangeRecord $record): void
+    {
+        $job = new WalChangesDispatchJob($record);
+        $job->onConnection($this->option('queue-connection'));
+        $job->onQueue($this->option('queue'));
+
+        app('Illuminate\Contracts\Bus\Dispatcher')->dispatch($job);
     }
 
     /**
@@ -560,17 +816,25 @@ class WalEventDispatchCommand extends Command
      */
     protected function buildChangeSummary(array $changes): string
     {
-        /** @var array<string, array<string, int>> $tableCounts */
         $tableCounts = [];
         foreach ($changes as $record) {
             $table = $record->getTable();
             $kind = $record->getKind();
-            if (!isset($tableCounts[$table][$kind])) {
-                $tableCounts[$table][$kind] = 0;
-            }
-            $tableCounts[$table][$kind]++;
+            $tableCounts[$table][$kind] = ($tableCounts[$table][$kind] ?? 0) + 1;
         }
 
+        return $this->formatChangeSummary($tableCounts);
+    }
+
+    /**
+     * 将 [table => [kind => count]] 计数器格式化为可读摘要。
+     *
+     * @param array<string, array<string, int>> $tableCounts
+     *
+     * @return string 如 "users: 3 inserts, 2 updates; orders: 1 delete"
+     */
+    protected function formatChangeSummary(array $tableCounts): string
+    {
         $tableParts = [];
         foreach ($tableCounts as $table => $kinds) {
             $kindParts = [];
@@ -640,6 +904,35 @@ class WalEventDispatchCommand extends Command
     }
 
     /**
+     * 为表名补全 schema 前缀。
+     *
+     * wal2json 的 add-tables/filter-tables 参数要求 schema.table 格式，
+     * 未指定 schema 的表名默认加 public 前缀。
+     *
+     * @param string $table
+     *
+     * @return string
+     */
+    protected function qualifyTableName($table)
+    {
+        return false === strpos($table, '.') ? 'public.' . $table : $table;
+    }
+
+    /**
+     * 根据连续错误次数计算指数退避秒数。
+     *
+     * 1s → 2s → 4s → 8s → 16s → 32s → 60s（上限）
+     *
+     * @param int $errorStreak
+     *
+     * @return int
+     */
+    protected function getBackoffSeconds($errorStreak)
+    {
+        return intval(min(60, pow(2, max(0, $errorStreak - 1))));
+    }
+
+    /**
      * 长驻进程手动刷入 Telescope 条目。
      *
      * Telescope 仅在 $app->terminating() 时刷入，长驻进程永远不会触发该事件。
@@ -676,6 +969,63 @@ class WalEventDispatchCommand extends Command
     }
 
     /**
+     * 检查复制槽健康状态，检测 WAL 堆积和 slot 失效。
+     *
+     * @param string $slot 复制槽名称
+     * @param int $warningMB 警告阈值（MB），0 表示不检查
+     * @param int $criticalMB 严重阈值（MB），0 表示不检查，超过时返回 'stop'
+     *
+     * @return string|null 'stop' 表示应停止进程，null 表示正常
+     */
+    protected function checkSlotHealth($slot, $warningMB = 0, $criticalMB = 0)
+    {
+        try {
+            $row = $this->getConnection()->selectOne(
+                "SELECT pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn) AS lag_bytes
+                 FROM pg_replication_slots
+                 WHERE slot_name = ?",
+                [$slot]
+            );
+
+            if (null === $row || null === $row->lag_bytes) {
+                return null;
+            }
+
+            $lagMB = intval($row->lag_bytes / 1024 / 1024);
+
+            if ($criticalMB > 0 && $lagMB >= $criticalMB) {
+                $this->error(sprintf(
+                    'Slot [%s] WAL lag %dMB exceeds critical threshold %dMB, stopping to prevent disk exhaustion',
+                    $slot, $lagMB, $criticalMB
+                ));
+
+                return 'stop';
+            }
+
+            if ($warningMB > 0 && $lagMB >= $warningMB) {
+                $this->warn(sprintf(
+                    'Slot [%s] WAL lag %dMB exceeds warning threshold %dMB',
+                    $slot, $lagMB, $warningMB
+                ));
+            }
+        } catch (Throwable $e) {
+            /** best-effort：检查失败不影响主流程 */
+        }
+
+        return null;
+    }
+
+    /**
+     * 清理 Laravel 容器作用域绑定，防止长驻进程内存泄漏。
+     */
+    protected function clearScopedInstances(): void
+    {
+        if (method_exists($this->getLaravel(), 'forgetScopedInstances')) {
+            $this->getLaravel()->forgetScopedInstances();
+        }
+    }
+
+    /**
      * 确保复制槽存在，不存在则创建（使用 wal2json 插件）。
      */
     protected function ensureSlotExists(string $slot): void
@@ -683,19 +1033,46 @@ class WalEventDispatchCommand extends Command
         $connection = $this->getConnection();
 
         $exists = $connection->selectOne(
-            'SELECT 1 FROM pg_replication_slots WHERE slot_name = ?',
-            [$slot]
+            'SELECT plugin, active, active_pid FROM pg_replication_slots WHERE slot_name = ? AND slot_type = ?',
+            [$slot, 'logical']
         );
 
         if (null !== $exists) {
+            if ('wal2json' !== $exists->plugin) {
+                throw new \RuntimeException(sprintf(
+                    'Slot [%s] exists but uses plugin [%s] instead of wal2json',
+                    $slot, $exists->plugin
+                ));
+            }
+            if ($exists->active) {
+                throw new \RuntimeException(sprintf(
+                    'Slot [%s] is currently active (PID %s), another consumer is running. '
+                    . 'Only one consumer can use a replication slot at a time.',
+                    $slot, $exists->active_pid
+                ));
+            }
             return;
         }
 
         $this->info(sprintf('Slot [%s] does not exist, creating...', $slot));
-        $connection->statement(
-            "SELECT pg_create_logical_replication_slot(?, 'wal2json')",
-            [$slot]
-        );
-        $this->info(sprintf('Slot [%s] created successfully', $slot));
+
+        try {
+            $connection->statement(
+                "SELECT pg_create_logical_replication_slot(?, 'wal2json')",
+                [$slot]
+            );
+            $this->info(sprintf('Slot [%s] created successfully', $slot));
+        } catch (Throwable $e) {
+            /** 并发竞态：另一个进程可能在检查与创建之间已创建了同名 slot */
+            $exists = $connection->selectOne(
+                'SELECT 1 FROM pg_replication_slots WHERE slot_name = ?',
+                [$slot]
+            );
+            if (null !== $exists) {
+                $this->info(sprintf('Slot [%s] already exists (created by another process)', $slot));
+                return;
+            }
+            throw $e;
+        }
     }
 }
