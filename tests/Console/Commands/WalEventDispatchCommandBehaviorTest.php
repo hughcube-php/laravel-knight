@@ -440,7 +440,7 @@ PHP
             });
         }
 
-        public function testPollChangesInAutoModeUsesGetChangesAndDoesNotAdvanceSlot(): void
+        public function testPollChangesInAutoModeAdvancesSlotAfterSuccessfulDispatch(): void
         {
             Queue::fake();
 
@@ -473,8 +473,10 @@ PHP
             $result = self::callMethod($command, 'pollChanges', ['slot_test_auto', $handlers, 1000, []]);
 
             $this->assertTrue($result);
-            /** auto mode 不调用 advance */
-            $this->assertEmpty($connection->statements);
+            /** auto mode 在成功分发后也会 advance，保留“成功后消费”的外部语义 */
+            $this->assertCount(1, $connection->statements);
+            $this->assertStringContainsString('pg_replication_slot_advance', $connection->statements[0]['query']);
+            $this->assertSame(['slot_test_auto', '0/A'], $connection->statements[0]['bindings']);
 
             Queue::assertPushed(WalChangesDispatchJob::class, 1);
             Queue::assertPushed(WalChangesDispatchJob::class, function (WalChangesDispatchJob $job) {

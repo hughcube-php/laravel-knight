@@ -31,8 +31,10 @@ use Throwable;
  * ## 消费模式 (--mode)
  *
  * - **advance** (默认，推荐)：peek_changes 读取 → 分发事件 → 手动 advance 推进槽位。
- *   事件分发失败不会丢失 WAL 数据，下次轮询可重试。
- * - **auto**：get_changes 读取即消费。最简单，但事件分发失败时 WAL 数据已被消费，无法重试。
+ *   事件分发失败不会丢失 WAL 数据，下次轮询可重试；无变更时还会推进到当前 WAL LSN，
+ *   消除共享实例上的假性滞后。
+ * - **auto**：成功分发后即消费。为避免 get_changes 与服务端游标组合在大事务场景下不稳定，
+ *   流式读取时内部实现为 peek_changes + 成功后 advance；对调用方仍表现为“成功消费后下一次读不到”。
  * - **peek**：只读不消费，用于调试。每次轮询都能看到相同数据。
  *
  * ## 事件分发 (--queue-connection / --queue)
@@ -134,7 +136,7 @@ class WalEventDispatchCommand extends Command
         {--batch=1000 : Max number of changes per poll}
         {--memory=128 : Memory limit in MB, process stops when exceeded}
         {--max-errors=30 : Max consecutive errors before process exits, 0 means unlimited}
-        {--mode=advance : Consume mode: auto(get_changes, read=consume), advance(peek+advance after dispatch, default), peek(read-only for debugging)}
+        {--mode=advance : Consume mode: auto(consume on successful dispatch), advance(peek+advance after dispatch, default), peek(read-only for debugging)}
         {--model-path=* : Model scanning paths, can be specified multiple times (default: app/Models)}
         {--wal2json-params=* : wal2json plugin parameters, e.g. --wal2json-params="filter-columns=content,body"}
         {--no-add-tables : Disable auto add-tables parameter (by default, only monitored tables are included in wal2json output)}
@@ -476,10 +478,10 @@ class WalEventDispatchCommand extends Command
      * 单次轮询：读取 WAL → 解析变更 → 构建 WalChangeRecord → 分发事件 → 推进槽位。
      *
      * 流程：
-     * 1. 通过 wal2json 读取 WAL 变更（peek 或 get，取决于 mode）
+     * 1. 通过 wal2json 读取 WAL 变更（流式游标统一使用 peek_changes）
      * 2. 解析 JSON，按表名分组构建 WalChangeRecord 数组
      * 3. 对每条记录 dispatch WalChangesDispatchJob，Job 内 dispatch 字符串事件
-     * 4. advance 模式下，推进槽位到最后处理的 LSN
+     * 4. auto/advance 模式下，推进槽位到最后处理的 LSN
      *
      * @param string $slot 复制槽名称
      * @param array $handlers Handler 映射 [table => [{handler, keyName}, ...]]
@@ -494,10 +496,15 @@ class WalEventDispatchCommand extends Command
         $connection = $this->getConnection();
         $mode = $this->getMode();
 
-        /** auto 模式用 get_changes（读即消费），advance/peek 用 peek_changes（只读） */
-        $function = 'auto' === $mode
-            ? 'pg_logical_slot_get_changes'
-            : 'pg_logical_slot_peek_changes';
+        /**
+         * 服务端游标统一基于 peek_changes。
+         *
+         * get_changes 在大事务 + 游标分块 FETCH 场景下会出现游标提前失效，
+         * 导致后续 FETCH 报 “cursor does not exist”。
+         * 这里统一先 peek，再在成功处理后按模式决定是否 advance，
+         * 保留 auto 模式“成功后消费”的外部语义。
+         */
+        $function = 'pg_logical_slot_peek_changes';
 
         /**
          * 防幻影滞后：peek 前记录当前 WAL LSN。
@@ -660,8 +667,8 @@ class WalEventDispatchCommand extends Command
             $this->line(sprintf('[%s] %s', date('Y-m-d H:i:s'), $this->formatChangeSummary($tableCounts)));
         }
 
-        /** advance 模式：事件分发成功后，手动推进槽位到最后处理的 LSN */
-        if ('advance' === $mode) {
+        /** auto/advance 模式：事件分发成功后，手动推进槽位到最后处理的 LSN */
+        if (in_array($mode, ['auto', 'advance'], true)) {
             try {
                 $connection->statement('SELECT pg_replication_slot_advance(?, ?)', [$slot, $lastLsn]);
             } catch (Throwable $e) {
