@@ -562,70 +562,86 @@ class WalEventDispatchCommand extends Command
         ) {
             $pdo = $connection->getPdo();
 
-            $quotedBindings = array_map(function ($v) use ($pdo) {
-                return $pdo->quote((string) $v);
-            }, $bindings);
-            $boundSql = preg_replace_callback('/\?/', function () use (&$quotedBindings) {
-                return array_shift($quotedBindings);
-            }, $sql);
+            /**
+             * 游标操作必须关闭 emulate prepares。
+             * 开启时 PDO 在客户端解析 SQL，可能导致包含 PG 函数调用的
+             * DECLARE CURSOR 语句解析异常。关闭后 SQL 直接发送到 PG 执行。
+             */
+            $emulateState = $pdo->getAttribute(\PDO::ATTR_EMULATE_PREPARES);
+            if ($emulateState) {
+                $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+            }
 
-            $pdo->exec(sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $boundSql));
+            try {
+                $quotedBindings = array_map(function ($v) use ($pdo) {
+                    return $pdo->quote((string) $v);
+                }, $bindings);
+                $boundSql = preg_replace_callback('/\?/', function () use (&$quotedBindings) {
+                    return array_shift($quotedBindings);
+                }, $sql);
 
-            while (true) {
-                $chunk = $pdo->query(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName))
-                    ->fetchAll(\PDO::FETCH_OBJ);
+                $pdo->exec(sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $boundSql));
 
-                if (empty($chunk)) {
-                    break;
-                }
+                while (true) {
+                    $chunk = $pdo->query(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName))
+                        ->fetchAll(\PDO::FETCH_OBJ);
 
-                foreach ($chunk as $row) {
-                    $lastLsn = $row->lsn;
-
-                    $payload = json_decode($row->data, true);
-                    if (!is_array($payload)) {
-                        if (JSON_ERROR_NONE !== json_last_error()) {
-                            $this->warn(sprintf(
-                                'json_decode failed (LSN %s): %s, data prefix: %s',
-                                $row->lsn, json_last_error_msg(), substr($row->data, 0, 200)
-                            ));
-                        }
-                        continue;
+                    if (empty($chunk)) {
+                        break;
                     }
 
-                    $changes = $isV2 ? [$payload] : ($payload['change'] ?? []);
+                    foreach ($chunk as $row) {
+                        $lastLsn = $row->lsn;
 
-                    foreach ($changes as $change) {
-                        $rawTable = $change['table'] ?? null;
-                        if (null === $rawTable) {
+                        $payload = json_decode($row->data, true);
+                        if (!is_array($payload)) {
+                            if (JSON_ERROR_NONE !== json_last_error()) {
+                                $this->warn(sprintf(
+                                    'json_decode failed (LSN %s): %s, data prefix: %s',
+                                    $row->lsn, json_last_error_msg(), substr($row->data, 0, 200)
+                                ));
+                            }
                             continue;
                         }
 
-                        $resolvedTable = $this->resolveTable($rawTable, $partitionMap);
-                        if (!isset($handlers[$resolvedTable])) {
-                            continue;
-                        }
+                        $changes = $isV2 ? [$payload] : ($payload['change'] ?? []);
 
-                        foreach ($handlers[$resolvedTable] as $meta) {
-                            $record = WalChangeRecord::fromWal2json($change, $resolvedTable, $rawTable, $meta['keyName'], get_class($meta['handler']));
-                            if (null === $record) {
+                        foreach ($changes as $change) {
+                            $rawTable = $change['table'] ?? null;
+                            if (null === $rawTable) {
                                 continue;
                             }
 
-                            $this->dispatchWalChange($record);
+                            $resolvedTable = $this->resolveTable($rawTable, $partitionMap);
+                            if (!isset($handlers[$resolvedTable])) {
+                                continue;
+                            }
 
-                            $table = $record->getTable();
-                            $kind = $record->getKind();
-                            $tableCounts[$table][$kind] = ($tableCounts[$table][$kind] ?? 0) + 1;
-                            $dispatchCount++;
+                            foreach ($handlers[$resolvedTable] as $meta) {
+                                $record = WalChangeRecord::fromWal2json($change, $resolvedTable, $rawTable, $meta['keyName'], get_class($meta['handler']));
+                                if (null === $record) {
+                                    continue;
+                                }
+
+                                $this->dispatchWalChange($record);
+
+                                $table = $record->getTable();
+                                $kind = $record->getKind();
+                                $tableCounts[$table][$kind] = ($tableCounts[$table][$kind] ?? 0) + 1;
+                                $dispatchCount++;
+                            }
                         }
                     }
+
+                    unset($chunk);
                 }
 
-                unset($chunk);
+                $pdo->exec(sprintf('CLOSE %s', $cursorName));
+            } finally {
+                if ($emulateState) {
+                    $pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
+                }
             }
-
-            $pdo->exec(sprintf('CLOSE %s', $cursorName));
         });
 
         /** 无变更：advance 模式下推进到 prePeekLsn 消除幻影滞后 */

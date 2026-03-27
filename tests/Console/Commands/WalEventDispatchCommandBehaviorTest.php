@@ -897,6 +897,8 @@ PHP
                 private $fetchIndex = 0;
                 public function __construct($conn) { $this->conn = $conn; }
                 public function quote($value) { return "'" . addslashes((string) $value) . "'"; }
+                public function getAttribute($attr) { return false; }
+                public function setAttribute($attr, $value) { return true; }
                 public function exec($sql)
                 {
                     if (false !== stripos($sql, 'DECLARE')) {
