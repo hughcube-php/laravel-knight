@@ -918,14 +918,12 @@ PHP
 
     /**
      * Mock Connection for cursor-based pollChanges tests.
-     * 模拟 Laravel Connection 的 transaction/select/unprepared/statement/selectOne/getPdo。
+     * 只保留 pollChanges 实际会用到的最小接口。
      */
     class MockCursorConnection
     {
         /** @var array */
         public $rows;
-        /** @var int */
-        private $fetchIndex = 0;
         /** @var array */
         public $statements = [];
         /** @var bool */
@@ -940,69 +938,11 @@ PHP
             $this->rows = $rows;
         }
 
-        public function beginTransaction() { }
-        public function commit() { }
-        public function rollBack() { }
-
-        public function unprepared($query)
-        {
-            if (false !== stripos($query, 'DECLARE')) {
-                $this->fetchIndex = 0;
-            }
-            return true;
-        }
-
-        public function getPdo()
-        {
-            $conn = $this;
-            return new class($conn) {
-                private $conn;
-                private $fetchIndex = 0;
-                public function __construct($conn) { $this->conn = $conn; }
-                public function quote($value) { return "'" . addslashes((string) $value) . "'"; }
-                public function prepare($sql)
-                {
-                    if (false !== stripos($sql, 'DECLARE')) {
-                        $this->fetchIndex = 0;
-                        return new class { public function execute() { return true; } };
-                    }
-                    if (false !== stripos($sql, 'CLOSE')) {
-                        return new class { public function execute() { return true; } };
-                    }
-                    /** FETCH */
-                    $size = 1000;
-                    if (preg_match('/FETCH\s+(\d+)/i', $sql, $m)) {
-                        $size = (int) $m[1];
-                    }
-                    $chunk = array_slice($this->conn->rows, $this->fetchIndex, $size);
-                    $this->fetchIndex += count($chunk);
-                    return new class($chunk) {
-                        private $data;
-                        public function __construct($data) { $this->data = $data; }
-                        public function execute() { return true; }
-                        public function fetchAll($mode = \PDO::FETCH_OBJ) { return $this->data; }
-                    };
-                }
-            };
-        }
-
         public function useWriteConnectionWhenReading($value = true)
         {
             $this->writeConnectionForced = $value;
 
             return $this;
-        }
-
-        public function transaction($callback, $attempts = 1)
-        {
-            $this->beginTransaction();
-            try {
-                $result = $callback($this);
-                return $result;
-            } catch (\Throwable $e) {
-                $this->rollBack();
-                throw $e;
-            }
         }
 
         public function selectOne($query, array $bindings = [], $useReadPdo = true)
@@ -1025,22 +965,6 @@ PHP
             foreach ($this->rows as $row) {
                 yield $row;
             }
-        }
-
-        public function select($query, array $bindings = [], $useReadPdo = true)
-        {
-            /** FETCH — 分块返回数据 */
-            if (false !== stripos($query, 'FETCH')) {
-                if (preg_match('/FETCH\s+(\d+)/i', $query, $m)) {
-                    $size = (int) $m[1];
-                } else {
-                    $size = 1000;
-                }
-                $chunk = array_slice($this->rows, $this->fetchIndex, $size);
-                $this->fetchIndex += count($chunk);
-                return $chunk;
-            }
-            return $this->rows;
         }
 
         public function statement($query, array $bindings = [])

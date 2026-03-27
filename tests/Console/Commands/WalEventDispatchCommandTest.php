@@ -2420,7 +2420,7 @@ class WalEventDispatchCommandTest extends TestCase
     // ==================== 架构师视角：异常传播、dispatch 失败、并发、事务一致性 ====================
 
     /**
-     * 【架构师】dispatchWalChange 中间抛异常 → 游标事务应回滚，异常向上传播。
+     * 【架构师】dispatchWalChange 中间抛异常 → 异常应向上传播。
      * advance 模式下 slot 不应被推进（未完成的变更可重试）。
      */
     public function testPollChangesRollsBackOnDispatchException()
