@@ -21,7 +21,7 @@ class Config extends Command
      */
     protected $description = 'Display the Application config';
 
-    public function configure()
+    public function configure(): void
     {
         parent::configure();
 
