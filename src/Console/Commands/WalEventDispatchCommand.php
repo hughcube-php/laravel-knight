@@ -560,15 +560,23 @@ class WalEventDispatchCommand extends Command
         }, $sql);
         $declareSql = sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $boundSql);
 
-        $connection->transaction(function ($connection) use (
-            $cursorName, $fetchSize, $isV2, $declareSql,
+        /**
+         * 游标操作必须在同一个 PDO 连接上执行。
+         * Laravel 的 select() 默认使用读连接，transaction() 在写连接上，
+         * 导致 DECLARE CURSOR 和 FETCH 不在同一连接。
+         * 因此游标的 DECLARE/FETCH/CLOSE 直接通过写连接 PDO 执行，
+         * 事务管理仍走 Laravel 的 transaction()。
+         */
+        $connection->transaction(function () use (
+            $pdo, $cursorName, $fetchSize, $isV2, $declareSql,
             $partitionMap, $handlers,
             &$tableCounts, &$dispatchCount, &$lastLsn
         ) {
-            $connection->unprepared($declareSql);
+            $pdo->exec($declareSql);
 
             while (true) {
-                $chunk = $connection->select(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName));
+                $chunk = $pdo->query(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName))
+                    ->fetchAll(\PDO::FETCH_OBJ);
 
                 if (empty($chunk)) {
                     break;
@@ -620,7 +628,7 @@ class WalEventDispatchCommand extends Command
                 unset($chunk);
             }
 
-            $connection->unprepared(sprintf('CLOSE %s', $cursorName));
+            $pdo->exec(sprintf('CLOSE %s', $cursorName));
         });
 
         /** 无变更：advance 模式下推进到 prePeekLsn 消除幻影滞后 */

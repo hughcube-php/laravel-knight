@@ -858,6 +858,56 @@ PHP
     }
 
     /**
+     * Mock PDO for cursor operations (exec/query/quote).
+     */
+    class MockCursorPdo
+    {
+        /** @var array */
+        private $rows;
+        /** @var int */
+        private $fetchIndex = 0;
+        /** @var MockCursorConnection */
+        private $conn;
+
+        public function __construct(array $rows, $conn)
+        {
+            $this->rows = $rows;
+            $this->conn = $conn;
+        }
+
+        public function quote($value)
+        {
+            return "'" . addslashes((string) $value) . "'";
+        }
+
+        public function exec($sql)
+        {
+            if (false !== stripos($sql, 'DECLARE')) {
+                $this->fetchIndex = 0;
+            }
+            return 0;
+        }
+
+        public function query($sql)
+        {
+            $size = 1000;
+            if (preg_match('/FETCH\s+(\d+)/i', $sql, $m)) {
+                $size = (int) $m[1];
+            }
+            $chunk = array_slice($this->rows, $this->fetchIndex, $size);
+            $this->fetchIndex += count($chunk);
+            return new MockPdoStatement($chunk);
+        }
+    }
+
+    class MockPdoStatement
+    {
+        private $data;
+        public function __construct(array $data) { $this->data = $data; }
+        public function fetchAll($mode = \PDO::FETCH_OBJ) { return $this->data; }
+    }
+
+    /**
      * Mock Connection for cursor-based pollChanges tests.
      * Simulates DECLARE CURSOR / FETCH / CLOSE + beginTransaction/commit/rollBack.
      */
@@ -884,9 +934,9 @@ PHP
 
         public function getPdo()
         {
-            return new class {
-                public function quote($value) { return "'" . addslashes($value) . "'"; }
-            };
+            $rows = $this->rows;
+            $conn = $this;
+            return new MockCursorPdo($rows, $conn);
         }
 
         public function transaction($callback, $attempts = 1)
