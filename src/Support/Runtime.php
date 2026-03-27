@@ -23,9 +23,32 @@ class Runtime
             return null;
         }
 
-        $command = $_SERVER['argv'][1] ?? null;
+        $argv = $_SERVER['argv'] ?? [];
 
-        return is_string($command) ? $command : null;
+        // 找到 artisan 脚本在 argv 中的位置
+        // 兼容直接执行 `php artisan cmd` 和 stdin 执行(argv[0]="Standard input code") 等场景
+        foreach ($argv as $index => $arg) {
+            if (!is_string($arg) || basename($arg) !== 'artisan') {
+                continue;
+            }
+
+            // 找到 artisan 后，跳过所有 "-" 开头的选项参数（如 --env=testing, -v, -vvv）
+            // 取第一个非选项参数作为命令名
+            $count = count($argv);
+            for ($i = $index + 1; $i < $count; $i++) {
+                if (!is_string($argv[$i])) {
+                    continue;
+                }
+                if (strncmp($argv[$i], '-', 1) === 0) {
+                    continue;
+                }
+                return $argv[$i];
+            }
+
+            return null;
+        }
+
+        return null;
     }
 
     /**
