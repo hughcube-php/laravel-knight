@@ -41,7 +41,7 @@ jobs:
         run: |
           set -euxo pipefail
           sudo systemctl start mysql.service
-          sudo mysql <<'SQL'
+          sudo mysql -uroot -proot <<'SQL'
           CREATE DATABASE IF NOT EXISTS knight_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
           CREATE USER IF NOT EXISTS 'knight'@'127.0.0.1' IDENTIFIED BY 'knight';
           CREATE USER IF NOT EXISTS 'knight'@'localhost' IDENTIFIED BY 'knight';
