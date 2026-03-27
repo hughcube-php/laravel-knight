@@ -503,6 +503,7 @@ class WalEventDispatchCommand extends Command
          * 导致后续 FETCH 报 “cursor does not exist”。
          * 这里统一先 peek，再在成功处理后按模式决定是否 advance，
          * 保留 auto 模式“成功后消费”的外部语义。
+         * 这样可以把“读取”和“确认消费”两个动作显式拆开，降低大事务流式读取时的游标风险。
          */
         $function = 'pg_logical_slot_peek_changes';
 
