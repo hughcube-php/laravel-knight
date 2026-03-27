@@ -539,11 +539,13 @@ class WalEventDispatchCommand extends Command
         $bindings = array_merge([$slot, $batch], $wal2jsonBindings);
 
         /**
-         * 使用 PG 服务端游标分块读取 + 即时 dispatch。
+         * 使用写连接流式读取 + 即时 dispatch。
          *
-         * 游标事务仅包含 FETCH + json_decode + dispatch 的 CPU 操作，对于绝大多数场景
-         * 事务时间极短（500k 行约 3-4 秒）。如果 Listener 有耗时操作（HTTP 调用、外部写入），
-         * 建议使用 --queue-connection=redis 将 dispatch 推入队列，避免长事务阻塞 VACUUM。
+         * 默认优先走 Laravel Connection::cursor()，并显式指定 useReadPdo=false，
+         * 保证整个命令都通过同一个 $connection 在主库上执行，不直接操作真实 PDO。
+         *
+         * 如果 Listener 有耗时操作（HTTP 调用、外部写入），建议使用
+         * --queue-connection=redis 将 dispatch 推入队列，避免长事务阻塞 VACUUM。
          */
         $cursorName = 'knight_wal_cursor';
         $fetchSize = 1000;
@@ -554,22 +556,17 @@ class WalEventDispatchCommand extends Command
         $lastLsn = null;
 
         /**
-         * 游标操作（DECLARE/FETCH/CLOSE）必须通过写连接 PDO 执行。
-         *
-         * DECLARE CURSOR 不支持 PDO 参数占位符（PG 限制），需要 quote 拼接。
          * 事务管理通过 $connection->transaction() 走 Laravel 层，
          * 确保 Listener 中 DB::transaction() 能正确使用 SAVEPOINT。
          *
-         * $pdo 在 transaction closure 内部通过 $connection->getPdo() 获取，
-         * 确保拿到的是 transaction() 正在使用的同一个写连接 PDO 实例。
+         * 默认分支统一通过 $connection->cursor(..., false, ...) 走主库写连接；
+         * 仅为极简测试替身保留下方 PDO 兼容分支。
          */
         $connection->transaction(function ($connection) use (
             $sql, $bindings, $cursorName, $fetchSize, $isV2,
             $partitionMap, $handlers,
             &$tableCounts, &$dispatchCount, &$lastLsn
         ) {
-            $pdo = $connection->getPdo();
-
             $processChunk = function (array $chunk) use (
                 $isV2, $partitionMap, $handlers,
                 &$tableCounts, &$dispatchCount, &$lastLsn
@@ -619,24 +616,19 @@ class WalEventDispatchCommand extends Command
             };
 
             /**
-             * 真实 PDO 直接逐行 fetch。
-             *
-             * 在 Linux / PHP 8.5 / PostgreSQL 的某些组合下，命名游标在超大 DELETE
-             * 事务中会中途失效；直接逐行 fetch 更稳定。保留下方游标分支用于测试替身，
-             * 避免改动现有行为测试桩对象。
+             * 正常运行路径：通过 Connection 抽象流式读取，并显式强制使用写连接。
              */
-            if ($pdo instanceof \PDO) {
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute($bindings);
-                while (false !== ($row = $stmt->fetch(\PDO::FETCH_OBJ))) {
+            if (method_exists($connection, 'cursor')) {
+                foreach ($connection->cursor($sql, $bindings, false, [\PDO::FETCH_OBJ]) as $row) {
                     $processChunk([$row]);
                 }
-                unset($stmt);
 
                 return;
             }
 
             /**
+             * 兼容极简测试替身的遗留分支。
+             *
              * DECLARE CURSOR 不支持 PDO 参数占位符（PG 限制），
              * 通过 quote 拼接后用 prepare()->execute() 执行。
              *
@@ -647,6 +639,7 @@ class WalEventDispatchCommand extends Command
              * 但 FETCH/CLOSE 再走 prepare()->execute() 在部分 PHP/PG 驱动组合
              * 下会导致已声明的命名游标提前失效，因此后续仍使用简单查询协议。
              */
+            $pdo = $connection->getPdo();
             $canToggleEmulatePrepares = method_exists($pdo, 'getAttribute') && method_exists($pdo, 'setAttribute');
             $emulateState = false;
             if ($canToggleEmulatePrepares) {

@@ -385,6 +385,60 @@ PHP
             ], $partitionMap);
         }
 
+        public function testGetConnectionForcesWriteConnectionOnSelectedConnection(): void
+        {
+            $originalDb = app('db');
+
+            $connection = new class() {
+                public $writeConnectionForced = false;
+
+                public function useWriteConnectionWhenReading($value = true)
+                {
+                    $this->writeConnectionForced = $value;
+
+                    return $this;
+                }
+            };
+
+            $db = new class($connection) {
+                public $requestedConnection = null;
+                private $connection;
+
+                public function __construct($connection)
+                {
+                    $this->connection = $connection;
+                }
+
+                public function connection($name = null)
+                {
+                    $this->requestedConnection = $name;
+
+                    return $this->connection;
+                }
+            };
+
+            app()->instance('db', $db);
+
+            try {
+                $command = new class() extends WalEventDispatchCommand {
+                    public function exposedGetConnection()
+                    {
+                        return $this->getConnection();
+                    }
+                };
+
+                $this->initializeCommand($command, ['--connection' => 'primary-test']);
+
+                $result = $command->exposedGetConnection();
+
+                $this->assertSame($connection, $result);
+                $this->assertSame('primary-test', $db->requestedConnection);
+                $this->assertTrue($connection->writeConnectionForced);
+            } finally {
+                app()->instance('db', $originalDb);
+            }
+        }
+
         public function testPollChangesSkipsInvalidRowsAndAdvancesSlot(): void
         {
             Queue::fake();
@@ -429,6 +483,9 @@ PHP
             $result = self::callMethod($command, 'pollChanges', ['slot_test', $handlers, 1000, []]);
 
             $this->assertTrue($result);
+            $this->assertCount(1, $connection->cursorCalls);
+            $this->assertFalse($connection->cursorCalls[0]['useReadPdo']);
+            $this->assertSame([\PDO::FETCH_OBJ], $connection->cursorCalls[0]['fetchUsing']);
             $this->assertCount(1, $connection->statements);
             $this->assertStringContainsString('pg_replication_slot_advance', $connection->statements[0]['query']);
             $this->assertSame(['slot_test', '0/6'], $connection->statements[0]['bindings']);
@@ -873,6 +930,10 @@ PHP
         public $statements = [];
         /** @var bool */
         public $advanceThrows = false;
+        /** @var array */
+        public $cursorCalls = [];
+        /** @var bool */
+        public $writeConnectionForced = false;
 
         public function __construct(array $rows)
         {
@@ -925,7 +986,12 @@ PHP
             };
         }
 
-        public function useWriteConnectionWhenReading($value = true) { return $this; }
+        public function useWriteConnectionWhenReading($value = true)
+        {
+            $this->writeConnectionForced = $value;
+
+            return $this;
+        }
 
         public function transaction($callback, $attempts = 1)
         {
@@ -939,12 +1005,26 @@ PHP
             }
         }
 
-        public function selectOne($query, array $bindings = [])
+        public function selectOne($query, array $bindings = [], $useReadPdo = true)
         {
             if (false !== strpos($query, 'pg_current_wal_lsn')) {
                 return (object) ['lsn' => '0/0'];
             }
             return null;
+        }
+
+        public function cursor($query, array $bindings = [], $useReadPdo = true, array $fetchUsing = [])
+        {
+            $this->cursorCalls[] = [
+                'query' => $query,
+                'bindings' => $bindings,
+                'useReadPdo' => $useReadPdo,
+                'fetchUsing' => $fetchUsing,
+            ];
+
+            foreach ($this->rows as $row) {
+                yield $row;
+            }
         }
 
         public function select($query, array $bindings = [], $useReadPdo = true)
