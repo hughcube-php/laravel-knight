@@ -546,14 +546,23 @@ class WalEventDispatchCommand extends Command
         $lastLsn = null;
 
         /**
-         * 使用 Laravel transaction() 包裹游标操作，
-         * Listener 中的 DB::transaction() 会正确使用 SAVEPOINT。
+         * DECLARE CURSOR 不支持 PDO 参数占位符（PG 限制），
+         * 通过 getPdo()->quote() 安全拼接后用 unprepared() 执行。
          *
-         * DECLARE CURSOR 不支持参数占位符（PG 限制），通过 Connection 的 raw 表达式拼接。
-         * FETCH/CLOSE 无参数，直接用 select()/unprepared()。
-         * select() 第三个参数 false 强制使用写连接，确保与事务在同一连接上。
+         * 游标事务内所有数据库操作强制使用写连接（主库），
+         * 避免读写分离下 DECLARE/FETCH/CLOSE 分散在不同连接上导致游标找不到。
+         * - unprepared() 内部走 getPdo()（写连接）
+         * - selectFromWriteConnection() 强制走写连接
+         * - transaction() 在写连接上开启事务
          */
-        $declareSql = $this->buildCursorDeclareSql($connection, $cursorName, $sql, $bindings);
+        $pdo = $connection->getPdo();
+        $quotedBindings = array_map(function ($v) use ($pdo) {
+            return $pdo->quote((string) $v);
+        }, $bindings);
+        $boundSql = preg_replace_callback('/\?/', function () use (&$quotedBindings) {
+            return array_shift($quotedBindings);
+        }, $sql);
+        $declareSql = sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $boundSql);
 
         $connection->transaction(function ($connection) use (
             $cursorName, $fetchSize, $isV2, $declareSql,
@@ -563,7 +572,7 @@ class WalEventDispatchCommand extends Command
             $connection->unprepared($declareSql);
 
             while (true) {
-                $chunk = $connection->select(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName), [], false);
+                $chunk = $connection->selectFromWriteConnection(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName));
 
                 if (empty($chunk)) {
                     break;
@@ -870,32 +879,6 @@ class WalEventDispatchCommand extends Command
         $slug = preg_replace('/_+/', '_', trim($slug, '_'));
 
         return $slug . '_wal_event';
-    }
-
-    /**
-     * 构建 DECLARE CURSOR 的完整 SQL（无占位符）。
-     *
-     * PG 的 DECLARE CURSOR 不支持 PDO 参数占位符，
-     * 通过 Connection::getPdo()->quote() 安全拼接参数值。
-     *
-     * @param Connection $connection
-     * @param string $cursorName
-     * @param string $sql 含 ? 占位符的查询 SQL
-     * @param array $bindings 绑定参数
-     *
-     * @return string 完整的 DECLARE CURSOR SQL
-     */
-    protected function buildCursorDeclareSql($connection, $cursorName, $sql, array $bindings)
-    {
-        $pdo = $connection->getPdo();
-        $quoted = array_map(function ($v) use ($pdo) {
-            return $pdo->quote((string) $v);
-        }, $bindings);
-        $boundSql = preg_replace_callback('/\?/', function () use (&$quoted) {
-            return array_shift($quoted);
-        }, $sql);
-
-        return sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $boundSql);
     }
 
     /**

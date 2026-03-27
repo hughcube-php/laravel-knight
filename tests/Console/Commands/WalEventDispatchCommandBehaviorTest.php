@@ -896,6 +896,11 @@ PHP
             };
         }
 
+        public function selectFromWriteConnection($query, array $bindings = [])
+        {
+            return $this->select($query, $bindings, false);
+        }
+
         public function transaction($callback, $attempts = 1)
         {
             $this->beginTransaction();
