@@ -570,6 +570,72 @@ class WalEventDispatchCommand extends Command
         ) {
             $pdo = $connection->getPdo();
 
+            $processChunk = function (array $chunk) use (
+                $isV2, $partitionMap, $handlers,
+                &$tableCounts, &$dispatchCount, &$lastLsn
+            ) {
+                foreach ($chunk as $row) {
+                    $lastLsn = $row->lsn;
+
+                    $payload = json_decode($row->data, true);
+                    if (!is_array($payload)) {
+                        if (JSON_ERROR_NONE !== json_last_error()) {
+                            $this->warn(sprintf(
+                                'json_decode failed (LSN %s): %s, data prefix: %s',
+                                $row->lsn, json_last_error_msg(), substr($row->data, 0, 200)
+                            ));
+                        }
+                        continue;
+                    }
+
+                    $changes = $isV2 ? [$payload] : ($payload['change'] ?? []);
+
+                    foreach ($changes as $change) {
+                        $rawTable = $change['table'] ?? null;
+                        if (null === $rawTable) {
+                            continue;
+                        }
+
+                        $resolvedTable = $this->resolveTable($rawTable, $partitionMap);
+                        if (!isset($handlers[$resolvedTable])) {
+                            continue;
+                        }
+
+                        foreach ($handlers[$resolvedTable] as $meta) {
+                            $record = WalChangeRecord::fromWal2json($change, $resolvedTable, $rawTable, $meta['keyName'], get_class($meta['handler']));
+                            if (null === $record) {
+                                continue;
+                            }
+
+                            $this->dispatchWalChange($record);
+
+                            $table = $record->getTable();
+                            $kind = $record->getKind();
+                            $tableCounts[$table][$kind] = ($tableCounts[$table][$kind] ?? 0) + 1;
+                            $dispatchCount++;
+                        }
+                    }
+                }
+            };
+
+            /**
+             * 真实 PDO 直接逐行 fetch。
+             *
+             * 在 Linux / PHP 8.5 / PostgreSQL 的某些组合下，命名游标在超大 DELETE
+             * 事务中会中途失效；直接逐行 fetch 更稳定。保留下方游标分支用于测试替身，
+             * 避免改动现有行为测试桩对象。
+             */
+            if ($pdo instanceof \PDO) {
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute($bindings);
+                while (false !== ($row = $stmt->fetch(\PDO::FETCH_OBJ))) {
+                    $processChunk([$row]);
+                }
+                unset($stmt);
+
+                return;
+            }
+
             /**
              * DECLARE CURSOR 不支持 PDO 参数占位符（PG 限制），
              * 通过 quote 拼接后用 prepare()->execute() 执行。
@@ -602,54 +668,6 @@ class WalEventDispatchCommand extends Command
                 $stmt = $pdo->prepare($declareSql);
                 $stmt->execute();
                 unset($stmt);
-
-                $processChunk = function (array $chunk) use (
-                    $isV2, $partitionMap, $handlers,
-                    &$tableCounts, &$dispatchCount, &$lastLsn
-                ) {
-                    foreach ($chunk as $row) {
-                        $lastLsn = $row->lsn;
-
-                        $payload = json_decode($row->data, true);
-                        if (!is_array($payload)) {
-                            if (JSON_ERROR_NONE !== json_last_error()) {
-                                $this->warn(sprintf(
-                                    'json_decode failed (LSN %s): %s, data prefix: %s',
-                                    $row->lsn, json_last_error_msg(), substr($row->data, 0, 200)
-                                ));
-                            }
-                            continue;
-                        }
-
-                        $changes = $isV2 ? [$payload] : ($payload['change'] ?? []);
-
-                        foreach ($changes as $change) {
-                            $rawTable = $change['table'] ?? null;
-                            if (null === $rawTable) {
-                                continue;
-                            }
-
-                            $resolvedTable = $this->resolveTable($rawTable, $partitionMap);
-                            if (!isset($handlers[$resolvedTable])) {
-                                continue;
-                            }
-
-                            foreach ($handlers[$resolvedTable] as $meta) {
-                                $record = WalChangeRecord::fromWal2json($change, $resolvedTable, $rawTable, $meta['keyName'], get_class($meta['handler']));
-                                if (null === $record) {
-                                    continue;
-                                }
-
-                                $this->dispatchWalChange($record);
-
-                                $table = $record->getTable();
-                                $kind = $record->getKind();
-                                $tableCounts[$table][$kind] = ($tableCounts[$table][$kind] ?? 0) + 1;
-                                $dispatchCount++;
-                            }
-                        }
-                    }
-                };
 
                 $closed = false;
 
