@@ -897,17 +897,16 @@ PHP
                 private $fetchIndex = 0;
                 public function __construct($conn) { $this->conn = $conn; }
                 public function quote($value) { return "'" . addslashes((string) $value) . "'"; }
-                public function getAttribute($attr) { return false; }
-                public function setAttribute($attr, $value) { return true; }
-                public function exec($sql)
+                public function prepare($sql)
                 {
                     if (false !== stripos($sql, 'DECLARE')) {
                         $this->fetchIndex = 0;
+                        return new class { public function execute() { return true; } };
                     }
-                    return 0;
-                }
-                public function query($sql)
-                {
+                    if (false !== stripos($sql, 'CLOSE')) {
+                        return new class { public function execute() { return true; } };
+                    }
+                    /** FETCH */
                     $size = 1000;
                     if (preg_match('/FETCH\s+(\d+)/i', $sql, $m)) {
                         $size = (int) $m[1];
@@ -917,6 +916,7 @@ PHP
                     return new class($chunk) {
                         private $data;
                         public function __construct($data) { $this->data = $data; }
+                        public function execute() { return true; }
                         public function fetchAll($mode = \PDO::FETCH_OBJ) { return $this->data; }
                     };
                 }
