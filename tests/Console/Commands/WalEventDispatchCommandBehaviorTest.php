@@ -406,44 +406,7 @@ PHP
                 ]])],
             ];
 
-            $mockPdo = new MockCursorPdo($rows);
-
-            $connection = new class($rows, $mockPdo) {
-                public array $rows;
-                public array $statements = [];
-                private $pdo;
-
-                public function __construct(array $rows, $pdo)
-                {
-                    $this->rows = $rows;
-                    $this->pdo = $pdo;
-                }
-
-                public function getPdo()
-                {
-                    return $this->pdo;
-                }
-
-                public function selectOne($query, array $bindings = [])
-                {
-                    if (false !== strpos($query, 'pg_current_wal_lsn')) {
-                        return (object) ['lsn' => '0/0'];
-                    }
-                    return null;
-                }
-
-                public function select($query, array $bindings = [])
-                {
-                    return $this->rows;
-                }
-
-                public function statement($query, array $bindings = [])
-                {
-                    $this->statements[] = ['query' => $query, 'bindings' => $bindings];
-
-                    return true;
-                }
-            };
+            $connection = new MockCursorConnection($rows);
 
             $command = new class() extends WalEventDispatchCommand {
                 public $connection;
@@ -487,36 +450,7 @@ PHP
                 ]])],
             ];
 
-            $mockPdo = new MockCursorPdo($rows);
-
-            $connection = new class($rows, $mockPdo) {
-                public array $rows;
-                public array $statements = [];
-                private $pdo;
-
-                public function __construct(array $rows, $pdo)
-                {
-                    $this->rows = $rows;
-                    $this->pdo = $pdo;
-                }
-
-                public function getPdo()
-                {
-                    return $this->pdo;
-                }
-
-                public function selectOne($query, array $bindings = [])
-                {
-                    return null;
-                }
-
-                public function statement($query, array $bindings = [])
-                {
-                    $this->statements[] = ['query' => $query, 'bindings' => $bindings];
-
-                    return true;
-                }
-            };
+            $connection = new MockCursorConnection($rows);
 
             $command = new class() extends WalEventDispatchCommand {
                 public $connection;
@@ -539,8 +473,7 @@ PHP
             $result = self::callMethod($command, 'pollChanges', ['slot_test_auto', $handlers, 1000, []]);
 
             $this->assertTrue($result);
-            /** auto mode uses get_changes - verify via the SQL in PDO prepare */
-            $this->assertNotEmpty($mockPdo->execCalls);
+            /** auto mode 不调用 advance */
             $this->assertEmpty($connection->statements);
 
             Queue::assertPushed(WalChangesDispatchJob::class, 1);
@@ -559,36 +492,7 @@ PHP
                 ]])],
             ];
 
-            $mockPdo = new MockCursorPdo($rows);
-
-            $connection = new class($rows, $mockPdo) {
-                public array $rows;
-                public array $statements = [];
-                private $pdo;
-
-                public function __construct(array $rows, $pdo)
-                {
-                    $this->rows = $rows;
-                    $this->pdo = $pdo;
-                }
-
-                public function getPdo()
-                {
-                    return $this->pdo;
-                }
-
-                public function selectOne($query, array $bindings = [])
-                {
-                    return null;
-                }
-
-                public function statement($query, array $bindings = [])
-                {
-                    $this->statements[] = ['query' => $query, 'bindings' => $bindings];
-
-                    return true;
-                }
-            };
+            $connection = new MockCursorConnection($rows);
 
             $command = new class() extends WalEventDispatchCommand {
                 public $connection;
@@ -629,39 +533,8 @@ PHP
                 ]])],
             ];
 
-            $mockPdo = new MockCursorPdo($rows);
-
-            $connection = new class($rows, $mockPdo) {
-                public array $rows;
-                public int $statementCalls = 0;
-                private $pdo;
-
-                public function __construct(array $rows, $pdo)
-                {
-                    $this->rows = $rows;
-                    $this->pdo = $pdo;
-                }
-
-                public function getPdo()
-                {
-                    return $this->pdo;
-                }
-
-                public function selectOne($query, array $bindings = [])
-                {
-                    if (false !== strpos($query, 'pg_current_wal_lsn')) {
-                        return (object) ['lsn' => '0/0'];
-                    }
-                    return null;
-                }
-
-                public function statement($query, array $bindings = [])
-                {
-                    $this->statementCalls++;
-
-                    throw new \RuntimeException('advance failed');
-                }
-            };
+            $connection = new MockCursorConnection($rows);
+            $connection->advanceThrows = true;
 
             $command = new class() extends WalEventDispatchCommand {
                 public $connection;
@@ -684,7 +557,7 @@ PHP
             $result = self::callMethod($command, 'pollChanges', ['slot_test_advance', $handlers, 1000, []]);
 
             $this->assertTrue($result);
-            $this->assertSame(1, $connection->statementCalls);
+            $this->assertCount(1, $connection->statements);
 
             Queue::assertPushed(WalChangesDispatchJob::class, 1);
             Queue::assertPushed(WalChangesDispatchJob::class, function (WalChangesDispatchJob $job) {
@@ -985,58 +858,82 @@ PHP
     }
 
     /**
-     * Mock PDO for cursor-based pollChanges tests.
-     * Simulates DECLARE CURSOR / FETCH / CLOSE behavior.
+     * Mock Connection for cursor-based pollChanges tests.
+     * Simulates DECLARE CURSOR / FETCH / CLOSE + beginTransaction/commit/rollBack.
      */
-    class MockCursorPdo
+    class MockCursorConnection
     {
         /** @var array */
         public $rows;
         /** @var int */
         private $fetchIndex = 0;
-        /** @var int */
-        private $fetchSize = 1000;
         /** @var array */
-        public $execCalls = [];
+        public $statements = [];
+        /** @var bool */
+        public $advanceThrows = false;
 
         public function __construct(array $rows)
         {
             $this->rows = $rows;
         }
 
-        public function exec($sql)
-        {
-            $this->execCalls[] = $sql;
-            return 0;
-        }
+        public function beginTransaction() { }
+        public function commit() { }
+        public function rollBack() { }
 
-        public function prepare($sql)
+        public function transaction($callback, $attempts = 1)
         {
-            return new MockCursorStatement($this);
-        }
-
-        public function query($sql)
-        {
-            if (preg_match('/FETCH\s+(\d+)/i', $sql, $m)) {
-                $this->fetchSize = (int) $m[1];
+            $this->beginTransaction();
+            try {
+                $result = $callback($this);
+                $this->commit();
+                return $result;
+            } catch (\Throwable $e) {
+                $this->rollBack();
+                throw $e;
             }
-            $chunk = array_slice($this->rows, $this->fetchIndex, $this->fetchSize);
-            $this->fetchIndex += count($chunk);
-            return new MockCursorResult($chunk);
         }
-    }
 
-    class MockCursorStatement
-    {
-        private $pdo;
-        public function __construct($pdo) { $this->pdo = $pdo; }
-        public function execute($bindings = []) { return true; }
-    }
+        public function selectOne($query, array $bindings = [])
+        {
+            if (false !== strpos($query, 'pg_current_wal_lsn')) {
+                return (object) ['lsn' => '0/0'];
+            }
+            return null;
+        }
 
-    class MockCursorResult
-    {
-        private $data;
-        public function __construct(array $data) { $this->data = $data; }
-        public function fetchAll($mode = \PDO::FETCH_OBJ) { return $this->data; }
+        public function select($query, array $bindings = [])
+        {
+            /** DECLARE CURSOR — 初始化，返回空 */
+            if (false !== stripos($query, 'DECLARE')) {
+                $this->fetchIndex = 0;
+                return [];
+            }
+            /** FETCH — 分块返回数据 */
+            if (false !== stripos($query, 'FETCH')) {
+                if (preg_match('/FETCH\s+(\d+)/i', $query, $m)) {
+                    $size = (int) $m[1];
+                } else {
+                    $size = 1000;
+                }
+                $chunk = array_slice($this->rows, $this->fetchIndex, $size);
+                $this->fetchIndex += count($chunk);
+                return $chunk;
+            }
+            /** CLOSE — 清理，返回空 */
+            if (false !== stripos($query, 'CLOSE')) {
+                return [];
+            }
+            return $this->rows;
+        }
+
+        public function statement($query, array $bindings = [])
+        {
+            $this->statements[] = ['query' => $query, 'bindings' => $bindings];
+            if ($this->advanceThrows) {
+                throw new \RuntimeException('advance failed');
+            }
+            return true;
+        }
     }
 }

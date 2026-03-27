@@ -535,7 +535,6 @@ class WalEventDispatchCommand extends Command
          * 事务时间极短（500k 行约 3-4 秒）。如果 Listener 有耗时操作（HTTP 调用、外部写入），
          * 建议使用 --queue-connection=redis 将 dispatch 推入队列，避免长事务阻塞 VACUUM。
          */
-        $pdo = $connection->getPdo();
         $cursorName = 'knight_wal_cursor';
         $fetchSize = 1000;
         $isV2 = '2' == $this->option('format-version');
@@ -544,15 +543,20 @@ class WalEventDispatchCommand extends Command
         $dispatchCount = 0;
         $lastLsn = null;
 
-        $pdo->exec('BEGIN');
-
-        try {
-            $declareStmt = $pdo->prepare(sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $sql));
-            $declareStmt->execute($bindings);
+        /**
+         * 使用 Laravel 的 transaction() 包裹游标操作，
+         * 确保 Listener 中的 DB::transaction() 能正确使用 SAVEPOINT，
+         * 异常时自动 rollback 游标事务。
+         */
+        $connection->transaction(function ($connection) use (
+            $cursorName, $fetchSize, $isV2, $sql, $bindings,
+            $partitionMap, $handlers,
+            &$tableCounts, &$dispatchCount, &$lastLsn
+        ) {
+            $connection->select(sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $sql), $bindings);
 
             while (true) {
-                $chunk = $pdo->query(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName))
-                    ->fetchAll(\PDO::FETCH_OBJ);
+                $chunk = $connection->select(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName));
 
                 if (empty($chunk)) {
                     break;
@@ -604,16 +608,8 @@ class WalEventDispatchCommand extends Command
                 unset($chunk);
             }
 
-            $pdo->exec(sprintf('CLOSE %s', $cursorName));
-            $pdo->exec('COMMIT');
-        } catch (Throwable $e) {
-            try {
-                $pdo->exec('ROLLBACK');
-            } catch (Throwable $re) {
-                /** best-effort */
-            }
-            throw $e;
-        }
+            $connection->select(sprintf('CLOSE %s', $cursorName));
+        });
 
         /** 无变更：advance 模式下推进到 prePeekLsn 消除幻影滞后 */
         if (null === $lastLsn) {
