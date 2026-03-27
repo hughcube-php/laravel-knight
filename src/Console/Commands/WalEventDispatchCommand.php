@@ -547,13 +547,25 @@ class WalEventDispatchCommand extends Command
          * 使用 Laravel 的 transaction() 包裹游标操作，
          * 确保 Listener 中的 DB::transaction() 能正确使用 SAVEPOINT，
          * 异常时自动 rollback 游标事务。
+         *
+         * DECLARE CURSOR 不支持 PDO 参数占位符（PG 限制），
+         * 需要手动 quote 拼接 SQL。所有参数均为受控输入（slot name、batch、wal2json 参数），无注入风险。
          */
+        $pdo = $connection->getPdo();
+        $quotedBindings = array_map(function ($v) use ($pdo) {
+            return $pdo->quote((string) $v);
+        }, $bindings);
+        $boundSql = preg_replace_callback('/\?/', function () use (&$quotedBindings) {
+            return array_shift($quotedBindings);
+        }, $sql);
+        $declareSql = sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $boundSql);
+
         $connection->transaction(function ($connection) use (
-            $cursorName, $fetchSize, $isV2, $sql, $bindings,
+            $cursorName, $fetchSize, $isV2, $declareSql,
             $partitionMap, $handlers,
             &$tableCounts, &$dispatchCount, &$lastLsn
         ) {
-            $connection->select(sprintf('DECLARE %s NO SCROLL CURSOR FOR %s', $cursorName, $sql), $bindings);
+            $connection->unprepared($declareSql);
 
             while (true) {
                 $chunk = $connection->select(sprintf('FETCH %d FROM %s', $fetchSize, $cursorName));
@@ -608,7 +620,7 @@ class WalEventDispatchCommand extends Command
                 unset($chunk);
             }
 
-            $connection->select(sprintf('CLOSE %s', $cursorName));
+            $connection->unprepared(sprintf('CLOSE %s', $cursorName));
         });
 
         /** 无变更：advance 模式下推进到 prePeekLsn 消除幻影滞后 */

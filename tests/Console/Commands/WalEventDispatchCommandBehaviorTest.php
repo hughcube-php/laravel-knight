@@ -880,6 +880,14 @@ PHP
         public function beginTransaction() { }
         public function commit() { }
         public function rollBack() { }
+        public function unprepared($query) { return true; }
+
+        public function getPdo()
+        {
+            return new class {
+                public function quote($value) { return "'" . addslashes($value) . "'"; }
+            };
+        }
 
         public function transaction($callback, $attempts = 1)
         {
