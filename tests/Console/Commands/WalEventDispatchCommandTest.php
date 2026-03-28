@@ -293,50 +293,6 @@ class WalEventDispatchCommandTest extends TestCase
         $this->assertSame(['filter-tables', 'custom.bar', 'format-version', '2'], $result);
     }
 
-    // ==================== buildChangeSummary ====================
-
-    public function testBuildChangeSummaryMixed()
-    {
-        $command = $this->makeCommand();
-
-        $changes = [
-            new WalChangeRecord('insert', 'users', null, 1, 'id', [], [], 'stdClass'),
-            new WalChangeRecord('insert', 'users', null, 2, 'id', [], [], 'stdClass'),
-            new WalChangeRecord('update', 'users', null, 3, 'id', [], [], 'stdClass'),
-            new WalChangeRecord('delete', 'users', null, 4, 'id', [], [], 'stdClass'),
-        ];
-
-        $result = self::callMethod($command, 'buildChangeSummary', [$changes]);
-        $this->assertSame('users: 2 inserts, 1 update, 1 delete', $result);
-    }
-
-    public function testBuildChangeSummarySingle()
-    {
-        $command = $this->makeCommand();
-
-        $changes = [
-            new WalChangeRecord('insert', 'users', null, 1, 'id', [], [], 'stdClass'),
-        ];
-
-        $result = self::callMethod($command, 'buildChangeSummary', [$changes]);
-        $this->assertSame('users: 1 insert', $result);
-    }
-
-    public function testBuildChangeSummaryMultipleTables()
-    {
-        $command = $this->makeCommand();
-
-        $changes = [
-            new WalChangeRecord('insert', 'users', null, 1, 'id', [], [], 'stdClass'),
-            new WalChangeRecord('update', 'orders', null, 2, 'id', [], [], 'stdClass'),
-            new WalChangeRecord('update', 'orders', null, 3, 'id', [], [], 'stdClass'),
-            new WalChangeRecord('delete', 'orders', null, 4, 'id', [], [], 'stdClass'),
-        ];
-
-        $result = self::callMethod($command, 'buildChangeSummary', [$changes]);
-        $this->assertSame('users: 1 insert; orders: 2 updates, 1 delete', $result);
-    }
-
     // ==================== formatChangeSummary ====================
 
     public function testFormatChangeSummaryEmpty()

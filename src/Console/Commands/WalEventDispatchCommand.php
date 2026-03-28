@@ -792,27 +792,6 @@ class WalEventDispatchCommand extends Command
     }
 
     /**
-     * 按表名+操作类型汇总变更记录数，生成可读摘要。
-     *
-     * @deprecated 使用 formatChangeSummary() 替代，pollChanges 内部已不再调用此方法
-     *
-     * @param WalChangeRecord[] $changes
-     *
-     * @return string 如 "users: 3 inserts, 2 updates; orders: 1 delete"
-     */
-    protected function buildChangeSummary(array $changes): string
-    {
-        $tableCounts = [];
-        foreach ($changes as $record) {
-            $table = $record->getTable();
-            $kind = $record->getKind();
-            $tableCounts[$table][$kind] = ($tableCounts[$table][$kind] ?? 0) + 1;
-        }
-
-        return $this->formatChangeSummary($tableCounts);
-    }
-
-    /**
      * 将 [table => [kind => count]] 计数器格式化为可读摘要。
      *
      * @param array<string, array<string, int>> $tableCounts
