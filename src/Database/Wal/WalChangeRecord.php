@@ -187,13 +187,16 @@ class WalChangeRecord implements JsonSerializable
      */
     const TOAST_UNCHANGED = 'unchanged-toast-datum';
 
+    /** fetchModel 内部缓存 key */
+    const FETCH_MODEL_CACHE_KEY = '__kr_fm_9d7e4a1b3f6c82e5';
+
     /**
      * 将 format-version 2 的 columns 数组扁平化为 [name => value] 关联数组。
      *
      * v2 输入: [{"name":"id","type":"integer","value":1}, {"name":"title","type":"text","value":"hello"}]
      * 输出:    ["id" => 1, "title" => "hello"]
      *
-     * TOAST 列哨兵值 "unchanged-toast-datum" 会被替换为 null，
+     * TOAST 列哨兵值 "unchanged-toast-datum" 会被直接跳过（不设 key），
      * 避免 toModel() 将哨兵字符串填充到 Model 属性中。
      * 使用 isToastUnchanged() 检测某列是否为未变更的 TOAST 列。
      *
@@ -207,7 +210,9 @@ class WalChangeRecord implements JsonSerializable
         foreach ($v2Columns as $col) {
             if (isset($col['name'])) {
                 $value = $col['value'] ?? null;
-                $result[$col['name']] = (self::TOAST_UNCHANGED === $value) ? null : $value;
+                if (self::TOAST_UNCHANGED !== $value) {
+                    $result[$col['name']] = $value;
+                }
             }
         }
         return $result;
@@ -215,6 +220,9 @@ class WalChangeRecord implements JsonSerializable
 
     /**
      * 检查指定列是否为未变更的 TOAST 列（仅 v2 格式 UPDATE 场景有意义）。
+     *
+     * TOAST 列在 flattenV2Columns 中被跳过（key 不存在于 columns），
+     * 因此通过 array_key_exists 即可判断。
      *
      * @param string $column
      *
@@ -409,7 +417,7 @@ class WalChangeRecord implements JsonSerializable
      */
     public function fetchModel()
     {
-        $key = '__kr_fm_9d7e4a1b3f6c82e5';
+        $key = self::FETCH_MODEL_CACHE_KEY;
 
         if ($this->hasContext($key)) {
             return $this->getContext($key);
@@ -441,7 +449,7 @@ class WalChangeRecord implements JsonSerializable
      */
     public function setModel($model)
     {
-        $this->setContext('__kr_fm_9d7e4a1b3f6c82e5', $model);
+        $this->setContext(self::FETCH_MODEL_CACHE_KEY, $model);
 
         return $this;
     }

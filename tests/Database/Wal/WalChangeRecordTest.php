@@ -727,8 +727,8 @@ class WalChangeRecordTest extends TestCase
         $this->assertNotNull($record);
         $columns = $record->getColumns();
 
-        /** TOAST 哨兵值应被替换为 null */
-        $this->assertNull($columns['email']);
+        /** TOAST 列 key 应被移除（不存在于 columns 中） */
+        $this->assertArrayNotHasKey('email', $columns);
         /** 正常值不受影响 */
         $this->assertSame('updated', $columns['name']);
         $this->assertSame(1, $columns['id']);
@@ -772,6 +772,32 @@ class WalChangeRecordTest extends TestCase
         );
 
         $this->assertTrue($record->isToastUnchanged('email'));
+        $this->assertFalse($record->isToastUnchanged('name'));
+        $this->assertFalse($record->isToastUnchanged('id'));
+    }
+
+    public function testIsToastUnchangedViaFromWal2json()
+    {
+        /** 通过 fromWal2json 实际路径构建 record，验证 isToastUnchanged 正确性 */
+        $change = [
+            'action' => 'U',
+            'table' => 'wal_record_test_items',
+            'columns' => [
+                ['name' => 'id', 'type' => 'integer', 'value' => 1],
+                ['name' => 'name', 'type' => 'text', 'value' => 'updated'],
+                ['name' => 'email', 'type' => 'text', 'value' => 'unchanged-toast-datum'],
+            ],
+            'identity' => [
+                ['name' => 'id', 'type' => 'integer', 'value' => 1],
+            ],
+        ];
+
+        $record = WalChangeRecord::fromWal2json($change, 'wal_record_test_items', 'wal_record_test_items', 'id', WalRecordTestModel::class);
+
+        $this->assertNotNull($record);
+        /** email 是 TOAST 未变更列 */
+        $this->assertTrue($record->isToastUnchanged('email'));
+        /** name 和 id 有实际值，不是 TOAST */
         $this->assertFalse($record->isToastUnchanged('name'));
         $this->assertFalse($record->isToastUnchanged('id'));
     }

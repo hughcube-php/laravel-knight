@@ -237,8 +237,7 @@ class WalEventDispatchCommand extends Command
             try {
                 /** P0: WAL 堆积检测，在 poll 前检查 slot 健康状态 */
                 if ($slotLagWarning > 0 || $slotLagCritical > 0) {
-                    $lagAction = $this->checkSlotHealth($slot, $slotLagWarning, $slotLagCritical);
-                    if ('stop' === $lagAction) {
+                    if ($this->checkSlotHealth($slot, $slotLagWarning, $slotLagCritical)) {
                         break;
                     }
                 }
@@ -292,7 +291,11 @@ class WalEventDispatchCommand extends Command
                 $partitionMap = $this->buildPartitionMap();
                 $this->partitionMapRefreshedAt = time();
                 if (!$this->option('no-add-tables')) {
+                    $oldAddTables = $this->autoAddTables;
                     $this->autoAddTables = $this->buildAutoAddTables($handlers, $partitionMap);
+                    if ($this->autoAddTables !== $oldAddTables) {
+                        $this->info(sprintf('Auto add-tables updated: %s', $this->autoAddTables ?: '(none)'));
+                    }
                 }
             }
 
@@ -552,7 +555,7 @@ class WalEventDispatchCommand extends Command
         $dispatchCount = 0;
         $lastLsn = null;
 
-        $processRow = function ($row) use ($isV2, $partitionMap, $handlers, &$tableCounts, &$dispatchCount, &$lastLsn) {
+        foreach ($connection->cursor($sql, $bindings, false, [\PDO::FETCH_OBJ]) as $row) {
             $lastLsn = $row->lsn;
 
             $payload = json_decode($row->data, true);
@@ -565,7 +568,7 @@ class WalEventDispatchCommand extends Command
                         substr($row->data, 0, 200)
                     ));
                 }
-                return;
+                continue;
             }
 
             $changes = $isV2 ? [$payload] : ($payload['change'] ?? []);
@@ -594,10 +597,6 @@ class WalEventDispatchCommand extends Command
                     $dispatchCount++;
                 }
             }
-        };
-
-        foreach ($connection->cursor($sql, $bindings, false, [\PDO::FETCH_OBJ]) as $row) {
-            $processRow($row);
         }
 
         /** 无变更：advance 模式下推进到 prePeekLsn 消除幻影滞后 */
@@ -795,6 +794,8 @@ class WalEventDispatchCommand extends Command
     /**
      * 按表名+操作类型汇总变更记录数，生成可读摘要。
      *
+     * @deprecated 使用 formatChangeSummary() 替代，pollChanges 内部已不再调用此方法
+     *
      * @param WalChangeRecord[] $changes
      *
      * @return string 如 "users: 3 inserts, 2 updates; orders: 1 delete"
@@ -967,9 +968,9 @@ class WalEventDispatchCommand extends Command
      *
      * @param string $slot 复制槽名称
      * @param int $warningMB 警告阈值（MB），0 表示不检查
-     * @param int $criticalMB 严重阈值（MB），0 表示不检查，超过时返回 'stop'
+     * @param int $criticalMB 严重阈值（MB），0 表示不检查，超过时返回 true
      *
-     * @return string|null 'stop' 表示应停止进程，null 表示正常
+     * @return bool true 表示应停止进程
      */
     protected function checkSlotHealth($slot, $warningMB = 0, $criticalMB = 0)
     {
@@ -983,7 +984,7 @@ class WalEventDispatchCommand extends Command
             );
 
             if (null === $row || null === $row->lag_bytes) {
-                return null;
+                return false;
             }
 
             $lagMB = intval($row->lag_bytes / 1024 / 1024);
@@ -996,7 +997,7 @@ class WalEventDispatchCommand extends Command
                     $criticalMB
                 ));
 
-                return 'stop';
+                return true;
             }
 
             if ($warningMB > 0 && $lagMB >= $warningMB) {
@@ -1011,7 +1012,7 @@ class WalEventDispatchCommand extends Command
             /** best-effort：检查失败不影响主流程 */
         }
 
-        return null;
+        return false;
     }
 
     /**
