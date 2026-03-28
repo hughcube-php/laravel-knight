@@ -969,23 +969,38 @@ class WalEventDispatchCommand extends Command
      */
     protected function flushTelescopeEntries(): void
     {
+        $telescopeClass = $this->getTelescopeClass();
+        if (null === $telescopeClass) {
+            return;
+        }
+
+        if (!call_user_func([$telescopeClass, 'isRecording'])) {
+            return;
+        }
+
+        try {
+            call_user_func([$telescopeClass, 'store'], app('Laravel\Telescope\Contracts\EntriesRepository'));
+        } catch (Throwable $e) {
+            /** best-effort */
+        }
+    }
+
+    /**
+     * 返回 Telescope 类名；未安装 Telescope 时返回 null。
+     *
+     * @return string|null
+     */
+    protected function getTelescopeClass()
+    {
         if (null === $this->telescopeAvailable) {
             $this->telescopeAvailable = class_exists('Laravel\Telescope\Telescope');
         }
 
         if (!$this->telescopeAvailable) {
-            return;
+            return null;
         }
 
-        if (!\Laravel\Telescope\Telescope::isRecording()) {
-            return;
-        }
-
-        try {
-            \Laravel\Telescope\Telescope::store(app('Laravel\Telescope\Contracts\EntriesRepository'));
-        } catch (Throwable $e) {
-            /** best-effort */
-        }
+        return 'Laravel\Telescope\Telescope';
     }
 
     /**
