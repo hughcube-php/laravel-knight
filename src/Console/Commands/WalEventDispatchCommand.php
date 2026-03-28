@@ -560,7 +560,9 @@ class WalEventDispatchCommand extends Command
                 if (JSON_ERROR_NONE !== json_last_error()) {
                     $this->warn(sprintf(
                         'json_decode failed (LSN %s): %s, data prefix: %s',
-                        $row->lsn, json_last_error_msg(), substr($row->data, 0, 200)
+                        $row->lsn,
+                        json_last_error_msg(),
+                        substr($row->data, 0, 200)
                     ));
                 }
                 return;
@@ -989,7 +991,9 @@ class WalEventDispatchCommand extends Command
             if ($criticalMB > 0 && $lagMB >= $criticalMB) {
                 $this->error(sprintf(
                     'Slot [%s] WAL lag %dMB exceeds critical threshold %dMB, stopping to prevent disk exhaustion',
-                    $slot, $lagMB, $criticalMB
+                    $slot,
+                    $lagMB,
+                    $criticalMB
                 ));
 
                 return 'stop';
@@ -998,7 +1002,9 @@ class WalEventDispatchCommand extends Command
             if ($warningMB > 0 && $lagMB >= $warningMB) {
                 $this->warn(sprintf(
                     'Slot [%s] WAL lag %dMB exceeds warning threshold %dMB',
-                    $slot, $lagMB, $warningMB
+                    $slot,
+                    $lagMB,
+                    $warningMB
                 ));
             }
         } catch (Throwable $e) {
@@ -1035,14 +1041,16 @@ class WalEventDispatchCommand extends Command
             if ('wal2json' !== $exists->plugin) {
                 throw new \RuntimeException(sprintf(
                     'Slot [%s] exists but uses plugin [%s] instead of wal2json',
-                    $slot, $exists->plugin
+                    $slot,
+                    $exists->plugin
                 ));
             }
             if ($exists->active) {
                 throw new \RuntimeException(sprintf(
                     'Slot [%s] is currently active (PID %s), another consumer is running. '
                     . 'Only one consumer can use a replication slot at a time.',
-                    $slot, $exists->active_pid
+                    $slot,
+                    $exists->active_pid
                 ));
             }
             return;
