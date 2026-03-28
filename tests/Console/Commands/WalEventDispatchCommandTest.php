@@ -32,88 +32,88 @@ class WalEventDispatchCommandTest extends TestCase
         return $command;
     }
 
-    // ==================== buildWal2jsonParamPlaceholders / buildWal2jsonParamBindings ====================
+    // ==================== buildWal2jsonParams ====================
 
-    public function testBuildWal2jsonParamPlaceholdersEmpty()
+    public function testBuildWal2jsonParamsPlaceholdersEmpty()
     {
         $command = $this->makeCommand(['--no-add-tables' => true]);
 
-        $result = self::callMethod($command, 'buildWal2jsonParamPlaceholders');
+        list($placeholders) = self::callMethod($command, 'buildWal2jsonParams');
         /** auto format-version=2 占一对占位符 */
-        $this->assertSame(', ?, ?', $result);
+        $this->assertSame(', ?, ?', $placeholders);
     }
 
-    public function testBuildWal2jsonParamPlaceholdersWithParams()
+    public function testBuildWal2jsonParamsPlaceholdersWithParams()
     {
         $command = $this->makeCommand(['--wal2json-params' => ['filter-columns=content', 'add-tables=users'], '--no-add-tables' => true]);
 
-        $result = self::callMethod($command, 'buildWal2jsonParamPlaceholders');
+        list($placeholders) = self::callMethod($command, 'buildWal2jsonParams');
         /** 2 user params + 1 auto(format-version) = 3 */
-        $this->assertSame(', ?, ?, ?, ?, ?, ?', $result);
+        $this->assertSame(', ?, ?, ?, ?, ?, ?', $placeholders);
     }
 
-    public function testBuildWal2jsonParamPlaceholdersWithAutoAddTables()
+    public function testBuildWal2jsonParamsPlaceholdersWithAutoAddTables()
     {
         $command = $this->makeCommand(['--no-add-tables' => true]);
         self::setProperty($command, 'autoAddTables', 'public.users,public.orders');
 
-        $result = self::callMethod($command, 'buildWal2jsonParamPlaceholders');
+        list($placeholders) = self::callMethod($command, 'buildWal2jsonParams');
         /** 0 user + 2 auto(format-version, add-tables) = 2 */
-        $this->assertSame(', ?, ?, ?, ?', $result);
+        $this->assertSame(', ?, ?, ?, ?', $placeholders);
     }
 
-    public function testBuildWal2jsonParamPlaceholdersWithParamsAndAutoAddTables()
+    public function testBuildWal2jsonParamsPlaceholdersWithParamsAndAutoAddTables()
     {
         $command = $this->makeCommand(['--wal2json-params' => ['filter-columns=content'], '--no-add-tables' => true]);
         self::setProperty($command, 'autoAddTables', 'public.users');
 
-        $result = self::callMethod($command, 'buildWal2jsonParamPlaceholders');
+        list($placeholders) = self::callMethod($command, 'buildWal2jsonParams');
         /** 1 user(filter-columns) + 2 auto(format-version, add-tables) = 3 */
-        $this->assertSame(', ?, ?, ?, ?, ?, ?', $result);
+        $this->assertSame(', ?, ?, ?, ?, ?, ?', $placeholders);
     }
 
-    public function testBuildWal2jsonParamBindingsEmpty()
+    public function testBuildWal2jsonParamsBindingsEmpty()
     {
         $command = $this->makeCommand(['--no-add-tables' => true]);
 
-        $result = self::callMethod($command, 'buildWal2jsonParamBindings');
+        list(, $bindings) = self::callMethod($command, 'buildWal2jsonParams');
         /** auto format-version=2 */
-        $this->assertSame(['format-version', '2'], $result);
+        $this->assertSame(['format-version', '2'], $bindings);
     }
 
-    public function testBuildWal2jsonParamBindingsWithParams()
+    public function testBuildWal2jsonParamsBindingsWithParams()
     {
         $command = $this->makeCommand(['--wal2json-params' => ['filter-columns=content,body', 'add-tables=users'], '--no-add-tables' => true]);
 
-        $result = self::callMethod($command, 'buildWal2jsonParamBindings');
+        list(, $bindings) = self::callMethod($command, 'buildWal2jsonParams');
         /** user params first, then auto format-version */
-        $this->assertSame(['filter-columns', 'content,body', 'add-tables', 'users', 'format-version', '2'], $result);
+        $this->assertSame(['filter-columns', 'content,body', 'add-tables', 'users', 'format-version', '2'], $bindings);
     }
 
-    public function testBuildWal2jsonParamBindingsWithKeyOnly()
+    public function testBuildWal2jsonParamsBindingsWithKeyOnly()
     {
         $command = $this->makeCommand(['--wal2json-params' => ['include-lsn'], '--no-add-tables' => true]);
 
-        $result = self::callMethod($command, 'buildWal2jsonParamBindings');
-        $this->assertSame(['include-lsn', '', 'format-version', '2'], $result);
+        list(, $bindings) = self::callMethod($command, 'buildWal2jsonParams');
+        $this->assertSame(['include-lsn', '', 'format-version', '2'], $bindings);
     }
 
-    public function testBuildWal2jsonParamBindingsWithAutoAddTables()
+    public function testBuildWal2jsonParamsBindingsWithAutoAddTables()
     {
         $command = $this->makeCommand(['--no-add-tables' => true]);
         self::setProperty($command, 'autoAddTables', 'public.users,public.orders');
 
-        $result = self::callMethod($command, 'buildWal2jsonParamBindings');
-        $this->assertSame(['format-version', '2', 'add-tables', 'public.users,public.orders'], $result);
+        list(, $bindings) = self::callMethod($command, 'buildWal2jsonParams');
+        $this->assertSame(['format-version', '2', 'add-tables', 'public.users,public.orders'], $bindings);
     }
 
-    public function testBuildWal2jsonParamBindingsWithParamsAndAutoAddTables()
+    public function testBuildWal2jsonParamsBindingsWithParamsAndAutoAddTables()
     {
         $command = $this->makeCommand(['--wal2json-params' => ['filter-columns=content'], '--no-add-tables' => true]);
         self::setProperty($command, 'autoAddTables', 'public.users,public.orders');
 
-        $result = self::callMethod($command, 'buildWal2jsonParamBindings');
-        $this->assertSame(['filter-columns', 'content', 'format-version', '2', 'add-tables', 'public.users,public.orders'], $result);
+        list(, $bindings) = self::callMethod($command, 'buildWal2jsonParams');
+        $this->assertSame(['filter-columns', 'content', 'format-version', '2', 'add-tables', 'public.users,public.orders'], $bindings);
     }
 
     // ==================== getUserWal2jsonParamKeys ====================
@@ -237,9 +237,9 @@ class WalEventDispatchCommandTest extends TestCase
             '--no-add-tables' => true,
         ]);
 
-        $result = self::callMethod($command, 'buildWal2jsonParamPlaceholders');
+        list($placeholders) = self::callMethod($command, 'buildWal2jsonParams');
         /** 1 user(format-version) + 0 auto = 1 */
-        $this->assertSame(', ?, ?', $result);
+        $this->assertSame(', ?, ?', $placeholders);
     }
 
     public function testBindingsWhenUserOverridesFormatVersion()
@@ -249,9 +249,9 @@ class WalEventDispatchCommandTest extends TestCase
             '--no-add-tables' => true,
         ]);
 
-        $result = self::callMethod($command, 'buildWal2jsonParamBindings');
+        list(, $bindings) = self::callMethod($command, 'buildWal2jsonParams');
         /** 用户的 format-version=1 不会被 auto format-version=2 追加 */
-        $this->assertSame(['format-version', '1'], $result);
+        $this->assertSame(['format-version', '1'], $bindings);
     }
 
     public function testPlaceholdersWhenUserOverridesAddTables()
@@ -262,9 +262,9 @@ class WalEventDispatchCommandTest extends TestCase
         ]);
         self::setProperty($command, 'autoAddTables', 'public.users');
 
-        $result = self::callMethod($command, 'buildWal2jsonParamPlaceholders');
+        list($placeholders) = self::callMethod($command, 'buildWal2jsonParams');
         /** 1 user(add-tables) + 1 auto(format-version) = 2 */
-        $this->assertSame(', ?, ?, ?, ?', $result);
+        $this->assertSame(', ?, ?, ?, ?', $placeholders);
     }
 
     public function testBindingsWhenUserOverridesAddTables()
@@ -275,9 +275,9 @@ class WalEventDispatchCommandTest extends TestCase
         ]);
         self::setProperty($command, 'autoAddTables', 'public.users');
 
-        $result = self::callMethod($command, 'buildWal2jsonParamBindings');
+        list(, $bindings) = self::callMethod($command, 'buildWal2jsonParams');
         /** 用户 add-tables 优先，auto add-tables 被跳过 */
-        $this->assertSame(['add-tables', 'custom.foo', 'format-version', '2'], $result);
+        $this->assertSame(['add-tables', 'custom.foo', 'format-version', '2'], $bindings);
     }
 
     public function testBindingsWhenUserOverridesFilterTables()
@@ -288,9 +288,9 @@ class WalEventDispatchCommandTest extends TestCase
             '--no-add-tables' => true,
         ]);
 
-        $result = self::callMethod($command, 'buildWal2jsonParamBindings');
+        list(, $bindings) = self::callMethod($command, 'buildWal2jsonParams');
         /** 用户 filter-tables 优先，--filter-tables 的自动注入被跳过 */
-        $this->assertSame(['filter-tables', 'custom.bar', 'format-version', '2'], $result);
+        $this->assertSame(['filter-tables', 'custom.bar', 'format-version', '2'], $bindings);
     }
 
     // ==================== formatChangeSummary ====================
@@ -2870,6 +2870,79 @@ class WalEventDispatchCommandTest extends TestCase
 
         self::callMethod($command, 'clearScopedInstances');
         $this->assertTrue(true);
+    }
+
+    // ==================== qualifyTableName ====================
+
+    public function testQualifyTableNameAddsPublicSchema(): void
+    {
+        $command = $this->makeCommand();
+        $result = self::callMethod($command, 'qualifyTableName', ['users']);
+        $this->assertSame('public.users', $result);
+    }
+
+    public function testQualifyTableNamePreservesExistingSchema(): void
+    {
+        $command = $this->makeCommand();
+        $result = self::callMethod($command, 'qualifyTableName', ['audit.logs']);
+        $this->assertSame('audit.logs', $result);
+    }
+
+    // ==================== MODE constants ====================
+
+    public function testModeConstants(): void
+    {
+        $this->assertSame('auto', WalEventDispatchCommand::MODE_AUTO);
+        $this->assertSame('advance', WalEventDispatchCommand::MODE_ADVANCE);
+        $this->assertSame('peek', WalEventDispatchCommand::MODE_PEEK);
+    }
+
+    // ==================== parseWal2jsonParam ====================
+
+    public function testParseWal2jsonParamKeyValue(): void
+    {
+        $command = $this->makeCommand();
+        $result = self::callMethod($command, 'parseWal2jsonParam', ['filter-columns=content,body']);
+        $this->assertSame(['filter-columns', 'content,body'], $result);
+    }
+
+    public function testParseWal2jsonParamKeyOnly(): void
+    {
+        $command = $this->makeCommand();
+        $result = self::callMethod($command, 'parseWal2jsonParam', ['include-lsn']);
+        $this->assertSame(['include-lsn', ''], $result);
+    }
+
+    public function testParseWal2jsonParamMultipleEquals(): void
+    {
+        $command = $this->makeCommand();
+        $result = self::callMethod($command, 'parseWal2jsonParam', ['key=a=b']);
+        $this->assertSame(['key', 'a=b'], $result);
+    }
+
+    // ==================== getCachedWal2jsonParams ====================
+
+    public function testGetCachedWal2jsonParamsReturnsCachedValue(): void
+    {
+        $command = $this->makeCommand(['--no-add-tables' => true]);
+
+        $first = self::callMethod($command, 'getCachedWal2jsonParams');
+        $second = self::callMethod($command, 'getCachedWal2jsonParams');
+        $this->assertSame($first, $second);
+
+        // 清除缓存后重新构建
+        self::setProperty($command, 'cachedWal2jsonParams', null);
+        $third = self::callMethod($command, 'getCachedWal2jsonParams');
+        $this->assertSame($first, $third);
+    }
+
+    // ==================== resolveMode ====================
+
+    public function testResolveModeWarnsOnInvalidValue(): void
+    {
+        $command = $this->makeCommand(['--mode' => 'invalid_mode']);
+        $result = self::callMethod($command, 'resolveMode');
+        $this->assertSame('advance', $result);
     }
 
     /**

@@ -716,6 +716,274 @@ PHP
             $this->assertTrue(true);
         }
 
+        // ==================== checkSlotHealth (mock connection) ====================
+
+        public function testCheckSlotHealthReturnsFalseWhenNoLag(): void
+        {
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+            };
+
+            $this->initializeCommand($command);
+
+            $command->connection = new class() {
+                public function selectOne($query, array $bindings = [], $useReadPdo = true)
+                {
+                    return (object) ['lag_bytes' => 0];
+                }
+            };
+
+            $result = self::callMethod($command, 'checkSlotHealth', ['slot_test', 100, 200]);
+            $this->assertFalse($result);
+        }
+
+        public function testCheckSlotHealthWarnsOnWarningThreshold(): void
+        {
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+            };
+
+            $this->initializeCommand($command);
+
+            $command->connection = new class() {
+                public function selectOne($query, array $bindings = [], $useReadPdo = true)
+                {
+                    return (object) ['lag_bytes' => 150 * 1024 * 1024];
+                }
+            };
+
+            $result = self::callMethod($command, 'checkSlotHealth', ['slot_test', 100, 200]);
+            $this->assertFalse($result);
+        }
+
+        public function testCheckSlotHealthReturnsTrueOnCriticalThreshold(): void
+        {
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+            };
+
+            $this->initializeCommand($command);
+
+            $command->connection = new class() {
+                public function selectOne($query, array $bindings = [], $useReadPdo = true)
+                {
+                    return (object) ['lag_bytes' => 250 * 1024 * 1024];
+                }
+            };
+
+            $result = self::callMethod($command, 'checkSlotHealth', ['slot_test', 100, 200]);
+            $this->assertTrue($result);
+        }
+
+        public function testCheckSlotHealthReturnsFalseOnQueryException(): void
+        {
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+            };
+
+            $this->initializeCommand($command);
+
+            $command->connection = new class() {
+                public function selectOne($query, array $bindings = [], $useReadPdo = true)
+                {
+                    throw new \RuntimeException('connection lost');
+                }
+            };
+
+            $result = self::callMethod($command, 'checkSlotHealth', ['slot_test', 100, 200]);
+            $this->assertFalse($result);
+        }
+
+        public function testCheckSlotHealthReturnsFalseWhenSlotNotFound(): void
+        {
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+            };
+
+            $this->initializeCommand($command);
+
+            $command->connection = new class() {
+                public function selectOne($query, array $bindings = [], $useReadPdo = true)
+                {
+                    return null;
+                }
+            };
+
+            $result = self::callMethod($command, 'checkSlotHealth', ['slot_test', 100, 200]);
+            $this->assertFalse($result);
+        }
+
+        // ==================== ensureSlotExists error paths (mock connection) ====================
+
+        public function testEnsureSlotExistsThrowsOnWrongPlugin(): void
+        {
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+            };
+
+            $this->initializeCommand($command);
+
+            $command->connection = new class() {
+                public function selectOne($query, array $bindings = [], $useReadPdo = true)
+                {
+                    return (object) ['plugin' => 'test_decoding', 'active' => false, 'active_pid' => null];
+                }
+            };
+
+            $this->expectException(\RuntimeException::class);
+            $this->expectExceptionMessage('instead of wal2json');
+
+            self::callMethod($command, 'ensureSlotExists', ['slot_test']);
+        }
+
+        public function testEnsureSlotExistsThrowsOnActiveSlotMocked(): void
+        {
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+            };
+
+            $this->initializeCommand($command);
+
+            $command->connection = new class() {
+                public function selectOne($query, array $bindings = [], $useReadPdo = true)
+                {
+                    return (object) ['plugin' => 'wal2json', 'active' => true, 'active_pid' => 12345];
+                }
+            };
+
+            $this->expectException(\RuntimeException::class);
+            $this->expectExceptionMessage('currently active');
+
+            self::callMethod($command, 'ensureSlotExists', ['slot_test']);
+        }
+
+        // ==================== pollChanges v2 format (mock connection) ====================
+
+        public function testPollChangesWithFormatVersion2(): void
+        {
+            Queue::fake();
+
+            $rows = [
+                (object) ['lsn' => '0/10', 'data' => json_encode([
+                    'action' => 'I',
+                    'table' => 'users',
+                    'columns' => [
+                        ['name' => 'id', 'type' => 'integer', 'value' => 1],
+                        ['name' => 'name', 'type' => 'text', 'value' => 'alice'],
+                    ],
+                ])],
+                (object) ['lsn' => '0/11', 'data' => json_encode([
+                    'action' => 'U',
+                    'table' => 'users',
+                    'columns' => [
+                        ['name' => 'id', 'type' => 'integer', 'value' => 1],
+                        ['name' => 'name', 'type' => 'text', 'value' => 'bob'],
+                    ],
+                ])],
+            ];
+
+            $connection = new MockCursorConnection($rows);
+
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+            };
+
+            $this->initializeCommand($command, ['--mode' => 'advance', '--format-version' => '2']);
+            $command->connection = $connection;
+
+            $handlers = [
+                'users' => [
+                    ['handler' => new DummyWalHandler(), 'keyName' => 'id'],
+                ],
+            ];
+
+            $result = self::callMethod($command, 'pollChanges', ['slot_v2', $handlers, 1000, []]);
+
+            $this->assertTrue($result);
+            Queue::assertPushed(WalChangesDispatchJob::class, 2);
+        }
+
+        // ==================== pollChanges advance mode: phantom lag advance ====================
+
+        public function testPollChangesAdvanceModeAdvancesToPrePeekLsnWhenNoChanges(): void
+        {
+            $rows = [];
+
+            $connection = new class($rows) extends MockCursorConnection {
+                public $selectOneCalls = [];
+
+                public function selectOne($query, array $bindings = [], $useReadPdo = true)
+                {
+                    $this->selectOneCalls[] = ['query' => $query, 'bindings' => $bindings];
+
+                    if (false !== strpos($query, 'pg_current_wal_lsn')) {
+                        return (object) ['lsn' => '0/ABC'];
+                    }
+
+                    return null;
+                }
+            };
+
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+            };
+
+            $this->initializeCommand($command, ['--mode' => 'advance', '--format-version' => '2']);
+            $command->connection = $connection;
+
+            $result = self::callMethod($command, 'pollChanges', ['slot_phantom', [], 1000, []]);
+
+            $this->assertFalse($result);
+            $this->assertCount(1, $connection->statements);
+            $this->assertStringContainsString('pg_replication_slot_advance', $connection->statements[0]['query']);
+            $this->assertSame(['slot_phantom', '0/ABC'], $connection->statements[0]['bindings']);
+        }
+
         private function initializeCommand(WalEventDispatchCommand $command, array $options = []): WalEventDispatchCommand
         {
             $command->setLaravel($this->app);

@@ -129,6 +129,10 @@ use Throwable;
  */
 class WalEventDispatchCommand extends Command
 {
+    const MODE_AUTO = 'auto';
+    const MODE_ADVANCE = 'advance';
+    const MODE_PEEK = 'peek';
+
     protected $signature = 'wal:event-dispatch
         {--connection= : Database connection name}
         {--slot= : Replication slot name, default: APP_NAME_APP_ENV_wal_event}
@@ -178,6 +182,27 @@ class WalEventDispatchCommand extends Command
     protected $partitionMapRefreshedAt = 0;
 
     /**
+     * 缓存的消费模式，运行时不变。
+     *
+     * @var string|null
+     */
+    protected $cachedMode;
+
+    /**
+     * 缓存的 wal2json 参数（占位符 + 绑定值），分区刷新时失效。
+     *
+     * @var array|null [string $placeholders, array $bindings]
+     */
+    protected $cachedWal2jsonParams;
+
+    /**
+     * Telescope 是否可用的缓存标记。
+     *
+     * @var bool|null
+     */
+    protected $telescopeAvailable;
+
+    /**
      * 主入口：初始化 → 主循环 → 清理退出。
      *
      * @throws Throwable
@@ -190,12 +215,16 @@ class WalEventDispatchCommand extends Command
 
         $this->ensureSlotExists($slot);
         $this->registerSignalHandlers();
+        $this->cachedMode = $this->resolveMode();
 
         $handlers = $this->discoverWalHandlers();
         $partitionMap = $this->buildPartitionMap();
         $this->partitionMapRefreshedAt = time();
 
         $handlerCount = array_sum(array_map('count', $handlers));
+        if (0 === $handlerCount) {
+            $this->warn('No WAL handlers discovered. The command will poll but no events will be dispatched.');
+        }
 
         /** 自动构建 add-tables 参数，仅输出被监听表的 WAL 变更 */
         if (!$this->option('no-add-tables')) {
@@ -297,6 +326,7 @@ class WalEventDispatchCommand extends Command
                         $this->info(sprintf('Auto add-tables updated: %s', $this->autoAddTables ?: '(none)'));
                     }
                 }
+                $this->cachedWal2jsonParams = null;
             }
 
             /** P1: 清理 Laravel 容器作用域绑定，防止长驻进程内存泄漏 */
@@ -463,18 +493,38 @@ class WalEventDispatchCommand extends Command
     }
 
     /**
-     * 获取 WAL 消费模式。
+     * 获取 WAL 消费模式（优先返回缓存值）。
      *
      * @return string auto|advance|peek
      */
     protected function getMode(): string
     {
+        if (null !== $this->cachedMode) {
+            return $this->cachedMode;
+        }
+
+        return $this->resolveMode();
+    }
+
+    /**
+     * 解析并校验 --mode 选项。无效值输出警告并回退到 advance。
+     *
+     * @return string
+     */
+    protected function resolveMode(): string
+    {
         $mode = $this->option('mode');
-        if (in_array($mode, ['auto', 'advance', 'peek'], true)) {
+        $valid = [self::MODE_AUTO, self::MODE_ADVANCE, self::MODE_PEEK];
+
+        if (in_array($mode, $valid, true)) {
             return $mode;
         }
 
-        return 'advance';
+        if (null !== $mode && '' !== $mode) {
+            $this->warn(sprintf('Invalid mode "%s", falling back to "advance". Valid modes: %s', $mode, implode(', ', $valid)));
+        }
+
+        return self::MODE_ADVANCE;
     }
 
     /**
@@ -518,7 +568,7 @@ class WalEventDispatchCommand extends Command
          * peek 结果为空时，advance 到此 LSN——peek 已确认此 LSN 之前无遗漏数据。
          */
         $prePeekLsn = null;
-        if ('advance' === $mode) {
+        if (self::MODE_ADVANCE === $mode) {
             try {
                 $row = $connection->selectOne('SELECT pg_current_wal_lsn() AS lsn', [], false);
                 $prePeekLsn = null !== $row ? $row->lsn : null;
@@ -536,9 +586,9 @@ class WalEventDispatchCommand extends Command
          *
          * 通过 Connection::cursor() 逐行读取，避免单个大事务将全部结果加载到 PHP 内存。
          */
-        list($wal2jsonPlaceholders, $wal2jsonBindings) = $this->buildWal2jsonParams();
-        $sql = sprintf('SELECT lsn, data FROM %s(?, NULL, ?%s)', $function, $wal2jsonPlaceholders);
-        $bindings = array_merge([$slot, $batch], $wal2jsonBindings);
+        $wal2json = $this->getCachedWal2jsonParams();
+        $sql = sprintf('SELECT lsn, data FROM %s(?, NULL, ?%s)', $function, $wal2json[0]);
+        $bindings = array_merge([$slot, $batch], $wal2json[1]);
 
         /**
          * 使用写连接流式读取 + 即时 dispatch。
@@ -549,7 +599,7 @@ class WalEventDispatchCommand extends Command
          * 如果 Listener 有耗时操作（HTTP 调用、外部写入），建议使用
          * --queue-connection=redis 将 dispatch 推入队列，避免长事务阻塞 VACUUM。
          */
-        $isV2 = '2' == $this->option('format-version');
+        $isV2 = 2 === intval($this->option('format-version'));
 
         $tableCounts = [];
         $dispatchCount = 0;
@@ -561,12 +611,7 @@ class WalEventDispatchCommand extends Command
             $payload = json_decode($row->data, true);
             if (!is_array($payload)) {
                 if (JSON_ERROR_NONE !== json_last_error()) {
-                    $this->warn(sprintf(
-                        'json_decode failed (LSN %s): %s, data prefix: %s',
-                        $row->lsn,
-                        json_last_error_msg(),
-                        substr($row->data, 0, 200)
-                    ));
+                    $this->warn(sprintf('json_decode failed (LSN %s): %s, data prefix: %s', $row->lsn, json_last_error_msg(), substr($row->data, 0, 200)));
                 }
                 continue;
             }
@@ -617,7 +662,7 @@ class WalEventDispatchCommand extends Command
         }
 
         /** auto/advance 模式：事件分发成功后，手动推进槽位到最后处理的 LSN */
-        if (in_array($mode, ['auto', 'advance'], true)) {
+        if (in_array($mode, [self::MODE_AUTO, self::MODE_ADVANCE], true)) {
             try {
                 $connection->statement('SELECT pg_replication_slot_advance(?, ?)', [$slot, $lastLsn]);
             } catch (Throwable $e) {
@@ -664,6 +709,20 @@ class WalEventDispatchCommand extends Command
     }
 
     /**
+     * 获取缓存的 wal2json 参数，缓存未命中时构建并缓存。
+     *
+     * @return array{string, array} [placeholders, bindings]
+     */
+    protected function getCachedWal2jsonParams()
+    {
+        if (null !== $this->cachedWal2jsonParams) {
+            return $this->cachedWal2jsonParams;
+        }
+
+        return $this->cachedWal2jsonParams = $this->buildWal2jsonParams();
+    }
+
+    /**
      * 一次性构建 wal2json 参数的 SQL 占位符和绑定值。
      *
      * 合并用户参数和自动参数，避免 collectAutoWal2jsonParams 被分别调用两次
@@ -678,9 +737,9 @@ class WalEventDispatchCommand extends Command
         $params = $this->option('wal2json-params');
         if (!empty($params)) {
             foreach ($params as $param) {
-                $parts = explode('=', $param, 2);
-                $bindings[] = $parts[0];
-                $bindings[] = $parts[1] ?? '';
+                list($key, $value) = self::parseWal2jsonParam($param);
+                $bindings[] = $key;
+                $bindings[] = $value;
             }
         }
 
@@ -696,24 +755,6 @@ class WalEventDispatchCommand extends Command
     }
 
     /**
-     * @deprecated 使用 buildWal2jsonParams() 替代
-     */
-    protected function buildWal2jsonParamPlaceholders(): string
-    {
-        list($placeholders) = $this->buildWal2jsonParams();
-        return $placeholders;
-    }
-
-    /**
-     * @deprecated 使用 buildWal2jsonParams() 替代
-     */
-    protected function buildWal2jsonParamBindings(): array
-    {
-        list(, $bindings) = $this->buildWal2jsonParams();
-        return $bindings;
-    }
-
-    /**
      * 提取用户通过 --wal2json-params 手动指定的参数 key 列表。
      *
      * 用于 collectAutoWal2jsonParams 检测冲突，避免自动参数覆盖用户的手动设置。
@@ -724,10 +765,23 @@ class WalEventDispatchCommand extends Command
     {
         $keys = [];
         foreach ($this->option('wal2json-params') ?: [] as $param) {
-            $parts = explode('=', $param, 2);
-            $keys[] = $parts[0];
+            $keys[] = self::parseWal2jsonParam($param)[0];
         }
         return $keys;
+    }
+
+    /**
+     * 解析单个 wal2json 参数字符串为 [key, value] 对。
+     *
+     * @param string $param 如 "filter-columns=content,body" 或 "include-lsn"
+     *
+     * @return array{string, string} [key, value]
+     */
+    protected static function parseWal2jsonParam($param)
+    {
+        $parts = explode('=', $param, 2);
+
+        return [$parts[0], $parts[1] ?? ''];
     }
 
     /**
@@ -911,10 +965,15 @@ class WalEventDispatchCommand extends Command
      *
      * Telescope 仅在 $app->terminating() 时刷入，长驻进程永远不会触发该事件。
      * 每次轮询成功后显式调用 store()，确保 Telescope 数据不会积压在内存中。
+     * Telescope 可用性在首次检查后缓存，避免每次轮询都走 class_exists。
      */
     protected function flushTelescopeEntries(): void
     {
-        if (!class_exists('Laravel\Telescope\Telescope')) {
+        if (null === $this->telescopeAvailable) {
+            $this->telescopeAvailable = class_exists('Laravel\Telescope\Telescope');
+        }
+
+        if (!$this->telescopeAvailable) {
             return;
         }
 
