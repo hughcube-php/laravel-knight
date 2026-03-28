@@ -2758,7 +2758,7 @@ class WalEventDispatchCommandTest extends TestCase
 
     // ==================== checkSlotHealth ====================
 
-    public function testCheckSlotHealthReturnsNullWhenBelowThreshold()
+    public function testCheckSlotHealthReturnsFalseWhenBelowThreshold()
     {
         $this->skipIfPgsqlNotConfigured();
         $this->skipIfWal2jsonNotAvailable();
@@ -2770,7 +2770,7 @@ class WalEventDispatchCommandTest extends TestCase
             self::callMethod($command, 'ensureSlotExists', [$slotName]);
 
             $result = self::callMethod($command, 'checkSlotHealth', [$slotName, 1024, 2048]);
-            $this->assertNull($result);
+            $this->assertFalse($result);
         } finally {
             try {
                 $this->app['db']->connection('pgsql')->statement(
@@ -2783,42 +2783,45 @@ class WalEventDispatchCommandTest extends TestCase
         }
     }
 
-    public function testCheckSlotHealthReturnsStopWhenCritical()
+    public function testCheckSlotHealthReturnsTrueWhenCriticalThresholdExceeded()
     {
-        $this->skipIfPgsqlNotConfigured();
-        $this->skipIfWal2jsonNotAvailable();
+        $command = new class() extends WalEventDispatchCommand {
+            public $connection;
 
-        $command = $this->makeCommand(['--connection' => 'pgsql']);
-
-        $slotName = 'knight_test_health_crit_'.time();
-        try {
-            self::callMethod($command, 'ensureSlotExists', [$slotName]);
-
-            /** 设置 critical 为 0MB 确保触发 */
-            $result = self::callMethod($command, 'checkSlotHealth', [$slotName, 0, 0]);
-            /** criticalMB=0 表示不检查，应返回 null */
-            $this->assertNull($result);
-        } finally {
-            try {
-                $this->app['db']->connection('pgsql')->statement(
-                    'SELECT pg_drop_replication_slot(?)',
-                    [$slotName]
-                );
-            } catch (\Throwable $e) {
-                // ignore
+            protected function getConnection()
+            {
+                return $this->connection;
             }
-        }
+        };
+        $command->setLaravel($this->app);
+
+        $input = new ArrayInput([], $command->getDefinition());
+        self::setProperty($command, 'input', $input);
+
+        $bufferedOutput = new BufferedOutput();
+        self::setProperty($command, 'output', new OutputStyle($input, $bufferedOutput));
+
+        $command->connection = new class() {
+            public function selectOne($query, array $bindings = [], $useReadPdo = true)
+            {
+                return (object) ['lag_bytes' => 3 * 1024 * 1024];
+            }
+        };
+
+        $result = self::callMethod($command, 'checkSlotHealth', ['slot_test', 1, 2]);
+
+        $this->assertTrue($result);
     }
 
-    public function testCheckSlotHealthWithNonExistentSlotReturnsNull()
+    public function testCheckSlotHealthWithNonExistentSlotReturnsFalse()
     {
         $this->skipIfPgsqlNotConfigured();
 
         $command = $this->makeCommand(['--connection' => 'pgsql']);
 
-        /** 不存在的 slot 查询返回 null，应安静返回 null */
+        /** 不存在的 slot 查询返回 null，应安静返回 false */
         $result = self::callMethod($command, 'checkSlotHealth', ['nonexistent_slot_xyz', 100, 200]);
-        $this->assertNull($result);
+        $this->assertFalse($result);
     }
 
     // ==================== ensureSlotExists: active slot throws ====================
