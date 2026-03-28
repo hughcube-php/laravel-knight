@@ -599,7 +599,7 @@ class WalEventDispatchCommand extends Command
          * 如果 Listener 有耗时操作（HTTP 调用、外部写入），建议使用
          * --queue-connection=redis 将 dispatch 推入队列，避免长事务阻塞 VACUUM。
          */
-        $isV2 = 2 === intval($this->option('format-version'));
+        $isV2 = '2' === $this->getEffectiveWal2jsonFormatVersion();
 
         $tableCounts = [];
         $dispatchCount = 0;
@@ -752,6 +752,26 @@ class WalEventDispatchCommand extends Command
         $placeholders = $count > 0 ? str_repeat(', ?, ?', $count) : '';
 
         return [$placeholders, $bindings];
+    }
+
+    /**
+     * 返回最终生效的 wal2json format-version。
+     *
+     * 解析逻辑必须与实际传给 wal2json 的参数保持一致，不能只看命令选项；
+     * 否则用户通过 --wal2json-params 覆盖 format-version 时，会出现
+     * “插件按 v1 输出、PHP 按 v2 解析”的分裂。
+     */
+    protected function getEffectiveWal2jsonFormatVersion(): string
+    {
+        list(, $bindings) = $this->getCachedWal2jsonParams();
+
+        for ($i = 0, $count = count($bindings); $i < $count; $i += 2) {
+            if ('format-version' === $bindings[$i]) {
+                return (string) ($bindings[$i + 1] ?? '');
+            }
+        }
+
+        return '1';
     }
 
     /**

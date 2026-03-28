@@ -541,6 +541,51 @@ PHP
             });
         }
 
+        public function testPollChangesUsesEffectiveFormatVersionFromWal2jsonParams(): void
+        {
+            Queue::fake();
+
+            $rows = [
+                (object) ['lsn' => '0/A1', 'data' => json_encode(['change' => [
+                    ['kind' => 'update', 'table' => 'users', 'columnnames' => ['id'], 'columnvalues' => [13]],
+                ]])],
+            ];
+
+            $connection = new MockCursorConnection($rows);
+
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+            };
+
+            $this->initializeCommand($command, [
+                '--mode' => 'advance',
+                '--wal2json-params' => ['format-version=1'],
+            ]);
+            $command->connection = $connection;
+
+            $handlers = [
+                'users' => [
+                    ['handler' => new DummyWalHandler(), 'keyName' => 'id'],
+                ],
+            ];
+
+            $result = self::callMethod($command, 'pollChanges', ['slot_test_format_override', $handlers, 1000, []]);
+
+            $this->assertTrue($result);
+            $this->assertCount(1, $connection->cursorCalls);
+            $this->assertSame('format-version', $connection->cursorCalls[0]['bindings'][2]);
+            $this->assertSame('1', $connection->cursorCalls[0]['bindings'][3]);
+            Queue::assertPushed(WalChangesDispatchJob::class, 1);
+            Queue::assertPushed(WalChangesDispatchJob::class, function (WalChangesDispatchJob $job) {
+                return $job->getRecord()->getId() == 13;
+            });
+        }
+
         public function testPollChangesInPeekModeDoesNotAdvanceSlot(): void
         {
             Queue::fake();
