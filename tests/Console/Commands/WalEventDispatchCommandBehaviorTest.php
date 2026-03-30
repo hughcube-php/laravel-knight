@@ -988,6 +988,253 @@ PHP
             Queue::assertPushed(WalChangesDispatchJob::class, 2);
         }
 
+        // ==================== dispatchWalChange: queue connection/queue options ====================
+
+        public function testDispatchWalChangeSetsQueueConnectionAndQueue(): void
+        {
+            Queue::fake();
+
+            $rows = [
+                (object) ['lsn' => '0/Q1', 'data' => json_encode(['change' => [
+                    ['kind' => 'insert', 'table' => 'users', 'columnnames' => ['id'], 'columnvalues' => [99]],
+                ]])],
+            ];
+
+            $connection = new MockCursorConnection($rows);
+
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+            };
+
+            $this->initializeCommand($command, [
+                '--mode' => 'advance',
+                '--format-version' => '1',
+                '--queue-connection' => 'redis',
+                '--queue' => 'wal-events',
+            ]);
+            $command->connection = $connection;
+
+            $handlers = [
+                'users' => [
+                    ['handler' => new DummyWalHandler(), 'keyName' => 'id'],
+                ],
+            ];
+
+            self::callMethod($command, 'pollChanges', ['slot_queue', $handlers, 1000, []]);
+
+            Queue::assertPushed(WalChangesDispatchJob::class, function (WalChangesDispatchJob $job) {
+                return $job->connection === 'redis' && $job->queue === 'wal-events';
+            });
+        }
+
+        // ==================== flushTelescopeEntries: store exception path ====================
+
+        public function testFlushTelescopeEntriesHandlesStoreException(): void
+        {
+            /** 绑定一个假的 EntriesRepository 以确保 app() 调用不会先于 store() 抛异常 */
+            $this->app->bind('Laravel\Telescope\Contracts\EntriesRepository', function () {
+                return new \stdClass();
+            });
+
+            $command = new class() extends WalEventDispatchCommand {
+                protected function getTelescopeClass()
+                {
+                    return TestFakeTelescope::class;
+                }
+            };
+
+            $this->initializeCommand($command);
+
+            TestFakeTelescope::$recording = true;
+            TestFakeTelescope::$storeCalled = false;
+            TestFakeTelescope::$storeThrows = true;
+
+            /** store() 抛异常不应传播，flushTelescopeEntries 应静默处理 */
+            self::callMethod($command, 'flushTelescopeEntries');
+            $this->assertTrue(TestFakeTelescope::$storeCalled);
+        }
+
+        public function testFlushTelescopeEntriesHandlesAppResolveException(): void
+        {
+            /**
+             * 不绑定 EntriesRepository → app() 抛异常。
+             * flushTelescopeEntries 的 catch(Throwable) 应静默处理。
+             */
+            $command = new class() extends WalEventDispatchCommand {
+                protected function getTelescopeClass()
+                {
+                    return TestFakeTelescope::class;
+                }
+            };
+
+            $this->initializeCommand($command);
+
+            TestFakeTelescope::$recording = true;
+            TestFakeTelescope::$storeCalled = false;
+            TestFakeTelescope::$storeThrows = false;
+
+            /** 不应抛出异常 */
+            self::callMethod($command, 'flushTelescopeEntries');
+            /** store() 不会被调用到（app() 先异常） */
+            $this->assertFalse(TestFakeTelescope::$storeCalled);
+        }
+
+        public function testFlushTelescopeEntriesSkipsWhenNotRecording(): void
+        {
+            $command = new class() extends WalEventDispatchCommand {
+                protected function getTelescopeClass()
+                {
+                    return TestFakeTelescope::class;
+                }
+            };
+
+            $this->initializeCommand($command);
+
+            TestFakeTelescope::$recording = false;
+            TestFakeTelescope::$storeCalled = false;
+
+            self::callMethod($command, 'flushTelescopeEntries');
+            $this->assertFalse(TestFakeTelescope::$storeCalled);
+        }
+
+        // ==================== handle: memory exceeded triggers exit ====================
+
+        public function testHandleExitsWhenMemoryExceeded(): void
+        {
+            $command = new TestableWalMemoryExceededCommand();
+            $command->handlers = [
+                'users' => [['handler' => new DummyWalHandler(), 'keyName' => 'id']],
+            ];
+            $command->pollReturn = false;
+            $command->exceptionHandler = $this->createMock(ExceptionHandler::class);
+
+            WalEventDispatchCommandRuntimeState::$mockSleep = true;
+
+            $this->initializeCommand($command, [
+                '--interval' => '0.1',
+                '--batch' => '10',
+                '--memory' => '1',
+            ]);
+
+            $command->handle();
+
+            /** 应该只有 1 次 pollChanges 调用后即因内存超限退出 */
+            $pollCalls = array_filter($command->calls, static function ($call) {
+                return $call[0] === 'pollChanges';
+            });
+            $this->assertCount(1, $pollCalls);
+            $this->assertTrue($command->memoryExitTriggered);
+        }
+
+        // ==================== handle: partition refresh updates add-tables ====================
+
+        public function testHandleRefreshesPartitionMapOnInterval(): void
+        {
+            $command = new TestableWalPartitionRefreshCommand();
+            $command->handlers = [
+                'orders' => [['handler' => new DummyWalHandler(), 'keyName' => 'id']],
+            ];
+            $command->pollReturn = false;
+            $command->exceptionHandler = $this->createMock(ExceptionHandler::class);
+
+            WalEventDispatchCommandRuntimeState::$mockSleep = true;
+
+            $this->initializeCommand($command, [
+                '--interval' => '0.1',
+                '--batch' => '10',
+                '--partition-refresh' => '1',
+            ]);
+
+            /** 让 partitionMapRefreshedAt 在过去以触发刷新 */
+            self::setProperty($command, 'partitionMapRefreshedAt', time() - 10);
+
+            $command->handle();
+
+            $this->assertTrue($command->partitionMapRebuilt, 'Partition map should be rebuilt on refresh interval');
+        }
+
+        // ==================== handle: slot-lag-critical triggers exit ====================
+
+        public function testHandleExitsOnSlotLagCritical(): void
+        {
+            $command = new TestableWalSlotLagCommand();
+            $command->handlers = [
+                'users' => [['handler' => new DummyWalHandler(), 'keyName' => 'id']],
+            ];
+            $command->pollReturn = false;
+            $command->exceptionHandler = $this->createMock(ExceptionHandler::class);
+            $command->slotHealthReturnsTrue = true;
+
+            WalEventDispatchCommandRuntimeState::$mockSleep = true;
+
+            $this->initializeCommand($command, [
+                '--interval' => '0.1',
+                '--batch' => '10',
+                '--slot-lag-critical' => '100',
+            ]);
+
+            $command->handle();
+
+            /** checkSlotHealth 返回 true 时应立即停止，不调用 pollChanges */
+            $pollCalls = array_filter($command->calls, static function ($call) {
+                return $call[0] === 'pollChanges';
+            });
+            $this->assertCount(0, $pollCalls);
+            $this->assertTrue($command->slotHealthChecked);
+        }
+
+        // ==================== advanceSlot: extracted method ====================
+
+        public function testAdvanceSlotCallsStatementCorrectly(): void
+        {
+            $connection = new MockCursorConnection([]);
+
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+            };
+
+            $this->initializeCommand($command);
+            $command->connection = $connection;
+
+            self::callMethod($command, 'advanceSlot', [$connection, 'test_slot', '0/FF']);
+
+            $this->assertCount(1, $connection->statements);
+            $this->assertStringContainsString('pg_replication_slot_advance', $connection->statements[0]['query']);
+            $this->assertSame(['test_slot', '0/FF'], $connection->statements[0]['bindings']);
+        }
+
+        public function testAdvanceSlotSilencesException(): void
+        {
+            $connection = new MockCursorConnection([]);
+            $connection->advanceThrows = true;
+
+            $command = new class() extends WalEventDispatchCommand {
+                public $connection;
+
+                protected function getConnection()
+                {
+                    return $this->connection;
+                }
+            };
+
+            $this->initializeCommand($command);
+            $command->connection = $connection;
+
+            /** 不应抛出异常 */
+            self::callMethod($command, 'advanceSlot', [$connection, 'test_slot', '0/FF']);
+            $this->assertTrue(true);
+        }
+
         // ==================== pollChanges advance mode: phantom lag advance ====================
 
         public function testPollChangesAdvanceModeAdvancesToPrePeekLsnWhenNoChanges(): void
@@ -1226,6 +1473,88 @@ PHP
 
         public function onKnightModelChanged(): void
         {
+        }
+    }
+
+    class TestFakeTelescope
+    {
+        public static $recording = true;
+        public static $storeCalled = false;
+        public static $storeThrows = false;
+
+        public static function isRecording()
+        {
+            return static::$recording;
+        }
+
+        public static function store($repository)
+        {
+            static::$storeCalled = true;
+            if (static::$storeThrows) {
+                throw new \RuntimeException('telescope store failed');
+            }
+        }
+    }
+
+    class TestableWalMemoryExceededCommand extends TestableWalEventDispatchCommand
+    {
+        public bool $memoryExitTriggered = false;
+
+        protected function pollChanges(string $slot, array $handlers, int $batch, array $partitionMap): bool
+        {
+            $this->calls[] = ['pollChanges', $slot, $batch, count($handlers), count($partitionMap)];
+
+            return $this->pollReturn;
+        }
+
+        protected function isMemoryExceeded($memoryLimit): bool
+        {
+            $this->memoryExitTriggered = true;
+
+            return true;
+        }
+    }
+
+    class TestableWalPartitionRefreshCommand extends TestableWalEventDispatchCommand
+    {
+        public bool $partitionMapRebuilt = false;
+
+        protected function pollChanges(string $slot, array $handlers, int $batch, array $partitionMap): bool
+        {
+            $this->calls[] = ['pollChanges', $slot, $batch, count($handlers), count($partitionMap)];
+
+            /** 第一次 poll 后停止 */
+            $this->shouldRun = false;
+
+            return $this->pollReturn;
+        }
+
+        protected function buildPartitionMap(): array
+        {
+            $this->partitionMapRebuilt = true;
+
+            return [];
+        }
+    }
+
+    class TestableWalSlotLagCommand extends TestableWalEventDispatchCommand
+    {
+        public bool $slotHealthReturnsTrue = false;
+        public bool $slotHealthChecked = false;
+
+        protected function pollChanges(string $slot, array $handlers, int $batch, array $partitionMap): bool
+        {
+            $this->calls[] = ['pollChanges', $slot, $batch, count($handlers), count($partitionMap)];
+            $this->shouldRun = false;
+
+            return $this->pollReturn;
+        }
+
+        protected function checkSlotHealth($slot, $warningMB = 0, $criticalMB = 0)
+        {
+            $this->slotHealthChecked = true;
+
+            return $this->slotHealthReturnsTrue;
         }
     }
 

@@ -647,11 +647,7 @@ class WalEventDispatchCommand extends Command
         /** 无变更：advance 模式下推进到 prePeekLsn 消除幻影滞后 */
         if (null === $lastLsn) {
             if (null !== $prePeekLsn) {
-                try {
-                    $connection->statement('SELECT pg_replication_slot_advance(?, ?)', [$slot, $prePeekLsn]);
-                } catch (Throwable $e) {
-                    /** best-effort */
-                }
+                $this->advanceSlot($connection, $slot, $prePeekLsn);
             }
 
             return false;
@@ -663,12 +659,7 @@ class WalEventDispatchCommand extends Command
 
         /** auto/advance 模式：事件分发成功后，手动推进槽位到最后处理的 LSN */
         if (in_array($mode, [self::MODE_AUTO, self::MODE_ADVANCE], true)) {
-            try {
-                $connection->statement('SELECT pg_replication_slot_advance(?, ?)', [$slot, $lastLsn]);
-            } catch (Throwable $e) {
-                /** 槽位可能已被其他进程推进，可安全忽略 */
-                $this->warn(sprintf('Slot advance warning (LSN %s): %s', $lastLsn, $e->getMessage()));
-            }
+            $this->advanceSlot($connection, $slot, $lastLsn);
         }
 
         return $dispatchCount > 0;
@@ -847,6 +838,22 @@ class WalEventDispatchCommand extends Command
         }
 
         return implode(',', array_map([$this, 'qualifyTableName'], $allTables));
+    }
+
+    /**
+     * 推进复制槽到指定 LSN，失败时仅记录警告不中断流程。
+     *
+     * @param Connection $connection
+     * @param string $slot
+     * @param string $lsn
+     */
+    protected function advanceSlot($connection, $slot, $lsn): void
+    {
+        try {
+            $connection->statement('SELECT pg_replication_slot_advance(?, ?)', [$slot, $lsn]);
+        } catch (Throwable $e) {
+            $this->warn(sprintf('Slot advance warning (LSN %s): %s', $lsn, $e->getMessage()));
+        }
     }
 
     /**
