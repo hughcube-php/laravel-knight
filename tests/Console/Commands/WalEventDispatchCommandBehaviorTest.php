@@ -1237,6 +1237,108 @@ PHP
 
         // ==================== pollChanges advance mode: phantom lag advance ====================
 
+        public function testHandleDropsAndRecreatesSlotOnWalSegmentRemoved(): void
+        {
+            $exceptionHandler = $this->createMock(ExceptionHandler::class);
+            $exceptionHandler->expects($this->once())->method('report');
+
+            $mockConnection = new MockCursorConnection([]);
+
+            $command = new TestableWalSegmentRemovedCommand();
+            $command->handlers = [];
+            $command->pollThrowable = new \RuntimeException('ERROR: requested WAL segment 00000001000000000000000A has already been removed');
+            $command->exceptionHandler = $exceptionHandler;
+            $command->connection = $mockConnection;
+
+            WalEventDispatchCommandRuntimeState::$mockSleep = true;
+
+            $this->initializeCommand($command, [
+                '--interval' => '0.1',
+                '--batch'    => '10',
+            ]);
+
+            $command->handle();
+
+            /** 验证 drop slot 被调用 */
+            $dropCalls = array_filter($mockConnection->statements, static function ($s) {
+                return false !== strpos($s['query'], 'pg_drop_replication_slot');
+            });
+            $this->assertCount(1, $dropCalls, 'pg_drop_replication_slot should be called once');
+
+            /** 验证 ensureSlotExists 在 error path 中被调用（startup + error recovery = 2） */
+            $ensureCalls = array_filter($command->calls, static function ($call) {
+                return $call[0] === 'ensureSlotExists';
+            });
+            $this->assertCount(2, $ensureCalls, 'ensureSlotExists should be called at startup and after drop');
+        }
+
+        public function testHandleSkipsEnsureSlotWhenDropFailsOnWalSegmentRemoved(): void
+        {
+            $exceptionHandler = $this->createMock(ExceptionHandler::class);
+            $exceptionHandler->expects($this->once())->method('report');
+
+            $mockConnection = new class([]) extends MockCursorConnection {
+                public function statement($query, array $bindings = [])
+                {
+                    $this->statements[] = ['query' => $query, 'bindings' => $bindings];
+                    if (false !== strpos($query, 'pg_drop_replication_slot')) {
+                        throw new \RuntimeException('slot is active');
+                    }
+                    return true;
+                }
+            };
+
+            $command = new TestableWalSegmentRemovedCommand();
+            $command->handlers = [];
+            $command->pollThrowable = new \RuntimeException('ERROR: requested WAL segment has already been removed');
+            $command->exceptionHandler = $exceptionHandler;
+            $command->connection = $mockConnection;
+
+            WalEventDispatchCommandRuntimeState::$mockSleep = true;
+
+            $this->initializeCommand($command, [
+                '--interval' => '0.1',
+                '--batch'    => '10',
+            ]);
+
+            $command->handle();
+
+            /** drop 失败后应跳过 ensureSlotExists，只有 startup 时的 1 次调用 */
+            $ensureCalls = array_filter($command->calls, static function ($call) {
+                return $call[0] === 'ensureSlotExists';
+            });
+            $this->assertCount(1, $ensureCalls, 'ensureSlotExists should only be called at startup when drop fails');
+        }
+
+        public function testHandleNonWalSegmentErrorDoesNotDropSlot(): void
+        {
+            $exceptionHandler = $this->createMock(ExceptionHandler::class);
+            $exceptionHandler->expects($this->once())->method('report');
+
+            $mockConnection = new MockCursorConnection([]);
+
+            $command = new TestableWalSegmentRemovedCommand();
+            $command->handlers = [];
+            $command->pollThrowable = new \RuntimeException('connection reset by peer');
+            $command->exceptionHandler = $exceptionHandler;
+            $command->connection = $mockConnection;
+
+            WalEventDispatchCommandRuntimeState::$mockSleep = true;
+
+            $this->initializeCommand($command, [
+                '--interval' => '0.1',
+                '--batch'    => '10',
+            ]);
+
+            $command->handle();
+
+            /** 普通错误不应调用 pg_drop_replication_slot */
+            $dropCalls = array_filter($mockConnection->statements, static function ($s) {
+                return false !== strpos($s['query'], 'pg_drop_replication_slot');
+            });
+            $this->assertCount(0, $dropCalls, 'pg_drop_replication_slot should NOT be called for non-WAL-segment errors');
+        }
+
         public function testPollChangesAdvanceModeAdvancesToPrePeekLsnWhenNoChanges(): void
         {
             $rows = [];
@@ -1534,6 +1636,32 @@ PHP
             $this->partitionMapRebuilt = true;
 
             return [];
+        }
+    }
+
+    class TestableWalSegmentRemovedCommand extends TestableWalEventDispatchCommand
+    {
+        private int $pollAttempt = 0;
+
+        protected function pollChanges(string $slot, array $handlers, int $batch, array $partitionMap): bool
+        {
+            $this->pollAttempt++;
+            $this->calls[] = ['pollChanges', $slot, $batch, count($handlers), count($partitionMap)];
+
+            if ($this->pollAttempt === 1 && $this->pollThrowable !== null) {
+                throw $this->pollThrowable;
+            }
+
+            /** 第二次 poll 正常返回并停止 */
+            $this->shouldRun = false;
+
+            return false;
+        }
+
+        protected function reconnectDatabase(): void
+        {
+            $this->reconnectCalled = true;
+            /** 不设置 shouldRun = false，让 handle() 继续走 WAL segment 检测 + ensureSlotExists 逻辑 */
         }
     }
 

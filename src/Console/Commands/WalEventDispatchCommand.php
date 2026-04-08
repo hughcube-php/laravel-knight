@@ -291,6 +291,36 @@ class WalEventDispatchCommand extends Command
                 $this->getExceptionHandler()->report($e);
                 $this->reconnectDatabase();
 
+                /**
+                 * WAL 段文件已被删除（PG 或 RDS WAL 保留策略回收），
+                 * 复制槽的 restart_lsn 指向的 WAL 不存在，无法恢复。
+                 * 删除旧槽，让 ensureSlotExists 从当前 LSN 重建。
+                 * 会丢失旧槽 restart_lsn 到当前 LSN 之间的 WAL 事件。
+                 */
+                if ($this->isWalSegmentRemovedError($e)) {
+                    $this->warn(sprintf(
+                        'WAL segment removed for slot [%s], dropping and recreating from current LSN. '
+                        . 'WAL events between old restart_lsn and now are lost.',
+                        $slot
+                    ));
+                    try {
+                        $this->getConnection()->statement('SELECT pg_drop_replication_slot(?)', [$slot]);
+                        $this->info(sprintf('Slot [%s] dropped due to WAL segment removal', $slot));
+                    } catch (Throwable $de) {
+                        $this->error(sprintf('Failed to drop slot [%s]: %s', $slot, $de->getMessage()));
+                        /** drop 失败意味着旧槽仍在，ensureSlotExists 会静默跳过，slot 不会被修复 */
+                        $this->error('Slot drop failed, skipping re-create to avoid masking the issue');
+
+                        if ($maxErrors > 0 && $this->errorStreak >= $maxErrors) {
+                            $this->error(sprintf('Consecutive errors reached limit (%d), stopping...', $maxErrors));
+                            break;
+                        }
+
+                        usleep(intval($backoff * 1000000));
+                        continue;
+                    }
+                }
+
                 try {
                     $this->ensureSlotExists($slot);
                 } catch (Throwable $re) {
@@ -1103,6 +1133,21 @@ class WalEventDispatchCommand extends Command
         if (method_exists($this->getLaravel(), 'forgetScopedInstances')) {
             $this->getLaravel()->forgetScopedInstances();
         }
+    }
+
+    /**
+     * 检测是否为 WAL 段文件已被删除的错误。
+     *
+     * PostgreSQL 错误码 58P01 (Undefined File) + 消息包含 "has already been removed"。
+     * 阿里云 RDS 的 WAL 保留策略可能在复制槽消费前删除 WAL 段文件，
+     * 导致 peek_changes/get_changes 无法读取，此时需要重建复制槽。
+     */
+    protected function isWalSegmentRemovedError(Throwable $e): bool
+    {
+        $message = $e->getMessage();
+
+        return false !== stripos($message, 'has already been removed')
+            || (false !== stripos($message, '58P01') && false !== stripos($message, 'WAL segment'));
     }
 
     /**

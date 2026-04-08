@@ -2936,6 +2936,50 @@ class WalEventDispatchCommandTest extends TestCase
         $this->assertSame($first, $third);
     }
 
+    // ==================== isWalSegmentRemovedError ====================
+
+    public function testIsWalSegmentRemovedErrorWithHasAlreadyBeenRemoved(): void
+    {
+        $command = $this->makeCommand();
+        $e = new \RuntimeException('ERROR: requested WAL segment 00000001000000000000000A has already been removed');
+        $this->assertTrue(self::callMethod($command, 'isWalSegmentRemovedError', [$e]));
+    }
+
+    public function testIsWalSegmentRemovedErrorWith58P01AndWalSegment(): void
+    {
+        $command = $this->makeCommand();
+        $e = new \RuntimeException('SQLSTATE[58P01]: Undefined file: WAL segment "00000001000000000000000A" does not exist');
+        $this->assertTrue(self::callMethod($command, 'isWalSegmentRemovedError', [$e]));
+    }
+
+    public function testIsWalSegmentRemovedErrorCaseInsensitive(): void
+    {
+        $command = $this->makeCommand();
+        $e = new \RuntimeException('ERROR: requested WAL segment Has Already Been Removed');
+        $this->assertTrue(self::callMethod($command, 'isWalSegmentRemovedError', [$e]));
+    }
+
+    public function testIsWalSegmentRemovedErrorReturnsFalseForUnrelatedError(): void
+    {
+        $command = $this->makeCommand();
+        $e = new \RuntimeException('connection reset by peer');
+        $this->assertFalse(self::callMethod($command, 'isWalSegmentRemovedError', [$e]));
+    }
+
+    public function testIsWalSegmentRemovedErrorReturnsFalseFor58P01WithoutWalSegment(): void
+    {
+        $command = $this->makeCommand();
+        $e = new \RuntimeException('SQLSTATE[58P01]: Undefined file: some other file missing');
+        $this->assertFalse(self::callMethod($command, 'isWalSegmentRemovedError', [$e]));
+    }
+
+    public function testIsWalSegmentRemovedErrorReturnsFalseForEmptyMessage(): void
+    {
+        $command = $this->makeCommand();
+        $e = new \RuntimeException('');
+        $this->assertFalse(self::callMethod($command, 'isWalSegmentRemovedError', [$e]));
+    }
+
     // ==================== resolveMode ====================
 
     public function testResolveModeWarnsOnInvalidValue(): void
