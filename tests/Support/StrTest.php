@@ -14,6 +14,72 @@ use HughCube\Laravel\Knight\Tests\TestCase;
 
 class StrTest extends TestCase
 {
+    public function testStripAllSpaces()
+    {
+        // null 输入返回 null
+        $this->assertNull(Str::stripAllSpaces(null));
+
+        // 空字符串保持空字符串
+        $this->assertSame('', Str::stripAllSpaces(''));
+
+        // 半角空格 (首尾 + 中间)
+        $this->assertSame('张三', Str::stripAllSpaces('张 三'));
+        $this->assertSame('张三', Str::stripAllSpaces(' 张三 '));
+        $this->assertSame('张三', Str::stripAllSpaces('  张  三  '));
+
+        // 全角空格 U+3000
+        $this->assertSame('张三', Str::stripAllSpaces("张\u{3000}三"));
+        $this->assertSame('张三', Str::stripAllSpaces("\u{3000}张三\u{3000}"));
+
+        // NBSP U+00A0 (Word/网页复制常见)
+        $this->assertSame('张三', Str::stripAllSpaces("张\u{00A0}三"));
+
+        // ZWSP U+200B
+        $this->assertSame('张三', Str::stripAllSpaces("张\u{200B}三"));
+
+        // BOM / ZWNBSP U+FEFF
+        $this->assertSame('张三', Str::stripAllSpaces("\u{FEFF}张三"));
+
+        // 制表符/换行/回车
+        $this->assertSame('张三', Str::stripAllSpaces("张\t三"));
+        $this->assertSame('张三', Str::stripAllSpaces("张\n三"));
+        $this->assertSame('张三', Str::stripAllSpaces("张\r三"));
+        $this->assertSame('张三', Str::stripAllSpaces("张\r\n三"));
+
+        // 其他 Unicode 细空格
+        $this->assertSame('张三', Str::stripAllSpaces("张\u{202F}三")); // NARROW NO-BREAK SPACE
+        $this->assertSame('张三', Str::stripAllSpaces("张\u{205F}三")); // MEDIUM MATHEMATICAL SPACE
+        $this->assertSame('张三', Str::stripAllSpaces("张\u{2000}三")); // EN QUAD
+        $this->assertSame('张三', Str::stripAllSpaces("张\u{2009}三")); // THIN SPACE
+        $this->assertSame('张三', Str::stripAllSpaces("张\u{1680}三")); // OGHAM SPACE MARK
+        $this->assertSame('张三', Str::stripAllSpaces("张\u{2060}三")); // WORD JOINER
+
+        // 混合多种空白
+        $this->assertSame('张三丰', Str::stripAllSpaces("张\u{3000}三\u{00A0}丰"));
+        $this->assertSame('abc', Str::stripAllSpaces(" a \t b\nc\u{3000}"));
+
+        // 纯空白字符串
+        $this->assertSame('', Str::stripAllSpaces("   \t\n\u{3000}\u{00A0}"));
+
+        // 不含空白的字符串保持不变
+        $this->assertSame('张三', Str::stripAllSpaces('张三'));
+        $this->assertSame('abc', Str::stripAllSpaces('abc'));
+
+        // 保留 ZWNJ (U+200C) 和 ZWJ (U+200D) — 对波斯/印地语有语义
+        $this->assertSame("می\u{200C}خواهم", Str::stripAllSpaces("می\u{200C}خواهم"));
+        $this->assertSame("क\u{200D}ष", Str::stripAllSpaces("क\u{200D}ष"));
+
+        // 企业名称场景
+        $this->assertSame('某某某有限公司', Str::stripAllSpaces('某某某 有限公司'));
+        $this->assertSame('某某某有限公司', Str::stripAllSpaces("某某某\u{3000}有限公司"));
+
+        // UTF-8 异常输入不抛异常, 且不会被静默清空
+        $invalid = "\xff张 三";
+        $result = Str::stripAllSpaces($invalid);
+        $this->assertIsString($result);
+        $this->assertNotSame('', $result);
+    }
+
     public function testCountCommonChars()
     {
         $this->assertSame(Str::countCommonChars('我喜欢编程', '编程让我快乐'), 3);

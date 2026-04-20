@@ -45,6 +45,60 @@ class Str extends \Illuminate\Support\Str
     }
 
     /**
+     * 去除字符串中所有无语义的空白/不可见字符.
+     *
+     * 删除范围(显式白名单):
+     *   U+0009-U+000D  HT/LF/VT/FF/CR
+     *   U+0020          半角空格
+     *   U+0085          NEL
+     *   U+00A0          NBSP
+     *   U+1680          OGHAM SPACE MARK
+     *   U+2000-U+200B   EN/EM QUAD..ZWSP (不含 ZWNJ U+200C, ZWJ U+200D)
+     *   U+2028          LINE SEPARATOR
+     *   U+2029          PARAGRAPH SEPARATOR
+     *   U+202F          NARROW NO-BREAK SPACE
+     *   U+205F          MEDIUM MATHEMATICAL SPACE
+     *   U+2060          WORD JOINER
+     *   U+3000          全角空格
+     *   U+FEFF          BOM / ZWNBSP
+     *
+     * 保留: ZWNJ/ZWJ (印地/波斯/emoji 连字符), 双向控制字符, 阿拉伯格式字符.
+     *
+     * @param string|null $value
+     * @return string|null
+     */
+    public static function stripAllSpaces(?string $value): ?string
+    {
+        if (null === $value) {
+            return null;
+        }
+
+        if ('' === $value) {
+            return '';
+        }
+
+        $pattern = '/['
+            .'\x{0009}-\x{000D}'
+            .'\x{0020}'
+            .'\x{0085}'
+            .'\x{00A0}'
+            .'\x{1680}'
+            .'\x{2000}-\x{200B}'
+            .'\x{2028}\x{2029}'
+            .'\x{202F}'
+            .'\x{205F}'
+            .'\x{2060}'
+            .'\x{3000}'
+            .'\x{FEFF}'
+            .']+/u';
+
+        $result = preg_replace($pattern, '', $value);
+
+        // UTF-8 异常时 preg_replace 返回 null, 降级只去半角空格, 保留原数据而不是清空
+        return null === $result ? strtr($value, [' ' => '']) : $result;
+    }
+
+    /**
      * 判断一个字符串的编码是否为UTF-8.
      */
     public static function isUtf8($string): bool
