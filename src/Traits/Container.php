@@ -98,9 +98,14 @@ trait Container
         return true == $this->getContainerConfig('app.debug');
     }
 
+    protected function getContainerEnv(): string
+    {
+        return strval($this->getContainerConfig('app.env', 'production'));
+    }
+
     protected function isContainerEnv($env): bool
     {
-        return $env === $this->getContainerConfig('app.env', 'production');
+        return $env === $this->getContainerEnv();
     }
 
     protected function isContainerLocalEnv(): bool
