@@ -73,11 +73,42 @@ class StrTest extends TestCase
         $this->assertSame('某某某有限公司', Str::stripAllSpaces('某某某 有限公司'));
         $this->assertSame('某某某有限公司', Str::stripAllSpaces("某某某\u{3000}有限公司"));
 
+        // SOFT HYPHEN U+00AD (0宽, 隐身字符)
+        $this->assertSame('张三', Str::stripAllSpaces("张\u{00AD}三"));
+        $this->assertSame('admin', Str::stripAllSpaces("ad\u{00AD}min"));
+
+        // COMBINING GRAPHEME JOINER U+034F (0宽)
+        $this->assertSame('张三', Str::stripAllSpaces("张\u{034F}三"));
+
+        // MONGOLIAN VOWEL SEPARATOR U+180E (Unicode 6.3 起为 format)
+        $this->assertSame('张三', Str::stripAllSpaces("张\u{180E}三"));
+
+        // HANGUL FILLER U+3164 (视觉零宽, 常用于绕过过滤器)
+        $this->assertSame('admin', Str::stripAllSpaces("ad\u{3164}min"));
+        // 真·韩文姓名 (Hangul 字母 U+AC00-D7A3) 应完全保留
+        $this->assertSame('김정일', Str::stripAllSpaces('김정일'));
+
+        // BRAILLE PATTERN BLANK U+2800 (视觉零宽)
+        $this->assertSame('admin', Str::stripAllSpaces("ad\u{2800}min"));
+        // 其他盲文字符 (有实际点阵内容) 不受影响
+        $this->assertSame("\u{2801}\u{28FF}", Str::stripAllSpaces("\u{2801}\u{28FF}"));
+
+        // 变体选择符 U+FE0F 必须保留 (emoji 彩色变体依赖它)
+        $this->assertSame("❤\u{FE0F}", Str::stripAllSpaces("❤\u{FE0F}"));
+
+        // BIDI 控制字符必须保留 (阿拉伯/希伯来脚本依赖)
+        $this->assertSame("\u{200E}abc", Str::stripAllSpaces("\u{200E}abc"));
+        $this->assertSame("\u{202A}abc\u{202C}", Str::stripAllSpaces("\u{202A}abc\u{202C}"));
+
         // UTF-8 异常输入不抛异常, 且不会被静默清空
         $invalid = "\xff张 三";
         $result = Str::stripAllSpaces($invalid);
         $this->assertIsString($result);
         $this->assertNotSame('', $result);
+
+        // 降级路径应清理 ASCII 范围内所有空白 (不仅是半角空格)
+        $invalidWithTab = "\xff张\t三\n";
+        $this->assertSame("\xff张三", Str::stripAllSpaces($invalidWithTab));
     }
 
     public function testCountCommonChars()

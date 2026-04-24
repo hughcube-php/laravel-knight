@@ -52,17 +52,26 @@ class Str extends \Illuminate\Support\Str
      *   U+0020          半角空格
      *   U+0085          NEL
      *   U+00A0          NBSP
+     *   U+00AD          SOFT HYPHEN (0宽, 常被用于钓鱼/绕过敏感词)
+     *   U+034F          COMBINING GRAPHEME JOINER (0宽, 正常业务几乎不用)
      *   U+1680          OGHAM SPACE MARK
+     *   U+180E          MONGOLIAN VOWEL SEPARATOR (Unicode 6.3 起为 format, 无视觉宽度)
      *   U+2000-U+200B   EN/EM QUAD..ZWSP (不含 ZWNJ U+200C, ZWJ U+200D)
      *   U+2028          LINE SEPARATOR
      *   U+2029          PARAGRAPH SEPARATOR
      *   U+202F          NARROW NO-BREAK SPACE
      *   U+205F          MEDIUM MATHEMATICAL SPACE
      *   U+2060          WORD JOINER
+     *   U+2800          BRAILLE PATTERN BLANK (视觉零宽, 常用于绕过过滤器)
      *   U+3000          全角空格
+     *   U+3164          HANGUL FILLER (视觉零宽, 常用于绕过过滤器; 合法韩文使用真·Hangul 字母)
      *   U+FEFF          BOM / ZWNBSP
      *
-     * 保留: ZWNJ/ZWJ (印地/波斯/emoji 连字符), 双向控制字符, 阿拉伯格式字符.
+     * 保留: ZWNJ/ZWJ (印地/波斯/emoji 连字符), 双向控制字符, 阿拉伯格式字符, 变体选择符.
+     *
+     * 注意: 本方法只做"空白/不可见字符"剥离, 不做 Unicode 规范化.
+     * 做姓名/邮箱等相等性比对前, 调用方应自行 Normalizer::normalize($s, Normalizer::FORM_C),
+     * 否则 "é" (U+00E9) 与 "é" (U+0065 U+0301) 会被判为不等.
      *
      * @param string|null $value
      * @return string|null
@@ -82,20 +91,26 @@ class Str extends \Illuminate\Support\Str
             .'\x{0020}'
             .'\x{0085}'
             .'\x{00A0}'
+            .'\x{00AD}'
+            .'\x{034F}'
             .'\x{1680}'
+            .'\x{180E}'
             .'\x{2000}-\x{200B}'
             .'\x{2028}\x{2029}'
             .'\x{202F}'
             .'\x{205F}'
             .'\x{2060}'
+            .'\x{2800}'
             .'\x{3000}'
+            .'\x{3164}'
             .'\x{FEFF}'
             .']+/u';
 
         $result = preg_replace($pattern, '', $value);
 
-        // UTF-8 异常时 preg_replace 返回 null, 降级只去半角空格, 保留原数据而不是清空
-        return null === $result ? strtr($value, [' ' => '']) : $result;
+        // UTF-8 异常时 /u 正则会返回 null. 降级到字节级正则, 清理 ASCII 范围空白
+        // (HT/LF/VT/FF/CR/SPACE 都是单字节, 不会出现在多字节序列中间, 按字节删除安全)
+        return null === $result ? preg_replace('/[\x09-\x0D\x20]+/', '', $value) : $result;
     }
 
     /**
